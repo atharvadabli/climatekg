@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .constants import indexing_config, query_config
+
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_ROOT = ROOT / "climatekg" / "runtime"
 DATA_ROOT = RUNTIME_ROOT / "data" / "papers"
@@ -18,6 +20,6 @@ def load_config(name: str) -> dict[str, Any]:
     return json.loads((ROOT / "config" / name).read_text(encoding="utf-8"))
 
 
-PIPELINE = load_config("pipeline.yaml")
-QUERY_PIPELINE = load_config("query_pipeline.yaml")
+PIPELINE = indexing_config()
+QUERY_PIPELINE = query_config()
 STATE_ALIASES = load_config("state_aliases.yaml")

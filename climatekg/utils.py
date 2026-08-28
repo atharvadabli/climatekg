@@ -8,6 +8,8 @@ import unicodedata
 from pathlib import Path
 from typing import Any, Iterable
 
+from .constants import FILE_HASH_CHUNK_BYTES, TOKEN_ESTIMATE_CHARACTERS_PER_TOKEN
+
 
 def normalize_text_key(value: str) -> str:
     value = unicodedata.normalize("NFKC", value or "").lower().strip()
@@ -23,13 +25,13 @@ def tokens(text: str) -> list[str]:
 def token_count(text: str) -> int:
     # The local Qwen tokenizer is unavailable as a Python package. This estimate
     # is used only for routing/budget enforcement and errs conservatively.
-    return max(1, math.ceil(len(text) / 3.5))
+    return max(1, math.ceil(len(text) / TOKEN_ESTIMATE_CHARACTERS_PER_TOKEN))
 
 
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+        for chunk in iter(lambda: handle.read(FILE_HASH_CHUNK_BYTES), b""):
             digest.update(chunk)
     return digest.hexdigest()
 
@@ -55,4 +57,3 @@ def cosine(left: list[float], right: list[float]) -> float:
 def l2_normalize(vector: list[float]) -> list[float]:
     norm = math.sqrt(sum(x * x for x in vector))
     return [x / norm for x in vector] if norm else vector
-

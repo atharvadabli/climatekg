@@ -146,7 +146,7 @@ def consolidate_paper(paper: Paper, contexts: list[Context], facets: list[Facet]
     system, user = template.split("USER\n", 1)
     expected = {(x["object_type"], x["left"]["id"], x["right"]["id"]) for x in candidates}
     cfg = PIPELINE["ollama"]["stages"]["paper_consolidation"]
-    batch = client.structured(stage="paper_consolidation", system=system.removeprefix("SYSTEM\n").strip(), user=user.format(paper_metadata=paper.model_dump_json(), candidate_pairs=json.dumps(candidates)), schema=ConsolidationBatch, model=PIPELINE["ollama"]["model"], temperature=cfg["temperature"], thinking=cfg["thinking"], artifact_dir=artifact_dir, paper_id=paper.id, input_block_ids=unique_in_order([block_id for x in candidates for side in ("left", "right") for block_id in x[side].get("evidence_block_ids", [])]), retries=PIPELINE["ollama"]["retries"])
+    batch = client.structured(stage="paper_consolidation", system=system.removeprefix("SYSTEM\n").strip(), user=user.format(paper_metadata=paper.model_dump_json(), candidate_pairs=json.dumps(candidates)), schema=ConsolidationBatch, model=PIPELINE["ollama"]["model"], temperature=cfg["temperature"], thinking=cfg["thinking"], artifact_dir=artifact_dir, paper_id=paper.id, input_block_ids=unique_in_order([block_id for x in candidates for side in ("left", "right") for block_id in x[side].get("evidence_block_ids", [])]), retries=cfg["retries"])
     received = {(x.object_type, x.left_id, x.right_id) for x in batch.decisions}
     if received != expected:
         raise ValueError("FAILED_REFERENCE_VALIDATION: consolidation decisions do not match candidate pairs")

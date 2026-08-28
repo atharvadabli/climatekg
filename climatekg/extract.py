@@ -383,13 +383,13 @@ def map_paper(paper: Paper, blocks: list[SourceBlock], paper_dir: Path, client: 
         if candidate_path.exists():
             result = PaperMap.model_validate_json(candidate_path.read_text(encoding="utf-8"))
         else:
-            result = client.structured(stage="paper_map", system=system, user=repair_base_user, schema=PaperMap, model=cfg["ollama"]["model"], temperature=stage_cfg["temperature"], thinking=stage_cfg["thinking"], artifact_dir=paper_dir / "extraction" / "map", paper_id=paper.id, input_block_ids=[x.id for x in useful], retries=cfg["ollama"]["retries"])
+            result = client.structured(stage="paper_map", system=system, user=repair_base_user, schema=PaperMap, model=cfg["ollama"]["model"], temperature=stage_cfg["temperature"], thinking=stage_cfg["thinking"], artifact_dir=paper_dir / "extraction" / "map", paper_id=paper.id, input_block_ids=[x.id for x in useful], retries=stage_cfg["retries"])
     else:
         scout_system, scout_user = _split_prompt(_prompt("section_scout.txt"))
         scout_cfg = cfg["ollama"]["stages"]["section_scout"]
         scouts = []
         for index, group in enumerate(group_sections(useful)):
-            scout = client.structured(stage="section_scout", system=scout_system, user=scout_user.format(paper_id=paper.id, section_path=" > ".join(group[0].section_path), section_blocks=_render_blocks(group)), schema=SectionScout, model=cfg["ollama"]["model"], temperature=scout_cfg["temperature"], thinking=scout_cfg["thinking"], artifact_dir=paper_dir / "extraction" / "map" / "scouts", paper_id=paper.id, input_block_ids=[x.id for x in group], retries=cfg["ollama"]["retries"])
+            scout = client.structured(stage="section_scout", system=scout_system, user=scout_user.format(paper_id=paper.id, section_path=" > ".join(group[0].section_path), section_blocks=_render_blocks(group)), schema=SectionScout, model=cfg["ollama"]["model"], temperature=scout_cfg["temperature"], thinking=scout_cfg["thinking"], artifact_dir=paper_dir / "extraction" / "map" / "scouts", paper_id=paper.id, input_block_ids=[x.id for x in group], retries=scout_cfg["retries"])
             scouts.append(scout)
             write_json(paper_dir / "extraction" / "map" / "scouts" / f"scout_{index:03d}.validated.json", scout.model_dump(by_alias=True))
         selected, selection_report = select_map_consolidation_blocks(
@@ -406,7 +406,8 @@ def map_paper(paper: Paper, blocks: list[SourceBlock], paper_dir: Path, client: 
             scout_outputs=render_scout_notes(scouts),
             selected_blocks=_render_blocks(selected),
         )
-        result = client.structured(stage="map_consolidation", system=consolidation_system, user=repair_base_user, schema=PaperMap, model=cfg["ollama"]["model"], temperature=0.0, thinking="low", artifact_dir=paper_dir / "extraction" / "map", paper_id=paper.id, input_block_ids=[x.id for x in selected], retries=cfg["ollama"]["retries"])
+        consolidation_cfg = cfg["ollama"]["stages"]["map_consolidation"]
+        result = client.structured(stage="map_consolidation", system=consolidation_system, user=repair_base_user, schema=PaperMap, model=cfg["ollama"]["model"], temperature=consolidation_cfg["temperature"], thinking=consolidation_cfg["thinking"], artifact_dir=paper_dir / "extraction" / "map", paper_id=paper.id, input_block_ids=[x.id for x in selected], retries=consolidation_cfg["retries"])
         result = remove_internal_inventory_aliases(result)
         validate_context_mention_resolution(result, setting_inventory)
     write_json(candidate_path, result.model_dump(by_alias=True))
@@ -433,7 +434,8 @@ def map_paper(paper: Paper, blocks: list[SourceBlock], paper_dir: Path, client: 
                 "evidence_block_ids, facet_seed_block_ids, claim_seed_block_ids, and global_claim_seed_block_ids, "
                 "using exact IDs from the allowed list."
             )
-            reference_repaired = client.structured(stage="paper_map_reference_id_repair", system=repair_system, user=reference_user, schema=PaperMap, model=cfg["ollama"]["model"], temperature=0.0, thinking="no", artifact_dir=paper_dir / "extraction" / "map" / "reference_id_repair", paper_id=paper.id, input_block_ids=[x.id for x in blocks], retries=0)
+            repair_cfg = cfg["ollama"]["stages"]["paper_map_reference_id_repair"]
+            reference_repaired = client.structured(stage="paper_map_reference_id_repair", system=repair_system, user=reference_user, schema=PaperMap, model=cfg["ollama"]["model"], temperature=repair_cfg["temperature"], thinking=repair_cfg["thinking"], artifact_dir=paper_dir / "extraction" / "map" / "reference_id_repair", paper_id=paper.id, input_block_ids=[x.id for x in blocks], retries=repair_cfg["retries"])
             write_json(reference_path, reference_repaired.model_dump(by_alias=True))
         try:
             _validate_reference_only_repair(result, reference_repaired, block_ids)
@@ -468,7 +470,8 @@ def map_paper(paper: Paper, blocks: list[SourceBlock], paper_dir: Path, client: 
         if repair_candidate_path.exists():
             proposed = PaperMap.model_validate_json(repair_candidate_path.read_text(encoding="utf-8"))
         else:
-            proposed = client.structured(stage="paper_map_reference_repair", system=repair_system, user=repair_user, schema=PaperMap, model=cfg["ollama"]["model"], temperature=0.0, thinking="low", artifact_dir=paper_dir / "extraction" / "map", paper_id=paper.id, input_block_ids=[x.id for x in repair_blocks], retries=1)
+            repair_cfg = cfg["ollama"]["stages"]["paper_map_reference_repair"]
+            proposed = client.structured(stage="paper_map_reference_repair", system=repair_system, user=repair_user, schema=PaperMap, model=cfg["ollama"]["model"], temperature=repair_cfg["temperature"], thinking=repair_cfg["thinking"], artifact_dir=paper_dir / "extraction" / "map", paper_id=paper.id, input_block_ids=[x.id for x in repair_blocks], retries=repair_cfg["retries"])
             write_json(repair_candidate_path, proposed.model_dump(by_alias=True))
         try:
             result = _apply_map_repair(original, proposed, block_ids)
@@ -479,7 +482,8 @@ def map_paper(paper: Paper, blocks: list[SourceBlock], paper_dir: Path, client: 
                 + f"REJECTED CORRECTION\n{proposed.model_dump_json(by_alias=True)}\n\n"
                 + "Return the complete JSON object again. Copy every original study-setting record exactly. Correct only comparisons whose start and end IDs are identical, adding the minimum evidence-supported child settings required for distinct endpoints."
             )
-            proposed = client.structured(stage="paper_map_reference_repair", system=repair_system, user=second_repair, schema=PaperMap, model=cfg["ollama"]["model"], temperature=0.0, thinking="low", artifact_dir=paper_dir / "extraction" / "map", paper_id=paper.id, input_block_ids=[x.id for x in repair_blocks], retries=0)
+            repair_cfg = cfg["ollama"]["stages"]["paper_map_reference_repair"]
+            proposed = client.structured(stage="paper_map_reference_repair", system=repair_system, user=second_repair, schema=PaperMap, model=cfg["ollama"]["model"], temperature=repair_cfg["temperature"], thinking=repair_cfg["thinking"], artifact_dir=paper_dir / "extraction" / "map", paper_id=paper.id, input_block_ids=[x.id for x in repair_blocks], retries=cfg["ollama"]["final_repair_retries"])
             write_json(repair_candidate_path, proposed.model_dump(by_alias=True))
             result = _apply_map_repair(original, proposed, block_ids)
     write_json(paper_dir / "extraction" / "map" / "paper_map.json", result.model_dump(by_alias=True))
@@ -581,11 +585,12 @@ def extract_facets(paper: Paper, mapped: PaperMap, contexts: list[Context], map_
         else:
             bundle = bundles[context.id]
             request_text = user.format(paper_id=paper.id, target_context=context.model_dump_json(), context_registry=json.dumps(map_meta["registry"]), parent_facets=json.dumps([x.model_dump() for x in parent_facets]), existing_target_facets="[]", evidence_blocks=_render_blocks(bundle))
-            batch = client.structured(stage="facet_extraction", system=system, user=request_text, schema=FacetBatch, model=PIPELINE["ollama"]["model"], temperature=cfg["temperature"], thinking=cfg["thinking"], artifact_dir=cached_path.parent, paper_id=paper.id, input_block_ids=[x.id for x in bundle], retries=PIPELINE["ollama"]["retries"])
+            batch = client.structured(stage="facet_extraction", system=system, user=request_text, schema=FacetBatch, model=PIPELINE["ollama"]["model"], temperature=cfg["temperature"], thinking=cfg["thinking"], artifact_dir=cached_path.parent, paper_id=paper.id, input_block_ids=[x.id for x in bundle], retries=cfg["retries"])
             allowed = {x.id for x in bundle}
             if batch.context_id != context.id or any(not set(x.evidence_block_ids) <= allowed for x in batch.facets):
                 repair = request_text + f"\n\nCORRECTION TASK\n\nThe returned condition records used an invalid target ID or evidence ID.\n\nPREVIOUS JSON OBJECT\n{batch.model_dump_json(by_alias=True)}\n\nREQUIRED TARGET ID\n{context.id}\n\nALLOWED EVIDENCE IDS\n{json.dumps(sorted(allowed))}\n\nReturn the complete JSON object again. Copy already valid records. Keep an invalid record only when one or more allowed SourceBlocks directly supports it, and assign the smallest supporting allowed ID set. Remove a record that has no directly supporting allowed SourceBlock."
-                batch = client.structured(stage="facet_reference_repair", system=system, user=repair, schema=FacetBatch, model=PIPELINE["ollama"]["model"], temperature=0.0, thinking="no", artifact_dir=cached_path.parent, paper_id=paper.id, input_block_ids=[x.id for x in bundle], retries=1)
+                repair_cfg = PIPELINE["ollama"]["stages"]["facet_reference_repair"]
+                batch = client.structured(stage="facet_reference_repair", system=system, user=repair, schema=FacetBatch, model=PIPELINE["ollama"]["model"], temperature=repair_cfg["temperature"], thinking=repair_cfg["thinking"], artifact_dir=cached_path.parent, paper_id=paper.id, input_block_ids=[x.id for x in bundle], retries=repair_cfg["retries"])
         if batch.context_id != context.id or any(not set(x.evidence_block_ids) <= allowed for x in batch.facets):
             raise ValueError(f"FAILED_REFERENCE_VALIDATION: Facet batch {context.id}")
         parent_keys = {(x.domain, normalize_text_key(x.notion), normalize_text_key(x.description)) for x in parent_facets}
@@ -634,11 +639,12 @@ def extract_claims(paper: Paper, mapped: PaperMap, contexts: list[Context], tran
             bundle = bundles[scope_id]
             target = next((x.model_dump() for x in transitions if x.id == scope_id), next((x.model_dump() for x in contexts if x.id == scope_id), {}))
             request_text = user.format(paper_id=paper.id, context_registry=json.dumps(map_meta["registry"]), transitions=json.dumps([x.model_dump() for x in transitions]), available_scope_facets=json.dumps([x.model_dump() for x in available_facets]), target_scope=json.dumps(target), evidence_blocks=_render_blocks(bundle))
-            batch = client.structured(stage="claim_extraction", system=system, user=request_text, schema=ClaimBatch, model=PIPELINE["ollama"]["model"], temperature=cfg["temperature"], thinking=cfg["thinking"], artifact_dir=cached_path.parent, paper_id=paper.id, input_block_ids=[x.id for x in bundle], retries=PIPELINE["ollama"]["retries"])
+            batch = client.structured(stage="claim_extraction", system=system, user=request_text, schema=ClaimBatch, model=PIPELINE["ollama"]["model"], temperature=cfg["temperature"], thinking=cfg["thinking"], artifact_dir=cached_path.parent, paper_id=paper.id, input_block_ids=[x.id for x in bundle], retries=cfg["retries"])
             allowed_blocks = {x.id for x in bundle}
             if batch.scope_id != scope_id or any(not set(x.evidence_block_ids) <= allowed_blocks for x in batch.claims):
                 repair = request_text + f"\n\nCORRECTION TASK\n\nThe returned scientific relationships used an invalid scope or reference ID.\n\nPREVIOUS JSON OBJECT\n{batch.model_dump_json(by_alias=True)}\n\nREQUIRED SCOPE ID\n{scope_id}\n\nALLOWED EVIDENCE IDS\n{json.dumps(sorted(allowed_blocks))}\n\nALLOWED CONDITION IDS\n{json.dumps(sorted(reachable_facets))}\n\nReturn the complete JSON object again using the required scope ID and exact IDs from the allowed lists. Keep scientific content grounded in the original evidence passages above."
-                batch = client.structured(stage="claim_reference_repair", system=system, user=repair, schema=ClaimBatch, model=PIPELINE["ollama"]["model"], temperature=0.0, thinking="low", artifact_dir=cached_path.parent, paper_id=paper.id, input_block_ids=[x.id for x in bundle], retries=1)
+                repair_cfg = PIPELINE["ollama"]["stages"]["claim_reference_repair"]
+                batch = client.structured(stage="claim_reference_repair", system=system, user=repair, schema=ClaimBatch, model=PIPELINE["ollama"]["model"], temperature=repair_cfg["temperature"], thinking=repair_cfg["thinking"], artifact_dir=cached_path.parent, paper_id=paper.id, input_block_ids=[x.id for x in bundle], retries=repair_cfg["retries"])
         if batch.scope_id != scope_id or any(not set(x.evidence_block_ids) <= allowed_blocks for x in batch.claims):
             raise ValueError(f"FAILED_REFERENCE_VALIDATION: Claim batch {scope_id}")
         for candidate in batch.claims:

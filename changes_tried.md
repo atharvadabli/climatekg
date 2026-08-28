@@ -149,3 +149,18 @@ py -3.13 -m pytest -q -p no:cacheprovider
 ```
 
 Result: `46 passed`.
+# 2026-08-28: Central constants and no-reasoning indexing ablation
+
+- Added `climatekg/constants.py` as the runtime tuning surface for both indexing
+  and querying.
+- Removed hard-coded reasoning, temperature, and retry settings from map
+  consolidation, repair calls, query repair, and final synthesis.
+- Set `REASONING_PROFILE = "no"` for an experimental three-paper run.
+- Runtime fell by 45.7-50.8%, from a 31.92-minute matching baseline mean to a
+  16.39-minute mean.
+- All references remained valid and Parquet/FAISS construction completed.
+- Full no-reasoning changed scientific map granularity: one duplicate
+  comparison appeared and important dry/wet regimes were replaced by
+  model-specific Contexts in one paper.
+- Decision: keep the result as an experiment; test a hybrid profile with low
+  reasoning for mapping and no reasoning for Claims/consolidation next.

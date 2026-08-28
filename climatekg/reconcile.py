@@ -104,7 +104,7 @@ def _extract_new_scope(paper: Paper, context: Context, contexts: list[Context], 
     facet_system, facet_user = _split_prompt((ROOT / "prompts" / "facet_extraction.txt").read_text(encoding="utf-8"))
     facet_request = facet_user.format(paper_id=paper.id, target_context=context.model_dump_json(), context_registry=json.dumps(registry), parent_facets=json.dumps([item.model_dump() for item in parent_facets]), existing_target_facets="[]", evidence_blocks=_render_blocks(bundle))
     facet_cfg = PIPELINE["ollama"]["stages"]["facet_extraction"]
-    facet_batch = client.structured(stage="reconciliation_facet_extraction", system=facet_system, user=facet_request, schema=FacetBatch, model=PIPELINE["ollama"]["model"], temperature=facet_cfg["temperature"], thinking=facet_cfg["thinking"], artifact_dir=paper_dir / "extraction" / "reconciliation" / context.id / "facets", paper_id=paper.id, input_block_ids=[item.id for item in bundle], retries=PIPELINE["ollama"]["retries"])
+    facet_batch = client.structured(stage="reconciliation_facet_extraction", system=facet_system, user=facet_request, schema=FacetBatch, model=PIPELINE["ollama"]["model"], temperature=facet_cfg["temperature"], thinking=facet_cfg["thinking"], artifact_dir=paper_dir / "extraction" / "reconciliation" / context.id / "facets", paper_id=paper.id, input_block_ids=[item.id for item in bundle], retries=facet_cfg["retries"])
     allowed_blocks = {item.id for item in bundle}
     if facet_batch.context_id != context.id or any(not set(item.evidence_block_ids) <= allowed_blocks for item in facet_batch.facets):
         raise ValueError(f"FAILED_CONTEXT_RECONCILIATION: invalid Facet references for {context.id}")
@@ -113,7 +113,7 @@ def _extract_new_scope(paper: Paper, context: Context, contexts: list[Context], 
     claim_system, claim_user = _split_prompt((ROOT / "prompts" / "claim_extraction.txt").read_text(encoding="utf-8"))
     claim_request = claim_user.format(paper_id=paper.id, context_registry=json.dumps(registry), transitions=json.dumps([item.model_dump() for item in transitions]), available_scope_facets=json.dumps([item.model_dump() for item in available]), target_scope=context.model_dump_json(), evidence_blocks=_render_blocks(bundle))
     claim_cfg = PIPELINE["ollama"]["stages"]["claim_extraction"]
-    claim_batch = client.structured(stage="reconciliation_claim_extraction", system=claim_system, user=claim_request, schema=ClaimBatch, model=PIPELINE["ollama"]["model"], temperature=claim_cfg["temperature"], thinking=claim_cfg["thinking"], artifact_dir=paper_dir / "extraction" / "reconciliation" / context.id / "claims", paper_id=paper.id, input_block_ids=[item.id for item in bundle], retries=PIPELINE["ollama"]["retries"])
+    claim_batch = client.structured(stage="reconciliation_claim_extraction", system=claim_system, user=claim_request, schema=ClaimBatch, model=PIPELINE["ollama"]["model"], temperature=claim_cfg["temperature"], thinking=claim_cfg["thinking"], artifact_dir=paper_dir / "extraction" / "reconciliation" / context.id / "claims", paper_id=paper.id, input_block_ids=[item.id for item in bundle], retries=claim_cfg["retries"])
     reachable = {item.id for item in available}
     if claim_batch.scope_id != context.id or any(not set(item.evidence_block_ids) <= allowed_blocks for item in claim_batch.claims):
         raise ValueError(f"FAILED_CONTEXT_RECONCILIATION: invalid Claim references for {context.id}")
@@ -149,7 +149,7 @@ def reconcile_contexts(paper: Paper, contexts: list[Context], transitions: list[
     registry = {item.id: {"label": item.label, "parent_ids": item.parent_ids, "aliases": item.aliases} for item in contexts}
     request = user.format(context_registry=json.dumps(registry), hints=json.dumps(hints), hint_evidence_blocks=_render_blocks(evidence))
     cfg = PIPELINE["ollama"]["stages"]["context_reconciliation"]
-    batch = client.structured(stage="context_reconciliation", system=system, user=request, schema=ContextReconciliationBatch, model=PIPELINE["ollama"]["model"], temperature=cfg["temperature"], thinking=cfg["thinking"], artifact_dir=paper_dir / "extraction" / "reconciliation", paper_id=paper.id, input_block_ids=evidence_ids, retries=PIPELINE["ollama"]["retries"])
+    batch = client.structured(stage="context_reconciliation", system=system, user=request, schema=ContextReconciliationBatch, model=PIPELINE["ollama"]["model"], temperature=cfg["temperature"], thinking=cfg["thinking"], artifact_dir=paper_dir / "extraction" / "reconciliation", paper_id=paper.id, input_block_ids=evidence_ids, retries=cfg["retries"])
     hint_by_id = {item["hint_id"]: item for item in hints}
     context_ids = {item.id for item in contexts}
     try:
@@ -165,7 +165,8 @@ def reconcile_contexts(paper: Paper, contexts: list[Context], transitions: list[
             f"ALLOWED REFERENCES FOR EACH HINT\n{json.dumps(valid_references)}\n\n"
             f"PREVIOUS JSON OBJECT\n{batch.model_dump_json()}"
         )
-        batch = client.structured(stage="context_reconciliation_reference_repair", system=system, user=repair_request, schema=ContextReconciliationBatch, model=PIPELINE["ollama"]["model"], temperature=cfg["temperature"], thinking=cfg["thinking"], artifact_dir=paper_dir / "extraction" / "reconciliation" / "reference_repair", paper_id=paper.id, input_block_ids=evidence_ids, retries=0)
+        repair_cfg = PIPELINE["ollama"]["stages"]["context_reconciliation_reference_repair"]
+        batch = client.structured(stage="context_reconciliation_reference_repair", system=system, user=repair_request, schema=ContextReconciliationBatch, model=PIPELINE["ollama"]["model"], temperature=repair_cfg["temperature"], thinking=repair_cfg["thinking"], artifact_dir=paper_dir / "extraction" / "reconciliation" / "reference_repair", paper_id=paper.id, input_block_ids=evidence_ids, retries=PIPELINE["ollama"]["final_repair_retries"])
         try:
             _validate_reconciliation_batch(batch, hints, context_ids)
         except ValueError as repair_exc:

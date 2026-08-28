@@ -90,7 +90,7 @@ def parse_query(question: str, query_id: str, client: OllamaClient, artifact_dir
     system, user = prompt.split("USER\n", 1)
     config = QUERY_PIPELINE["ollama"]["stages"]["query_parse"]
     warnings: list[str] = []
-    parsed = client.structured(stage="query_parse", system=system.removeprefix("SYSTEM\n").strip(), user=user.format(user_question=question).strip(), schema=ParsedQuery, model=QUERY_PIPELINE["ollama"]["model"], temperature=config["temperature"], thinking=config["thinking"], artifact_dir=artifact_dir / "parse", paper_id=query_id, input_block_ids=[], retries=2)
+    parsed = client.structured(stage="query_parse", system=system.removeprefix("SYSTEM\n").strip(), user=user.format(user_question=question).strip(), schema=ParsedQuery, model=QUERY_PIPELINE["ollama"]["model"], temperature=config["temperature"], thinking=config["thinking"], artifact_dir=artifact_dir / "parse", paper_id=query_id, input_block_ids=[], retries=config["retries"])
     normalized = unicodedata.normalize("NFC", question)
     explicit_global = bool(re.search(r"\b(?:across (?:the )?(?:indexed )?(?:literature|studies)|global(?:ly)?|corpus-wide)\b", normalized, re.I))
     if parsed.global_requested != explicit_global:
@@ -117,7 +117,8 @@ Use only conditions stated in the question."""
 {question}
 
 The first parse omitted the environmental information at the beginning of this question. Extract the stated climate, season, land surface, hydrology, atmosphere, terrain, and spatial-configuration conditions."""
-        facet_batch = client.structured(stage="query_parse_context_repair", system=facet_system, user=repair_user, schema=ParsedQueryFacetBatch, model=QUERY_PIPELINE["ollama"]["model"], temperature=0.0, thinking="no", artifact_dir=artifact_dir / "parse", paper_id=query_id, input_block_ids=[], retries=1)
+        repair_config = QUERY_PIPELINE["ollama"]["stages"]["query_parse_context_repair"]
+        facet_batch = client.structured(stage="query_parse_context_repair", system=facet_system, user=repair_user, schema=ParsedQueryFacetBatch, model=QUERY_PIPELINE["ollama"]["model"], temperature=repair_config["temperature"], thinking=repair_config["thinking"], artifact_dir=artifact_dir / "parse", paper_id=query_id, input_block_ids=[], retries=repair_config["retries"])
         parsed = parsed.model_copy(update={"explicit_context_facets": facet_batch.explicit_context_facets, "global_requested": False})
     spans = [x.supporting_text_span for x in parsed.explicit_context_facets]
     spans += [x.supporting_text_span for x in (parsed.source, parsed.target) if x]
@@ -286,7 +287,10 @@ def map_endpoint(endpoint: ClaimEndpoint | None, corpus: Corpus, client: OllamaC
     vector = client.embed([endpoint.concept], QUERY_PIPELINE["embeddings"]["model"], QUERY_PIPELINE["embeddings"]["dimension"])[0]
     top_k = QUERY_PIPELINE["state_mapping"]["top_k"]
     if indexes:
-        pool_k = max(top_k * 10, 50)
+        pool_k = max(
+            top_k * QUERY_PIPELINE["state_mapping"]["exact_fallback_pool_multiplier"],
+            QUERY_PIPELINE["state_mapping"]["exact_fallback_pool_minimum"],
+        )
         states = [corpus.states[identifier] for identifier, _ in indexes.search("states", vector, pool_k)]
     else:
         states = list(corpus.states.values())
@@ -481,7 +485,11 @@ def parse_spatial_scales(text: str) -> list[dict[str, Any]]:
         occupied.append(match.span())
     for match in re.finditer(r"(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*(km|m)\b", normalized, re.I):
         if any(a <= match.start() < b for a, b in occupied): continue
-        nearby = normalized[max(0, match.start() - 25):match.end() + 15].lower()
+        spatial = QUERY_PIPELINE["spatial"]
+        nearby = normalized[
+            max(0, match.start() - spatial["relation_text_lookbehind_characters"]):
+            match.end() + spatial["relation_text_lookahead_characters"]
+        ].lower()
         kind = "distance_band" if any(word in nearby for word in ("annulus", "annuli", "halo")) else "range"
         records.append({"kind": kind, "value": None, "min": float(match.group(1)), "max": float(match.group(2)), "x": None, "y": None, "unit": match.group(3).lower(), "source_text": match.group(0)})
     return records
@@ -530,7 +538,8 @@ def retrieve_alternatives(paths: list[dict[str, Any]], ranked: list[dict[str, An
 def select_source_blocks(paths: list[dict[str, Any]], corpus: Corpus, query_vector: list[float] | None, alternative_claim_ids: list[str] | None = None) -> dict[str, list[dict[str, Any]]]:
     result = {}
     limit = QUERY_PIPELINE["synthesis"]["max_source_blocks_per_claim"]
-    priority = {"results": 5, "analysis": 5, "discussion": 4, "conclusion": 3, "methods": 2}
+    evidence_config = QUERY_PIPELINE["evidence_selection"]
+    priority = evidence_config["section_priority"]
     claim_ids = list(dict.fromkeys([*(identifier for path in paths for identifier in path["claim_ids"]), *(alternative_claim_ids or [])]))
     used_facet_ids: list[str] = []
     for claim_id in claim_ids:
@@ -539,8 +548,8 @@ def select_source_blocks(paths: list[dict[str, Any]], corpus: Corpus, query_vect
         if blocks and claim.claim_embedding and query_vector and all(block.embedding for block in blocks):
             def block_score(block: SourceBlock) -> float:
                 section = normalize_text_key(" ".join(block.section_path))
-                bonus = 0.05 if any(name in section for name in ("results", "analysis")) else 0.02 if "discussion" in section else 0.0
-                return 0.7 * max(0.0, cosine(claim.claim_embedding or [], block.embedding or [])) + 0.3 * max(0.0, cosine(query_vector, block.embedding or [])) + bonus
+                bonus = evidence_config["results_section_bonus"] if any(name in section for name in ("results", "analysis")) else evidence_config["discussion_section_bonus"] if "discussion" in section else 0.0
+                return evidence_config["direct_weight"] * max(0.0, cosine(claim.claim_embedding or [], block.embedding or [])) + evidence_config["query_weight"] * max(0.0, cosine(query_vector, block.embedding or [])) + bonus
             blocks.sort(key=lambda block: (-block_score(block), block.order))
         else:
             blocks.sort(key=lambda block: (-max((value for name, value in priority.items() if name in normalize_text_key(" ".join(block.section_path))), default=0), block.order))
@@ -609,7 +618,7 @@ def trim_evidence_package(spec: QuerySpec, paths: list[dict[str, Any]], alternat
     primary_blocks = {key: value[:1] for key, value in selected_blocks.items()}
     for claim_id in selected_claim_ids:
         if len(blocks.get(claim_id, [])) > 1:
-            proposal = {**selected_blocks, claim_id: blocks[claim_id][:2]}
+            proposal = {**selected_blocks, claim_id: blocks[claim_id][:cfg["max_source_blocks_per_claim"]]}
             if package_tokens(selected_paths, selected_alternatives, proposal) <= budget:
                 selected_blocks = proposal
 
@@ -649,8 +658,10 @@ def synthesize(spec: QuerySpec, paths: list[dict[str, Any]], ranked: list[dict[s
     system, user = prompt.split("USER QUESTION\n", 1)
     selected_claim_ids = [x for path in paths[:QUERY_PIPELINE["synthesis"]["top_paths"]] for x in path["claim_ids"]]
     spatial_translation = any(spatial_report(corpus.claims[x], corpus)["allowed"] for x in selected_claim_ids)
-    complex_evidence = bool(alternatives) or len(selected_paths) >= 4 or spatial_translation or len({corpus.claims[x].to.state for x in selected_claim_ids}) >= 2
-    thinking = "medium" if complex_evidence else "low"
+    synthesis_config = QUERY_PIPELINE["synthesis"]
+    complex_evidence = bool(alternatives) or len(selected_paths) >= synthesis_config["complex_min_paths"] or spatial_translation or len({corpus.claims[x].to.state for x in selected_claim_ids}) >= synthesis_config["complex_min_outcome_states"]
+    stage_name = "final_synthesis_complex" if complex_evidence else "final_synthesis"
+    llm_config = QUERY_PIPELINE["ollama"]["stages"][stage_name]
     rendered = "USER QUESTION\n" + user
     query_payload = _query_spec_payload(spec)
     block_references = {
@@ -661,7 +672,7 @@ def synthesize(spec: QuerySpec, paths: list[dict[str, Any]], ranked: list[dict[s
         for claim_id, claim_blocks in blocks.items()
     }
     rendered = rendered.format(question=spec.user_question, query_spec=json.dumps(query_payload), query_context=json.dumps(query_payload["context"]), selected_paths=json.dumps(selected_paths), contradictions=json.dumps(alternatives), source_blocks=json.dumps(block_references))
-    output = client.structured(stage="final_synthesis", system=system.removeprefix("SYSTEM\n").strip(), user=rendered, schema=SynthesisOutput, model=QUERY_PIPELINE["ollama"]["model"], temperature=0.0, thinking=thinking, artifact_dir=artifact_dir / "synthesis", paper_id=spec.query_id, input_block_ids=[item["id"] for values in blocks.values() for item in values], retries=2)
+    output = client.structured(stage="final_synthesis", system=system.removeprefix("SYSTEM\n").strip(), user=rendered, schema=SynthesisOutput, model=QUERY_PIPELINE["ollama"]["model"], temperature=llm_config["temperature"], thinking=llm_config["thinking"], artifact_dir=artifact_dir / "synthesis", paper_id=spec.query_id, input_block_ids=[item["id"] for values in blocks.values() for item in values], retries=llm_config["retries"])
     allowed_claims = {x for path in paths[:QUERY_PIPELINE["synthesis"]["top_paths"]] for x in path["claim_ids"]} | {x["claim_id"] for x in alternatives}
     allowed_facets = {x.id for x in spec.context.facets}
     warnings, valid = [], []
@@ -714,15 +725,15 @@ def run_query(
     stage("query_embedded", {name: len(vector) if vector else 0 for name, vector in vectors.items()})
     context_reports, more = retrieve_contexts(spec, vectors, corpus, indexes)
     warnings.extend(more)
-    stage("contexts_retrieved", {"candidate_count": len(context_reports), "top_contexts": [{"context_id": row["context_id"], "rerank_score": row["rerank_score"], "overall_score": row["context_similarity"]["overall_score"], "coverage": row["context_similarity"]["coverage"]} for row in list(context_reports.values())[:5]], "warnings": more})
+    stage("contexts_retrieved", {"candidate_count": len(context_reports), "top_contexts": [{"context_id": row["context_id"], "rerank_score": row["rerank_score"], "overall_score": row["context_similarity"]["overall_score"], "coverage": row["context_similarity"]["coverage"]} for row in list(context_reports.values())[:QUERY_PIPELINE["reporting"]["top_contexts"]]], "warnings": more})
     source_seeds, more = map_endpoint(spec.source, corpus, client, indexes); warnings.extend(more)
     source_warnings = more
     target_seeds, more = map_endpoint(spec.target, corpus, client, indexes); warnings.extend(more)
     stage("states_mapped", {"source_seeds": source_seeds, "target_seeds": target_seeds, "warnings": source_warnings + more})
     ranked = rank_claims(spec, vectors, corpus, context_reports, source_seeds, target_seeds, indexes)
-    stage("claims_ranked", {"candidate_count": len(ranked), "top_claims": [{key: row[key] for key in ("claim_id", "R_claim", "A_claim", "context_coverage", "channels")} for row in ranked[:10]]})
+    stage("claims_ranked", {"candidate_count": len(ranked), "top_claims": [{key: row[key] for key in ("claim_id", "R_claim", "A_claim", "context_coverage", "channels")} for row in ranked[:QUERY_PIPELINE["reporting"]["top_claims"]]]})
     paths = search_paths(spec, corpus, ranked, source_seeds, target_seeds)
-    stage("paths_searched", {"path_count": len(paths), "top_paths": [{key: row[key] for key in ("claim_ids", "R_path", "A_path", "C_path", "context_unknown", "coherence_unknown")} for row in paths[:5]]})
+    stage("paths_searched", {"path_count": len(paths), "top_paths": [{key: row[key] for key in ("claim_ids", "R_path", "A_path", "C_path", "context_unknown", "coherence_unknown")} for row in paths[:QUERY_PIPELINE["reporting"]["top_paths"]]]})
     alternatives = retrieve_alternatives(paths, ranked, corpus, spec)
     stage("alternatives_retrieved", {"count": len(alternatives), "claim_ids": [row["claim_id"] for row in alternatives]})
     selected_blocks = select_source_blocks(paths[:QUERY_PIPELINE["synthesis"]["top_paths"]], corpus, vectors["claim"], [item["claim_id"] for item in alternatives])

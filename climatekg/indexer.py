@@ -22,9 +22,10 @@ from .utils import write_json
 
 
 def _metadata(blocks: list[Any], paper_id: str, source_file: str) -> Paper:
+    config = PIPELINE["paper_metadata"]
     title_block = next((x for x in blocks if x.block_type == "title"), blocks[0])
-    title = " ".join(title_block.text.split())[:500]
-    sample = "\n".join(x.text for x in blocks[:30])
+    title = " ".join(title_block.text.split())[:config["title_max_characters"]]
+    sample = "\n".join(x.text for x in blocks[:config["sample_source_blocks"]])
     doi_match = re.search(r"\b10\.\d{4,9}/[-._;()/:A-Z0-9]+", sample, re.I)
     year_match = re.search(r"\b(19|20)\d{2}\b", sample)
     return Paper(id=paper_id, title=title, source_file=source_file, doi=doi_match.group(0).rstrip(".,") if doi_match else None, year=int(year_match.group(0)) if year_match else None)
@@ -175,7 +176,7 @@ def index_pdf(pdf_path: Path, data_root: Path, paper_id: str, client: OllamaClie
                 target.write_text(text, encoding="utf-8")
             evidence_links = [{"object_id": item.id, "source_block_id": block_id} for items in (contexts, facets, transitions, claims) for item in items for block_id in item.evidence_block_ids]
             prompt_versions = current_prompt_versions()
-            final = FinalPaper(paper=paper, source_blocks=blocks, contexts=contexts, facets=facets, transitions=transitions, claims=claims, states=states, evidence_links=evidence_links, unresolved_conflicts=unresolved, metadata={"parser": "nvidia/NVIDIA-Nemotron-Parse-v1.2", "extractor_model": PIPELINE["ollama"]["model"], "embedding_model": PIPELINE["embeddings"]["model"], "embedding_dimension": PIPELINE["embeddings"]["dimension"], "prompt_versions": prompt_versions, "created_at": datetime.now(timezone.utc).isoformat()})
+            final = FinalPaper(paper=paper, source_blocks=blocks, contexts=contexts, facets=facets, transitions=transitions, claims=claims, states=states, evidence_links=evidence_links, unresolved_conflicts=unresolved, metadata={"parser": PIPELINE["parsing"]["model"], "extractor_model": PIPELINE["ollama"]["model"], "embedding_model": PIPELINE["embeddings"]["model"], "embedding_dimension": PIPELINE["embeddings"]["dimension"], "reasoning_profile": PIPELINE["ollama"]["reasoning_profile"], "prompt_versions": prompt_versions, "created_at": datetime.now(timezone.utc).isoformat()})
             write_json(paper_dir / "final" / "final_paper.json", final.model_dump(by_alias=True))
         manifest["status"] = "complete"
         manifest["counts"] = {"source_blocks": len(blocks), "contexts": len(contexts), "facets": len(facets), "transitions": len(transitions), "claims": len(claims), "states": len(states)}

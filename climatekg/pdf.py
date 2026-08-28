@@ -4,6 +4,7 @@ import re
 import shutil
 import statistics
 import json
+import math
 import subprocess
 import unicodedata
 from collections import Counter
@@ -11,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from .config import PIPELINE, ROOT
+from .constants import TOKEN_ESTIMATE_CHARACTERS_PER_TOKEN
 from .models import SourceBlock
 from .utils import sha256_file, token_count, write_json
 
@@ -33,8 +35,8 @@ def register_pdf(pdf_path: Path, data_root: Path, paper_id: str) -> tuple[Path, 
         "pdf_sha256": digest,
         "status": "registered",
         "parser": "nemotron-parse-v1.2",
-        "extractor_model": "qwen3.6:27b",
-        "embedding_model": "qwen3-embedding:4b",
+        "extractor_model": PIPELINE["ollama"]["model"],
+        "embedding_model": PIPELINE["embeddings"]["model"],
         "active_pipeline_version": "0.1",
         "warnings": [],
     }
@@ -53,14 +55,14 @@ def parse_pdf(pdf_path: Path, paper_dir: Path) -> dict[str, Any]:
     if cached is not None:
         return cached
     render_command = [config["pdfium_python"], str(ROOT / "climatekg" / "workers" / "pdfium_render.py"), str(pdf_path), str(parse_dir / "page_images"), str(page_manifest), "--dpi", str(config["render_dpi"])]
-    _run_logged(render_command, parse_dir / "renderer.log", timeout=1800)
+    _run_logged(render_command, parse_dir / "renderer.log", timeout=config["render_timeout_seconds"])
     rendered = json.loads(page_manifest.read_text(encoding="utf-8"))
     rendered_pages = rendered.get("pages", [])
     if not rendered_pages:
         raise ValueError("FAILED_PARSE: PDFium rendered no pages")
     model_path = ROOT / config["model_path"]
     parse_command = [config["nemotron_python"], str(ROOT / "climatekg" / "workers" / "nemotron_parse.py"), str(model_path), str(page_manifest), str(output_path)]
-    _run_logged(parse_command, parse_dir / "nemotron.log", timeout=7200)
+    _run_logged(parse_command, parse_dir / "nemotron.log", timeout=config["parse_timeout_seconds"])
     raw = json.loads(output_path.read_text(encoding="utf-8"))
     parsed_pages = raw.get("pages", [])
     rendered_numbers = [page["page"] for page in rendered_pages]
@@ -75,14 +77,14 @@ def parse_pdf(pdf_path: Path, paper_dir: Path) -> dict[str, Any]:
     for page in raw["pages"]:
         for element in page["elements"]:
             y0, y1 = element["bbox"][1], element["bbox"][3]
-            element["near_top"] = y0 <= page["height"] * 0.12
-            element["near_bottom"] = y1 >= page["height"] * 0.88
+            element["near_top"] = y0 <= page["height"] * config["page_top_fraction"]
+            element["near_bottom"] = y1 >= page["height"] * config["page_bottom_fraction"]
     write_json(output_path, raw)
     markdown = "\n\n".join(f"<!-- PAGE {p['page']} -->\n" + "\n\n".join(e["text"] for e in p["elements"]) for p in raw["pages"])
     (parse_dir / "nemotron.md").write_text(markdown, encoding="utf-8")
     text_length = sum(len(e["text"].strip()) for p in raw["pages"] for e in p["elements"])
     flags: list[str] = []
-    if not raw["pages"] or text_length < 100:
+    if not raw["pages"] or text_length < config["minimum_parsed_characters"]:
         flags.append("PARSE_EMPTY")
     if "\ufffd" in markdown:
         flags.append("PARSE_ENCODING_ERROR")
@@ -103,7 +105,7 @@ def _validated_parse_cache(page_manifest: Path, output_path: Path) -> dict[str, 
         numbers = [page["page"] for page in rendered_pages]
         valid = (
             rendered.get("renderer") == "PDFium"
-            and raw.get("parser") == "nvidia/NVIDIA-Nemotron-Parse-v1.2"
+            and raw.get("parser") == PIPELINE["parsing"]["model"]
             and raw.get("page_count") == len(rendered_pages) > 0
             and [page["page"] for page in parsed_pages] == numbers
             and all(Path(page["path"]).is_file() for page in rendered_pages)
@@ -137,8 +139,9 @@ def _run_logged(command: list[str], log_path: Path, timeout: int) -> None:
 
 
 def _header_footer_lines(raw: dict[str, Any]) -> set[str]:
+    config = PIPELINE["source_cleaning"]
     pages = raw["pages"]
-    threshold = max(2, int(len(pages) * 0.6 + 0.999))
+    threshold = max(config["repeated_margin_min_pages"], math.ceil(len(pages) * config["repeated_margin_page_fraction"]))
     counts: Counter[str] = Counter()
     originals: dict[str, str] = {}
     for page in pages:
@@ -148,7 +151,7 @@ def _header_footer_lines(raw: dict[str, Any]) -> set[str]:
                 continue
             for line in element["text"].splitlines():
                 key = re.sub(r"\d+", "#", " ".join(line.split()).lower())
-                if 2 <= len(key) <= 150 and key not in seen and not line.lstrip().startswith("#"):
+                if config["margin_line_min_characters"] <= len(key) <= config["margin_line_max_characters"] and key not in seen and not line.lstrip().startswith("#"):
                     counts[key] += 1
                     originals[key] = line
                     seen.add(key)
@@ -183,6 +186,7 @@ def clean_parse(raw: dict[str, Any], paper_dir: Path) -> list[dict[str, Any]]:
 
 
 def _classify(text: str, first: bool, in_references: bool, font_size: float, body_size: float, bold: bool, semantic_class: str | None = None) -> str:
+    config = PIPELINE["source_cleaning"]
     stripped = text.strip()
     semantic = normalize_semantic_class(semantic_class)
     semantic_map = {"title": "title", "section header": "heading", "heading": "heading", "text": "paragraph", "list item": "list", "table": "table", "caption": "figure_caption", "formula": "equation", "footnote": "footnote", "bibliography": "reference", "page header": "other", "page footer": "other"}
@@ -204,8 +208,8 @@ def _classify(text: str, first: bool, in_references: bool, font_size: float, bod
         return "table"
     words = stripped.split()
     explicit_numbered = bool(re.match(r"^(?:\d+(?:\.\d+)*|[IVX]+)[.)]?\s+[A-Za-z]", stripped))
-    typographic_heading = font_size >= body_size * 1.15 or (bold and font_size >= body_size and len(words) <= 14)
-    if len(stripped.splitlines()) <= 2 and len(words) <= 14 and not stripped.endswith((".", ";", ",")) and (explicit_numbered or typographic_heading):
+    typographic_heading = font_size >= body_size * config["heading_font_size_factor"] or (bold and font_size >= body_size and len(words) <= config["heading_max_words"])
+    if len(stripped.splitlines()) <= config["heading_max_lines"] and len(words) <= config["heading_max_words"] and not stripped.endswith((".", ";", ",")) and (explicit_numbered or typographic_heading):
         return "heading"
     return "paragraph"
 
@@ -224,7 +228,7 @@ def _split_text(text: str, max_tokens: int, target_tokens: int) -> list[tuple[st
         for clause in clauses:
             hard = False
             while token_count(clause) > max_tokens:
-                approx = int(max_tokens * 3.5)
+                approx = int(max_tokens * TOKEN_ESTIMATE_CHARACTERS_PER_TOKEN)
                 cut = clause.rfind(" ", 0, approx)
                 cut = cut if cut > 0 else approx
                 if current:
@@ -247,14 +251,17 @@ def _split_text(text: str, max_tokens: int, target_tokens: int) -> list[tuple[st
     return pieces
 
 
-def build_source_blocks(cleaned_pages: list[dict[str, Any]], paper_id: str, paper_dir: Path, max_tokens: int = 1500, target_tokens: int = 1100) -> list[SourceBlock]:
+def build_source_blocks(cleaned_pages: list[dict[str, Any]], paper_id: str, paper_dir: Path, max_tokens: int | None = None, target_tokens: int | None = None) -> list[SourceBlock]:
+    max_tokens = max_tokens or PIPELINE["blocks"]["max_block_tokens"]
+    target_tokens = target_tokens or PIPELINE["blocks"]["target_split_tokens"]
     blocks: list[SourceBlock] = []
     section_path: list[str] = []
     section_ordinal = 0
     paragraph_ordinal = 0
     in_references = False
-    body_candidates = [x["font_size"] for page in cleaned_pages for x in page["elements"] if len(x["text"]) >= 80 and x["font_size"]]
-    body_size = statistics.median(body_candidates) if body_candidates else 10.0
+    cleaning = PIPELINE["source_cleaning"]
+    body_candidates = [x["font_size"] for page in cleaned_pages for x in page["elements"] if len(x["text"]) >= cleaning["body_font_sample_min_characters"] and x["font_size"]]
+    body_size = statistics.median(body_candidates) if body_candidates else cleaning["fallback_body_font_size"]
     for page in cleaned_pages:
         for element_data in page["elements"]:
             element = element_data["text"]

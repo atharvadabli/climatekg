@@ -20,13 +20,14 @@ class Neo4jHttp:
 
     def execute(self, statements: list[dict[str, Any]]) -> list[dict[str, Any]]:
         request = urllib.request.Request(self.url, data=json.dumps({"statements": statements}).encode(), headers={"Content-Type": "application/json", "Authorization": f"Basic {self.auth}"})
-        with urllib.request.urlopen(request, timeout=300) as response:
+        with urllib.request.urlopen(request, timeout=PIPELINE["graph"]["http_timeout_seconds"]) as response:
             result = json.loads(response.read())
         if result.get("errors"):
             raise RuntimeError(f"FAILED_GRAPH_INGEST: {result['errors']}")
         return result.get("results", [])
 
-    def initialize(self, dimension: int = 2048) -> None:
+    def initialize(self, dimension: int | None = None) -> None:
+        dimension = dimension or PIPELINE["embeddings"]["dimension"]
         constraints = [
             "CREATE CONSTRAINT paper_id IF NOT EXISTS FOR (n:Paper) REQUIRE n.id IS UNIQUE",
             "CREATE CONSTRAINT context_id IF NOT EXISTS FOR (n:Context) REQUIRE n.id IS UNIQUE",

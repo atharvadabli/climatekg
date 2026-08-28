@@ -33,8 +33,8 @@ shortcuts.
 ## Repository Layout
 
 ```text
-climatekg/        Python implementation
-config/           Models, thresholds, weights, and validation queries
+climatekg/        Python implementation and centralized constants.py settings
+config/           State aliases, validation queries, and legacy config snapshots
 prompts/          Versioned standalone Qwen prompts
 scripts/          Validation, replay, export, and benchmark commands
 tests/            Deterministic and pipeline-boundary tests
@@ -61,8 +61,14 @@ ollama pull qwen3.6:27b
 ollama pull qwen3-embedding:4b
 ```
 
+All indexing and query tuning values are defined in `climatekg/constants.py`.
+Set `REASONING_PROFILE` there to `baseline` or `no`; model names, stage settings,
+token budgets, `top_k` values, thresholds, weights, parser paths, and timeouts
+are in the same file. The older pipeline YAML files are retained only as
+historical configuration snapshots and are not read at runtime.
+
 Nemotron Parse and PDFium use the worker executables configured in
-`config/pipeline.yaml`. Missing parser requirements cause an explicit failure;
+`climatekg/constants.py`. Missing parser requirements cause an explicit failure;
 there is no alternate PDF-parser fallback.
 
 ## Index and Query
