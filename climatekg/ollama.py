@@ -18,7 +18,7 @@ PROMPT_VERSIONS = {
     "paper_map": "v10",
     "map_consolidation": "v10",
     "section_scout": "v4",
-    "query_parse": "v3",
+    "query_parse": "v4",
     "final_synthesis": "v4",
 }
 

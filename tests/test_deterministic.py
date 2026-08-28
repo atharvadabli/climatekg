@@ -13,7 +13,7 @@ import pytest
 
 from climatekg.models import Claim, ClaimEndpoint, Context, Facet, FinalPaper, Paper, QueryContext, QueryFacet, QuerySpec, SourceBlock, Transition
 from climatekg.pdf import _split_text, _validated_parse_cache, clean_parse
-from climatekg.query import Corpus, _is_compound_unspecified_target, context_similarity, trim_evidence_package
+from climatekg.query import Corpus, _context_rerank_score, _is_compound_unspecified_target, context_similarity, trim_evidence_package
 from climatekg.reconcile import _validate_reconciliation_batch, reversal_hints
 from climatekg.retrieval import bm25
 from climatekg.utils import normalize_text_key
@@ -63,6 +63,27 @@ def test_context_similarity_separates_missing_from_mismatch() -> None:
     assert matched["coverage"] == 1.0
     assert missing["coverage"] == 0.0
     assert missing["domain_scores"]["climate"]["status"] == "missing_in_candidate"
+
+
+def test_context_similarity_does_not_reuse_one_facet_for_two_conditions() -> None:
+    query = [
+        QueryFacet(id="Q_PATTERN", domain="spatial_configuration", notion="patch arrangement", description="alternating patches", origin="user", notion_embedding=[1.0, 0.0], content_embedding=[1.0, 0.0]),
+        QueryFacet(id="Q_SCALE", domain="spatial_configuration", notion="patch size", description="large patches", origin="user", notion_embedding=[0.9, 0.1], content_embedding=[0.9, 0.1]),
+    ]
+    candidates = [
+        Facet(id="F_GENERIC", context_id="C", domain="spatial_configuration", notion="heterogeneous patches", description="patch configuration", origin="reported", evidence_block_ids=["B"], notion_embedding=[1.0, 0.0], content_embedding=[1.0, 0.0]),
+        Facet(id="F_SIZE", context_id="C", domain="spatial_configuration", notion="large patch scale", description="large patch size", origin="reported", evidence_block_ids=["B"], notion_embedding=[0.8, 0.2], content_embedding=[0.8, 0.2]),
+    ]
+    report = context_similarity(query, candidates)
+    assert len({item["candidate_facet_id"] for item in report["facet_matches"]}) == 2
+    assert report["missing_query_facets"] == []
+
+
+def test_context_rerank_combines_facet_and_whole_context_scores(monkeypatch: pytest.MonkeyPatch) -> None:
+    from climatekg.config import QUERY_PIPELINE
+
+    monkeypatch.setitem(QUERY_PIPELINE["context_retrieval"], "whole_context_weight", 0.2)
+    assert _context_rerank_score(0.5, 1.0) == pytest.approx(0.6)
 
 
 def _test_artifact_dir(name: str) -> Path:

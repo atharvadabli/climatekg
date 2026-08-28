@@ -2,7 +2,7 @@
   "ollama": {"model": "qwen3.6:27b", "structured_output": true, "stages": {"query_parse": {"temperature": 0.0, "thinking": "no"}, "final_synthesis": {"temperature": 0.0, "thinking": "low"}, "final_synthesis_complex": {"temperature": 0.0, "thinking": "medium"}}},
   "embeddings": {"model": "qwen3-embedding:4b", "dimension": 2048, "normalize": true},
   "state_mapping": {"top_k": 5, "seed_top_k": 5, "candidate_margin": 0.05},
-  "context_retrieval": {"ann_top_k": 100, "rerank_top_k": 30, "notion_weight_alpha": 0.35, "missing_coverage_penalty_lambda": 0.25, "domain_weights": {"spatial_configuration": 1.0, "land_surface": 1.0, "hydrology": 1.0, "atmosphere": 1.0, "climate": 1.0, "substrate_terrain": 1.0, "other": 0.5}, "min_context_score": null},
+  "context_retrieval": {"ann_top_k": 100, "rerank_top_k": 30, "notion_weight_alpha": 0.35, "missing_coverage_penalty_lambda": 0.25, "whole_context_weight": 0.15, "domain_weights": {"spatial_configuration": 1.0, "land_surface": 1.0, "hydrology": 1.0, "atmosphere": 1.0, "climate": 1.0, "substrate_terrain": 1.0, "other": 0.5}, "min_context_score": null},
   "conditioning": {"weight_beta": 0.25, "min_known_conditioning_score": null},
   "mechanism_retrieval": {"claim_semantic_top_k": 100, "transition_top_k": 50, "candidate_claim_top_k": 200},
   "claim_ranking": {"weights": {"context": 0.45, "mechanism": 0.20, "intervention": 0.15, "endpoint": 0.20}},
