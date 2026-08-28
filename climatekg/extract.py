@@ -562,18 +562,24 @@ def extract_facets(paper: Paper, mapped: PaperMap, contexts: list[Context], map_
     reverse = {v: k for k, v in map_meta["temp_to_permanent"].items()}
     facets, hints = [], []
     context_by_id = {item.id: item for item in contexts}
+    bundles: dict[str, list[SourceBlock]] = {}
     for context in contexts:
+        cached_path = paper_dir / "extraction" / "facets" / context.id / "validated.json"
+        if cached_path.exists():
+            continue
         source = by_temp[reverse[context.id]]
+        parent_aliases = [alias for parent_id in context.parent_ids for alias in [context_by_id[parent_id].label, *context_by_id[parent_id].aliases]]
+        child_aliases = [alias for child in contexts if context.id in child.parent_ids for alias in [child.label, *child.aliases]]
+        queries = [context.label, *context.aliases, *(f"background context {alias}" for alias in parent_aliases), *(f"scenario {alias}" for alias in child_aliases), "study area location climate season meteorology", "wind atmospheric circulation humidity boundary layer", "land cover land use vegetation management", "hydrology soil moisture", "terrain topography elevation", "spatial configuration patch heterogeneity edge"]
+        bundles[context.id] = evidence_bundle(blocks, queries, context.aliases, source.facet_seed_block_ids, client)
+    for context in contexts:
         parent_facets = [facet for facet in effective_facet_ids(context.id, contexts, facets) if facet.context_id != context.id]
         cached_path = paper_dir / "extraction" / "facets" / context.id / "validated.json"
         if cached_path.exists():
             batch = FacetBatch.model_validate_json(cached_path.read_text(encoding="utf-8"))
             allowed = {x.id for x in blocks}
         else:
-            parent_aliases = [alias for parent_id in context.parent_ids for alias in [context_by_id[parent_id].label, *context_by_id[parent_id].aliases]]
-            child_aliases = [alias for child in contexts if context.id in child.parent_ids for alias in [child.label, *child.aliases]]
-            queries = [context.label, *context.aliases, *(f"background context {alias}" for alias in parent_aliases), *(f"scenario {alias}" for alias in child_aliases), "study area location climate season meteorology", "wind atmospheric circulation humidity boundary layer", "land cover land use vegetation management", "hydrology soil moisture", "terrain topography elevation", "spatial configuration patch heterogeneity edge"]
-            bundle = evidence_bundle(blocks, queries, context.aliases, source.facet_seed_block_ids, client)
+            bundle = bundles[context.id]
             request_text = user.format(paper_id=paper.id, target_context=context.model_dump_json(), context_registry=json.dumps(map_meta["registry"]), parent_facets=json.dumps([x.model_dump() for x in parent_facets]), existing_target_facets="[]", evidence_blocks=_render_blocks(bundle))
             batch = client.structured(stage="facet_extraction", system=system, user=request_text, schema=FacetBatch, model=PIPELINE["ollama"]["model"], temperature=cfg["temperature"], thinking=cfg["thinking"], artifact_dir=cached_path.parent, paper_id=paper.id, input_block_ids=[x.id for x in bundle], retries=PIPELINE["ollama"]["retries"])
             allowed = {x.id for x in bundle}
@@ -613,6 +619,11 @@ def extract_claims(paper: Paper, mapped: PaperMap, contexts: list[Context], tran
             queries = [context.label, *context.aliases, "effect response difference change increase decrease mechanism results climate temperature precipitation evapotranspiration"]
             scopes.append((context.id, "context", queries, mapped.global_claim_seed_block_ids or context.evidence_block_ids, effective_facet_ids(context.id, contexts, facets)))
     claims, hints = [], []
+    bundles = {
+        scope_id: evidence_bundle(blocks, queries, queries[:5], mandatory, client, claim=True)
+        for scope_id, _, queries, mandatory, _ in scopes
+        if not (paper_dir / "extraction" / "claims" / scope_id / "validated.json").exists()
+    }
     for scope_id, scope_type, queries, mandatory, available_facets in scopes:
         reachable_facets = {x.id for x in available_facets}
         cached_path = paper_dir / "extraction" / "claims" / scope_id / "validated.json"
@@ -620,7 +631,7 @@ def extract_claims(paper: Paper, mapped: PaperMap, contexts: list[Context], tran
             batch = ClaimBatch.model_validate_json(cached_path.read_text(encoding="utf-8"))
             allowed_blocks = {x.id for x in blocks}
         else:
-            bundle = evidence_bundle(blocks, queries, queries[:5], mandatory, client, claim=True)
+            bundle = bundles[scope_id]
             target = next((x.model_dump() for x in transitions if x.id == scope_id), next((x.model_dump() for x in contexts if x.id == scope_id), {}))
             request_text = user.format(paper_id=paper.id, context_registry=json.dumps(map_meta["registry"]), transitions=json.dumps([x.model_dump() for x in transitions]), available_scope_facets=json.dumps([x.model_dump() for x in available_facets]), target_scope=json.dumps(target), evidence_blocks=_render_blocks(bundle))
             batch = client.structured(stage="claim_extraction", system=system, user=request_text, schema=ClaimBatch, model=PIPELINE["ollama"]["model"], temperature=cfg["temperature"], thinking=cfg["thinking"], artifact_dir=cached_path.parent, paper_id=paper.id, input_block_ids=[x.id for x in bundle], retries=PIPELINE["ollama"]["retries"])

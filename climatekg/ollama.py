@@ -66,30 +66,38 @@ class OllamaClient:
             try:
                 raw = self._post("/api/chat", payload)
             except urllib.error.HTTPError as exc:
+                elapsed = time.time() - started
                 body = exc.read().decode("utf-8", "replace")
                 error_path = artifact_dir / f"{call_id}.attempt{attempt}.http_error.json"
                 write_json(error_path, {"status": exc.code, "reason": exc.reason, "body": body})
-                write_json(artifact_dir / f"{call_id}.envelope.json", {"call_id": call_id, "paper_id": paper_id, "stage": stage, "model": model, "prompt_version": prompt_version(stage), "thinking_level": thinking, "input_block_ids": input_block_ids, "request_path": str(request_path.resolve()), "validated": False, "retry_number": attempt, "http_error_path": str(error_path.resolve()), "elapsed_seconds": time.time() - started})
+                write_json(artifact_dir / f"{call_id}.attempt{attempt}.metrics.json", {"call_id": call_id, "attempt": attempt, "paper_id": paper_id, "stage": stage, "request_path": str(request_path.resolve()), "http_error_path": str(error_path.resolve()), "validated": False, "elapsed_seconds": elapsed})
+                write_json(artifact_dir / f"{call_id}.envelope.json", {"call_id": call_id, "paper_id": paper_id, "stage": stage, "model": model, "prompt_version": prompt_version(stage), "thinking_level": thinking, "input_block_ids": input_block_ids, "request_path": str(request_path.resolve()), "validated": False, "retry_number": attempt, "http_error_path": str(error_path.resolve()), "elapsed_seconds": elapsed})
                 transient_markers = ("connection was forcibly closed", "connection reset", "wsarecv", "unexpected eof", "loading model")
                 if attempt < retries and any(marker in body.lower() for marker in transient_markers):
                     time.sleep(2 ** attempt)
                     continue
                 raise RuntimeError(f"OLLAMA_HTTP_ERROR {stage}: {exc.code} {body[:500]}") from exc
             except urllib.error.URLError as exc:
+                elapsed = time.time() - started
                 error_path = artifact_dir / f"{call_id}.attempt{attempt}.transport_error.json"
                 write_json(error_path, {"reason": str(exc.reason)})
+                write_json(artifact_dir / f"{call_id}.attempt{attempt}.metrics.json", {"call_id": call_id, "attempt": attempt, "paper_id": paper_id, "stage": stage, "request_path": str(request_path.resolve()), "transport_error_path": str(error_path.resolve()), "validated": False, "elapsed_seconds": elapsed})
                 if attempt < retries:
                     time.sleep(2 ** attempt)
                     continue
                 raise RuntimeError(f"OLLAMA_TRANSPORT_ERROR {stage}: {exc.reason}") from exc
             raw_path = artifact_dir / f"{call_id}.attempt{attempt}.json"
             write_json(raw_path, raw)
+            elapsed = time.time() - started
+            api_metrics = {key: raw.get(key) for key in ("total_duration", "load_duration", "prompt_eval_count", "prompt_eval_duration", "eval_count", "eval_duration")}
             try:
                 result = schema.model_validate_json(raw["message"]["content"])
-                write_json(artifact_dir / f"{call_id}.envelope.json", {"call_id": call_id, "paper_id": paper_id, "stage": stage, "model": model, "prompt_version": prompt_version(stage), "thinking_level": thinking, "input_block_ids": input_block_ids, "request_path": str(request_path.resolve()), "raw_response_path": str(raw_path.resolve()), "validated": True, "retry_number": attempt, "elapsed_seconds": time.time() - started})
+                write_json(artifact_dir / f"{call_id}.attempt{attempt}.metrics.json", {"call_id": call_id, "attempt": attempt, "paper_id": paper_id, "stage": stage, "request_path": str(request_path.resolve()), "raw_response_path": str(raw_path.resolve()), "validated": True, "elapsed_seconds": elapsed, **api_metrics})
+                write_json(artifact_dir / f"{call_id}.envelope.json", {"call_id": call_id, "paper_id": paper_id, "stage": stage, "model": model, "prompt_version": prompt_version(stage), "thinking_level": thinking, "input_block_ids": input_block_ids, "request_path": str(request_path.resolve()), "raw_response_path": str(raw_path.resolve()), "validated": True, "retry_number": attempt, "elapsed_seconds": elapsed})
                 return result
             except (ValidationError, ValueError, KeyError) as exc:
                 last_error = str(exc)
+                write_json(artifact_dir / f"{call_id}.attempt{attempt}.metrics.json", {"call_id": call_id, "attempt": attempt, "paper_id": paper_id, "stage": stage, "request_path": str(request_path.resolve()), "raw_response_path": str(raw_path.resolve()), "validated": False, "elapsed_seconds": elapsed, "validation_errors": last_error, **api_metrics})
                 prompt = (
                     f"{user}\n\n"
                     "CORRECTION TASK\n\n"

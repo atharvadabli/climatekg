@@ -3,9 +3,11 @@ from __future__ import annotations
 import json
 import re
 import shutil
+import time
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 from .canonicalize import canonicalize_claim_states
 from .config import PIPELINE
@@ -55,9 +57,57 @@ def _clear_derived_artifacts(paper_dir: Path, data_root: Path) -> None:
             shutil.rmtree(target)
 
 
+def _write_index_timing(path: Path, report: dict[str, Any]) -> None:
+    report["measured_phase_seconds"] = sum(item["elapsed_seconds"] for item in report["phases"])
+    write_json(path, report)
+
+
+@contextmanager
+def _timed_phase(path: Path, report: dict[str, Any], name: str) -> Iterator[None]:
+    started_at = datetime.now(timezone.utc).isoformat()
+    started = time.perf_counter()
+    status = "complete"
+    error: dict[str, str] | None = None
+    try:
+        yield
+    except Exception as exc:
+        status = "failed"
+        error = {"type": type(exc).__name__, "message": str(exc)}
+        raise
+    finally:
+        phase = {
+            "name": name,
+            "started_at": started_at,
+            "finished_at": datetime.now(timezone.utc).isoformat(),
+            "elapsed_seconds": time.perf_counter() - started,
+            "status": status,
+        }
+        if error:
+            phase["error"] = error
+        report["phases"].append(phase)
+        _write_index_timing(path, report)
+
+
 def index_pdf(pdf_path: Path, data_root: Path, paper_id: str, client: OllamaClient | None = None, rebuild_derived: bool = False) -> FinalPaper:
     client = client or OllamaClient()
+    run_started = time.perf_counter()
+    run_started_at = datetime.now(timezone.utc).isoformat()
+    registration_started = time.perf_counter()
     paper_dir, manifest = register_pdf(pdf_path, data_root, paper_id)
+    timing_path = paper_dir / "metrics" / "indexing_timing.json"
+    timing_report: dict[str, Any] = {
+        "paper_id": manifest["paper_id"],
+        "source_pdf": str(pdf_path.resolve()),
+        "run_started_at": run_started_at,
+        "status": "running",
+        "phases": [{
+            "name": "paper_registration",
+            "started_at": run_started_at,
+            "finished_at": datetime.now(timezone.utc).isoformat(),
+            "elapsed_seconds": time.perf_counter() - registration_started,
+            "status": "complete",
+        }],
+    }
     final_path = paper_dir / "final" / "final_paper.json"
     if manifest.get("status") == "complete" and final_path.exists():
         cached = FinalPaper.model_validate_json(final_path.read_text(encoding="utf-8"))
@@ -72,55 +122,78 @@ def index_pdf(pdf_path: Path, data_root: Path, paper_id: str, client: OllamaClie
         _clear_derived_artifacts(paper_dir, data_root)
         manifest["status"] = "registered"
         manifest.pop("counts", None)
+    _write_index_timing(timing_path, timing_report)
     manifest.pop("failure", None)
     try:
-        raw = parse_pdf(paper_dir / "source" / "paper.pdf", paper_dir)
+        with _timed_phase(timing_path, timing_report, "pdf_parse_nemotron"):
+            raw = parse_pdf(paper_dir / "source" / "paper.pdf", paper_dir)
         manifest["status"] = "parsed"
         write_json(paper_dir / "manifest.json", manifest)
-        cleaned = clean_parse(raw, paper_dir)
-        blocks = build_source_blocks(cleaned, paper_id, paper_dir, PIPELINE["blocks"]["max_block_tokens"], PIPELINE["blocks"]["target_split_tokens"])
-        embed_source_blocks(client, blocks, paper_dir / "blocks" / "block_embeddings.json")
-        (paper_dir / "blocks" / "blocks.jsonl").write_text("\n".join(x.model_dump_json(by_alias=True) for x in blocks) + "\n", encoding="utf-8")
-        paper = _metadata(blocks, paper_id, pdf_path.name)
+        with _timed_phase(timing_path, timing_report, "parse_cleaning"):
+            cleaned = clean_parse(raw, paper_dir)
+        with _timed_phase(timing_path, timing_report, "sourceblock_generation"):
+            blocks = build_source_blocks(cleaned, paper_id, paper_dir, PIPELINE["blocks"]["max_block_tokens"], PIPELINE["blocks"]["target_split_tokens"])
+            (paper_dir / "blocks" / "blocks.jsonl").write_text("\n".join(x.model_dump_json(by_alias=True) for x in blocks) + "\n", encoding="utf-8")
+            paper = _metadata(blocks, paper_id, pdf_path.name)
+        with _timed_phase(timing_path, timing_report, "sourceblock_embeddings"):
+            embed_source_blocks(client, blocks, paper_dir / "blocks" / "block_embeddings.json")
         manifest["status"] = "mapping"
         write_json(paper_dir / "manifest.json", manifest)
-        mapped = map_paper(paper, blocks, paper_dir, client)
-        contexts, transitions, map_meta = permanent_map(paper, mapped)
-        write_json(paper_dir / "extraction" / "map" / "context_registry.json", map_meta)
+        with _timed_phase(timing_path, timing_report, "paper_mapping"):
+            mapped = map_paper(paper, blocks, paper_dir, client)
+        with _timed_phase(timing_path, timing_report, "permanent_context_transition_ids"):
+            contexts, transitions, map_meta = permanent_map(paper, mapped)
+            write_json(paper_dir / "extraction" / "map" / "context_registry.json", map_meta)
         manifest["status"] = "extracting_facets"
         write_json(paper_dir / "manifest.json", manifest)
-        facets, facet_hints = extract_facets(paper, mapped, contexts, map_meta, blocks, paper_dir, client)
+        with _timed_phase(timing_path, timing_report, "facet_extraction"):
+            facets, facet_hints = extract_facets(paper, mapped, contexts, map_meta, blocks, paper_dir, client)
         manifest["status"] = "extracting_claims"
         write_json(paper_dir / "manifest.json", manifest)
-        claims, claim_hints = extract_claims(paper, mapped, contexts, transitions, facets, map_meta, blocks, paper_dir, client)
+        with _timed_phase(timing_path, timing_report, "claim_extraction"):
+            claims, claim_hints = extract_claims(paper, mapped, contexts, transitions, facets, map_meta, blocks, paper_dir, client)
         manifest["status"] = "reconciling_contexts"
         write_json(paper_dir / "manifest.json", manifest)
-        contexts, facets, claims, reconciliation_unresolved = reconcile_contexts(paper, contexts, transitions, facets, claims, facet_hints + claim_hints, blocks, paper_dir, client)
-        unresolved = list(reconciliation_unresolved)
+        with _timed_phase(timing_path, timing_report, "context_reconciliation"):
+            contexts, facets, claims, reconciliation_unresolved = reconcile_contexts(paper, contexts, transitions, facets, claims, facet_hints + claim_hints, blocks, paper_dir, client)
+            unresolved = list(reconciliation_unresolved)
         manifest["status"] = "consolidating"
         write_json(paper_dir / "manifest.json", manifest)
-        contexts, facets, transitions, claims, consolidation_warnings = consolidate_paper(paper, contexts, facets, transitions, claims, blocks, paper_dir, client)
-        unresolved.extend({"type": "consolidation_conflict", "value": value} for value in consolidation_warnings)
-        states = canonicalize_claim_states(claims)
+        with _timed_phase(timing_path, timing_report, "paper_consolidation"):
+            contexts, facets, transitions, claims, consolidation_warnings = consolidate_paper(paper, contexts, facets, transitions, claims, blocks, paper_dir, client)
+            unresolved.extend({"type": "consolidation_conflict", "value": value} for value in consolidation_warnings)
+        with _timed_phase(timing_path, timing_report, "state_canonicalization"):
+            states = canonicalize_claim_states(claims)
         manifest["status"] = "embedding"
         write_json(paper_dir / "manifest.json", manifest)
-        context_texts = embed_paper(client, blocks, contexts, facets, transitions, claims, states)
-        for context_id, text in context_texts.items():
-            target = paper_dir / "final" / "context_retrieval_text" / f"{context_id}.txt"
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(text, encoding="utf-8")
-        evidence_links = [{"object_id": item.id, "source_block_id": block_id} for items in (contexts, facets, transitions, claims) for item in items for block_id in item.evidence_block_ids]
-        prompt_versions = current_prompt_versions()
-        final = FinalPaper(paper=paper, source_blocks=blocks, contexts=contexts, facets=facets, transitions=transitions, claims=claims, states=states, evidence_links=evidence_links, unresolved_conflicts=unresolved, metadata={"parser": "nvidia/NVIDIA-Nemotron-Parse-v1.2", "extractor_model": PIPELINE["ollama"]["model"], "embedding_model": PIPELINE["embeddings"]["model"], "embedding_dimension": PIPELINE["embeddings"]["dimension"], "prompt_versions": prompt_versions, "created_at": datetime.now(timezone.utc).isoformat()})
-        write_json(paper_dir / "final" / "final_paper.json", final.model_dump(by_alias=True))
+        with _timed_phase(timing_path, timing_report, "final_object_embeddings"):
+            context_texts = embed_paper(client, blocks, contexts, facets, transitions, claims, states)
+        with _timed_phase(timing_path, timing_report, "final_artifact_assembly"):
+            for context_id, text in context_texts.items():
+                target = paper_dir / "final" / "context_retrieval_text" / f"{context_id}.txt"
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(text, encoding="utf-8")
+            evidence_links = [{"object_id": item.id, "source_block_id": block_id} for items in (contexts, facets, transitions, claims) for item in items for block_id in item.evidence_block_ids]
+            prompt_versions = current_prompt_versions()
+            final = FinalPaper(paper=paper, source_blocks=blocks, contexts=contexts, facets=facets, transitions=transitions, claims=claims, states=states, evidence_links=evidence_links, unresolved_conflicts=unresolved, metadata={"parser": "nvidia/NVIDIA-Nemotron-Parse-v1.2", "extractor_model": PIPELINE["ollama"]["model"], "embedding_model": PIPELINE["embeddings"]["model"], "embedding_dimension": PIPELINE["embeddings"]["dimension"], "prompt_versions": prompt_versions, "created_at": datetime.now(timezone.utc).isoformat()})
+            write_json(paper_dir / "final" / "final_paper.json", final.model_dump(by_alias=True))
         manifest["status"] = "complete"
         manifest["counts"] = {"source_blocks": len(blocks), "contexts": len(contexts), "facets": len(facets), "transitions": len(transitions), "claims": len(claims), "states": len(states)}
         write_json(paper_dir / "manifest.json", manifest)
+        timing_report["status"] = "complete"
+        timing_report["finished_at"] = datetime.now(timezone.utc).isoformat()
+        timing_report["wall_elapsed_seconds"] = time.perf_counter() - run_started
+        _write_index_timing(timing_path, timing_report)
         return final
     except Exception as exc:
         manifest["status"] = "FAILED_PARSE" if "FAILED_PARSE" in str(exc) else "NEEDS_REVIEW"
         manifest["failure"] = {"type": type(exc).__name__, "message": str(exc)}
         write_json(paper_dir / "manifest.json", manifest)
+        timing_report["status"] = "failed"
+        timing_report["finished_at"] = datetime.now(timezone.utc).isoformat()
+        timing_report["wall_elapsed_seconds"] = time.perf_counter() - run_started
+        timing_report["failure"] = manifest["failure"]
+        _write_index_timing(timing_path, timing_report)
         raise
 
 

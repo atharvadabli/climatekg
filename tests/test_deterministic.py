@@ -6,7 +6,7 @@ from climatekg.canonicalize import canonical_concept, canonical_direction, state
 from climatekg.extract import _apply_map_repair, _validate_map, _validate_map_references, _validate_map_repair, _validate_reference_only_repair, remove_internal_inventory_aliases, render_paper_map_tree, scout_setting_inventory, select_map_consolidation_blocks, validate_context_mention_resolution
 from climatekg.extraction_models import ContextHintDecision, ContextReconciliationBatch, MapContext, MapTransition, PaperMap, ScoutMention, SectionScout
 from climatekg.graph import _flatten, _inflate
-from climatekg.indexer import _clear_derived_artifacts, current_prompt_versions
+from climatekg.indexer import _clear_derived_artifacts, current_prompt_versions, index_pdf
 import json
 
 import pytest
@@ -17,6 +17,7 @@ from climatekg.query import Corpus, _context_rerank_score, _is_compound_unspecif
 from climatekg.reconcile import _validate_reconciliation_batch, reversal_hints
 from climatekg.retrieval import bm25
 from climatekg.utils import normalize_text_key
+from climatekg.utils import sha256_file
 
 
 def test_normative_normalization() -> None:
@@ -269,6 +270,27 @@ def test_explicit_derived_rebuild_retains_parse_and_blocks() -> None:
         assert current_prompt_versions()["section_scout"] == "v4"
     finally:
         shutil.rmtree(data_root, ignore_errors=True)
+
+
+def test_cached_index_return_preserves_completed_timing(tmp_path: Path) -> None:
+    pdf_path = tmp_path / "paper.pdf"
+    pdf_path.write_bytes(b"benchmark fixture")
+    data_root = tmp_path / "data"
+    paper_dir = data_root / "P000001"
+    final_dir = paper_dir / "final"
+    metrics_dir = paper_dir / "metrics"
+    final_dir.mkdir(parents=True)
+    metrics_dir.mkdir(parents=True)
+    manifest = {"paper_id": "P000001", "pdf_sha256": sha256_file(pdf_path), "status": "complete"}
+    (paper_dir / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    final = FinalPaper(paper=Paper(id="P000001", title="Fixture", source_file="paper.pdf"), source_blocks=[], contexts=[], facets=[], transitions=[], claims=[], states=[], metadata={"prompt_versions": current_prompt_versions()})
+    (final_dir / "final_paper.json").write_text(final.model_dump_json(by_alias=True), encoding="utf-8")
+    timing_path = metrics_dir / "indexing_timing.json"
+    timing_path.write_text('{"status":"complete","wall_elapsed_seconds":123.0}', encoding="utf-8")
+
+    index_pdf(pdf_path, data_root, "P000001")
+
+    assert json.loads(timing_path.read_text(encoding="utf-8"))["wall_elapsed_seconds"] == 123.0
 
 
 def test_neo4j_property_round_trip_preserves_nested_values() -> None:
