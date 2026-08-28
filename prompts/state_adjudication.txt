@@ -1,0 +1,37 @@
+SYSTEM
+
+TASK
+
+Decide whether two scientific concept names can use the same canonical graph identity without changing their scientific meaning.
+
+INPUT
+
+You will receive two concept names and example passages showing how each name is used.
+
+HOW TO DECIDE
+
+Use exactly one label:
+- `SAME`: The names are substitutable for the same scientific variable, process, or land state in the supplied uses.
+- `RELATED_BUT_DISTINCT`: The concepts are connected or correlated but represent different variables, processes, or states.
+- `DIFFERENT`: The concepts have different scientific meanings.
+- `UNCERTAIN`: The examples are insufficient for a safe decision.
+
+Be conservative. A flux and a state variable are distinct. A mechanism and its outcome are distinct. Moisture convergence and moisture recycling are distinct. Latent heat flux and evapotranspiration remain distinct unless the supplied evidence explicitly uses the terms as the same measured concept.
+
+OUTPUT
+
+Return valid JSON only in the JSON Schema supplied with this request. The output must contain the decision label and the two input concept identifiers required by that schema. Copy identifiers exactly.
+
+USER
+
+CONCEPT A
+{concept_a}
+
+EXAMPLES FOR CONCEPT A
+{examples_a}
+
+CONCEPT B
+{concept_b}
+
+EXAMPLES FOR CONCEPT B
+{examples_b}

@@ -1,0 +1,60 @@
+SYSTEM
+
+TASK
+
+Read evidence for one scientific study setting and record the environmental or experimental conditions that belong specifically to that setting.
+
+The output calls each condition record a `facet`. A facet represents one coherent aspect of the setting, such as land cover, soil-moisture state, season, atmospheric flow, terrain, or patch arrangement.
+
+INPUT
+
+You will receive:
+- a paper identifier;
+- the target study setting;
+- a registry of all known settings in the paper;
+- condition records inherited from parent settings;
+- condition records already assigned directly to the target;
+- evidence passages with stable SourceBlock IDs.
+
+WHAT TO RECORD
+
+Record only conditions stated in the evidence and owned by the target setting. A parent condition should appear again only when the target evidence states a meaningful difference.
+
+Keep one coherent scientific notion together. Preserve reported quantities, units, seasons, atmospheric layers, time of day, spatial scale, direction, distance, patch/edge relations, and qualifications in the description.
+
+If the evidence clearly belongs to a scientifically different setting that is absent from the registry, describe that problem in `unmapped_context_hints` rather than assigning the condition to the target.
+
+OUTPUT
+
+Return valid JSON only. The JSON Schema supplied with this request is authoritative.
+
+- `context_id`: Copy the target setting's permanent ID exactly.
+- `facets`: A list of condition records. For each record:
+  - `domain`: Use exactly one of `spatial_configuration`, `land_surface`, `hydrology`, `atmosphere`, `climate`, `substrate_terrain`, or `other`.
+  - `notion`: A concise, value-free scientific noun phrase, usually 2-8 words. Generate this label from the evidence.
+  - `description`: An evidence-faithful description, usually 20-60 words. Include the reported state and material qualifiers without padding.
+  - `evidence_block_ids`: The smallest set of SourceBlock IDs that directly supports this record.
+- `unmapped_context_hints`: Short descriptions of evidence that appears to require a different study setting. Use an empty list when none exists.
+- `ambiguities`: Short descriptions of uncertainty that affects extraction. Use an empty list when none exists.
+
+Copy SourceBlock IDs exactly. Do not infer missing environmental properties or convert reported units.
+
+USER
+
+PAPER IDENTIFIER
+{paper_id}
+
+TARGET STUDY SETTING
+{target_context}
+
+ALL KNOWN STUDY SETTINGS
+{context_registry}
+
+INHERITED CONDITION RECORDS
+{parent_facets}
+
+EXISTING DIRECT CONDITION RECORDS
+{existing_target_facets}
+
+EVIDENCE PASSAGES WITH SOURCEBLOCK IDS
+{evidence_blocks}

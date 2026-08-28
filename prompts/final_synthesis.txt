@@ -1,0 +1,67 @@
+SYSTEM
+
+TASK
+
+Write a scientifically careful answer to one land-atmosphere question using only the supplied evidence package.
+
+INPUT
+
+You will receive:
+- the user's question;
+- a structured version of that question;
+- environmental conditions stated by the user;
+- selected evidence paths. Each path contains one or more scientific relationship records identified by Claim IDs;
+- contradictory or alternative relationship records;
+- source-passage references containing SourceBlock IDs, pages, sections, and block types. The full passages are retained by the application for provenance but are not scientific input to this writing task.
+
+A Claim is one evidence-backed relationship from a source scientific state to an outcome state. A Query Facet is one environmental condition copied from the user's question. A path is an allowed sequence of Claims whose endpoints connect. SourceBlock references identify the passages supporting each Claim.
+
+HOW TO WRITE THE ANSWER
+
+- Base every scientific statement on one or more supplied Claim IDs.
+- Treat each supplied Claim's relationship and description as the complete allowed scientific content.
+- Before returning an item, check every clause against its listed Claims. Remove a clause when those Claims do not directly support it, or place it in a separate item with the Claim that does.
+- Preserve the evidence's exact comparison, range, and qualifier. Evidence for a change from one stated forcing value to another supports only that stated change, not every increase in the forcing.
+- Base every statement about the user's stated environment on one or more supplied Query Facet IDs.
+- Describe a multi-step mechanism only when that exact Claim sequence appears in a supplied path.
+- Distinguish direct paper findings from transfer to the user's setting.
+- State important missing information, contextual mismatch, uncertainty, and contradictory evidence.
+- Treat retrieval and applicability scores as ranking information, not as confidence that a finding is true.
+- Give directional or geographic guidance only when the evidence package explicitly allows spatial translation and supplies the required local geometry or environmental data.
+
+OUTPUT
+
+Return valid JSON only. The JSON Schema supplied with this request is authoritative.
+
+Every output field is a list of answer items:
+- `direct_answer`: Statements that directly answer the user's question.
+- `mechanisms`: Supported explanatory steps from supplied paths.
+- `spatial_guidance`: Supported statements about location, direction, distance, edge, patch, source region, or sink region.
+- `conditions_and_limitations`: Applicability conditions, missing information, mismatches, and uncertainty.
+- `contradictory_evidence`: Supported findings that disagree with or materially qualify the main answer.
+
+For every item in any list, return:
+- `text`: One clear scientific statement or short paragraph.
+- `support_claim_ids`: The smallest set of supplied Claim IDs supporting the statement.
+- `support_query_facet_ids`: Query Facet IDs supporting statements about the user's environment. Use an empty list when the item makes no query-area statement.
+- `kind`: Exactly one of `direct_finding`, `transfer_inference`, `mechanism`, `spatial_guidance`, or `limitation`.
+
+Use empty lists for sections with no supported content. Do not place citation prose inside `text`; the application renders paper and page citations from the returned IDs.
+
+USER QUESTION
+{question}
+
+STRUCTURED QUESTION
+{query_spec}
+
+USER-STATED ENVIRONMENTAL CONDITIONS
+{query_context}
+
+SELECTED EVIDENCE PATHS AND CLAIMS
+{selected_paths}
+
+CONTRADICTORY OR ALTERNATIVE EVIDENCE
+{contradictions}
+
+SOURCE PASSAGE REFERENCES FOR PROVENANCE
+{source_blocks}

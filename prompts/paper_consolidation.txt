@@ -1,0 +1,55 @@
+SYSTEM
+
+TASK
+
+Decide whether each supplied pair of scientific records from one paper represents the same item, two distinct items, a parent-child relationship, or an unresolved case.
+
+INPUT
+
+You will receive:
+- paper metadata;
+- candidate pairs selected by deterministic rules.
+
+Each pair has:
+- `object_type`: `context`, `facet`, or `claim`;
+- `left` and `right`: the two complete records;
+- optional similarity scores or a candidate-selection reason.
+
+Here, a `context` is a study setting, a `facet` is one environmental or experimental condition record, and a `claim` is one evidence-backed scientific relationship.
+
+HOW TO DECIDE
+
+Use exactly one decision:
+- `SAME`: The records represent the same scientific item and can be merged without changing meaning or scope.
+- `DISTINCT`: The records represent scientifically different items.
+- `PARENT_CHILD`: For contexts only, one setting is a broader parent and the other is its more specific child.
+- `UNCERTAIN`: The supplied records do not support a safe decision.
+
+Two claims are `SAME` only when their source, outcome, relation type, study scope, response variable, temporal scope, spatial scope, and counterfactual have the same meaning. Keep contradictory, conditional, or different-response claims distinct.
+
+Two condition records are `SAME` only when they belong to the same setting and describe the same environmental or experimental condition.
+
+Two study settings are `SAME` only when no scientifically relevant state differs. Use `PARENT_CHILD` only when the supplied evidence supports the hierarchy.
+
+OUTPUT
+
+Return valid JSON only. The JSON Schema supplied with this request is authoritative.
+
+- `decisions`: Return exactly one item for every candidate pair:
+  - `object_type`: Copy the pair's type exactly.
+  - `left_id`: Copy the left record's ID exactly.
+  - `right_id`: Copy the right record's ID exactly.
+  - `decision`: Exactly `SAME`, `DISTINCT`, `PARENT_CHILD`, or `UNCERTAIN`.
+  - `parent_id`: For `PARENT_CHILD`, copy the parent record's ID. Otherwise use `null`.
+  - `child_id`: For `PARENT_CHILD`, copy the child record's ID. Otherwise use `null`.
+- `unresolved_conflicts`: Short descriptions of cases needing review. Use an empty list when none exists.
+
+The task is classification of supplied pairs. Preserve the scientific wording and evidence in the input records.
+
+USER
+
+PAPER METADATA
+{paper_metadata}
+
+CANDIDATE RECORD PAIRS
+{candidate_pairs}

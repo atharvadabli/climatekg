@@ -1,0 +1,36 @@
+# Python environments and build products
+.venv*/
+venv/
+env/
+*.egg-info/
+build/
+dist/
+
+# Python and test caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+pytest-cache-files-*/
+.coverage
+htmlcov/
+
+# ClimateKG runtime data, models, caches, and generated outputs
+climatekg/runtime/
+output/
+
+# Local release bundles and generated archives
+climatekg_github_release/
+*.zip
+
+# Local tooling and credentials
+.agents/
+.codex/
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+
+# Operating-system files
+Thumbs.db
+.DS_Store

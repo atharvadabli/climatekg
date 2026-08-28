@@ -1,0 +1,23 @@
+{
+  "version": "0.3",
+  "concept_aliases": {
+    "convective precipitation": ["convective precipitation", "convective rainfall", "convective rainfall likelihood", "afternoon convective precipitation"],
+    "evapotranspiration": ["ET", "evapotranspiration"],
+    "planetary boundary layer": ["PBL", "planetary boundary layer", "atmospheric boundary layer"],
+    "precipitation": ["precipitation", "precipitation north of 18 n", "sahel precipitation"],
+    "surface albedo": ["surface albedo", "surface albedo north of 18 n", "surface albedo increase 0.14 to 0.35"],
+    "surface air temperature": ["surface air temperature", "surface temperature", "near-surface air temperature", "near-surface temperature"]
+  },
+  "state_directions": {
+    "increase": ["increase", "increased", "increasing", "higher", "rise", "rising", "enhancement", "enhanced", "warmer", "warming", "expand", "expanded", "expanding", "expansion", "increased from 0.14 to 0.35", "increased to 0.35"],
+    "decrease": ["decrease", "decreased", "decreasing", "lower", "decline", "declining", "reduction", "reduce", "reduced", "cooler", "cooling", "decreases by approximately 40%", "decreased by 40%"],
+    "strengthen": ["strengthen", "strengthened", "stronger", "intensify", "intensified"],
+    "weaken": ["weaken", "weakened", "weaker", "diminish", "diminished"],
+    "earlier": ["earlier", "advance", "advanced"],
+    "later": ["later", "delay", "delayed"],
+    "more_frequent": ["more frequent", "increased frequency", "more likely", "higher probability", "increased likelihood of occurrence"],
+    "less_frequent": ["less frequent", "reduced frequency", "less likely", "lower probability"],
+    "no_detectable_change": ["no detectable change", "no significant change", "insignificant effect", "null effect"],
+    "on activated": ["on activated", "active", "activate", "activated", "activating"]
+  }
+}

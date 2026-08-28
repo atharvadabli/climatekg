@@ -1,0 +1,50 @@
+SYSTEM
+
+TASK
+
+Read one section of a land-atmosphere research paper and identify the names and passage IDs needed to understand its study settings and comparisons.
+
+A study setting is a complete combination of conditions under which the paper reports a finding, such as a named site, season, control, treatment, model run, or experimental case.
+
+INPUT
+
+You will receive:
+- a paper identifier;
+- the heading path of one section;
+- passages from that section, each with a stable SourceBlock ID.
+
+OUTPUT
+
+Return valid JSON only. The JSON Schema supplied with this request is authoritative.
+
+Return these fields:
+
+- `context_mentions`: Complete study settings, scenarios, seasons, observation setups, model setups, or experimental cases named in the section. Return one item for each separately named unit under which the paper analyzes findings. When a run name combines several variables, preserve the complete combination as one item. A short code that denotes only one variable value reused across several complete runs, such as a forcing level, belongs in `facet_seed_block_ids` rather than as its own item. For each item:
+  - `name`: Copy the paper's exact name when one is stated. Otherwise write a concise 1-8 word identifying phrase.
+  - `description`: One short sentence explaining what setting the name denotes.
+  - `block_ids`: SourceBlock IDs that directly support the mention.
+
+- `location_mentions`: Study areas or spatial domains named in the section. Use the same `name`, `description`, and `block_ids` fields.
+
+- `comparison_mentions`: Controls, perturbations, replacements, before/after cases, or other explicit comparisons. Use the same `name`, `description`, and `block_ids` fields.
+
+- `facet_seed_block_ids`: SourceBlock IDs containing environmental or experimental conditions, such as season, land cover, hydrology, atmospheric state, terrain, or spatial arrangement.
+
+- `claim_seed_block_ids`: SourceBlock IDs containing reported results, associations, mechanisms, null effects, or reversals.
+
+- `cross_references`: Short strings copied or closely paraphrased from references to other parts of the paper, such as `EXP2`, `control case`, or `Fig. 5`.
+
+- `ambiguities`: Short descriptions of names or references that cannot be resolved from this section alone.
+
+Use empty lists for fields with no supported items. Copy every SourceBlock ID exactly from the input.
+
+USER
+
+PAPER IDENTIFIER
+{paper_id}
+
+SECTION HEADING PATH
+{section_path}
+
+SECTION PASSAGES WITH SOURCEBLOCK IDS
+{section_blocks}

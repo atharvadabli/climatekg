@@ -1,0 +1,98 @@
+SYSTEM
+
+TASK
+
+Build a compact tree of the study settings and comparisons in one land-atmosphere research paper.
+
+A study setting is the complete combination of conditions under which the paper reports a finding. Conditions may include place, period, environmental regime, data source, model setup, control or treatment, and values of experimental variables.
+
+A child setting inherits every condition from its parent and stores only what changes or becomes more specific. Reading a child together with all its ancestors must identify a scientifically usable setting for the paper's findings.
+
+A comparison is an observed or imposed change between two study settings.
+
+INPUT
+
+You will receive:
+- paper metadata;
+- preliminary notes made from separate paper sections;
+- selected original passages with stable SourceBlock IDs.
+
+The preliminary notes identify possible settings and comparisons. Use the original passages to decide the final structure and evidence.
+
+The `SETTING INVENTORY` gives every unique study-setting name a stable `CM###` identifier. Resolve every inventory item to a setting. Two inventory IDs may resolve to the same setting only when the original names are alternate spellings or aliases of the same complete setting; preserve both names in that setting's label or `aliases`.
+
+HOW TO BUILD THE SETTING TREE
+
+1. Start with conditions shared by most of the paper. Store them in a root setting.
+2. Add child settings for study areas, observation or model branches, controls, treatments, seasons, regimes, and experimental cases when the paper reports findings separately for them.
+3. When several named cases share one condition, place that condition in a parent and place their differences in children.
+4. Create one child setting for each named experiment, control, scenario, site, or case that has a distinct combination of conditions and separately reported findings. A family setting may be their parent.
+5. Use `aliases` only for different names that denote the same complete setting. Names with different treatment values, forcing levels, places, periods, or other conditions are separate child settings, not aliases of one group.
+6. Treat a combination of experimental variables as one complete branch. For example, if a finding applies to a particular land treatment at a particular forcing level, the applicable child must inherit both conditions. Separate sibling nodes for the treatment and forcing level do not represent their combination.
+7. Use the fewest nodes that preserve complete finding scopes. Sharing repeated conditions through inheritance makes the tree compact; removing a separately reported case does not.
+8. Create a setting for a reported regime or outcome group only when the paper analyzes that group as a setting for multiple findings. Otherwise represent the result later through its cited result passages.
+9. Keep settings from cited background studies out of the current paper's tree unless the current paper directly analyzes them as comparison data.
+10. Every leaf must be a complete setting under which the paper analyzes findings. Every non-leaf must supply a condition shared by at least two descendant settings. A variable value reused inside complete run names is not a separate sibling leaf.
+
+For each proposed setting, perform this completeness check:
+
+Read the setting together with all its ancestors. Verify that this combined description states the conditions needed to know where that setting's cited findings apply. If an experimental variable that changes the finding is missing, add or move the appropriate parent or child setting.
+
+HOW TO BUILD COMPARISONS
+
+- Use complete settings as both endpoints.
+- Prefer endpoints that hold other relevant conditions fixed when the paper does so.
+- When the paper identifies a control, baseline, or reference setting, use it as `from_context_temp_id` and the treatment or changed setting as `to_context_temp_id`.
+- When no explicit control is named and the comparison is absence versus presence or non-event versus event, use absence or non-event as `from_context_temp_id`.
+- Describe the manipulation or contrast itself, rather than its climatic result.
+- Cite passages that establish the comparison and passages containing its reported results.
+
+Use only information stated in the supplied original passages. Record unresolved structural uncertainty in `ambiguities`.
+
+OUTPUT
+
+Return valid JSON only. The JSON Schema supplied with this request is authoritative.
+
+Return parent settings before their children in `contexts`.
+
+For each `contexts` item, return:
+- `temp_id`: Generate one unique temporary ID.
+- `label`: Generate a concise noun phrase, usually 3-12 words, identifying the setting.
+- `parent_temp_ids`: List the temporary IDs whose conditions this setting inherits. Use an empty list for a root.
+- `split_reason`: Use `null` for a root. For a child, classify why it is separate using exactly one of `separate_reported_finding`, `sign_or_null_reversal`, `misleading_parent_scope`, or `explicit_transition_state`.
+- `aliases`: Copy paper-local experiment IDs, scenario names, control names, abbreviations, or alternative names that refer to this same setting. Use an empty list when none are stated.
+- `spatial_support`: Use `null` when no location is stated. Otherwise return `kind`, `name`, `geometry`, and `resolution` as defined below.
+- `evidence_block_ids`: Copy the smallest set of SourceBlock IDs that directly establishes the setting.
+- `facet_seed_block_ids`: Copy SourceBlock IDs containing environmental, temporal, spatial, model, or experimental conditions for this setting. Use an empty list when none are available.
+
+For `spatial_support`:
+- `kind`: Use exactly one of `point`, `patch`, `watershed`, `region`, `climate_zone`, `global`, or `unresolved`.
+- `name`: Copy the site, domain, region, or area name stated in the passages.
+- `geometry`: Copy stated coordinates or geometry into a JSON object. Use `null` when absent.
+- `resolution`: Use exactly one of `exact`, `approximate`, `named_region`, `global`, or `unresolved`.
+
+For each `transitions` item, return:
+- `temp_id`: Generate one unique temporary ID.
+- `from_context_temp_id`: Copy the temporary ID of the starting, reference, or control setting.
+- `to_context_temp_id`: Copy the temporary ID of the changed or compared setting.
+- `label`: Generate a concise comparison name, usually 2-10 words.
+- `aliases`: Copy paper-local names for this comparison. Use an empty list when absent.
+- `description`: Generate one sentence, usually 10-50 words, describing what changes between the endpoints.
+- `evidence_block_ids`: Copy the smallest set of SourceBlock IDs that establishes the comparison.
+- `claim_seed_block_ids`: Copy SourceBlock IDs containing results of this comparison. Use an empty list when none are available.
+
+Also return:
+- `context_mention_resolution`: Return one JSON object entry for every `CM###` identifier in `SETTING INVENTORY`. Each value is the `temp_id` of its corresponding setting. Use an empty object only when the inventory is empty.
+- `global_claim_seed_block_ids`: Copy SourceBlock IDs containing paper-wide findings that do not belong to one listed comparison.
+- `ambiguities`: Write short descriptions of unresolved structural choices. Use an empty list when none remain.
+
+USER
+
+PAPER METADATA
+{paper_metadata}
+
+PRELIMINARY SECTION NOTES
+{scout_outputs}
+
+SELECTED ORIGINAL PASSAGES
+{selected_blocks}

@@ -1,0 +1,14 @@
+{
+  "ollama": {"model": "qwen3.6:27b", "structured_output": true, "stages": {"query_parse": {"temperature": 0.0, "thinking": "no"}, "final_synthesis": {"temperature": 0.0, "thinking": "low"}, "final_synthesis_complex": {"temperature": 0.0, "thinking": "medium"}}},
+  "embeddings": {"model": "qwen3-embedding:4b", "dimension": 2048, "normalize": true},
+  "state_mapping": {"top_k": 5, "seed_top_k": 5, "candidate_margin": 0.05},
+  "context_retrieval": {"ann_top_k": 100, "rerank_top_k": 30, "notion_weight_alpha": 0.35, "missing_coverage_penalty_lambda": 0.25, "domain_weights": {"spatial_configuration": 1.0, "land_surface": 1.0, "hydrology": 1.0, "atmosphere": 1.0, "climate": 1.0, "substrate_terrain": 1.0, "other": 0.5}, "min_context_score": null},
+  "conditioning": {"weight_beta": 0.25, "min_known_conditioning_score": null},
+  "mechanism_retrieval": {"claim_semantic_top_k": 100, "transition_top_k": 50, "candidate_claim_top_k": 200},
+  "claim_ranking": {"weights": {"context": 0.45, "mechanism": 0.20, "intervention": 0.15, "endpoint": 0.20}},
+  "path_search": {"max_path_length": 4, "beam_width": 40, "max_paths": 20, "cross_edge_context_threshold": null, "path_length_penalty": 0.08, "tie_margin": 0.02},
+  "synthesis": {"top_paths": 8, "max_claims": 24, "max_source_blocks_per_claim": 2, "evidence_input_budget_tokens": 16000, "hard_llm_input_budget_tokens": 20000},
+  "spatial": {"directional_persistence_threshold": 0.55, "spatial_transfer_min_score": null, "sector_quantile": 0.33, "terrain_barrier_relief_m": 300, "terrain_barrier_search_km": 50, "terrain_barrier_min_fraction": 0.5},
+  "contradictions": {"per_focal_claim_top_k": 3},
+  "evidence_selection": {"direct_weight": 0.7, "query_weight": 0.3, "results_section_bonus": 0.05, "discussion_section_bonus": 0.02}
+}

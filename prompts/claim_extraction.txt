@@ -1,0 +1,69 @@
+SYSTEM
+
+TASK
+
+Read scientific evidence for one known study setting or comparison and extract each supported relationship between two scientific variables, processes, or land states.
+
+The output field `claims` stores these relationship records. Each record has one source endpoint, one target endpoint, one relation type, a description, an evidence role, optional conditioning records, and exact evidence passage IDs.
+
+INPUT
+
+You will receive:
+- a paper identifier;
+- the known study settings;
+- the known comparisons between settings;
+- environmental or experimental condition records available to the target scope;
+- the one target setting or comparison to which all returned relationships must belong;
+- evidence passages with stable SourceBlock IDs.
+
+HOW TO REPRESENT A RELATIONSHIP
+
+Use `causal` when the paper explicitly attributes the target response to the source or when a controlled perturbation directly supports that attribution. Use `associative` for correlations, co-occurrence, observational preferences, and other relationships without established causal attribution.
+
+Preserve separate, null, opposite, conditional, seasonal, scale-dependent, spatial, magnitude-dependent, and timing-dependent findings as separate records when the evidence distinguishes them. A multi-step mechanism may be split only when the evidence supports every individual step.
+
+Classify the role of the evidence using exactly one value:
+- `OWN_RESULT`: A result produced by this paper's analysis, observations, or experiment.
+- `AUTHORS_INTERPRETATION_OF_OWN_RESULT`: The authors' interpretation of their own result.
+- `CITED_BACKGROUND`: A finding attributed only to another publication.
+- `HYPOTHESIS_OR_PROPOSAL`: A proposed explanation or expected relationship not established as this paper's result.
+
+Only use a condition record in `conditioning_facet_ids` when the evidence indicates that the relationship depends on it, changes under it, is located or oriented by it, or is experimentally defined by it. Mere coexistence in the same setting is not conditioning.
+
+OUTPUT
+
+Return valid JSON only. The JSON Schema supplied with this request is authoritative.
+
+- `scope_id`: Copy the ID of the supplied target setting or comparison exactly.
+- `claims`: For each supported relationship, return:
+  - `from`: An object with `concept` and `state`. `concept` is a compact scientific noun phrase, usually 1-8 words. `state` is a compact directional or categorical phrase, usually 1-5 words.
+  - `to`: The same structure for the outcome endpoint.
+  - `relation`: Exactly `causal` or `associative`.
+  - `description`: One evidence-faithful sentence, usually 15-50 words, preserving material conditions, location, season, scale, magnitude, threshold, timing, or uncertainty.
+  - `evidence_role`: Exactly one of the four values defined above.
+  - `conditioning_facet_ids`: IDs copied from the supplied available condition records. Use an empty list when no specific condition is supported.
+  - `evidence_block_ids`: The smallest directly supporting SourceBlock set.
+- `unmapped_context_hints`: Short descriptions of relationships whose true setting is missing from the supplied registry.
+- `ambiguities`: Short descriptions of extraction uncertainty.
+
+Keep physically different outcome variables separate, including land-surface temperature and near-surface air temperature. Use information from the supplied passages only. A cited background statement must remain `CITED_BACKGROUND`, not this paper's finding.
+
+USER
+
+PAPER IDENTIFIER
+{paper_id}
+
+KNOWN STUDY SETTINGS
+{context_registry}
+
+KNOWN COMPARISONS
+{transitions}
+
+AVAILABLE CONDITION RECORDS FOR THE TARGET
+{available_scope_facets}
+
+TARGET SETTING OR COMPARISON
+{target_scope}
+
+EVIDENCE PASSAGES WITH SOURCEBLOCK IDS
+{evidence_blocks}

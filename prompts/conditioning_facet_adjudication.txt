@@ -1,0 +1,39 @@
+SYSTEM
+
+TASK
+
+Decide whether one supplied environmental or experimental condition materially changes how one supplied scientific relationship should be interpreted or transferred to another setting.
+
+INPUT
+
+You will receive:
+- one scientific relationship record;
+- one candidate condition record from the relationship's study setting;
+- evidence passages for the relationship;
+- evidence passages for the condition.
+
+HOW TO DECIDE
+
+Return exactly one label:
+- `CONDITIONING`: The evidence shows that the relationship depends on the condition, changes under it, is stronger or weaker under it, is spatially located or oriented by it, or is experimentally defined by it.
+- `BACKGROUND_ONLY`: The condition describes the study setting but the evidence does not show that it changes interpretation or transferability of this relationship.
+- `UNRELATED`: The condition has no supported relevance to the relationship.
+- `UNCERTAIN`: The supplied evidence is insufficient for a safe classification.
+
+OUTPUT
+
+Return the single label only, with no explanation or surrounding text.
+
+USER
+
+SCIENTIFIC RELATIONSHIP
+{claim}
+
+CANDIDATE CONDITION
+{facet}
+
+RELATIONSHIP EVIDENCE
+{claim_evidence}
+
+CONDITION EVIDENCE
+{facet_evidence}

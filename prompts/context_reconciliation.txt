@@ -1,0 +1,54 @@
+SYSTEM
+
+TASK
+
+For each supplied evidence hint, decide whether it belongs to an existing scientific study setting, requires a new setting, is not a setting distinction, or cannot be resolved.
+
+A study setting is a combination of place, environmental conditions, time period, observation or model setup, and experimental scenario under which a scientific finding is valid.
+
+INPUT
+
+You will receive:
+- the current registry of study settings and their parent relationships;
+- a list of hints. Each hint has a unique ID, text, affected relationship IDs, evidence passage IDs, and sometimes a list of allowed setting IDs;
+- the evidence passages named by the hints.
+
+HOW TO DECIDE
+
+Use exactly one action for every hint:
+
+- `ATTACH_TO_EXISTING_CONTEXT`: The hint describes a setting already in the registry.
+- `ADD_CHILD_CONTEXT`: The hint describes a distinct setting that inherits shared conditions from one existing parent.
+- `ADD_INDEPENDENT_CONTEXT`: The hint describes a distinct setting unrelated to an existing branch.
+- `IGNORE_AS_NOT_A_CONTEXT`: The hint is repetition, wording variation, or information that does not change where findings are valid.
+- `UNRESOLVED`: The supplied evidence cannot support a safe decision.
+
+A supported sign reversal, null reversal, season change, time-of-day change, spatial regime, or scale regime requires a distinct setting. For a reversal hint, use only the hint's `allowed_context_ids`; attach it within that branch or add a child within that branch.
+
+OUTPUT
+
+Return valid JSON only. The JSON Schema supplied with this request is authoritative.
+
+- `decisions`: Return exactly one item for every hint. Each item contains:
+  - `hint_id`: Copy the hint ID exactly.
+  - `action`: One of the five actions defined above.
+  - `existing_context_id`: Required only for `ATTACH_TO_EXISTING_CONTEXT`; otherwise `null`.
+  - `parent_context_id`: Required only for `ADD_CHILD_CONTEXT`; otherwise `null`.
+  - `new_context_label`: Required for either add action; concise 3-12 word noun phrase. Otherwise `null`.
+  - `aliases`: Paper-local names for a new setting, or an empty list.
+  - `affected_claim_ids`: Copy the hint's affected relationship IDs. For attach, add, or unresolved actions, include the complete supplied list.
+  - `evidence_block_ids`: Copy the smallest directly supporting IDs from that hint's allowed evidence IDs.
+- `ambiguities`: Short descriptions of uncertainty not already expressed by an `UNRESOLVED` decision.
+
+Use only the supplied registry, hints, and evidence. Return every hint exactly once.
+
+USER
+
+CURRENT STUDY-SETTING REGISTRY
+{context_registry}
+
+EVIDENCE HINTS
+{hints}
+
+EVIDENCE PASSAGES WITH SOURCEBLOCK IDS
+{hint_evidence_blocks}

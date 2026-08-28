@@ -1,0 +1,289 @@
+\documentclass{article}
+
+% Keep the official style file unchanged and next to this source.
+% Anonymous review mode is the default: do not add `final` or `preprint`.
+\usepackage{neurips_2026}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage{hyperref}
+
+\definecolor{missingred}{RGB}{150,20,20}
+\newcommand{\missing}[1]{\textcolor{missingred}{\textbf{[MISSING: #1]}}}
+\newcommand{\system}{ClimateKG}
+
+\title{ClimateKG: Context-Gated Scientific GraphRAG for Auditable
+Land--Atmosphere Evidence Synthesis}
+
+\author{Anonymous Author(s)}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Land-use and land-cover changes alter exchanges of energy, moisture, and
+momentum with the atmosphere, but reported responses depend on hydroclimate,
+season, atmospheric regime, terrain, and intervention geometry. Consequently,
+topically relevant literature is not necessarily applicable to a local
+question, and an unconstrained graph search can join individually plausible
+claims supported by incompatible environments. We introduce \system{}, a
+scientific GraphRAG pipeline that represents study Contexts and their Facets,
+evidence-backed causal or associative Claims, land-surface Transitions,
+canonical States, and exact SourceBlock provenance. At query time, it keeps
+environmental similarity, coverage, intervention relevance, and mechanism
+relevance distinct; gates Claims by their supporting Contexts before mechanism
+search; and produces cited answers traceable to source passages. In a pilot
+indexing study, the pipeline fully processed 10 heterogeneous papers into 2,184
+SourceBlocks and 213 Claims, while retaining five malformed extractions for
+review rather than silently repairing scientific content. \missing{Insert the
+frozen query benchmark and comparative retrieval results.} The intended role
+is evidence triage and hypothesis formation before expensive regional climate
+experiments, not autonomous land-management prescription.
+\end{abstract}
+
+\section{Introduction}
+
+Land surfaces influence near-surface temperature, boundary-layer development,
+clouds, precipitation, and circulation by modifying albedo, roughness,
+evapotranspiration, and soil moisture \citep{pielke2007,cao2020,spracklen2018}.
+Yet these effects are conditional. Soil-moisture heterogeneity can organize
+convection at mesoscale \citep{taylor2011}, while background wind changes where
+surface-triggered convection develops \citep{froidevaux2014}. Moisture recycling
+also links land conditions to remote precipitation sinks \citep{keys2012}.
+Retrieval for local land--atmosphere questions must therefore ask not only
+whether a passage mentions an intervention and outcome, but under which
+environmental and spatial conditions its finding applies.
+
+Passage retrieval and retrieval-augmented generation (RAG) provide useful
+external evidence to language models \citep{lewis2020}. Generic graph retrieval
+can expose multi-hop structure \citep{edge2024}, but topical or semantic
+connectivity alone does not prevent a path from combining a dry-season result,
+a wet-season mechanism, and a response observed under a different flow regime.
+This is especially risky where effects are conditional, scale dependent,
+contradictory, or sign reversing.
+
+We make three contributions. First, \system{} implements a provenance-preserving
+scientific representation in which every extracted object is linked to the
+smallest sufficient supporting SourceBlocks. Second, it compares query and
+study environments at the Facet level and gates Claims before graph traversal;
+missing context remains distinct from mismatch. Third, it emits a structured
+query report that exposes ranking components, rejection reasons, paths, and
+citations. The central hypothesis is that context gating reduces environmentally
+incompatible evidence and paths without losing relevant supported findings.
+\missing{State the measured headline result after benchmark freeze.}
+
+\begin{figure}[t]
+  \centering
+  \fbox{\begin{minipage}{0.95\linewidth}\centering\small
+  PDFs $\rightarrow$ Nemotron Parse v1.2 $\rightarrow$ SourceBlocks
+  $\rightarrow$ Contexts, Facets, Transitions, Claims
+  $\rightarrow$ canonical States $\rightarrow$ embeddings $\rightarrow$ Neo4j
+  \\[2pt]
+  Question $\rightarrow$ Query Context $\rightarrow$ Context/Facet comparison
+  $\rightarrow$ Claim gate $\rightarrow$ mechanism paths
+  $\rightarrow$ SourceBlocks $\rightarrow$ grounded answer
+  \end{minipage}}
+  \caption{The indexing and query flows. Context gating precedes mechanism-path
+  construction; all substantive answer statements retain source provenance.}
+  \label{fig:pipeline}
+\end{figure}
+
+\section{Method}
+
+\paragraph{Evidence-preserving indexing.}
+Only NVIDIA Nemotron Parse v1.2 is used to convert PDFs into structured page
+elements. Deterministic cleaning removes repeated page furniture and segments
+the text into stable SourceBlocks while preserving sections, captions, tables,
+and scientific notation. Qwen3.6:27b, served locally through Ollama, performs
+only the semantic stages specified by the extraction procedure. Structured
+outputs are schema validated before use. Current-paper findings are separated
+from cited background, and evidence identifiers are restricted to the blocks
+shown to the extraction call.
+
+A \emph{Context} denotes a scientifically distinct environmental,
+observational, or experimental regime. A child Context inherits shared Facets
+from its parents. Each \emph{Facet} has a controlled scientific domain and open
+notion and description; reported and spatially derived Facets retain different
+provenance. A \emph{Transition} links baseline and changed Contexts. A
+\emph{Claim} connects directional or categorical States, distinguishes causal
+from associative relations, and is scoped to a Context or Transition. Its
+\texttt{conditioning\_facet\_ids} contain only Facets that materially affect
+interpretation or transfer. State concepts are normalized deterministically
+with a curated alias registry; embeddings propose uncertain candidates but do
+not force merges. Qwen3-Embedding-4B produces normalized 2,048-dimensional
+vectors for retrieval.
+
+\paragraph{Context comparison.}
+The query parser produces optional source and target States, an intervention,
+and a temporary Query Context. It does not infer environmental properties from
+a place name. User-supplied or reproducibly derived Facets may enrich the Query
+Context. For query Facet $q$ and candidate Facet $f$ in the same domain,
+\begin{equation}
+s(q,f)=\alpha\cos(E_n(q),E_n(f))+(1-\alpha)\cos(E_c(q),E_c(f)),
+\end{equation}
+where $E_n$ embeds domain and notion and $E_c$ also includes the description.
+Directional MaxSim averages each query Facet's best same-domain match. A
+weighted semantic score $S_{\mathrm{semantic}}$ uses only comparable domains,
+while coverage is the fraction of query-domain weight for which the candidate
+has information. Ranking uses
+\begin{equation}
+S_{\mathrm{context}}=S_{\mathrm{semantic}}
+\left[1-\lambda_{\mathrm{missing}}(1-\mathrm{coverage})\right].
+\end{equation}
+Thus absence is reported and conservatively penalized but is not treated as a
+contradiction.
+
+\paragraph{Claim gating and path search.}
+For a Context-scoped Claim, applicability begins with its Context score; for a
+Transition-scoped Claim, it uses the baseline (FROM) Context. When conditioning
+Facets are comparable, their mean best-match score is combined with Context
+applicability. Unknown conditioning domains remain unknown. Claim ranking then
+renormalizes configured weights over non-null applicability, semantic,
+intervention, and endpoint components. Context gating is applied before beam
+search. For a path of length $L$,
+\begin{align}
+A_{\mathrm{path}}&=\min_e A_e, &
+C_{\mathrm{path}}&=\min_j C_j,\\
+R_{\mathrm{path}}&=A_{\mathrm{factor}}C_{\mathrm{factor}}
+\,\overline{R_e}\big/\left[1+\gamma(L-1)\right],
+\end{align}
+where $C_j$ is adjacent-Context coherence and unknown applicability or
+coherence is flagged rather than replaced by a scientific confidence value.
+Local advection, patch/edge effects, distance decay, windward/leeward effects,
+moisture recycling, and remote teleconnections use separate spatial rules.
+Cardinal recommendations require both local environmental/geometric data and a
+transferable relation; prose alone cannot create a direction.
+
+\paragraph{Grounded synthesis.}
+After path ranking, the evidence package contains only selected Claims and their
+supporting SourceBlocks. Budget trimming cannot retain a Claim after dropping
+all of its evidence. The final output includes a natural-language answer and a
+machine-readable report linking each substantive statement to its Claims,
+supporting Contexts, Paper, and SourceBlocks. Retrieval scores rank evidence;
+they are not probabilities that a scientific result is true.
+
+\section{Pilot Validation and Evaluation Design}
+
+\paragraph{Pilot corpus.}
+We selected 15 PDFs spanning local land-use influences on weather and climate,
+including irrigation, vegetation and soil-moisture heterogeneity, surface
+roughness, albedo, and land-cover change. Table~\ref{tab:indexing} reports the
+saved pipeline artifacts. Ten papers completed all indexing stages with no
+unresolved consolidation conflicts. Five were retained as \textsc{Needs Review}
+after referential or semantic-preservation checks failed. This fail-closed
+behavior is intentional: malformed scientific objects are not silently passed
+to retrieval. Seventeen deterministic tests cover normalization, parsing cache
+identity, Context hierarchy, scope and provenance references, reconciliation,
+Neo4j property serialization, missing-versus-mismatch scoring, and evidence
+budget behavior.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Saved pilot indexing artifacts. These counts establish execution and
+schema validity, not retrieval superiority.}
+\label{tab:indexing}
+\begin{tabular}{lr}
+\toprule
+Artifact & Count \\
+\midrule
+Fully indexed / retained for review & 10 / 5 \\
+SourceBlocks & 2,184 \\
+Contexts / Facets & 101 / 437 \\
+Transitions / Claims & 51 / 213 \\
+Canonical States & 322 \\
+Deterministic tests passed & 17 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Acceptance-critical retrieval evaluation.}
+\missing{Annotate 18--24 queries covering forward, backward, source-to-target,
+global, contradictory, missing-context, sign-reversal, and spatial cases. State
+the train/development/test split and annotator expertise.} Each gold record
+should identify applicable Contexts and Claims, incompatible evidence,
+acceptable mechanism paths, smallest sufficient SourceBlocks, and supported
+answer propositions. A second annotator should independently review a fixed
+subset, with agreement and adjudication reported.
+
+All variants must use the same PDFs, queries, embedding model, and evidence
+budget: (i) BM25 passage retrieval, (ii) dense passage retrieval, (iii) graph
+retrieval without Context gating, and (iv) full \system{}. The primary metrics
+are applicable-Claim precision/recall/F1, incompatible-Claim rate,
+valid-path rate, citation precision and coverage, supported-answer rate, and
+answer completeness. Report latency, token use, and peak memory as operational
+metrics. Whole-Context-only and no-conditioning-Facet ablations isolate the
+Facet-level contribution.
+
+\begin{table}[t]
+\centering
+\scriptsize
+\caption{Frozen benchmark results. Replace every placeholder from generated
+evaluation JSON; higher is better except incompatible-Claim rate.}
+\label{tab:results}
+\begin{tabular}{lccccc}
+\toprule
+System & Claim F1 & Incompat. $\downarrow$ & Valid path & Cite. prec. & Supported \\
+\midrule
+BM25 & \missing{--} & \missing{--} & n/a & \missing{--} & \missing{--} \\
+Dense RAG & \missing{--} & \missing{--} & n/a & \missing{--} & \missing{--} \\
+Ungated graph & \missing{--} & \missing{--} & \missing{--} & \missing{--} & \missing{--} \\
+\system{} & \missing{--} & \missing{--} & \missing{--} & \missing{--} & \missing{--} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\missing{Add one compact qualitative example showing the same query under the
+ungated and gated systems, including rejected Context, mechanism path, and exact
+SourceBlock citations. Add confidence intervals or bootstrap intervals where
+the benchmark size permits.}
+
+\section{Pathway to Climate Impact and Limitations}
+
+The intended users are climate researchers and regional-planning teams deciding
+which land-surface hypotheses merit detailed investigation. Today, relevant
+evidence is distributed across observational, remote-sensing, and modelling
+studies whose environmental assumptions differ. \system{} can reduce the manual
+search space while exposing why a finding may or may not transfer. Its output
+can define a small set of evidence-backed land-cover perturbations, mechanism
+hypotheses, seasons, and spatial constraints for subsequent regional climate or
+weather-model experiments. This pathway may reduce expensive, weakly motivated
+scenario runs and make the literature basis of each tested scenario auditable.
+It does not establish that an intervention will produce a desired local outcome.
+
+Potential harms arise if retrieval rank is mistaken for causal certainty or if
+literature coverage reproduces geographic and institutional biases. A locally
+plausible climate response may still conflict with biodiversity, water, food,
+livelihood, or justice objectives. Accordingly, the system must expose missing
+context, contradictory findings, provenance, and uncertainty; local experts and
+affected communities remain responsible for framing objectives and evaluating
+trade-offs. \missing{Add feedback from at least one land--atmosphere domain
+expert and, if recommendations are discussed, one intended-user or stakeholder
+review.}
+
+The present pilot is small and not a representative census of land--atmosphere
+science. Extraction quality depends on PDF parsing and local language-model
+judgment. Five fail-closed papers show that structured extraction remains a
+material bottleneck. Spatial enrichment is incomplete, and no WRF or field
+validation has been performed. \missing{After completing the benchmark, add
+measured failure categories, generalization limits, and compute/energy use.}
+
+\section{Conclusion}
+
+\system{} makes environmental applicability an explicit part of scientific
+GraphRAG. It preserves exact evidence, separates missing information from
+mismatch, selects Claims before path construction, and prevents spatial prose
+from becoming unsupported local direction. The pilot demonstrates traceable,
+validated indexing with visible failure handling. \missing{Conclude with the
+measured retrieval and grounding result, without claiming scientific truth or
+management effectiveness.}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

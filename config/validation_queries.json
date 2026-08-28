@@ -1,0 +1,89 @@
+{
+  "version": "1.0",
+  "queries": [
+    {
+      "query_id": "QGEN001",
+      "category": "generic",
+      "question": "Across the indexed literature, what local near-surface climate effects are reported from irrigation?",
+      "expected_mode": "global",
+      "expect_context_facets": false,
+      "scientific_purpose": "Global synthesis without an environmental gate; tests intervention and outcome retrieval."
+    },
+    {
+      "query_id": "QGEN002",
+      "category": "generic",
+      "question": "Across the indexed literature, through which reported mechanisms can deforestation affect surface temperature and cloud cover?",
+      "expected_mode": "global",
+      "expect_context_facets": false,
+      "scientific_purpose": "Tests multi-step mechanism retrieval and preservation of competing albedo and evapotranspiration pathways."
+    },
+    {
+      "query_id": "QGEN003",
+      "category": "generic",
+      "question": "Across the indexed literature, what effects do land-cover conversions have on boundary-layer properties?",
+      "expected_mode": "global",
+      "expect_context_facets": false,
+      "scientific_purpose": "Tests broad global evidence synthesis and associative-versus-causal wording."
+    },
+    {
+      "query_id": "QCTX001",
+      "category": "context_dependent",
+      "question": "In a humid tropical forest during daytime, could deforestation increase surface temperature?",
+      "expected_mode": "a_to_b",
+      "expect_context_facets": true,
+      "scientific_purpose": "Tests tropical deforestation warming and context-specific energy-partitioning evidence."
+    },
+    {
+      "query_id": "QCTX002",
+      "category": "context_dependent",
+      "question": "In a snow-covered boreal forest during winter, could deforestation decrease surface temperature?",
+      "expected_mode": "a_to_b",
+      "expect_context_facets": true,
+      "scientific_purpose": "Tests the boreal sign reversal relative to tropical deforestation."
+    },
+    {
+      "query_id": "QCTX003",
+      "category": "context_dependent",
+      "question": "In the non-drought US Midwest summer with adequate soil moisture, could expanding irrigation reduce extreme daily maximum temperatures?",
+      "expected_mode": "a_to_b",
+      "expect_context_facets": true,
+      "scientific_purpose": "Tests transfer under an explicitly stated moisture regime and distinguishes associative evidence."
+    },
+    {
+      "query_id": "QCTX004",
+      "category": "context_dependent",
+      "question": "In an afternoon dry-soil convective regime, is convective rainfall reported as more likely over drier or wetter soil patches?",
+      "expected_mode": null,
+      "expect_context_facets": true,
+      "scientific_purpose": "Tests diurnal and soil-moisture conditioning plus preservation of sign-reversing evidence.",
+      "required_claim_groups": [
+        ["P000006_CL001"],
+        ["P000006_CL007", "P000006_CL010", "P000006_CL015"]
+      ]
+    },
+    {
+      "query_id": "QCTX005",
+      "category": "context_dependent",
+      "question": "In a stable nighttime atmosphere with low ambient turbulence, how does activating wind-turbine rotor mixing affect near-surface air temperature?",
+      "expected_mode": "forward",
+      "expect_context_facets": true,
+      "scientific_purpose": "Tests stability-dependent temperature response and contradictory daytime or unstable evidence."
+    },
+    {
+      "query_id": "QCTX006",
+      "category": "context_dependent",
+      "question": "In the Sahel north of 18 degrees north during summer, could increasing surface albedo from 0.14 to 0.35 reduce precipitation?",
+      "expected_mode": "a_to_b",
+      "expect_context_facets": true,
+      "scientific_purpose": "Tests magnitude, season, and regional conditioning for an albedo-precipitation mechanism."
+    },
+    {
+      "query_id": "QSPA001",
+      "category": "spatial",
+      "question": "In a heterogeneous semi-arid landscape during the afternoon, where relative to dry and wet patch edges is convection reported to initiate?",
+      "expected_mode": null,
+      "expect_context_facets": true,
+      "scientific_purpose": "Tests patch-edge evidence retrieval and fail-closed handling when local geometry is insufficient for translation."
+    }
+  ]
+}

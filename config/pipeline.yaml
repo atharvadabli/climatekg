@@ -1,0 +1,17 @@
+{
+  "parsing": {"model": "nvidia/NVIDIA-Nemotron-Parse-v1.2", "model_path": "climatekg/runtime/cache/nemotron_parse_v1_2", "nemotron_python": "E:/Atharv/lulc_suggestor_poc/hipporag copy 3/.venv-nemotron/Scripts/python.exe", "pdfium_python": "C:/Users/DELL/.codex/venvs/mineru_py313/Scripts/python.exe", "render_dpi": 200},
+  "paper_mapping": {"whole_paper_threshold_tokens": 15000, "map_consolidation_source_budget_tokens": 9000, "evidence_input_budget_tokens": 18000, "hard_llm_input_budget_tokens": 24000},
+  "ollama": {"model": "qwen3.6:27b", "retries": 2, "structured_output": true, "stages": {
+    "paper_map": {"temperature": 0.1, "thinking": "low"}, "section_scout": {"temperature": 0.0, "thinking": "no"},
+    "facet_extraction": {"temperature": 0.0, "thinking": "no"}, "claim_extraction": {"temperature": 0.0, "thinking": "low"},
+    "context_reconciliation": {"temperature": 0.0, "thinking": "medium"}, "paper_consolidation": {"temperature": 0.0, "thinking": "medium"},
+    "state_adjudication": {"temperature": 0.0, "thinking": "low"}}},
+  "embeddings": {"model": "qwen3-embedding:4b", "dimension": 2048, "normalize": true, "block_embeddings": true},
+  "blocks": {"max_block_tokens": 1500, "target_split_tokens": 1100},
+  "section_scout": {"target_tokens": 6500, "min_tokens": 3500, "max_tokens": 8000},
+  "evidence_retrieval": {"lexical_top_k": 10, "semantic_top_k": 10, "neighbor_blocks_each_side": 1, "max_context_bundle_blocks": 80, "bm25_k1": 1.5, "bm25_b": 0.75},
+  "consolidation": {"facet_notion_candidate_cosine": 0.82, "facet_content_candidate_cosine": 0.88, "claim_endpoint_candidate_cosine": 0.88, "max_context_reconciliation_rounds": 2},
+  "enrichment": {"min_valid_polygon_coverage": 0.80, "wind_directional_persistence_threshold": 0.55},
+  "graph": {"neo4j_uri": "bolt://localhost:7687", "neo4j_http_uri": "http://localhost:7474", "database": "neo4j", "user": "neo4j", "password_env": "NEO4J_PASSWORD", "ann": {"backend": "faiss_hnsw", "connectivity": 32, "ef_construction": 200, "ef_search": 128}},
+  "canonicalization": {"state_embedding_top_k": 5, "auto_merge_cosine_threshold": null}
+}
