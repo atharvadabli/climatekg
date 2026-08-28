@@ -164,3 +164,24 @@ Result: `46 passed`.
   model-specific Contexts in one paper.
 - Decision: keep the result as an experiment; test a hybrid profile with low
   reasoning for mapping and no reasoning for Claims/consolidation next.
+
+# 2026-08-29: Factorial reasoning benchmark and medium-map cross-check
+
+- Added a cache-safe eight-profile runner covering all `low`/`no` combinations
+  for mapping, Claim extraction, and downstream reconciliation/consolidation.
+- Added per-profile `BENCHMARK.md` and `benchmark.json` reports plus a combined
+  matrix report.
+- All four `map=no` profiles failed because they generated a duplicated
+  irrigation comparison. All four `map=low` profiles passed the screening-paper
+  structural gate.
+- Claim reasoning at `low` cost substantially more without changing the Claim
+  count when the same paper map and Facets were held fixed.
+- A fresh `map-low_claim-no_down-no` cross-check omitted the wet/high-soil-
+  moisture regime and its comparison in `P000006`.
+- A targeted `map-medium_claim-no_down-no` cross-check preserved the important
+  structures in `P000001`, `P000003`, and `P000006`, averaging 18.88 minutes per
+  paper.
+- Selected `map-medium_claim-no_down-no` for the stratified 50-paper run. At the
+  measured mean, projected serial runtime is 15.73 hours.
+- Added a deterministic 50-paper corpus builder and resumable profile benchmark
+  runner. Scientific extraction behavior was not changed.

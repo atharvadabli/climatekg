@@ -1,0 +1,252 @@
+[
+  {
+    "paper_id": "P000001",
+    "filename": "baidya-roy-traiteur-2010-impacts-of-wind-farms-on-surface-air-temperatures.pdf",
+    "topic": "wind-farm surface temperature effects"
+  },
+  {
+    "paper_id": "P000002",
+    "filename": "41467_2024_Article_51783.pdf",
+    "topic": "recent local land-atmosphere interaction study"
+  },
+  {
+    "paper_id": "P000003",
+    "filename": "Effects_of_global_irrigation_on_the_near-surface_c.pdf",
+    "topic": "irrigation effects on near-surface climate"
+  },
+  {
+    "paper_id": "P000004",
+    "filename": "JGR Atmospheres - 2017 - Thiery - Present‐day irrigation mitigates heat extremes.pdf",
+    "topic": "irrigation mitigation of heat extremes"
+  },
+  {
+    "paper_id": "P000005",
+    "filename": "Journal of Geophysical Research  Atmospheres - 2010 - Garcia‐Carreras - Impact of mesoscale vegetation heterogeneities on.pdf",
+    "topic": "mesoscale vegetation heterogeneity"
+  },
+  {
+    "paper_id": "P000006",
+    "filename": "nature11377.pdf",
+    "topic": "land-cover influence on climate"
+  },
+  {
+    "paper_id": "P000007",
+    "filename": "nclimate2825.pdf",
+    "topic": "land management and climate response"
+  },
+  {
+    "paper_id": "P000008",
+    "filename": "nclimate3250.pdf",
+    "topic": "land-cover climate effects"
+  },
+  {
+    "paper_id": "P000009",
+    "filename": "pielke_vegetationsoilscumulus_2001.pdf",
+    "topic": "vegetation and soil controls on cumulus clouds"
+  },
+  {
+    "paper_id": "P000010",
+    "filename": "science.aar5629.pdf",
+    "topic": "land-surface influence on climate"
+  },
+  {
+    "paper_id": "P000011",
+    "filename": "afforestation/duveiller2021__Revealing_the_widespread_potential_of_forests_to_increase_low_level_cloud_cover.pdf",
+    "topic": "afforestation"
+  },
+  {
+    "paper_id": "P000012",
+    "filename": "afforestation/schwaab2020__Increasing_the_broad-leaved_tree_fraction_in_European_forests_mitigates_hot_temperature_ex.pdf",
+    "topic": "afforestation"
+  },
+  {
+    "paper_id": "P000013",
+    "filename": "afforestation/swann2012__Mid-latitude_afforestation_shifts_general_circulation_and_tropical_precipitation.pdf",
+    "topic": "afforestation"
+  },
+  {
+    "paper_id": "P000014",
+    "filename": "afforestation/teuling2017__Observational_evidence_for_cloud_cover_enhancement_over_western_European_forests.pdf",
+    "topic": "afforestation"
+  },
+  {
+    "paper_id": "P000015",
+    "filename": "cropland-expansion/beltran2012__Modelling_the_effects_of_land_use_land_cover_changes_on_the_near_surface_atmosphere_in_sou.pdf",
+    "topic": "cropland expansion"
+  },
+  {
+    "paper_id": "P000016",
+    "filename": "cropping-practice/chen2019__China_and_India_lead_in_greening_of_the_world_through_land-use_management.pdf",
+    "topic": "cropping practice"
+  },
+  {
+    "paper_id": "P000017",
+    "filename": "cropping-practice/kaye2017__Using_cover_crops_to_mitigate_and_adapt_to_climate_change._A_review.pdf",
+    "topic": "cropping practice"
+  },
+  {
+    "paper_id": "P000018",
+    "filename": "deforestation/luoquaashan2024__Decreased_cloud_cover_partially_offsets_the_cooling_effects_of_surface_albedo_change_due_t.pdf",
+    "topic": "deforestation"
+  },
+  {
+    "paper_id": "P000019",
+    "filename": "deforestation/wangbraseltahir2000__The_Impact_of_Observed_Deforestation_on_the_Mesoscale_Distribution_of_Rainfall_and_Clouds_.pdf",
+    "topic": "deforestation"
+  },
+  {
+    "paper_id": "P000020",
+    "filename": "deforestation/easternindia2019__Land_use_and_land_cover_change_effect_on_surface_temperature_over_Eastern_India.pdf",
+    "topic": "deforestation"
+  },
+  {
+    "paper_id": "P000021",
+    "filename": "deforestation/indiawrf2021__Quantifying_Temperature_and_Precipitation_Change_Caused_by_Land_Cover_Change_A_Case_Study_.pdf",
+    "topic": "deforestation"
+  },
+  {
+    "paper_id": "P000022",
+    "filename": "deforestation/keys2012__Analyzing_precipitationsheds_to_understand_the_vulnerability_of_rainfall_dependent_regions.pdf",
+    "topic": "deforestation"
+  },
+  {
+    "paper_id": "P000023",
+    "filename": "deforestation/paul2016__Weakening_of_Indian_Summer_Monsoon_Rainfall_due_to_Changes_in_Land_Use_Land_Cover.pdf",
+    "topic": "deforestation"
+  },
+  {
+    "paper_id": "P000024",
+    "filename": "deforestation/paul2018__Increased_Spatial_Variability_and_Intensification_of_Extreme_Monsoon_Rainfall_due_to_Urban.pdf",
+    "topic": "deforestation"
+  },
+  {
+    "paper_id": "P000025",
+    "filename": "deforestation/perugini2017__Biophysical_effects_on_temperature_and_precipitation_due_to_land_cover_change.pdf",
+    "topic": "deforestation"
+  },
+  {
+    "paper_id": "P000026",
+    "filename": "deforestation/amazondipole2024__Impact_of_Amazonian_deforestation_on_precipitation_reverses_between_seasons.pdf",
+    "topic": "deforestation"
+  },
+  {
+    "paper_id": "P000027",
+    "filename": "degradation-desertification/xueshukla1993__The_Influence_of_Land_Surface_Properties_on_Sahel_Climate._Part_1_Desertification.pdf",
+    "topic": "degradation desertification"
+  },
+  {
+    "paper_id": "P000028",
+    "filename": "generic-LULCC/ghausi2023__Radiative_controls_by_clouds_and_thermodynamics_shape_surface_temperatures_and_turbulent_f.pdf",
+    "topic": "generic LULCC"
+  },
+  {
+    "paper_id": "P000029",
+    "filename": "generic-LULCC/ford2015__Soil_moisture_precipitation_coupling_observations_from_the_Oklahoma_Mesonet_and_underlying.pdf",
+    "topic": "generic LULCC"
+  },
+  {
+    "paper_id": "P000030",
+    "filename": "generic-LULCC/froidevaux2014__Influence_of_the_Background_Wind_on_the_Local_Soil_Moisture_Precipitation_Feedback.pdf",
+    "topic": "generic LULCC"
+  },
+  {
+    "paper_id": "P000031",
+    "filename": "generic-LULCC/guillod2015__Reconciling_spatial_and_temporal_soil_moisture_effects_on_afternoon_rainfall.pdf",
+    "topic": "generic LULCC"
+  },
+  {
+    "paper_id": "P000032",
+    "filename": "generic-LULCC/hohenegger2009__The_Soil_Moisture_Precipitation_Feedback_in_Simulations_with_Explicit_and_Parameterized_Co.pdf",
+    "topic": "generic LULCC"
+  },
+  {
+    "paper_id": "P000033",
+    "filename": "generic-LULCC/mahfouf1987__The_Influence_of_Soil_and_Vegetation_on_the_Development_of_Mesoscale_Circulations.pdf",
+    "topic": "generic LULCC"
+  },
+  {
+    "paper_id": "P000034",
+    "filename": "generic-LULCC/mathon2002__Mesoscale_Convective_System_Rainfall_in_the_Sahel.pdf",
+    "topic": "generic LULCC"
+  },
+  {
+    "paper_id": "P000035",
+    "filename": "generic-LULCC/rasmijn2018__Future_equivalent_of_2010_Russian_heatwave_intensified_by_weakening_soil_moisture_constrai.pdf",
+    "topic": "generic LULCC"
+  },
+  {
+    "paper_id": "P000036",
+    "filename": "greening/klein2017__Feedback_of_observed_interannual_vegetation_change_a_regional_climate_model_analysis_for_t.pdf",
+    "topic": "greening"
+  },
+  {
+    "paper_id": "P000037",
+    "filename": "irrigation/cook2011__Irrigation_induced_surface_cooling_in_the_context_of_modern_and_increased_greenhouse_gas_f.pdf",
+    "topic": "irrigation"
+  },
+  {
+    "paper_id": "P000038",
+    "filename": "irrigation/kang2018__North_China_Plain_threatened_by_deadly_heatwaves_due_to_climate_change_and_irrigation.pdf",
+    "topic": "irrigation"
+  },
+  {
+    "paper_id": "P000039",
+    "filename": "irrigation/mishra2020__Moist_heat_stress_extremes_in_India_enhanced_by_irrigation.pdf",
+    "topic": "irrigation"
+  },
+  {
+    "paper_id": "P000040",
+    "filename": "irrigation/riverinterlink2023__River_interlinking_alters_land-atmosphere_feedback_and_changes_the_Indian_summer_monsoon.pdf",
+    "topic": "irrigation"
+  },
+  {
+    "paper_id": "P000041",
+    "filename": "plantation/naudts2016__Europe_s_forest_management_did_not_mitigate_climate_warming.pdf",
+    "topic": "plantation"
+  },
+  {
+    "paper_id": "P000042",
+    "filename": "reservoir-tank/oasistarim2016__The_oasis_effect_and_summer_temperature_rise_in_arid_regions_-_case_study_in_Tarim_Basin.pdf",
+    "topic": "reservoir tank"
+  },
+  {
+    "paper_id": "P000043",
+    "filename": "reservoir-tank/crosman2010__Sea_and_Lake_Breezes_A_Review_of_Numerical_Studies.pdf",
+    "topic": "reservoir tank"
+  },
+  {
+    "paper_id": "P000044",
+    "filename": "rice-paddy/paddyjilin2019__Land_Surface_Temperature_Response_to_Irrigated_Paddy_Field_Expansion_a_Case_Study_of_Semi-.pdf",
+    "topic": "rice paddy"
+  },
+  {
+    "paper_id": "P000045",
+    "filename": "rice-paddy/paddyrice2025__Widespread_land_surface_cooling_from_paddy_rice_cultivation_revealed_by_global_satellite_m.pdf",
+    "topic": "rice paddy"
+  },
+  {
+    "paper_id": "P000046",
+    "filename": "solar-farm/barrongafford2016__The_Photovoltaic_Heat_Island_Effect_Larger_solar_power_plants_increase_local_temperatures.pdf",
+    "topic": "solar farm"
+  },
+  {
+    "paper_id": "P000047",
+    "filename": "wetland-restoration/thiery2015__The_Impact_of_the_African_Great_Lakes_on_the_Regional_Climate.pdf",
+    "topic": "wetland restoration"
+  },
+  {
+    "paper_id": "P000048",
+    "filename": "wind-farm/vautard2014__Regional_climate_model_simulations_indicate_limited_climatic_impacts_by_operational_and_pl.pdf",
+    "topic": "wind farm"
+  },
+  {
+    "paper_id": "P000049",
+    "filename": "wind-farm/fitch2013__Parameterization_of_Wind_Farms_in_Climate_Models.pdf",
+    "topic": "wind farm"
+  },
+  {
+    "paper_id": "P000050",
+    "filename": "wind-farm/miller2016__Two_methods_for_estimating_limits_to_large-scale_wind_power_generation.pdf",
+    "topic": "wind farm"
+  }
+]
