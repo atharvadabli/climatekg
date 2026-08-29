@@ -237,3 +237,19 @@ Result: `46 passed`.
   the unrelated 15%-to-45% Transition.
 - Automatic combined routing remains disabled. This is a one-paper structural
   result; crossed-factor `P000007` and a broader corpus remain to be tested.
+
+# Constrained v4.1 heterogeneous patch-size test (2026-08-29)
+
+- Ran `atsc-jas-d-18-0196.1.pdf` with the no-thinking one-call route through
+  embeddings and Parquet/FAISS indexing in 254.4 seconds.
+- Evidence handles, nested Claim scopes, deterministic flattening, and graph
+  integrity all passed.
+- Scientific setting coverage did not pass: HET5/HET7/HET14 zero-wind cases,
+  multiple strong-wind cases, and homogeneous controls were compressed into
+  broad Contexts; HET7U0.5, HET14U2, HOMU0_DRY/WET, and detailed Ax2 cases were
+  not preserved as separate settings despite being present in cleaned blocks.
+- A low-thinking replay hit the 32K limit with 32,411 prompt tokens, only 357
+  generated tokens, and `done_reason: length`; its JSON was truncated.
+- Conclusion: v4.1 improves referential integrity but does not make a one-call
+  route adequate for crossed-factor papers. This paper requires the proposed
+  compact two-call Context/Facet then Transition/Claim route or staged extraction.
