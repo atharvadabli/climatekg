@@ -33,7 +33,6 @@ def _metadata(blocks: list[Any], paper_id: str, source_file: str) -> Paper:
 
 
 PROMPT_STAGES = (
-    "small_paper_extraction",
     "paper_map",
     "section_scout",
     "map_consolidation",
@@ -44,8 +43,9 @@ PROMPT_STAGES = (
 )
 
 
-def current_prompt_versions() -> dict[str, str]:
-    return {stage: stage_prompt_version(stage) for stage in PROMPT_STAGES}
+def current_prompt_versions(combined_route: bool = False) -> dict[str, str]:
+    stages = (*PROMPT_STAGES, "small_paper_extraction") if combined_route else PROMPT_STAGES
+    return {stage: stage_prompt_version(stage) for stage in stages}
 
 
 def _clear_derived_artifacts(paper_dir: Path, data_root: Path) -> None:
@@ -114,8 +114,8 @@ def index_pdf(pdf_path: Path, data_root: Path, paper_id: str, client: OllamaClie
     final_path = paper_dir / "final" / "final_paper.json"
     if manifest.get("status") == "complete" and final_path.exists():
         cached = FinalPaper.model_validate_json(final_path.read_text(encoding="utf-8"))
-        expected = current_prompt_versions()
         saved = cached.metadata.get("prompt_versions", {})
+        expected = current_prompt_versions(cached.metadata.get("extraction_route") == "small_paper_combined")
         if all(saved.get(stage) == version for stage, version in expected.items()):
             return cached
         if not rebuild_derived:
@@ -186,8 +186,8 @@ def index_pdf(pdf_path: Path, data_root: Path, paper_id: str, client: OllamaClie
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_text(text, encoding="utf-8")
             evidence_links = [{"object_id": item.id, "source_block_id": block_id} for items in (contexts, facets, transitions, claims) for item in items for block_id in item.evidence_block_ids]
-            prompt_versions = current_prompt_versions()
-            final = FinalPaper(paper=paper, source_blocks=blocks, contexts=contexts, facets=facets, transitions=transitions, claims=claims, states=states, evidence_links=evidence_links, unresolved_conflicts=unresolved, metadata={"parser": PIPELINE["parsing"]["model"], "extractor_model": PIPELINE["ollama"]["model"], "embedding_model": PIPELINE["embeddings"]["model"], "embedding_dimension": PIPELINE["embeddings"]["dimension"], "reasoning_profile": PIPELINE["ollama"]["reasoning_profile"], "extraction_route": "small_paper_combined" if combined_route else "staged", "prompt_versions": prompt_versions, "created_at": datetime.now(timezone.utc).isoformat()})
+            prompt_versions = current_prompt_versions(combined_route)
+            final = FinalPaper(paper=paper, source_blocks=blocks, contexts=contexts, facets=facets, transitions=transitions, claims=claims, states=states, evidence_links=evidence_links, unresolved_conflicts=unresolved, metadata={"parser": PIPELINE["parsing"]["model"], "extractor_model": PIPELINE["ollama"]["model"], "embedding_model": PIPELINE["embeddings"]["model"], "embedding_dimension": PIPELINE["embeddings"]["dimension"], "reasoning_profile": PIPELINE["ollama"]["reasoning_profile"], "reasoning_levels": {stage: config["thinking"] for stage, config in PIPELINE["ollama"]["stages"].items()}, "extraction_route": "small_paper_combined" if combined_route else "staged", "prompt_versions": prompt_versions, "created_at": datetime.now(timezone.utc).isoformat()})
             write_json(paper_dir / "final" / "final_paper.json", final.model_dump(by_alias=True))
         manifest["status"] = "complete"
         manifest["counts"] = {"source_blocks": len(blocks), "contexts": len(contexts), "facets": len(facets), "transitions": len(transitions), "claims": len(claims), "states": len(states)}

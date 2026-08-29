@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from .config import PIPELINE, ROOT
-from .extract import _render_blocks, _split_prompt, permanent_map
+from .extract import _render_blocks, _split_prompt, permanent_map, render_paper_map_tree
 from .extraction_models import PaperMap, SmallPaperExtraction
 from .models import Claim, Context, Facet, Paper, SourceBlock, Transition
 from .ollama import OllamaClient
@@ -155,6 +155,7 @@ def extract_small_paper(
         global_claim_seed_block_ids=[],
         ambiguities=result.ambiguities,
     )
+    (artifact_dir / "paper_map.tree.txt").write_text(render_paper_map_tree(paper_map), encoding="utf-8")
     contexts, transitions, map_meta = permanent_map(paper, paper_map)
     context_ids = map_meta["temp_to_permanent"]
     facet_ids = {item.temp_id: f"{paper.id}_F{index:03d}" for index, item in enumerate(result.facets, 1)}

@@ -68,6 +68,9 @@ def test_small_paper_prompt_requires_value_specific_context_coverage() -> None:
     assert "every separately analyzed value has a context" in text
     assert "from_context_temp_id` and `to_context_temp_id` must be different" in text
     assert "sensitivity test, stratification, subset, binning, or lag analysis" in text
+    assert "internal evidence ledger" in text
+    assert "every evidence-ledger row is represented by a claim" in text
+    assert "brief grid-resolution check" in text
 
 
 def test_complete_setting_v11_candidates_are_standalone_and_consistent() -> None:

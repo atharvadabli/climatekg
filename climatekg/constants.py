@@ -29,7 +29,7 @@ TOKEN_ESTIMATE_CHARACTERS_PER_TOKEN = 3.5
 FILE_HASH_CHUNK_BYTES = 1024 * 1024
 
 PROMPT_VERSIONS = {
-    "small_paper_extraction": "v2",
+    "small_paper_extraction": "v3",
     "paper_map": "v11",
     "map_consolidation": "v11",
     "paper_map_candidate": "v11",
@@ -113,7 +113,7 @@ INDEXING_PIPELINE: dict[str, Any] = {
         "minimum_parsed_characters": 100,
     },
     "paper_mapping": {
-        "combined_extraction_enabled": True,
+        "combined_extraction_enabled": False,
         "combined_extraction_threshold_tokens": 8000,
         "whole_paper_threshold_tokens": 15000,
         "map_consolidation_source_budget_tokens": 9000,

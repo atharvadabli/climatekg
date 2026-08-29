@@ -60,14 +60,14 @@ def _regime_checks(converted: dict[str, Any]) -> dict[str, bool]:
     }
 
 
-def run(paper_id: str, output_root: Path, replace: bool) -> list[dict[str, Any]]:
+def run(paper_id: str, output_root: Path, replace: bool, levels: tuple[str, ...] = LEVELS) -> list[dict[str, Any]]:
     output_root = output_root.resolve()
     if not output_root.is_relative_to(OUTPUT_ROOT.resolve()):
         raise ValueError(f"output root must remain inside {OUTPUT_ROOT.resolve()}")
     paper_dir = Path("climatekg/runtime/data/papers") / paper_id
     paper, blocks = _load_paper(paper_dir)
     rows = []
-    for level in LEVELS:
+    for level in levels:
         profile_dir = output_root / level
         if replace and profile_dir.exists():
             shutil.rmtree(profile_dir)
@@ -160,10 +160,11 @@ def _write_markdown(path: Path, rows: list[dict[str, Any]]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--paper-id", default="P000006")
-    parser.add_argument("--output-root", type=Path, default=OUTPUT_ROOT / "small_paper_combined_v2_p000006_20260829")
+    parser.add_argument("--output-root", type=Path, default=OUTPUT_ROOT / "small_paper_combined_v3_p000006_20260829")
+    parser.add_argument("--levels", nargs="+", choices=LEVELS, default=list(LEVELS))
     parser.add_argument("--replace", action="store_true")
     args = parser.parse_args()
-    run(args.paper_id, args.output_root, args.replace)
+    run(args.paper_id, args.output_root, args.replace, tuple(args.levels))
 
 
 if __name__ == "__main__":

@@ -38,15 +38,16 @@ HOW TO WORK
 Consider the evidence carefully and complete these steps internally before producing the JSON:
 
 1. Inventory the condition dimensions that the paper varies or uses to separate analyses.
-2. List only the combinations that the paper directly analyzes.
-3. Make an internal coverage table with one row for every separately analyzed condition value or combination and reserve one context ID for each row.
-4. Build a compact hierarchy: place the shared dataset, place, method, or setup in parents and each complete analyzed combination in a child or leaf.
-5. Check every leaf together with its ancestors. Expand any leaf that still combines individually evaluated sites, periods, regimes, treatments, run names, or variable values.
-6. Record the conditions owned by each context. Put a shared condition on the parent rather than repeating it on every child.
-7. Identify explicit controls, treatments, changes, and contrasts. For every comparison, verify that both compared values have their own context IDs, then connect those two different IDs as a transition.
-8. For each context and transition, identify every directly supported scientific relationship and its smallest sufficient evidence set.
-9. Before returning JSON, check the coverage table again: every separately analyzed value has a context, every comparison connects two different contexts, and every claim is scoped to its complete setting or comparison.
-10. Check every temporary ID, reference, and evidence ID before returning the result.
+2. Make an internal evidence ledger by reading every results, analysis, discussion, and conclusion passage. Give each current-paper finding, null result, sign change, threshold, sensitivity or robustness result, and authors' interpretation its own ledger row with supporting SourceBlock IDs.
+3. List only the condition combinations that the paper directly analyzes, including combinations used in brief sensitivity or robustness tests.
+4. Make an internal setting coverage table with one row for every separately analyzed condition value or combination and reserve one context ID for each row.
+5. Build a compact hierarchy: place the shared dataset, place, method, or setup in parents and each complete analyzed combination in a child or leaf.
+6. Check every leaf together with its ancestors. Expand any leaf that still combines individually evaluated sites, periods, regimes, treatments, run names, or variable values.
+7. Record the conditions owned by each context. Put a shared condition on the parent rather than repeating it on every child.
+8. Identify explicit controls, treatments, changes, and contrasts. For every comparison, verify that both compared values have their own context IDs, then connect those two different IDs as a transition.
+9. Convert every evidence-ledger row into one or more claims. Keep separate physical steps separate when each step has direct support. Assign each claim to its complete context or transition and use its smallest sufficient evidence set.
+10. Before returning JSON, check both internal tables: every separately analyzed value has a context, every comparison connects two different contexts, and every evidence-ledger row is represented by a claim.
+11. Check every temporary ID, reference, and evidence ID before returning the result.
 
 CONTEXT DECISIONS
 
@@ -59,6 +60,10 @@ Use aliases only for different names referring to the same complete setting. A c
 A condition-defined regime, such as a season, time window, soil-moisture range, wind regime, or model configuration, is a setting when the paper analyzes it separately. A group defined only from its observed outcome is a setting only when the paper then analyzes that group under additional conditions.
 
 Reusing the same observations, simulations, site, or method does not merge separately analyzed subsets. Put the reused material in a parent context. Create child contexts for each reported time window, season, environmental bin, lag, treatment value, or other filter when the paper reports results separately for those values. This rule also applies when the paper calls the analysis a sensitivity test, stratification, subset, binning, or lag analysis.
+
+The length or prominence of an analysis does not determine whether it is a setting. A brief grid-resolution check, alternative parameter choice, robustness test, or sensitivity analysis has separate child settings when the paper changes a condition and reports a result for the changed value.
+
+When the paper reports a continuous sensitivity, binned curve, or threshold, create child contexts for the explicitly described regimes, threshold sides, or individually discussed values that support different findings. Preserve the reported ranges or threshold in Facets. Do not invent unnamed bins that are visible only as unsupported possibilities.
 
 For example, when one observational dataset is analyzed for a morning window and an evening window, create a parent for the common dataset and two children for the time windows. A morning-versus-evening comparison connects the two children; it does not connect the dataset parent to itself. Apply the same structure to separately analyzed dry and wet bins, early and late periods, or low and high forcing values.
 
@@ -79,6 +84,8 @@ CLAIM DECISIONS
 Use `causal` when the paper explicitly attributes the outcome to the source or a controlled perturbation directly supports the attribution. Use `associative` for correlations, co-occurrence, observational preferences, and relationships without established causal attribution.
 
 Preserve separate null, opposite, conditional, seasonal, scale-dependent, spatial, magnitude-dependent, and timing-dependent findings as separate claims when the evidence distinguishes them. Split a multi-step mechanism only when the evidence supports every individual step.
+
+Include current-paper robustness and sensitivity findings even when they occupy only one sentence. Include the authors' supported interpretation as a separate Claim when it adds a mechanism rather than merely restating the observed relationship. Claim selection is based on direct support and scientific distinctness, not on whether a finding appears to be a headline result.
 
 Classify `evidence_role` using exactly one value:
 

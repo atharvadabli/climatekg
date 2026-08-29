@@ -203,3 +203,16 @@ Result: `46 passed`.
 - Promoted both prompts to v11 and aligned the normative indexing specification.
 - Stopped the v10 large-corpus run after 20 attempts to avoid mixing prompt
   versions; its partial benchmark artifacts remain preserved.
+# Small-paper combined extraction experiment (2026-08-29)
+
+- Added an experimental one-call Context/Facet/Transition/Claim route for
+  cleaned papers at or below 8000 estimated tokens.
+- Benchmarked Qwen `no`, `low`, and `medium` thinking on P000006 and preserved
+  exact prompts, raw responses, thinking, converted objects, and metrics.
+- Traced v1 failures to deliberate regime compression and same-endpoint
+  Transitions in model reasoning; v2 fixed the generic structural rule.
+- Added a v3 evidence-ledger procedure. It improved the selected `low` run to 7
+  Contexts, 3 Transitions, and 8 Claims in 460 seconds.
+- The combined run still omitted a material resolution-sensitivity experiment.
+  Automatic routing is therefore disabled by default; see
+  `docs/SMALL_PAPER_COMBINED_EXTRACTION_EXPERIMENT.md`.

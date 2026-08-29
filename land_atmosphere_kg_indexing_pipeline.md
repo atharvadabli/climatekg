@@ -1027,9 +1027,10 @@ For a nominal 32k working context, detailed evidence calls should normally keep 
 
 ## 12.0 Combined extraction for very short papers
 
-When the cleaned paper contains at most `8000` estimated tokens after removing
+The combined route is experimental and disabled by default. When explicitly
+enabled, and when the cleaned paper contains at most `8000` estimated tokens after removing
 reference blocks and empty blocks, use the versioned
-`small_paper_extraction_v2` prompt in `prompts/small_paper_extraction.txt`.
+`small_paper_extraction_v3` prompt in `prompts/small_paper_extraction.txt`.
 This single call returns temporary Contexts, Facets, Transitions, and Claims.
 
 The input is the cleaned SourceBlocks in reading order. Bibliography entries,

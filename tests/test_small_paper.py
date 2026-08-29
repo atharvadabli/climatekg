@@ -5,6 +5,7 @@ import pytest
 from climatekg.extraction_models import SmallPaperExtraction
 from climatekg.models import SourceBlock
 from climatekg.small_paper import _validate_combined, cleaned_paper_blocks, combined_extraction_token_count
+from climatekg.indexer import current_prompt_versions
 
 
 def _block(block_id: str, block_type: str = "paragraph", text: str = "evidence") -> SourceBlock:
@@ -45,6 +46,11 @@ def test_cleaned_input_excludes_reference_blocks() -> None:
     blocks = [_block("B1", text="one"), _block("B2", "reference", "a cited reference")]
     assert [item.id for item in cleaned_paper_blocks(blocks)] == ["B1"]
     assert combined_extraction_token_count(blocks) == 1
+
+
+def test_experimental_prompt_version_does_not_invalidate_staged_papers() -> None:
+    assert "small_paper_extraction" not in current_prompt_versions()
+    assert "small_paper_extraction" in current_prompt_versions(combined_route=True)
 
 
 def test_combined_extraction_accepts_reachable_conditioning_facet() -> None:
