@@ -1,6 +1,6 @@
 {
   "parsing": {"model": "nvidia/NVIDIA-Nemotron-Parse-v1.2", "model_path": "climatekg/runtime/cache/nemotron_parse_v1_2", "nemotron_python": "E:/Atharv/lulc_suggestor_poc/hipporag copy 3/.venv-nemotron/Scripts/python.exe", "pdfium_python": "C:/Users/DELL/.codex/venvs/mineru_py313/Scripts/python.exe", "render_dpi": 200},
-  "paper_mapping": {"combined_extraction_enabled": false, "combined_extraction_threshold_tokens": 8000, "whole_paper_threshold_tokens": 15000, "map_consolidation_source_budget_tokens": 9000, "evidence_input_budget_tokens": 18000, "hard_llm_input_budget_tokens": 24000},
+  "paper_mapping": {"combined_extraction_enabled": false, "combined_extraction_target_tokens": 8000, "combined_extraction_max_cleaned_tokens": 16000, "whole_paper_threshold_tokens": 15000, "map_consolidation_source_budget_tokens": 9000, "evidence_input_budget_tokens": 18000, "hard_llm_input_budget_tokens": 24000},
   "ollama": {"model": "qwen3.6:27b", "retries": 2, "structured_output": true, "stages": {
     "small_paper_extraction": {"temperature": 0.0, "thinking": "low"}, "paper_map": {"temperature": 0.1, "thinking": "low"}, "section_scout": {"temperature": 0.0, "thinking": "no"},
     "facet_extraction": {"temperature": 0.0, "thinking": "no"}, "claim_extraction": {"temperature": 0.0, "thinking": "low"},

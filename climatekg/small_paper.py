@@ -22,7 +22,7 @@ def combined_extraction_token_count(blocks: list[SourceBlock]) -> int:
 
 def is_combined_extraction_eligible(blocks: list[SourceBlock]) -> bool:
     config = PIPELINE["paper_mapping"]
-    return bool(config["combined_extraction_enabled"]) and combined_extraction_token_count(blocks) <= config["combined_extraction_threshold_tokens"]
+    return bool(config["combined_extraction_enabled"]) and combined_extraction_token_count(blocks) <= config["combined_extraction_max_cleaned_tokens"]
 
 
 def _validate_combined(result: SmallPaperExtraction, blocks: list[SourceBlock]) -> None:
@@ -121,9 +121,9 @@ def extract_small_paper(
 ) -> tuple[list[Context], list[Facet], list[Transition], list[Claim], list[str], dict[str, Any]]:
     useful = cleaned_paper_blocks(blocks)
     token_total = combined_extraction_token_count(blocks)
-    threshold = PIPELINE["paper_mapping"]["combined_extraction_threshold_tokens"]
-    if token_total > threshold:
-        raise ValueError(f"combined extraction input is {token_total} tokens, above the {threshold}-token threshold")
+    maximum = PIPELINE["paper_mapping"]["combined_extraction_max_cleaned_tokens"]
+    if token_total > maximum:
+        raise ValueError(f"combined extraction input is {token_total} tokens, above the {maximum}-token safety limit")
 
     artifact_dir = paper_dir / "extraction" / "small_paper"
     validated_path = artifact_dir / "validated.json"

@@ -5,10 +5,13 @@ import json
 import math
 import re
 import unicodedata
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Iterable
 
-from .constants import FILE_HASH_CHUNK_BYTES, TOKEN_ESTIMATE_CHARACTERS_PER_TOKEN
+import tiktoken
+
+from .constants import FILE_HASH_CHUNK_BYTES, ROUTING_TOKENIZER_ENCODING
 
 
 def normalize_text_key(value: str) -> str:
@@ -22,10 +25,14 @@ def tokens(text: str) -> list[str]:
     return re.findall(r"[\w%+./-]+", unicodedata.normalize("NFKC", text).lower())
 
 
+@lru_cache(maxsize=1)
+def _routing_tokenizer() -> tiktoken.Encoding:
+    return tiktoken.get_encoding(ROUTING_TOKENIZER_ENCODING)
+
+
 def token_count(text: str) -> int:
-    # The local Qwen tokenizer is unavailable as a Python package. This estimate
-    # is used only for routing/budget enforcement and errs conservatively.
-    return max(1, math.ceil(len(text) / TOKEN_ESTIMATE_CHARACTERS_PER_TOKEN))
+    """Count routing/budget tokens with the configured standard tokenizer."""
+    return len(_routing_tokenizer().encode(text))
 
 
 def sha256_file(path: Path) -> str:

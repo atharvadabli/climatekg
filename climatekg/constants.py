@@ -26,6 +26,7 @@ OLLAMA_CONTEXT_TOKENS = 32768
 OLLAMA_RETRIES = 2
 OLLAMA_RETRY_BACKOFF_BASE_SECONDS = 2
 TOKEN_ESTIMATE_CHARACTERS_PER_TOKEN = 3.5
+ROUTING_TOKENIZER_ENCODING = "o200k_base"
 FILE_HASH_CHUNK_BYTES = 1024 * 1024
 
 PROMPT_VERSIONS = {
@@ -114,7 +115,11 @@ INDEXING_PIPELINE: dict[str, Any] = {
     },
     "paper_mapping": {
         "combined_extraction_enabled": False,
-        "combined_extraction_threshold_tokens": 8000,
+        # 8K is the preferred size for the combined experiment, not a hard
+        # eligibility boundary. The safety limit reserves at least half of the
+        # 32K window for instructions, schema, reasoning, and generated JSON.
+        "combined_extraction_target_tokens": 8000,
+        "combined_extraction_max_cleaned_tokens": 16000,
         "whole_paper_threshold_tokens": 15000,
         "map_consolidation_source_budget_tokens": 9000,
         "evidence_input_budget_tokens": 18000,

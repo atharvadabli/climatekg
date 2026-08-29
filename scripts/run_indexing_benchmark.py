@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from climatekg.indexer import index_pdf, load_corpus
+from climatekg.config import PIPELINE
 from climatekg.parquet_graph import ParquetGraph
 from climatekg.utils import write_json
 
@@ -61,7 +62,7 @@ def _paper_rows(data_root: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def _write_report(output_root: Path, corpus_spec: list[dict[str, str]], parquet_seconds: float | None) -> None:
+def _write_report(output_root: Path, corpus_spec: list[dict[str, str]], parquet_seconds: float | None, route: str) -> None:
     data_root = output_root / "data"
     papers = _paper_rows(data_root)
     calls = _collect_llm_calls(data_root, output_root)
@@ -92,6 +93,7 @@ def _write_report(output_root: Path, corpus_spec: list[dict[str, str]], parquet_
     ]
     summary = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "extraction_route": route,
         "requested_papers": len(corpus_spec),
         "registered_papers": len(papers),
         "completed_papers": len(complete),
@@ -116,6 +118,7 @@ def _write_report(output_root: Path, corpus_spec: list[dict[str, str]], parquet_
         "",
         "## Scope",
         "",
+        f"- Extraction route: `{route}`",
         f"- Requested papers: {summary['requested_papers']}",
         f"- Completed papers: {summary['completed_papers']}",
         f"- LLM attempts: {summary['llm_attempts']}",
@@ -210,12 +213,18 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--limit", type=int, default=10)
     parser.add_argument("--paper-id", action="append", dest="paper_ids")
     parser.add_argument("--report-only", action="store_true")
+    parser.add_argument("--route", choices=("combined", "staged"), required=True)
+    parser.add_argument("--thinking", choices=("no", "low", "medium", "high"))
     return parser
 
 
 def main() -> None:
     args = _parser().parse_args()
     output_root = args.output_root.resolve()
+    PIPELINE["paper_mapping"]["combined_extraction_enabled"] = args.route == "combined"
+    if args.thinking:
+        stage_name = "small_paper_extraction" if args.route == "combined" else "paper_map"
+        PIPELINE["ollama"]["stages"][stage_name]["thinking"] = args.thinking
     data_root = output_root / "data"
     output_root.mkdir(parents=True, exist_ok=True)
     corpus_spec = json.loads(args.corpus.read_text(encoding="utf-8"))
@@ -224,10 +233,15 @@ def main() -> None:
         corpus_spec = [item for item in corpus_spec if item["paper_id"] in requested]
     corpus_spec = corpus_spec[: args.limit]
     write_json(output_root / "corpus_manifest.json", corpus_spec)
+    write_json(output_root / "run_configuration.json", {
+        "route": args.route,
+        "thinking_override": args.thinking,
+        "combined_extraction_enabled": PIPELINE["paper_mapping"]["combined_extraction_enabled"],
+    })
     if args.report_only:
         parquet_path = output_root / "parquet_build.json"
         parquet_seconds = json.loads(parquet_path.read_text(encoding="utf-8"))["elapsed_seconds"] if parquet_path.exists() else None
-        _write_report(output_root, corpus_spec, parquet_seconds)
+        _write_report(output_root, corpus_spec, parquet_seconds, args.route)
         return
     progress = []
     for item in corpus_spec:
@@ -240,14 +254,14 @@ def main() -> None:
             row = {"paper_id": item["paper_id"], "status": "failed", "elapsed_seconds": time.perf_counter() - started, "error": {"type": type(exc).__name__, "message": str(exc)}}
         progress.append(row)
         write_json(output_root / "benchmark_progress.json", progress)
-        _write_report(output_root, corpus_spec, None)
+        _write_report(output_root, corpus_spec, None, args.route)
         print(json.dumps(row), flush=True)
 
     parquet_started = time.perf_counter()
     counts = ParquetGraph(output_root / "parquet_graph").write_corpus(load_corpus(data_root))
     parquet_seconds = time.perf_counter() - parquet_started
     write_json(output_root / "parquet_build.json", {"elapsed_seconds": parquet_seconds, "table_counts": counts})
-    _write_report(output_root, corpus_spec, parquet_seconds)
+    _write_report(output_root, corpus_spec, parquet_seconds, args.route)
     print(json.dumps({"parquet_seconds": parquet_seconds, "table_counts": counts}), flush=True)
 
 
