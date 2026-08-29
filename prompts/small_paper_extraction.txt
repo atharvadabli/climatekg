@@ -39,12 +39,14 @@ Consider the evidence carefully and complete these steps internally before produ
 
 1. Inventory the condition dimensions that the paper varies or uses to separate analyses.
 2. List only the combinations that the paper directly analyzes.
-3. Build a compact hierarchy: place shared conditions in parents and each complete analyzed combination in a child or leaf.
-4. Check every leaf together with its ancestors. Expand any leaf that still combines individually evaluated sites, periods, regimes, treatments, run names, or variable values.
-5. Record the conditions owned by each context. Put a shared condition on the parent rather than repeating it on every child.
-6. Identify explicit controls, treatments, changes, and contrasts, and connect their complete settings as transitions.
-7. For each context and transition, identify every directly supported scientific relationship and its smallest sufficient evidence set.
-8. Check every temporary ID, reference, and evidence ID before returning the result.
+3. Make an internal coverage table with one row for every separately analyzed condition value or combination and reserve one context ID for each row.
+4. Build a compact hierarchy: place the shared dataset, place, method, or setup in parents and each complete analyzed combination in a child or leaf.
+5. Check every leaf together with its ancestors. Expand any leaf that still combines individually evaluated sites, periods, regimes, treatments, run names, or variable values.
+6. Record the conditions owned by each context. Put a shared condition on the parent rather than repeating it on every child.
+7. Identify explicit controls, treatments, changes, and contrasts. For every comparison, verify that both compared values have their own context IDs, then connect those two different IDs as a transition.
+8. For each context and transition, identify every directly supported scientific relationship and its smallest sufficient evidence set.
+9. Before returning JSON, check the coverage table again: every separately analyzed value has a context, every comparison connects two different contexts, and every claim is scoped to its complete setting or comparison.
+10. Check every temporary ID, reference, and evidence ID before returning the result.
 
 CONTEXT DECISIONS
 
@@ -56,6 +58,10 @@ Use aliases only for different names referring to the same complete setting. A c
 
 A condition-defined regime, such as a season, time window, soil-moisture range, wind regime, or model configuration, is a setting when the paper analyzes it separately. A group defined only from its observed outcome is a setting only when the paper then analyzes that group under additional conditions.
 
+Reusing the same observations, simulations, site, or method does not merge separately analyzed subsets. Put the reused material in a parent context. Create child contexts for each reported time window, season, environmental bin, lag, treatment value, or other filter when the paper reports results separately for those values. This rule also applies when the paper calls the analysis a sensitivity test, stratification, subset, binning, or lag analysis.
+
+For example, when one observational dataset is analyzed for a morning window and an evening window, create a parent for the common dataset and two children for the time windows. A morning-versus-evening comparison connects the two children; it does not connect the dataset parent to itself. Apply the same structure to separately analyzed dry and wet bins, early and late periods, or low and high forcing values.
+
 Keep findings attributed only to cited literature distinct from findings produced by the current paper.
 
 FACET DECISIONS
@@ -66,7 +72,7 @@ Assign a facet to the most general context for which it remains true. A child re
 
 TRANSITION DECISIONS
 
-Use complete contexts as both endpoints. When the paper identifies a control, baseline, or reference, use it as the starting context. Describe the manipulation or contrast, not its climatic result. Cite the smallest passage set establishing the comparison.
+Use complete contexts as both endpoints. `from_context_temp_id` and `to_context_temp_id` must be different. When compared values share a dataset or setup, make that shared material their parent and use value-specific children as the endpoints. When the paper identifies a control, baseline, or reference, use it as the starting context. Describe the manipulation or contrast, not its climatic result. Cite the smallest passage set establishing the comparison.
 
 CLAIM DECISIONS
 

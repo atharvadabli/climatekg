@@ -62,6 +62,14 @@ def test_prompts_avoid_pipeline_dependent_phrasing() -> None:
         assert phrase not in combined
 
 
+def test_small_paper_prompt_requires_value_specific_context_coverage() -> None:
+    text = (PROMPT_DIR / "small_paper_extraction.txt").read_text(encoding="utf-8")
+    assert "coverage table" in text
+    assert "every separately analyzed value has a context" in text
+    assert "from_context_temp_id` and `to_context_temp_id` must be different" in text
+    assert "sensitivity test, stratification, subset, binning, or lag analysis" in text
+
+
 def test_complete_setting_v11_candidates_are_standalone_and_consistent() -> None:
     candidate_dir = PROMPT_DIR / "experiments" / "complete_setting_v11"
     cases = {

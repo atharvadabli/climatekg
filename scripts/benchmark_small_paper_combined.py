@@ -160,7 +160,7 @@ def _write_markdown(path: Path, rows: list[dict[str, Any]]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--paper-id", default="P000006")
-    parser.add_argument("--output-root", type=Path, default=OUTPUT_ROOT / "small_paper_combined_p000006_20260829")
+    parser.add_argument("--output-root", type=Path, default=OUTPUT_ROOT / "small_paper_combined_v2_p000006_20260829")
     parser.add_argument("--replace", action="store_true")
     args = parser.parse_args()
     run(args.paper_id, args.output_root, args.replace)

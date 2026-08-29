@@ -1029,7 +1029,7 @@ For a nominal 32k working context, detailed evidence calls should normally keep 
 
 When the cleaned paper contains at most `8000` estimated tokens after removing
 reference blocks and empty blocks, use the versioned
-`small_paper_extraction_v1` prompt in `prompts/small_paper_extraction.txt`.
+`small_paper_extraction_v2` prompt in `prompts/small_paper_extraction.txt`.
 This single call returns temporary Contexts, Facets, Transitions, and Claims.
 
 The input is the cleaned SourceBlocks in reading order. Bibliography entries,
