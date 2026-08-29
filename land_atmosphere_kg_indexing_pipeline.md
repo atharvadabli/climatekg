@@ -1023,7 +1023,60 @@ For a nominal 32k working context, detailed evidence calls should normally keep 
 
 ---
 
-# 12. Stage 5A — whole-paper mapping for short papers
+# 12. Stage 5A — whole-paper processing for short papers
+
+## 12.0 Combined extraction for very short papers
+
+When the cleaned paper contains at most `8000` estimated tokens after removing
+reference blocks and empty blocks, use the versioned
+`small_paper_extraction_v1` prompt in `prompts/small_paper_extraction.txt`.
+This single call returns temporary Contexts, Facets, Transitions, and Claims.
+
+The input is the cleaned SourceBlocks in reading order. Bibliography entries,
+repeated page margins, and other material removed by the cleaning stage are not
+sent. The call uses the same controlled vocabularies, evidence roles, complete-
+setting hierarchy, causal/associative distinction, smallest-sufficient-evidence
+rule, and materially-conditioning-Facet rule used by the staged extractors.
+
+The model internally follows this work order:
+
+1. inventory the applicability dimensions and analyzed combinations;
+2. build and completeness-check the setting hierarchy;
+3. assign setting-owned Facets;
+4. identify comparisons between complete settings;
+5. extract scoped Claims;
+6. check temporary object and SourceBlock references.
+
+Return schema-valid JSON only. The Ollama `thinking` field, when enabled, is
+stored with the raw response for audit but is not parsed as scientific output.
+
+Python must then validate:
+
+- unique non-empty temporary IDs;
+- an acyclic Context hierarchy with valid parents;
+- valid and distinct Transition endpoints;
+- valid Claim scopes;
+- valid, reachable conditioning Facets through Context inheritance;
+- non-empty evidence for every scientific object;
+- evidence IDs restricted to the cleaned non-reference SourceBlocks supplied to
+  the call.
+
+After validation, Python assigns the same permanent IDs and creates the same
+Context, Facet, Transition, and Claim schemas as the staged route. The existing
+Context reconciliation, paper consolidation, State canonicalization, embedding,
+and graph-ingestion stages remain unchanged.
+
+Do not silently fall back to staged extraction when the combined call fails
+schema or reference validation. Preserve the request, raw response, thinking,
+metrics, and validation failure for review. Papers above the threshold use the
+staged mapping and extraction path below.
+
+The runtime context window remains `32768` tokens. Evaluate `no`, `low`, and
+`medium` thinking on the same paper and exact cleaned input before selecting a
+default. Increasing the context window is a separate experiment, not an
+automatic response to an oversized paper.
+
+## 12.1 Staged whole-paper mapping
 
 ## Purpose
 
@@ -1037,7 +1090,7 @@ Discover:
 - which source blocks likely contain Context details
 - which source blocks likely contain Results/Claims
 
-Do **not** extract detailed Facets or Claims yet.
+On this staged route, do **not** extract detailed Facets or Claims yet.
 
 ## Input
 
@@ -3650,6 +3703,15 @@ Use a single authoritative registry update step.
 1–3 Claim extraction calls
 1 consolidation
 ≈ 4–7 total
+```
+
+## Very short paper using combined extraction
+
+```text
+1 combined Context/Facet/Transition/Claim extraction
+0–1 context reconciliation
+0–1 paper consolidation call when semantic merge candidates exist
+≈ 1–3 total
 ```
 
 ## Complex/long paper

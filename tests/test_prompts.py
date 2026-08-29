@@ -9,13 +9,14 @@ import uuid
 from pydantic import BaseModel
 
 from climatekg.ollama import OllamaClient
-from climatekg.extraction_models import PaperMap, SectionScout
+from climatekg.extraction_models import PaperMap, SectionScout, SmallPaperExtraction
 
 
 ROOT = Path(__file__).resolve().parents[1]
 PROMPT_DIR = ROOT / "prompts"
 
 EXPECTED_PLACEHOLDERS = {
+    "small_paper_extraction.txt": {"paper_id", "paper_text"},
     "paper_map.txt": {"paper_id", "paper_text"},
     "section_scout.txt": {"paper_id", "section_path", "section_blocks"},
     "map_consolidation.txt": {"paper_metadata", "scout_outputs", "selected_blocks"},
@@ -89,6 +90,11 @@ def test_paper_map_structured_schema_requires_every_declared_field() -> None:
         assert set(item_schema["required"]) == set(item_schema["properties"])
     scout_schema = SectionScout.model_json_schema()
     assert set(scout_schema["required"]) == set(scout_schema["properties"])
+    combined_schema = SmallPaperExtraction.model_json_schema()
+    assert set(combined_schema["required"]) == set(combined_schema["properties"])
+    for name in ("SmallPaperFacet", "SmallPaperClaim"):
+        item_schema = combined_schema["$defs"][name]
+        assert set(item_schema["required"]) == set(item_schema["properties"])
 
 
 class _ExampleOutput(BaseModel):

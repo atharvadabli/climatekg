@@ -18,6 +18,7 @@ from .models import FinalPaper, Paper
 from .ollama import OllamaClient, stage_prompt_version
 from .pdf import build_source_blocks, clean_parse, parse_pdf, register_pdf
 from .reconcile import reconcile_contexts
+from .small_paper import extract_small_paper, is_combined_extraction_eligible
 from .utils import write_json
 
 
@@ -32,6 +33,7 @@ def _metadata(blocks: list[Any], paper_id: str, source_file: str) -> Paper:
 
 
 PROMPT_STAGES = (
+    "small_paper_extraction",
     "paper_map",
     "section_scout",
     "map_consolidation",
@@ -138,26 +140,35 @@ def index_pdf(pdf_path: Path, data_root: Path, paper_id: str, client: OllamaClie
             paper = _metadata(blocks, paper_id, pdf_path.name)
         with _timed_phase(timing_path, timing_report, "sourceblock_embeddings"):
             embed_source_blocks(client, blocks, paper_dir / "blocks" / "block_embeddings.json")
-        manifest["status"] = "mapping"
-        write_json(paper_dir / "manifest.json", manifest)
-        with _timed_phase(timing_path, timing_report, "paper_mapping"):
-            mapped = map_paper(paper, blocks, paper_dir, client)
-        with _timed_phase(timing_path, timing_report, "permanent_context_transition_ids"):
-            contexts, transitions, map_meta = permanent_map(paper, mapped)
-            write_json(paper_dir / "extraction" / "map" / "context_registry.json", map_meta)
-        manifest["status"] = "extracting_facets"
-        write_json(paper_dir / "manifest.json", manifest)
-        with _timed_phase(timing_path, timing_report, "facet_extraction"):
-            facets, facet_hints = extract_facets(paper, mapped, contexts, map_meta, blocks, paper_dir, client)
-        manifest["status"] = "extracting_claims"
-        write_json(paper_dir / "manifest.json", manifest)
-        with _timed_phase(timing_path, timing_report, "claim_extraction"):
-            claims, claim_hints = extract_claims(paper, mapped, contexts, transitions, facets, map_meta, blocks, paper_dir, client)
+        combined_route = is_combined_extraction_eligible(blocks)
+        if combined_route:
+            manifest["status"] = "extracting_small_paper"
+            write_json(paper_dir / "manifest.json", manifest)
+            with _timed_phase(timing_path, timing_report, "small_paper_combined_extraction"):
+                contexts, facets, transitions, claims, combined_ambiguities, map_meta = extract_small_paper(paper, blocks, paper_dir, client)
+            facet_hints: list[str] = []
+            claim_hints: list[str] = []
+        else:
+            manifest["status"] = "mapping"
+            write_json(paper_dir / "manifest.json", manifest)
+            with _timed_phase(timing_path, timing_report, "paper_mapping"):
+                mapped = map_paper(paper, blocks, paper_dir, client)
+            with _timed_phase(timing_path, timing_report, "permanent_context_transition_ids"):
+                contexts, transitions, map_meta = permanent_map(paper, mapped)
+                write_json(paper_dir / "extraction" / "map" / "context_registry.json", map_meta)
+            manifest["status"] = "extracting_facets"
+            write_json(paper_dir / "manifest.json", manifest)
+            with _timed_phase(timing_path, timing_report, "facet_extraction"):
+                facets, facet_hints = extract_facets(paper, mapped, contexts, map_meta, blocks, paper_dir, client)
+            manifest["status"] = "extracting_claims"
+            write_json(paper_dir / "manifest.json", manifest)
+            with _timed_phase(timing_path, timing_report, "claim_extraction"):
+                claims, claim_hints = extract_claims(paper, mapped, contexts, transitions, facets, map_meta, blocks, paper_dir, client)
         manifest["status"] = "reconciling_contexts"
         write_json(paper_dir / "manifest.json", manifest)
         with _timed_phase(timing_path, timing_report, "context_reconciliation"):
             contexts, facets, claims, reconciliation_unresolved = reconcile_contexts(paper, contexts, transitions, facets, claims, facet_hints + claim_hints, blocks, paper_dir, client)
-            unresolved = list(reconciliation_unresolved)
+            unresolved = ([{"type": "combined_extraction_ambiguity", "value": value} for value in combined_ambiguities] if combined_route else []) + list(reconciliation_unresolved)
         manifest["status"] = "consolidating"
         write_json(paper_dir / "manifest.json", manifest)
         with _timed_phase(timing_path, timing_report, "paper_consolidation"):
@@ -176,7 +187,7 @@ def index_pdf(pdf_path: Path, data_root: Path, paper_id: str, client: OllamaClie
                 target.write_text(text, encoding="utf-8")
             evidence_links = [{"object_id": item.id, "source_block_id": block_id} for items in (contexts, facets, transitions, claims) for item in items for block_id in item.evidence_block_ids]
             prompt_versions = current_prompt_versions()
-            final = FinalPaper(paper=paper, source_blocks=blocks, contexts=contexts, facets=facets, transitions=transitions, claims=claims, states=states, evidence_links=evidence_links, unresolved_conflicts=unresolved, metadata={"parser": PIPELINE["parsing"]["model"], "extractor_model": PIPELINE["ollama"]["model"], "embedding_model": PIPELINE["embeddings"]["model"], "embedding_dimension": PIPELINE["embeddings"]["dimension"], "reasoning_profile": PIPELINE["ollama"]["reasoning_profile"], "prompt_versions": prompt_versions, "created_at": datetime.now(timezone.utc).isoformat()})
+            final = FinalPaper(paper=paper, source_blocks=blocks, contexts=contexts, facets=facets, transitions=transitions, claims=claims, states=states, evidence_links=evidence_links, unresolved_conflicts=unresolved, metadata={"parser": PIPELINE["parsing"]["model"], "extractor_model": PIPELINE["ollama"]["model"], "embedding_model": PIPELINE["embeddings"]["model"], "embedding_dimension": PIPELINE["embeddings"]["dimension"], "reasoning_profile": PIPELINE["ollama"]["reasoning_profile"], "extraction_route": "small_paper_combined" if combined_route else "staged", "prompt_versions": prompt_versions, "created_at": datetime.now(timezone.utc).isoformat()})
             write_json(paper_dir / "final" / "final_paper.json", final.model_dump(by_alias=True))
         manifest["status"] = "complete"
         manifest["counts"] = {"source_blocks": len(blocks), "contexts": len(contexts), "facets": len(facets), "transitions": len(transitions), "claims": len(claims), "states": len(states)}

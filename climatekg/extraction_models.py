@@ -95,6 +95,36 @@ class ClaimBatch(StrictModel):
     ambiguities: list[str] = Field(default_factory=list)
 
 
+class SmallPaperFacet(CompleteOutputModel):
+    temp_id: str
+    context_temp_id: str
+    domain: Domain
+    notion: str
+    description: str
+    evidence_block_ids: list[str]
+
+
+class SmallPaperClaim(CompleteOutputModel):
+    temp_id: str
+    scope_type: Literal["context", "transition"]
+    scope_temp_id: str
+    from_: ClaimEndpoint = Field(alias="from", serialization_alias="from")
+    to: ClaimEndpoint
+    relation: Literal["causal", "associative"]
+    description: str
+    evidence_role: Literal["OWN_RESULT", "AUTHORS_INTERPRETATION_OF_OWN_RESULT", "CITED_BACKGROUND", "HYPOTHESIS_OR_PROPOSAL"]
+    conditioning_facet_temp_ids: list[str] = Field(default_factory=list)
+    evidence_block_ids: list[str]
+
+
+class SmallPaperExtraction(CompleteOutputModel):
+    contexts: list[MapContext]
+    facets: list[SmallPaperFacet]
+    transitions: list[MapTransition]
+    claims: list[SmallPaperClaim]
+    ambiguities: list[str] = Field(default_factory=list)
+
+
 class ConsolidationDecision(StrictModel):
     object_type: Literal["context", "facet", "claim"]
     left_id: str
