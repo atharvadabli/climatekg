@@ -30,7 +30,7 @@ ROUTING_TOKENIZER_ENCODING = "o200k_base"
 FILE_HASH_CHUNK_BYTES = 1024 * 1024
 
 PROMPT_VERSIONS = {
-    "small_paper_extraction": "v3",
+    "small_paper_extraction": "v4.1",
     "paper_map": "v11",
     "map_consolidation": "v11",
     "paper_map_candidate": "v11",

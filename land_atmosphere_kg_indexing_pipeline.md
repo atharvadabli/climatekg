@@ -1027,17 +1027,34 @@ For a nominal 32k working context, detailed evidence calls should normally keep 
 
 ## 12.0 Combined extraction for very short papers
 
-The combined route is experimental and disabled by default. When explicitly
-enabled, and when the cleaned paper contains at most `8000` estimated tokens after removing
-reference blocks and empty blocks, use the versioned
-`small_paper_extraction_v3` prompt in `prompts/small_paper_extraction.txt`.
-This single call returns temporary Contexts, Facets, Transitions, and Claims.
+The combined route is experimental and disabled by default. Count the cleaned,
+non-reference, non-empty paper text with the standard `o200k_base` tokenizer.
+Treat `8000` tokens as the preferred target for this route, not as a hard
+boundary. When explicitly enabled, the route may accept up to `16000` cleaned
+tokens while the runtime context window remains `32768`. Use the versioned
+`small_paper_extraction_v4.1` prompt in `prompts/small_paper_extraction.txt`.
+This single call returns temporary nested Contexts, Facets, Transitions, and
+Claims.
 
 The input is the cleaned SourceBlocks in reading order. Bibliography entries,
 repeated page margins, and other material removed by the cleaning stage are not
-sent. The call uses the same controlled vocabularies, evidence roles, complete-
-setting hierarchy, causal/associative distinction, smallest-sufficient-evidence
-rule, and materially-conditioning-Facet rule used by the staged extractors.
+sent. Before rendering the prompt, Python assigns request-local evidence handles
+such as `E001` to the supplied SourceBlocks. The JSON Schema enumerates the
+handles allowed in every evidence field. The model never needs to reproduce a
+permanent composite SourceBlock ID. Python stores the handle catalog and maps
+returned handles back to permanent SourceBlock IDs after the call.
+
+The call uses the same controlled vocabularies, evidence roles, complete-setting
+hierarchy, causal/associative distinction, smallest-sufficient-evidence rule,
+and materially-conditioning-Facet rule used by the staged extractors.
+
+The temporary response nests each Facet and Context-scoped Claim inside its
+owning Context. It nests each comparison Claim inside its owning Transition.
+The containing object determines Claim scope; the model does not return a
+separate arbitrary Claim scope ID. Facets use keys unique within their Context,
+and conditioning references use `(context_temp_id, facet_key)`. This is only an
+LLM-facing schema. Python deterministically flattens it into the final schemas
+specified elsewhere in this document.
 
 The model internally follows this work order:
 
@@ -1046,7 +1063,7 @@ The model internally follows this work order:
 3. assign setting-owned Facets;
 4. identify comparisons between complete settings;
 5. extract scoped Claims;
-6. check temporary object and SourceBlock references.
+6. check temporary object, evidence-handle, and conditioning-Facet references.
 
 Return schema-valid JSON only. The Ollama `thinking` field, when enabled, is
 stored with the raw response for audit but is not parsed as scientific output.
@@ -1059,8 +1076,9 @@ Python must then validate:
 - valid Claim scopes;
 - valid, reachable conditioning Facets through Context inheritance;
 - non-empty evidence for every scientific object;
-- evidence IDs restricted to the cleaned non-reference SourceBlocks supplied to
-  the call.
+- evidence handles restricted by schema to those supplied to the call;
+- exact deterministic mapping from each returned handle to one cleaned,
+  non-reference SourceBlock.
 
 After validation, Python assigns the same permanent IDs and creates the same
 Context, Facet, Transition, and Claim schemas as the staged route. The existing
@@ -1069,8 +1087,8 @@ and graph-ingestion stages remain unchanged.
 
 Do not silently fall back to staged extraction when the combined call fails
 schema or reference validation. Preserve the request, raw response, thinking,
-metrics, and validation failure for review. Papers above the threshold use the
-staged mapping and extraction path below.
+metrics, and validation failure for review. Papers above the `16000`-token
+safety limit use the staged mapping and extraction path below.
 
 The runtime context window remains `32768` tokens. Evaluate `no`, `low`, and
 `medium` thinking on the same paper and exact cleaned input before selecting a

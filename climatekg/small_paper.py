@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import Any
 
 from .config import PIPELINE, ROOT
-from .extract import _render_blocks, _split_prompt, permanent_map, render_paper_map_tree
-from .extraction_models import PaperMap, SmallPaperExtraction
+from .combined_extraction import EvidenceCatalog, flatten_small_paper_v4, render_evidence_catalog
+from .extract import _split_prompt, permanent_map, render_paper_map_tree
+from .extraction_models import PaperMap, SmallPaperExtraction, constrained_small_paper_v4_schema
 from .models import Claim, Context, Facet, Paper, SourceBlock, Transition
 from .ollama import OllamaClient
 from .utils import token_count, unique_in_order, write_json
@@ -130,13 +131,15 @@ def extract_small_paper(
     if validated_path.exists():
         result = SmallPaperExtraction.model_validate_json(validated_path.read_text(encoding="utf-8"))
     else:
+        catalog = EvidenceCatalog.from_blocks(useful)
+        schema = constrained_small_paper_v4_schema(catalog.handles)
         system, user = _split_prompt((ROOT / "prompts" / "small_paper_extraction.txt").read_text(encoding="utf-8"))
         stage = PIPELINE["ollama"]["stages"]["small_paper_extraction"]
-        result = client.structured(
+        nested_result = client.structured(
             stage="small_paper_extraction",
             system=system,
-            user=user.format(paper_id=paper.id, paper_text=_render_blocks(useful)),
-            schema=SmallPaperExtraction,
+            user=user.format(paper_id=paper.id, paper_text=render_evidence_catalog(useful, catalog)),
+            schema=schema,
             model=PIPELINE["ollama"]["model"],
             temperature=stage["temperature"],
             thinking=stage["thinking"],
@@ -145,7 +148,10 @@ def extract_small_paper(
             input_block_ids=[block.id for block in useful],
             retries=stage["retries"],
         )
-        write_json(artifact_dir / "schema_validated.json", result.model_dump(by_alias=True))
+        write_json(artifact_dir / "evidence_handle_catalog.json", catalog.as_rows())
+        write_json(artifact_dir / "schema_validated.json", nested_result.model_dump(by_alias=True))
+        result = flatten_small_paper_v4(nested_result, catalog)
+        write_json(artifact_dir / "flattened.json", result.model_dump(by_alias=True))
     _validate_combined(result, blocks)
     write_json(validated_path, result.model_dump(by_alias=True))
     paper_map = PaperMap(

@@ -125,6 +125,88 @@ class SmallPaperExtraction(CompleteOutputModel):
     ambiguities: list[str] = Field(default_factory=list)
 
 
+class SmallPaperFacetV4(CompleteOutputModel):
+    facet_key: str
+    domain: Domain
+    notion: str
+    description: str
+    evidence_handles: list[str]
+
+
+class ConditioningFacetRefV4(CompleteOutputModel):
+    context_temp_id: str
+    facet_key: str
+
+
+class SmallPaperClaimV4(CompleteOutputModel):
+    from_: ClaimEndpoint = Field(alias="from", serialization_alias="from")
+    to: ClaimEndpoint
+    relation: Literal["causal", "associative"]
+    description: str
+    evidence_role: Literal["OWN_RESULT", "AUTHORS_INTERPRETATION_OF_OWN_RESULT", "CITED_BACKGROUND", "HYPOTHESIS_OR_PROPOSAL"]
+    conditioning_facets: list[ConditioningFacetRefV4] = Field(default_factory=list)
+    evidence_handles: list[str]
+
+
+class SmallPaperContextV4(CompleteOutputModel):
+    temp_id: str
+    label: str
+    parent_temp_ids: list[str] = Field(default_factory=list)
+    split_reason: Literal["separate_reported_finding", "sign_or_null_reversal", "misleading_parent_scope", "explicit_transition_state"] | None = None
+    aliases: list[str] = Field(default_factory=list)
+    spatial_support: SpatialSupport | None = None
+    evidence_handles: list[str]
+    facet_seed_handles: list[str] = Field(default_factory=list)
+    facets: list[SmallPaperFacetV4] = Field(default_factory=list)
+    claims: list[SmallPaperClaimV4] = Field(default_factory=list)
+
+
+class SmallPaperTransitionV4(CompleteOutputModel):
+    temp_id: str
+    from_context_temp_id: str
+    to_context_temp_id: str
+    label: str
+    aliases: list[str] = Field(default_factory=list)
+    description: str
+    evidence_handles: list[str]
+    claim_seed_handles: list[str] = Field(default_factory=list)
+    claims: list[SmallPaperClaimV4] = Field(default_factory=list)
+
+
+class SmallPaperExtractionV4(CompleteOutputModel):
+    contexts: list[SmallPaperContextV4]
+    transitions: list[SmallPaperTransitionV4]
+    ambiguities: list[str] = Field(default_factory=list)
+
+
+def constrained_small_paper_v4_schema(evidence_handles: list[str]) -> type[SmallPaperExtractionV4]:
+    """Create a request-local schema whose evidence fields accept only shown handles."""
+    allowed = list(evidence_handles)
+
+    class ConstrainedSmallPaperExtractionV4(SmallPaperExtractionV4):
+        @classmethod
+        def model_json_schema(cls, *args: Any, **kwargs: Any) -> dict[str, Any]:
+            schema = super().model_json_schema(*args, **kwargs)
+
+            def constrain(node: Any) -> None:
+                if isinstance(node, dict):
+                    properties = node.get("properties", {})
+                    for name in ("evidence_handles", "facet_seed_handles", "claim_seed_handles"):
+                        if name in properties:
+                            properties[name]["items"] = {"type": "string", "enum": allowed}
+                    for value in node.values():
+                        constrain(value)
+                elif isinstance(node, list):
+                    for value in node:
+                        constrain(value)
+
+            constrain(schema)
+            return schema
+
+    ConstrainedSmallPaperExtractionV4.__name__ = "ConstrainedSmallPaperExtractionV4"
+    return ConstrainedSmallPaperExtractionV4
+
+
 class ConsolidationDecision(StrictModel):
     object_type: Literal["context", "facet", "claim"]
     left_id: str

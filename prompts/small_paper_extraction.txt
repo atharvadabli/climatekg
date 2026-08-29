@@ -2,90 +2,78 @@ SYSTEM
 
 TASK
 
-Read one short land-atmosphere research paper and produce a structured account of:
+Read one land-atmosphere research paper and return a structured record of:
 
-1. the complete study settings that the paper directly analyzes;
-2. the conditions that define each setting;
-3. the comparisons between settings; and
-4. the scientific relationships supported by the paper.
+1. every complete study setting for which the paper reports a result;
+2. the environmental or experimental conditions defining each setting;
+3. comparisons or imposed changes between settings; and
+4. scientific relationships supported by the paper.
 
-The input is self-contained. Use only the supplied paper passages.
+Use only the supplied passages. Consider the evidence carefully before deciding.
 
 INPUT
 
-You will receive:
+You will receive a paper identifier followed by cleaned paper passages in reading order.
 
-- a paper identifier;
-- cleaned paper passages in reading order;
-- one stable SourceBlock ID before every passage.
+Each passage begins with a short evidence handle such as `[E001]`. An evidence handle identifies that exact passage only. Copy these handles exactly when citing evidence.
 
-Reference-list entries, repeated page margins, and other removed material are not included.
+TERMS
 
-TERMS USED IN THE OUTPUT
+A `context` is one complete study setting under which the paper directly analyzes a result. A setting may combine place, period, season, time of day, observations or simulation setup, environmental regime, land treatment, and experimental-variable values.
 
-A `context` is one study setting: a complete combination of conditions under which the paper directly analyzes findings. Conditions may include place, period, season, time of day, observations or simulation setup, environmental regime, control or treatment, and values of experimental variables.
+A child context inherits all conditions from its parent. A parent contains conditions shared by at least two children. Reading a context together with its ancestors must identify one scientifically usable setting.
 
-A child context inherits every condition from its parent. Reading a child together with all its ancestors must identify one scientifically usable setting. A parent should hold conditions shared by at least two children.
+A `facet` is one condition belonging to a context, such as land cover, soil moisture, season, atmospheric flow, terrain, spatial arrangement, model configuration, or an experimental value.
 
-A `facet` is one coherent condition belonging to a context, such as land cover, soil moisture, season, atmospheric flow, terrain, spatial arrangement, model configuration, or experimental value.
+A `transition` is a comparison or imposed change between two contexts. Its endpoints are complete study settings.
 
-A `transition` is a comparison or imposed change between two complete contexts. Its endpoints are settings, not scientific variables.
+A `claim` is one evidence-supported relationship between a source state or process and an outcome state or process.
 
-A `claim` is one supported relationship between a source variable, process, or land state and an outcome variable or process. A claim belongs either to one context or to one transition.
+HOW TO IDENTIFY COMPLETE SETTINGS
 
-HOW TO WORK
+Inventory every condition dimension that the paper varies or uses to separate results. Include brief sensitivity, robustness, resolution, parameter, threshold, lag, seasonal, spatial, and null-result analyses.
 
-Consider the evidence carefully and complete these steps internally before producing the JSON:
+Construct the context hierarchy so every separately analyzed combination is represented. For crossed conditions, create branches containing the complete combinations.
 
-1. Inventory the condition dimensions that the paper varies or uses to separate analyses.
-2. Make an internal evidence ledger by reading every results, analysis, discussion, and conclusion passage. Give each current-paper finding, null result, sign change, threshold, sensitivity or robustness result, and authors' interpretation its own ledger row with supporting SourceBlock IDs.
-3. List only the condition combinations that the paper directly analyzes, including combinations used in brief sensitivity or robustness tests.
-4. Make an internal setting coverage table with one row for every separately analyzed condition value or combination and reserve one context ID for each row.
-5. Build a compact hierarchy: place the shared dataset, place, method, or setup in parents and each complete analyzed combination in a child or leaf.
-6. Check every leaf together with its ancestors. Expand any leaf that still combines individually evaluated sites, periods, regimes, treatments, run names, or variable values.
-7. Record the conditions owned by each context. Put a shared condition on the parent rather than repeating it on every child.
-8. Identify explicit controls, treatments, changes, and contrasts. For every comparison, verify that both compared values have their own context IDs, then connect those two different IDs as a transition.
-9. Convert every evidence-ledger row into one or more claims. Keep separate physical steps separate when each step has direct support. Assign each claim to its complete context or transition and use its smallest sufficient evidence set.
-10. Before returning JSON, check both internal tables: every separately analyzed value has a context, every comparison connects two different contexts, and every evidence-ledger row is represented by a claim.
-11. Check every temporary ID, reference, and evidence ID before returning the result.
+Example:
 
-CONTEXT DECISIONS
+```text
+Common observational study
+|- Rainfed
+|  |- Rainfed during drought
+|  `- Rainfed outside drought
+`- Irrigated
+   |- Irrigated during drought
+   `- Irrigated outside drought
+```
 
-Settings are determined by applicability conditions, not by whether their results differ. Keep two analyzed combinations separate when place, period, season, regime, setup, treatment, forcing level, or another applicability condition differs, even when their effects are similar, equal, or null.
+The rainfed and irrigated parents contain their shared water-source conditions. Each leaf contains its own drought-regime condition. A finding for irrigated drought conditions belongs to that leaf or to a transition containing that leaf.
 
-Create one complete leaf for every named experiment, control, scenario, site, period, regime, or individually evaluated variable value. A range, sweep, ensemble, or sensitivity family may be a parent, but it does not replace value-specific children when the values are evaluated separately. Include only combinations actually analyzed by the paper; do not construct unreported combinations.
+Put a condition on the most general context for which it remains true. Put a changed or more specific condition on the child where it applies. Use aliases only for different paper-local names referring to the same complete setting.
 
-Use aliases only for different names referring to the same complete setting. A code reused as one variable value across several complete runs is a condition, not a separate sibling setting.
+When compared values share observations, a site, or a simulation setup, put the shared material in a parent and create value-specific children. Use those children as transition endpoints.
 
-A condition-defined regime, such as a season, time window, soil-moisture range, wind regime, or model configuration, is a setting when the paper analyzes it separately. A group defined only from its observed outcome is a setting only when the paper then analyzes that group under additional conditions.
+HOW TO RECORD FACETS
 
-Reusing the same observations, simulations, site, or method does not merge separately analyzed subsets. Put the reused material in a parent context. Create child contexts for each reported time window, season, environmental bin, lag, treatment value, or other filter when the paper reports results separately for those values. This rule also applies when the paper calls the analysis a sensitivity test, stratification, subset, binning, or lag analysis.
+Create one facet for each coherent condition. Give every facet a `facet_key` that is unique within its context, such as `season`, `water_source`, `patch_size`, or `background_wind`. The key is a short local identifier; the scientific wording belongs in `notion` and `description`.
 
-The length or prominence of an analysis does not determine whether it is a setting. A brief grid-resolution check, alternative parameter choice, robustness test, or sensitivity analysis has separate child settings when the paper changes a condition and reports a result for the changed value.
+Preserve reported quantities, units, ranges, seasons, atmospheric layers, time of day, spatial scale, direction, distance, patch or edge relations, and qualifications in the description.
 
-When the paper reports a continuous sensitivity, binned curve, or threshold, create child contexts for the explicitly described regimes, threshold sides, or individually discussed values that support different findings. Preserve the reported ranges or threshold in Facets. Do not invent unnamed bins that are visible only as unsupported possibilities.
+A facet defines the setting in which an analysis applies. Record temperature, precipitation, wind, cloud, vegetation, or other reported responses as claims when they are outcomes of the analysis. A measured variable may define a facet only when the paper uses its value to stratify or select settings before analyzing another result.
 
-For example, when one observational dataset is analyzed for a morning window and an evening window, create a parent for the common dataset and two children for the time windows. A morning-versus-evening comparison connects the two children; it does not connect the dataset parent to itself. Apply the same structure to separately analyzed dry and wet bins, early and late periods, or low and high forcing values.
+HOW TO RECORD TRANSITIONS
 
-Keep findings attributed only to cited literature distinct from findings produced by the current paper.
+Use different complete contexts as the two endpoints. When the paper identifies a control, baseline, or reference, use it as the starting context. Describe the manipulation or contrast rather than its climatic result.
 
-FACET DECISIONS
+Place every claim about a comparison inside that transition's `claims` array. Verify that the settings described by the claim are the transition endpoints.
 
-Record one coherent condition per facet. Preserve reported quantities, units, seasons, atmospheric layers, time of day, spatial scale, direction, distance, patch or edge relations, and qualifications in `description`.
+HOW TO RECORD CLAIMS
 
-Assign a facet to the most general context for which it remains true. A child receives a separate facet when its condition changes or becomes more specific.
-
-TRANSITION DECISIONS
-
-Use complete contexts as both endpoints. `from_context_temp_id` and `to_context_temp_id` must be different. When compared values share a dataset or setup, make that shared material their parent and use value-specific children as the endpoints. When the paper identifies a control, baseline, or reference, use it as the starting context. Describe the manipulation or contrast, not its climatic result. Cite the smallest passage set establishing the comparison.
-
-CLAIM DECISIONS
+Place a claim describing one setting inside that context's `claims` array. Place a claim describing a comparison or imposed change inside that transition's `claims` array. The containing object determines the claim's scope.
 
 Use `causal` when the paper explicitly attributes the outcome to the source or a controlled perturbation directly supports the attribution. Use `associative` for correlations, co-occurrence, observational preferences, and relationships without established causal attribution.
 
-Preserve separate null, opposite, conditional, seasonal, scale-dependent, spatial, magnitude-dependent, and timing-dependent findings as separate claims when the evidence distinguishes them. Split a multi-step mechanism only when the evidence supports every individual step.
-
-Include current-paper robustness and sensitivity findings even when they occupy only one sentence. Include the authors' supported interpretation as a separate Claim when it adds a mechanism rather than merely restating the observed relationship. Claim selection is based on direct support and scientific distinctness, not on whether a finding appears to be a headline result.
+Preserve null, opposite, conditional, seasonal, scale-dependent, spatial, magnitude-dependent, and timing-dependent findings as separate claims when the evidence distinguishes them. Include current-paper sensitivity and robustness findings. Include an authors' interpretation as a separate claim when it adds a supported mechanism.
 
 Classify `evidence_role` using exactly one value:
 
@@ -94,22 +82,28 @@ Classify `evidence_role` using exactly one value:
 - `CITED_BACKGROUND`: attributed only to another publication;
 - `HYPOTHESIS_OR_PROPOSAL`: proposed or expected, but not established by this paper.
 
-Use a facet in `conditioning_facet_temp_ids` only when the relationship depends on that condition, changes under it, is located or oriented by it, or is experimentally defined by it. Mere coexistence in the same setting is not conditioning.
+For each materially conditioning facet, return its context ID and facet key. A context claim may use facets from its own context or an ancestor. A transition claim may use facets from either endpoint or an ancestor of either endpoint. Include only conditions on which the relationship materially depends.
+
+EVIDENCE
+
+For every object, copy the smallest sufficient set of evidence handles that directly supports it. Every returned handle must be one of the handles shown in the input. Keep findings attributed only to cited literature distinct from findings produced by this paper.
 
 OUTPUT
 
-Return valid JSON only. The JSON Schema supplied with this request is authoritative. Return parent contexts before their children.
+Return valid JSON only, with no Markdown or surrounding commentary. The JSON Schema supplied with the request is authoritative. Return parent contexts before their children.
 
-For each item in `contexts`:
+For each context:
 
-- `temp_id`: Generate one unique temporary context ID such as `C1`.
+- `temp_id`: Generate a unique ID such as `C1`.
 - `label`: Generate a concise identifying noun phrase, usually 3-12 words.
-- `parent_temp_ids`: Copy parent temporary context IDs. Use an empty list for a root.
+- `parent_temp_ids`: Copy parent context IDs. Use an empty list for a root.
 - `split_reason`: Use `null` for a root. For a child use exactly one of `separate_reported_finding`, `sign_or_null_reversal`, `misleading_parent_scope`, or `explicit_transition_state`.
-- `aliases`: Copy paper-local names that refer to this same complete setting.
-- `spatial_support`: Use `null` if no place is stated. Otherwise return `kind`, `name`, `geometry`, and `resolution`.
-- `evidence_block_ids`: Copy the smallest SourceBlock set establishing the setting.
-- `facet_seed_block_ids`: Copy SourceBlock IDs containing conditions for the setting. These may repeat `evidence_block_ids`.
+- `aliases`: Copy paper-local names for the same setting. Use an empty list when none exist.
+- `spatial_support`: Use `null` when no place is stated. Otherwise return `kind`, `name`, `geometry`, and `resolution`.
+- `evidence_handles`: Copy the smallest evidence-handle set establishing the setting.
+- `facet_seed_handles`: Copy handles containing conditions for this setting. These may repeat `evidence_handles`.
+- `facets`: Return the conditions owned by this context.
+- `claims`: Return scientific relationships scoped to this context.
 
 For `spatial_support`:
 
@@ -118,38 +112,35 @@ For `spatial_support`:
 - `geometry`: Copy stated coordinates or geometry into a JSON object; otherwise use `null`.
 - `resolution`: Use exactly one of `exact`, `approximate`, `named_region`, `global`, or `unresolved`.
 
-For each item in `facets`:
+For each facet:
 
-- `temp_id`: Generate one unique temporary facet ID such as `F1`.
-- `context_temp_id`: Copy the temporary ID of the context that owns this condition.
+- `facet_key`: Generate a short identifier unique within its context, usually 1-4 lowercase words joined by underscores.
 - `domain`: Use exactly one of `spatial_configuration`, `land_surface`, `hydrology`, `atmosphere`, `climate`, `substrate_terrain`, or `other`.
 - `notion`: Generate a concise value-free scientific noun phrase, usually 2-8 words.
 - `description`: Generate an evidence-faithful description, usually 10-50 words, including reported values and qualifiers.
-- `evidence_block_ids`: Copy the smallest SourceBlock set directly supporting the condition.
+- `evidence_handles`: Copy the smallest handles directly supporting the condition.
 
-For each item in `transitions`:
+For each transition:
 
-- `temp_id`: Generate one unique temporary transition ID such as `T1`.
+- `temp_id`: Generate a unique ID such as `T1`.
 - `from_context_temp_id`: Copy the starting, control, baseline, or reference context ID.
 - `to_context_temp_id`: Copy the changed or compared context ID.
 - `label`: Generate a concise comparison name, usually 2-10 words.
-- `aliases`: Copy paper-local names for the comparison.
+- `aliases`: Copy paper-local names for the comparison. Use an empty list when none exist.
 - `description`: Generate one evidence-faithful sentence, usually 10-50 words, describing what changes.
-- `evidence_block_ids`: Copy the smallest SourceBlock set establishing the comparison.
-- `claim_seed_block_ids`: Copy SourceBlock IDs containing results for the comparison.
+- `evidence_handles`: Copy the smallest handles establishing the comparison.
+- `claim_seed_handles`: Copy handles containing results for the comparison.
+- `claims`: Return scientific relationships scoped to this transition.
 
-For each item in `claims`:
+For each claim:
 
-- `temp_id`: Generate one unique temporary claim ID such as `CL1`.
-- `scope_type`: Use exactly `context` or `transition`.
-- `scope_temp_id`: Copy a context temporary ID when `scope_type` is `context`, or a transition temporary ID when it is `transition`.
 - `from`: Return `concept` and `state`. Generate a compact scientific concept, usually 1-8 words, and a compact directional or categorical state, usually 1-5 words.
 - `to`: Use the same structure for the outcome.
 - `relation`: Use exactly `causal` or `associative`.
-- `description`: Generate one evidence-faithful sentence, usually 15-50 words, preserving material conditions, location, season, scale, magnitude, threshold, timing, or uncertainty.
+- `description`: Generate one evidence-faithful sentence, usually 15-50 words, preserving material conditions, location, season, scale, magnitude, threshold, timing, and uncertainty.
 - `evidence_role`: Use exactly one of the four values defined above.
-- `conditioning_facet_temp_ids`: Copy only materially conditioning temporary facet IDs reachable from the claim's context or transition endpoints through context inheritance.
-- `evidence_block_ids`: Copy the smallest directly supporting SourceBlock set.
+- `conditioning_facets`: For each material condition, copy `context_temp_id` and `facet_key`. Use an empty list when none materially condition the relationship.
+- `evidence_handles`: Copy the smallest directly supporting evidence-handle set.
 
 For `ambiguities`, write short descriptions of unresolved scientific or structural choices. Use an empty list when none remain.
 
@@ -158,5 +149,5 @@ USER
 PAPER IDENTIFIER
 {paper_id}
 
-CLEANED PAPER PASSAGES WITH SOURCEBLOCK IDS
+CLEANED PAPER PASSAGES WITH EVIDENCE HANDLES
 {paper_text}

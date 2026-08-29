@@ -220,3 +220,20 @@ Result: `46 passed`.
   thinking traces and JSON responses were byte-identical, with approximately
   469 seconds runtime each. On local Ollama 0.32.9, these three non-false levels
   did not produce different reasoning effort for this model/request.
+
+# Constrained combined extraction v4.1 (2026-08-29)
+
+- Replaced full SourceBlock IDs in the one-call prompt with request-local
+  handles and enumerated the allowed handles in the request JSON Schema.
+- Nested Facets and Context Claims inside Contexts and comparison Claims inside
+  Transitions, then deterministically flattened them into the unchanged final
+  ClimateKG schemas.
+- Rewrote the standalone Qwen prompt around complete experimental settings and
+  clarified that reported responses belong in Claims rather than Facets.
+- Replayed previously failing `P000010` with thinking disabled. It completed
+  through embeddings and Parquet/FAISS indexing in 242.6 seconds with 9
+  Contexts, 12 Facets, 5 Transitions, 17 Claims, and valid evidence round trips.
+- The 30% solar-efficiency Claim is now scoped to its own 30% Context instead of
+  the unrelated 15%-to-45% Transition.
+- Automatic combined routing remains disabled. This is a one-paper structural
+  result; crossed-factor `P000007` and a broader corpus remain to be tested.
