@@ -1,0 +1,192 @@
+{
+  "version": "1.0",
+  "purpose": "Fixed translations for turning technical watershed recommendations into farmer-friendly English.",
+  "style_rules": {
+    "reading_level": "Use everyday English for a non-technical adult reader.",
+    "sentence_length": "Prefer sentences of 18 words or fewer.",
+    "maximum_recommendations": 3,
+    "confidence_labels": [
+      "High",
+      "Medium",
+      "Low"
+    ],
+    "required_order": [
+      "main recommendation",
+      "where to act",
+      "likely benefit",
+      "main caution",
+      "confidence",
+      "next check"
+    ],
+    "rules": [
+      "Preserve all warnings, uncertainty, directions, seasons, and numbers that materially affect a decision.",
+      "Do not promise changes to rainfall, temperature, humidity, wind, or crop yield.",
+      "Do not describe retrieved papers or the language model.",
+      "Do not show retrieval scores, model names, or internal gate scores.",
+      "When evidence is weak, say plainly that the farmer should not depend on that benefit.",
+      "Use a technical term only when no listed farmer-friendly wording can preserve its meaning."
+    ]
+  },
+  "translations": [
+    {
+      "technical": "land-use and land-cover change",
+      "variants": ["LULC", "LULCC", "land cover change"],
+      "farmer_friendly": "changing how the land is used or covered"
+    },
+    {
+      "technical": "watershed",
+      "variants": ["micro-watershed"],
+      "farmer_friendly": "watershed, the land draining to the same stream"
+    },
+    {
+      "technical": "afforestation",
+      "variants": ["reforestation", "tree-cover increase"],
+      "farmer_friendly": "planting and restoring suitable trees"
+    },
+    {
+      "technical": "agroforestry",
+      "variants": ["agroforestry system", "agroforestry systems"],
+      "farmer_friendly": "trees grown alongside crops"
+    },
+    {
+      "technical": "shelterbelt",
+      "variants": ["windbreak"],
+      "farmer_friendly": "a row of trees or shrubs that slows the wind"
+    },
+    {
+      "technical": "evapotranspiration",
+      "variants": ["ET"],
+      "farmer_friendly": "water released from soil and plants into the air"
+    },
+    {
+      "technical": "surface roughness",
+      "variants": ["aerodynamic roughness", "rougher surfaces"],
+      "farmer_friendly": "wind resistance created by trees and other ground cover"
+    },
+    {
+      "technical": "roughness",
+      "variants": [],
+      "farmer_friendly": "resistance to wind near the ground"
+    },
+    {
+      "technical": "albedo",
+      "variants": [],
+      "farmer_friendly": "how much sunlight the ground reflects"
+    },
+    {
+      "technical": "latent heat flux",
+      "variants": ["latent heat"],
+      "farmer_friendly": "heat used to evaporate water instead of heating the ground"
+    },
+    {
+      "technical": "sensible heat",
+      "variants": ["sensible-heat dominated"],
+      "farmer_friendly": "heat that directly warms the ground and air"
+    },
+    {
+      "technical": "boundary layer",
+      "variants": ["atmospheric boundary layer"],
+      "farmer_friendly": "the air close to the ground"
+    },
+    {
+      "technical": "moisture recycling",
+      "variants": [],
+      "farmer_friendly": "reuse of water released by soil and plants"
+    },
+    {
+      "technical": "soil-moisture coupling",
+      "variants": ["land-atmosphere coupling", "soil-air coupling", "coupling strength", "coupling", "TCI"],
+      "farmer_friendly": "how strongly wet or dry soil affects the air above it"
+    },
+    {
+      "technical": "evaporative fraction",
+      "variants": ["EF", "EF proxy"],
+      "farmer_friendly": "the share of available heat used to evaporate water"
+    },
+    {
+      "technical": "aridity index",
+      "variants": ["AI"],
+      "farmer_friendly": "a measure of how dry the area is"
+    },
+    {
+      "technical": "convective triggering potential",
+      "variants": ["CTP", "CTP-HI", "HIlow", "triggerability"],
+      "farmer_friendly": "whether the air is ready to turn added heat and moisture into rain"
+    },
+    {
+      "technical": "diurnal temperature range",
+      "variants": ["DTR"],
+      "farmer_friendly": "the difference between daytime and night-time temperature"
+    },
+    {
+      "technical": "leaf area index",
+      "variants": ["LAI", "leaf_area"],
+      "farmer_friendly": "the amount of leaf cover"
+    },
+    {
+      "technical": "cropping-practice change",
+      "variants": ["cropping_practice"],
+      "farmer_friendly": "changing field practices, such as keeping soil covered or reducing tillage"
+    },
+    {
+      "technical": "residue retention",
+      "variants": [],
+      "farmer_friendly": "keeping suitable crop remains on the soil"
+    },
+    {
+      "technical": "crop residue",
+      "variants": [],
+      "farmer_friendly": "suitable crop remains"
+    },
+    {
+      "technical": "supplemental irrigation",
+      "variants": ["deficit irrigation"],
+      "farmer_friendly": "using a limited amount of water when crops need it most"
+    },
+    {
+      "technical": "transitionable land",
+      "variants": ["convertible land", "transitionable LULC", "convertible"],
+      "farmer_friendly": "land that may be suitable for a carefully planned change"
+    },
+    {
+      "technical": "aerodynamic drag",
+      "variants": ["drag"],
+      "farmer_friendly": "friction that slows the wind"
+    },
+    {
+      "technical": "contiguous",
+      "variants": [],
+      "farmer_friendly": "connected"
+    },
+    {
+      "technical": "monoculture",
+      "variants": [],
+      "farmer_friendly": "a single crop grown over a large area"
+    },
+    {
+      "technical": "precipitation",
+      "variants": [],
+      "farmer_friendly": "rainfall"
+    },
+    {
+      "technical": "humidity/VPD",
+      "variants": [],
+      "farmer_friendly": "air moisture conditions"
+    },
+    {
+      "technical": "vapour pressure deficit",
+      "variants": ["vapor pressure deficit", "VPD"],
+      "farmer_friendly": "crop-air dryness"
+    },
+    {
+      "technical": "binding gate",
+      "variants": ["failed gate", "failing gate"],
+      "farmer_friendly": "a local condition that prevents a reliable claim"
+    },
+    {
+      "technical": "screening",
+      "variants": ["screening step"],
+      "farmer_friendly": "an early check that must be confirmed locally"
+    }
+  ]
+}

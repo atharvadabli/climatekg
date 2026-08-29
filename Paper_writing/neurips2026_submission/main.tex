@@ -1,0 +1,122 @@
+\documentclass{article}
+\usepackage{tackling_climate_workshop_style}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{url}
+
+\newcommand{\system}{ClimateKG}
+\newcommand{\code}[1]{\texttt{#1}}
+\title{ClimateKG: Context-Gated Scientific GraphRAG for\\Literature-Grounded Land-Use Scenario Design}
+\author{Anonymous Author(s)}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Land-use and land-cover changes alter surface energy, water, and momentum exchanges, but the resulting cloud, rainfall, and temperature responses depend on season, hydroclimate, background wind, and intervention geometry. Testing many spatial land-use scenarios with convection-resolving models is expensive, while ordinary retrieval can combine topically relevant but environmentally incompatible findings. We introduce \system{}, a scientific GraphRAG system that extracts evidence-backed claims together with the complete study settings under which they hold, gates evidence by a query's environmental context before graph traversal, and returns answers traceable to exact source passages. A staged run completed 17 papers, producing 2,583 evidence blocks, 155 study contexts, and 261 scientific claims; a separate ten-paper end-to-end validation exercised graph construction and cited querying. Two case studies show why conditioning matters: patch size and wind alter heterogeneous-surface convection, while the same observed deforestation pattern yields null, cloud-only, or rainfall responses across atmospheric regimes. The system is intended to propose auditable hypotheses and a small set of candidate land-use rasters for subsequent WRF evaluation, not to prescribe land management or replace simulation.
+\end{abstract}
+
+\section{Why context-conditioned evidence?}
+Land surfaces influence temperature, boundary-layer growth, clouds, rainfall, and circulation through albedo, roughness, soil moisture, and evapotranspiration \citep{pielke2007,cao2020}. These effects are not intervention lookup rules. Mesoscale soil-moisture patterns can organize storm initiation \citep{taylor2011}; changing patch size or background wind can change whether and where convection develops \citep{lee2019}. Likewise, observed Amazonian deforestation produced different cloud and rainfall responses under different seasonal and synoptic regimes \citep{wang2000}. A useful literature system must therefore retrieve not only \emph{what} changed and \emph{what} followed, but \emph{where, when, at what scale, and under which atmospheric state}.
+
+The motivating application is scenario design. Exploring many high-resolution land-cover layouts for many regions with a numerical model such as WRF \citep{skamarock2019} is computationally demanding; multi-year convection-resolving regional simulations illustrate the scale of this cost \citep{leutwyler2017}. Literature can narrow this search: retrieve transferable mechanisms, identify conditions and counter-evidence, generate a small set of spatially explicit candidate land-use rasters, and then test those candidates numerically. Plain RAG \citep{lewis2020} provides passage evidence, and generic GraphRAG supports corpus-level connections and summaries \citep{edge2024}; neither representation makes environmental applicability a first-class constraint.
+
+We contribute (1) a provenance-preserving representation of scientific findings and their study settings; (2) context gating before mechanism-path search, while separating missing information from mismatch; (3) staged and single-call extraction routes for different paper lengths; and (4) a reproducible pilot with saved prompts, model responses, intermediate JSON, graph tables, query reports, and exact citations. The contribution is an evidence-to-hypothesis system, not evidence that any retrieved intervention will work locally.
+
+\begin{figure}[t]
+\centering
+\fbox{\begin{minipage}{0.96\linewidth}\small
+\textbf{Indexing:} PDF $\rightarrow$ Nemotron Parse v1.2 $\rightarrow$ cleaned \textbf{EvidenceBlocks} $\rightarrow$ hierarchical \textbf{StudyContexts} + \textbf{ContextFacets} $\rightarrow$ \textbf{LandTransitions} + evidence-backed \textbf{ScientificClaims} $\rightarrow$ canonical concepts + embeddings $\rightarrow$ Parquet/Neo4j graph.\\[-1pt]
+\textbf{Querying:} question + optional local data $\rightarrow$ structured query context $\rightarrow$ context candidates and coverage $\rightarrow$ claim gate $\rightarrow$ compatible mechanism paths $\rightarrow$ smallest supporting EvidenceBlocks $\rightarrow$ cited answer.
+\end{minipage}}
+\caption{\system{} makes the scientific setting part of retrieval. Claims are gated before they can participate in a mechanism path.}
+\label{fig:pipeline}
+\end{figure}
+
+\section{ClimateKG}
+\paragraph{Scientific representation.}
+An \textbf{EvidenceBlock} is a stable, page-linked passage from the current paper. A \textbf{StudyContext} is one complete observational or experimental setting; a hierarchy shares common setup while preserving children such as the same region in different seasons or the same simulation at different patch sizes and wind speeds. A \textbf{ContextFacet} records one relevant property (e.g., atmosphere, climate, hydrology, land surface, terrain, or spatial configuration). A \textbf{LandTransition} links baseline and changed settings. A \textbf{ScientificClaim} connects source and target states, marks causal versus associative language, and cites the smallest directly supporting blocks. These reader-facing names correspond to \code{SourceBlock}, \code{Context}, \code{Facet}, \code{Transition}, and \code{Claim} in the released schemas.
+
+\paragraph{Indexing.}
+NVIDIA Nemotron Parse v1.2 is the sole PDF parser. Deterministic cleaning removes repeated furniture and marks reference material for exclusion from semantic extraction while preserving sections, tables, captions, units, and provenance. The local Qwen3.6--27B model is used only for semantic extraction and reconciliation; Pydantic schemas reject malformed references rather than silently repairing scientific content. Long papers use a staged route: section scouting, a compact hierarchy of complete settings, facet extraction, claim extraction, consolidation, and state canonicalization. Short cleaned papers may use one structured extraction call followed by the same deterministic consolidation and graph stages. Qwen3-Embedding-4B produces normalized 2,048-dimensional vectors. Embedding similarity proposes candidates; it does not force uncertain concept merges.
+
+\paragraph{Context retrieval and claim gating.}
+The query parser returns optional source/target states, an intervention, and ContextFacets. For same-domain query facet $q$ and candidate facet $f$, pair similarity is
+\begin{equation}
+s(q,f)=\alpha\cos(E_n(q),E_n(f))+(1-\alpha)\cos(E_c(q),E_c(f)),
+\end{equation}
+where $E_n$ embeds the domain and notion and $E_c$ includes the description. Directional MaxSim averages each query facet's best same-domain match. Coverage is reported separately, and the ranking score is $S_{ctx}=S_{sem}[1-\lambda(1-\mathrm{coverage})]$; absent information is therefore not treated as contradiction. Approximate nearest-neighbor search proposes contexts, followed by exact facet-level reranking.
+
+A claim first inherits applicability from its supporting StudyContext (or the baseline context of its transition). Only facets that materially condition that claim affect its conditioning score. Context, mechanism, intervention, and endpoint signals remain separate in the report and are combined only for ranking. Gating precedes beam search, preventing a path from joining individually plausible claims supported by incompatible settings. Spatial relations retain distinct rules for local advection, patch/edge effects, distance decay, windward/leeward effects, moisture recycling, and teleconnections. A cardinal recommendation requires local geometry and transferable evidence.
+
+\paragraph{Grounded answer.}
+The synthesis prompt sees only selected claims, context scores, and their supporting EvidenceBlocks. Evidence-budget trimming cannot retain a claim after removing all its support. Every substantive answer statement links to a claim, paper, page, and block; scores are ranking signals, not probabilities that a finding is true.
+
+\section{Pilot validation}
+\paragraph{Execution and efficiency.}
+We selected PDFs spanning heterogeneity, irrigation, vegetation change, deforestation, albedo, roughness, and soil-moisture feedbacks. Table~\ref{tab:pilot} reports saved runs, not a claim of corpus representativeness. The staged run registered 20 papers and completed 17; three were visibly retained for review. It took 20.02 minutes per completed paper on average (20.92 median), with paper mapping, facet extraction, parsing, and claim extraction dominating time. The completed graph contains 6,057 relationships and 1,341 evidence links. In a separate ten-paper combined-route experiment, 7/10 papers passed all checks using one extraction call per paper; successful papers averaged 3.29 minutes. The three rejected outputs contained invalid evidence or conditioning references. This route is faster, but its 70\% completion rate motivates routing and fail-closed validation rather than treating it as universally interchangeable with staged extraction.
+
+\begin{table}[t]
+\centering\small
+\caption{Measured artifacts from saved pilot runs. Times include cached parsing in the combined experiment, so route times are not a controlled end-to-end speed comparison.}
+\label{tab:pilot}
+\begin{tabular}{lrr}
+\toprule
+ & Staged run & Combined run \\
+\midrule
+Registered / completed papers & 20 / 17 & 10 / 7 \\
+EvidenceBlocks & 2,583 & 906 \\
+StudyContexts / ContextFacets & 155 / 497 & 46 / 60 \\
+LandTransitions / ScientificClaims & 54 / 261 & 20 / 65 \\
+Mean successful paper time & 20.02 min & 3.29 min \\
+LLM calls & 305 & 10 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{End-to-end and mechanism cases.}
+A separate ten-paper validation built 2,184 EvidenceBlocks, 101 StudyContexts, 437 ContextFacets, 51 LandTransitions, and 213 ScientificClaims, then exercised Parquet/Neo4j ingestion and ten fixed query workflows. All ten produced schema-valid cited answers after defect-focused reruns. This verifies pipeline execution and traceability, not answer correctness at benchmark scale.
+
+Table~\ref{tab:cases} presents two manually checked cases. For the in-corpus heterogeneous-surface query, parsing preserved the 14.4-km chessboard and zero-wind facets. The top context had full facet coverage ($S_{ctx}=0.676$), and the answer cited the finding that patches above 5 km transitioned from shallow cumulus to deep precipitating convection over dry patches, while homogeneous forcing retained shallow clouds. It also preserved the counterintuitive result that cross-patch circulation reduced the near-surface dry--wet temperature contrast \citep{lee2019}. With 1 m s$^{-1}$ wind, a separate claim moves convergence from the dry-patch center to its downwind edge, so collapsing the cases would produce a misleading spatial answer.
+
+The Rondonia extraction separates rainy, break, and dry-season simulations. Under rainy-season strong synoptic forcing, control and deforestation rainfall were nearly identical and mesoscale circulations were inhibited. During the break, weakened winds allowed enhanced low cloud but little colocated rainfall. In the dry-season setting, weak wind allowed a stronger land-induced circulation and localized convective response \citep{wang2000}. The same land pattern therefore cannot be mapped to one unconditional ``deforestation increases rainfall'' edge.
+
+\begin{table}[t]
+\centering\scriptsize
+\caption{Why complete study settings matter. IDs point to released claims and exact supporting blocks in the appendix.}
+\label{tab:cases}
+\begin{tabular}{p{0.18\linewidth}p{0.35\linewidth}p{0.35\linewidth}}
+\toprule
+Case & Preserved conditions & Indexed/queried conclusion \\
+\midrule
+Heterogeneous LES & 14.4-km dry/wet chessboard; zero wind & $>5$-km patches support deep precipitating convection over dry patches; cross-patch mixing reduces surface contrast (CL002, CL004). \\
+Rondonia deforestation & Rainy/break/dry season; original vs. weakened synoptic wind & Null rainfall under strong forcing; cloud-only response in weakened-wind break case; dry-season circulation response (CL001, CL006--010, CL015). \\
+New Rajasthan location & Semi-arid; 10--15-km alternating irrigated/dry patches; weak monsoon wind & Literature analogy can motivate a mechanism hypothesis, but cannot establish local rainfall or cardinal placement without local geometry and numerical/field validation. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Frozen query audit.}
+We froze three questions before inspection: the in-corpus 14.4-km zero-wind LES case; the in-corpus Rondonia seasonal/wind comparison; and an out-of-corpus semi-arid Rajasthan case with weak monsoon wind and proposed 10--15-km irrigated/dry patches. For each answer, the saved audit records direct support, citation coverage, conditioning variables, incompatible evidence, causal wording, unsupported local advice, latency, and tokens. The first query passed manual trace inspection. The second revealed the downstream recall failure described below. The third returned cited cloud/edge mechanisms and an explicit transfer warning in 4.84 minutes, but omitted the requested patch scale and did not reconcile weak user-specified wind with derived JJA wind of 3.09 m s$^{-1}$. These cases are diagnostic, not a powered benchmark.
+
+The packaged plain RAG and Microsoft GraphRAG implementations enable a later equal-corpus comparison. A valid comparison must hold the questions, generation model, evidence budget, and source corpus fixed; separately score applicable-claim retrieval, incompatible-evidence rate, citation support, and answer completeness; and report latency and compute. Community summarization and context-gated path retrieval serve different purposes, so we do not interpret one case-study answer as universal system superiority. A held-out expert annotation set is still required.
+
+\section{Climate impact pathway and limits}
+For scientists, \system{} exposes mechanism paths and contradictions for literature synthesis. For regional planners, it can translate a local question into a shortlist of evidence-backed scenarios and explicit unknowns. For farmers or communities, it may support transparent discussion, but should not issue autonomous recommendations. A proposed workflow is: define the target region and objective; derive citable local climate, terrain, land-cover, wind, and geometry variables; retrieve compatible findings; generate a small, diverse set of LULC rasters; evaluate them with WRF or another appropriate model; and assess water, food, biodiversity, livelihood, and justice trade-offs with local experts and affected communities.
+
+The present corpus is small and geographically biased; extraction still fails; similarity is not causal validity; and no WRF experiment, field validation, stakeholder study, or statistical system-superiority benchmark has been completed. A frozen 17-paper Rondonia query also exposed a downstream failure: the correct paper's context ranked sixth and its claims entered the candidate set, but source-state mapping was cleared and path search retained only generic deforestation paths. The answer appropriately reported missing seasonal evidence, yet failed to use available evidence. This localizes an important limitation to path seeding/selection rather than extraction. The new-location case is consequently a transferability audit, not a recommendation. Plain RAG and Microsoft GraphRAG are packaged for controlled comparison, but we do not report unfinished baseline results. Immediate priorities are expert annotation, citation/path audits, equal-budget baselines, and numerical testing of selected raster scenarios. Even before those stages, the pilot shows that complete study settings prevent distinct regimes from being flattened into one literature edge and keep generated statements inspectable at source.
+
+\clearpage
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\clearpage
+\appendix
+\input{appendix}
+\end{document}

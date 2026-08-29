@@ -1,0 +1,44 @@
+{
+  "version": "pilot_v1",
+  "systems": ["plain_rag", "microsoft_graphrag", "climatekg"],
+  "shared_generation_model": "qwen3.6:27b",
+  "shared_embedding_model_where_supported": "qwen3-embedding:4b",
+  "queries": [
+    {
+      "id": "Q1_IN_HETEROGENEITY",
+      "corpus_relation": "in_corpus",
+      "question": "Under zero background wind over a heterogeneous chessboard surface with 14.4 km dry and wet patches, how does surface heat-flux heterogeneity affect local cloud development and precipitation?",
+      "must_preserve": ["zero background wind", "14.4 km patches", "dry and wet patch configuration"],
+      "expected_evidence": ["P000001_CL001", "P000001_CL002", "P000001_CL003", "P000001_CL004"],
+      "counterintuitive_point": "Horizontal circulations can reduce near-surface dry-wet temperature contrast while promoting deeper convection over sufficiently large dry patches."
+    },
+    {
+      "id": "Q2_IN_RONDONIA",
+      "corpus_relation": "in_corpus",
+      "question": "How did observed deforestation patterns in Rondônia affect clouds and rainfall in the rainy, break, and dry-season simulations, and how did synoptic wind condition the response?",
+      "must_preserve": ["Rondônia", "rainy season", "break period", "dry season", "original versus weakened synoptic wind"],
+      "expected_evidence": ["P000019_CL001", "P000019_CL006", "P000019_CL007", "P000019_CL008", "P000019_CL010", "P000019_CL015"],
+      "counterintuitive_point": "The same land pattern produces null, cloud-only, or rainfall responses depending on season and synoptic forcing."
+    },
+    {
+      "id": "Q3_OUT_SEMIARID",
+      "corpus_relation": "out_of_corpus_location",
+      "question": "For a semi-arid planning area in Rajasthan with strong daytime heating, weak monsoon background wind, and proposed 10-15 km alternating irrigated and dry land patches, what literature-supported local cloud or rainfall mechanisms are transferable, and what remains uncertain?",
+      "must_preserve": ["semi-arid", "Rajasthan", "weak monsoon background wind", "10-15 km alternating irrigated and dry patches"],
+      "expected_evidence": [],
+      "counterintuitive_point": "Environmental analogy may support a mechanism hypothesis but cannot establish a local effect or cardinal placement without local geometry and validation."
+    }
+  ],
+  "audit_fields": [
+    "directly_supported_statements",
+    "citation_precision",
+    "citation_coverage",
+    "conditioning_variables_preserved",
+    "incompatible_evidence_used",
+    "causal_associative_distinction_preserved",
+    "unsupported_location_specific_recommendation",
+    "answer_latency_seconds",
+    "prompt_tokens",
+    "generation_tokens"
+  ]
+}

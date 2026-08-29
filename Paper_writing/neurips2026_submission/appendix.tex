@@ -1,0 +1,84 @@
+\section{Reproducibility and extraction detail}
+
+\subsection{Released artifacts}
+The repository preserves the rendered/cleaned document, stable EvidenceBlocks, every completed LLM request and response, schema-validation failures, consolidated paper JSON, embeddings, Parquet graph tables and ANN indexes, and per-query reports. The two extraction routes converge on the same final schema. The staged route is:
+\begin{quote}\small
+section scout $\rightarrow$ hierarchy of complete experimental settings $\rightarrow$ ContextFacet extraction $\rightarrow$ ScientificClaim extraction $\rightarrow$ context reconciliation $\rightarrow$ paper consolidation $\rightarrow$ state canonicalization $\rightarrow$ embeddings.
+\end{quote}
+The combined route supplies all cleaned non-reference EvidenceBlocks to a single structured extraction prompt, then uses the same reconciliation, consolidation, state, embedding, and graph steps. The routing count uses the \code{o200k\_base} tokenizer on cleaned non-reference blocks; 8,000 tokens is a preferred target rather than a hard rejection boundary, with a configured 16,000-token safety limit for the experiment reported here.
+
+\subsection{Central object schemas}
+Below, \code{evidence\_block\_ids} must name directly supporting passages from the current paper. IDs are permanent after assignment.
+\begin{verbatim}
+StudyContext {
+  id, paper_id, name, description,
+  parent_context_id?, evidence_block_ids[], context_embedding
+}
+ContextFacet {
+  id, paper_id, context_id,
+  domain: spatial_configuration | land_surface | hydrology |
+          atmosphere | climate | substrate_terrain | other,
+  notion, description, origin, source?, evidence_block_ids[], embeddings
+}
+LandTransition {
+  id, paper_id, from_context_id, to_context_id,
+  intervention_description, evidence_block_ids[]
+}
+ScientificClaim {
+  id, paper_id,
+  scope_type: context | transition, scope_id,
+  from: {concept, state}, to: {concept, state},
+  relation: causal | associative,
+  description, evidence_role,
+  conditioning_facet_ids[], evidence_block_ids[], claim_embedding
+}
+\end{verbatim}
+
+\section{Staged trace: heterogeneous surface experiment}
+The indexed paper is Lee et al. \citep{lee2019}, DOI \code{10.1175/JAS-D-18-0196.1}. Nemotron Parse produced 163 EvidenceBlocks. Staged extraction produced 26 StudyContexts, 59 ContextFacets, four LandTransitions, and 18 ScientificClaims. The setting hierarchy retains the common LES setup and separates heterogeneous patch size/wind combinations from homogeneous dry, wet, and domain-mean controls. For example, the 14.4-km case has distinct zero, 1, and 2 m s$^{-1}$ children rather than one context with wind described in prose.
+
+\paragraph{Claim CL002.}
+\code{P000001\_CL002} is a causal claim scoped to transition \code{P000001\_T001}; it is conditioned by facet \code{P000001\_F012}. Its description states that chessboard heat-flux heterogeneity with patches above 5 km produces a transition from shallow cumulus to deep precipitating convection over dry patches, whereas homogeneous domain-mean fluxes retain scattered shallow clouds. The sole evidence is \code{P000001:S06:P0033}, which reports deep clouds above 6 km and significant precipitation over dry patches for large zero-wind patches, versus shallow cumulus for patches below 5 km.
+
+\paragraph{Claim CL004.}
+\code{P000001\_CL004} uses \code{P000001:S11:P0112} to record that active cross-patch circulation horizontally mixes the boundary layer and reduces the near-surface dry--wet temperature contrast. This is easy to omit from a simple ``heterogeneity causes convection'' summary, yet it is important because the surface-temperature response and cloud response do not follow the same naive contrast argument.
+
+\paragraph{Wind-dependent spatial claim.}
+\code{P000001\_CL014} cites \code{P000001:S11:P0097} and \code{P000001:S12:P0122}: changing background wind from zero to 1 m s$^{-1}$ moves the convergence/updraft from the dry-patch center to the downwind edge; sufficiently stronger flow destroys the organized circulation. This claim belongs to a different transition and cannot be substituted into the zero-wind answer.
+
+\subsection{Query trace}
+The frozen question was: ``Under zero background wind over a heterogeneous chessboard surface with 14.4 km dry and wet patches, how does surface heat-flux heterogeneity affect local cloud development and precipitation?'' The parser created two user-origin facets: (i) spatial configuration, notion \emph{chessboard surface pattern}, description \emph{14.4 km patches}; and (ii) atmosphere, notion \emph{zero background wind}. The top retrieved context matched both domains (coverage 1.0), with spatial and atmospheric pair scores 0.662 and 0.691 and overall context score 0.676. After claim gating, synthesis cited CL002 for deep precipitating convection, CL001 for stronger updrafts, CL003 for mixed-layer thermodynamics, and CL004 for reduced surface contrast. The response explicitly limited transfer to the described patch configuration and did not invent a local cardinal placement.
+
+\section{Staged trace: Rondonia deforestation}
+The indexed study is Wang et al. \citep{wang2000}. Its 142 EvidenceBlocks yielded 20 StudyContexts, 44 ContextFacets, eight LandTransitions, and 33 ScientificClaims. The hierarchy separates break-period original wind, break-period weakened wind, rainy-season strong forcing, and dry-season weak-wind settings.
+
+\begin{table}[h]
+\centering\small
+\caption{Selected extracted findings and their exact evidence anchors.}
+\begin{tabular}{p{0.12\linewidth}p{0.54\linewidth}p{0.20\linewidth}}
+\toprule
+Claim & Extracted result & EvidenceBlock(s) \\
+\midrule
+CL001 & Break period, original wind: at most 0.1 mm at isolated control locations and almost no rainfall in the deforestation run. & S08:P0056 \\
+CL006--007 & Weakened wind: enhanced low cumulus at 900--800 hPa over deforested areas, but sparse rain cells did not overlap the enhanced cloud. & S08:P0062, P0064 \\
+CL008--010 & Rainy season: control and deforestation rainfall/cloud distributions were nearly identical because stronger synoptic forcing inhibited mesoscale circulation. & S09:P0072, P0074; S11:P0101 \\
+CL015 & Dry season, weak wind: significant low-level mesoscale heat flux indicated a land-induced circulation; related evidence reports localized convection/rainfall on the first day. & S10:P0091, P0092 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This trace illustrates the representation's purpose. A graph with one unconditional \emph{deforestation $\rightarrow$ rainfall} edge would erase null and cloud-only regimes and could reverse the interpretation of a local query.
+
+\subsection{Observed retrieval failure}
+We ran the frozen Rondonia question over the 17-paper Parquet graph. The parser correctly created rainy/break/dry-season and synoptic-wind facets and added provenance-bearing local enrichment. The best P000019 StudyContext ranked sixth (context score 0.495); P000019 claims including CL001, CL007, CL008, CL010, and CL015 appeared among claim candidates. Nevertheless, the state-mapping stage emitted \code{QUERY\_UNSUPPORTED\_SOURCE\_STATE\_CLEARED}, and all four retained mechanism paths used generic P000002 deforestation claims. Synthesis therefore stated that the supplied evidence lacked seasonal and wind-conditioned findings. This was a grounded abstention relative to its selected evidence, but an end-to-end retrieval error because applicable indexed evidence existed. The saved report localizes the defect to source-state/path seeding and evidence selection after context retrieval.
+
+\section{New-location transfer and baselines}
+The frozen out-of-corpus question describes a semi-arid Rajasthan planning area, strong daytime heating, weak monsoon background wind, and proposed alternating irrigated/dry patches of 10--15 km. A place name alone is not used to infer climate. Query enrichment may add reproducibly sourced local facets (coordinates/geometry, climate class, aridity, elevation, wind, land cover, and patch metrics), with each derived value retaining dataset and operation provenance. Retrieval may then identify analogous patch-circulation mechanisms, but the answer must report missing or mismatched facets and cannot assert local rainfall, optimal LULC, or cardinal placement without applicable evidence and local numerical or field validation.
+
+\paragraph{Observed out-of-corpus result.}
+The query resolved Rajasthan to an approximate point and derived a TerraClimate aridity ratio of 0.209 (semi-arid), BWh K\"oppen--Geiger class, cropland land cover, terrain, and seasonal ERA5-Land winds with dataset provenance. End-to-end latency was 290.4 s: query parsing used 12.9 s (882 prompt and 325 generated tokens), while synthesis used 232.3 s (19,224 prompt and 1,026 generated tokens). The answer cited mechanisms for enhanced afternoon cloud over vegetated/cropland surfaces and downwind edge effects, and explicitly warned that the evidence came from other climate regimes and did not establish transfer to Rajasthan. However, the parser encoded the 10--15-km alternating pattern in the source state rather than a spatial-configuration facet, and the answer omitted that scale. It also failed to reconcile the user's weak-monsoon description with derived JJA wind of 3.09 m s$^{-1}$. The run therefore passed basic grounding/abstention checks but failed the full conditioning audit.
+
+The release includes three runnable systems: the proposed indexing/query pipeline, a project-owned plain RAG baseline, and Microsoft GraphRAG 3.1.1 under its MIT license. A frozen comparison file specifies the same three questions, local Qwen3.6--27B generator, shared embedding model where supported, corpus, and audit fields. Required audits are direct support, citation precision/coverage, preservation of conditioning variables, incompatible evidence use, causal/associative language, unsupported location-specific recommendations, latency, and token use. We deliberately omit incomplete baseline scores from the main paper.
+
+\section{Known limitations and next validation steps}
+The pilot is not a representative literature census. PDF errors, extraction omissions, schema failures, canonicalization mistakes, and incomplete local enrichment remain possible. A claim's retrieval score is not scientific confidence, external validity, feasibility, or net climate benefit. Before planning use, the system requires a held-out, expert-annotated query benchmark; independent citation and path review; geographic coverage analysis; equal-budget RAG/GraphRAG baselines; sensitivity analysis for context weights and thresholds; and WRF experiments for selected scenarios. Any intervention also requires water, biodiversity, food, livelihood, governance, and equity assessment with affected communities.

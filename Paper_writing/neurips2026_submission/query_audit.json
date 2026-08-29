@@ -1,0 +1,61 @@
+{
+  "version": "pilot_manual_audit_v1",
+  "scope_note": "Diagnostic case audit; not a statistically powered benchmark.",
+  "queries": [
+    {
+      "id": "Q1_IN_HETEROGENEITY",
+      "status": "pass_manual_trace",
+      "artifact": "climatekg/runtime/outputs/hierarchy_e2e_het_v10/queries_v4/QHET_14KM_U0/query_report.json",
+      "conditioning_variables_preserved": [
+        "14.4 km chessboard patches",
+        "zero background wind"
+      ],
+      "selected_claims": [
+        "P000001_CL001",
+        "P000001_CL002",
+        "P000001_CL003",
+        "P000001_CL004"
+      ],
+      "unsupported_location_specific_recommendation": false,
+      "notes": "Top context coverage was 1.0 and overall context score was 0.676."
+    },
+    {
+      "id": "Q2_IN_RONDONIA",
+      "status": "fail_path_recall",
+      "artifact": "climatekg/runtime/outputs/indexing_50_medium_map_20260829/paper_queries/Q2_IN_RONDONIA/query_report.json",
+      "conditioning_variables_preserved": [
+        "rainy, break, and dry-season simulations",
+        "synoptic wind conditioning"
+      ],
+      "retrieval_observation": "P000019 best Context ranked 6 and its Claims entered the candidate set.",
+      "failure": "QUERY_UNSUPPORTED_SOURCE_STATE_CLEARED; all four retained paths used P000002 Claims.",
+      "grounded_relative_to_selected_evidence": true,
+      "end_to_end_correct": false
+    },
+    {
+      "id": "Q3_OUT_SEMIARID",
+      "status": "partial_conditioning_failure",
+      "artifact": "climatekg/runtime/outputs/indexing_50_medium_map_20260829/paper_queries/Q3_OUT_SEMIARID/query_report.json",
+      "latency_seconds": 290.4,
+      "query_parse": {
+        "elapsed_seconds": 12.9,
+        "prompt_tokens": 882,
+        "generated_tokens": 325
+      },
+      "final_synthesis": {
+        "elapsed_seconds": 232.3,
+        "prompt_tokens": 19224,
+        "generated_tokens": 1026
+      },
+      "passed": [
+        "citations supplied for substantive mechanisms",
+        "explicit warning that source climates differ from Rajasthan",
+        "no invented cardinal placement"
+      ],
+      "failed": [
+        "10-15 km pattern omitted as a spatial-configuration Facet and from answer",
+        "weak user-specified monsoon wind not reconciled with derived JJA wind of 3.09 m/s"
+      ]
+    }
+  ]
+}

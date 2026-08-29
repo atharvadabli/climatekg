@@ -16,6 +16,16 @@ htmlcov/
 
 # ClimateKG runtime data, models, caches, and generated outputs
 climatekg/runtime/
+Paper_writing/neurips2026_submission/build/
+Paper_writing/neurips2026_submission/*.aux
+Paper_writing/neurips2026_submission/*.bbl
+Paper_writing/neurips2026_submission/*.blg
+Paper_writing/neurips2026_submission/*.log
+Paper_writing/neurips2026_submission/*.out
+Paper_writing/neurips2026_submission/*.toc
+baselines/**/output/
+baselines/**/cache/
+baselines/**/__pycache__/
 output/
 
 # Local release bundles and generated archives
