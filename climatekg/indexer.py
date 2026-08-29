@@ -13,13 +13,16 @@ from typing import Any, Iterator
 from .canonicalize import canonicalize_claim_states
 from .config import PIPELINE
 from .consolidate import consolidate_paper
+from .earth_engine import EarthEngineBackend
 from .embeddings import embed_paper, embed_source_blocks
+from .enrichment import derive_facets, paper_facets
 from .extract import extract_claims, extract_facets, map_paper, permanent_map
 from .models import FinalPaper, Paper
 from .ollama import OllamaClient, stage_prompt_version
 from .pdf import build_source_blocks, clean_parse, parse_pdf, register_pdf
 from .reconcile import reconcile_contexts
 from .small_paper import extract_small_paper, is_combined_extraction_eligible
+from .spatial import geometry_hash, resolve_spatial_support
 from .utils import write_json
 
 
@@ -217,6 +220,34 @@ def index_pdf(pdf_path: Path, data_root: Path, paper_id: str, client: OllamaClie
         with _timed_phase(timing_path, timing_report, "paper_consolidation"):
             contexts, facets, transitions, claims, consolidation_warnings = consolidate_paper(paper, contexts, facets, transitions, claims, blocks, paper_dir, client)
             unresolved.extend({"type": "consolidation_conflict", "value": value} for value in consolidation_warnings)
+        with _timed_phase(timing_path, timing_report, "earth_engine_enrichment"):
+            enrichment_config = PIPELINE["enrichment"]
+            resolved_contexts = []
+            enrichment_rows: list[dict[str, Any]] = []
+            cache: dict[str, tuple[list[Any], dict[str, Any], list[str]]] = {}
+            backend: EarthEngineBackend | None = None
+            for context in contexts:
+                if context.spatial_support is None:
+                    resolved_contexts.append(context)
+                    continue
+                try:
+                    support = resolve_spatial_support(context.spatial_support, enrichment_config["watershed_registry_path"])
+                    context = context.model_copy(update={"spatial_support": support})
+                    if support.geometry is not None:
+                        backend = backend or EarthEngineBackend(enrichment_config["earth_engine_project"], enrichment_config["datasets"], enrichment_config["reference_period"])
+                        key = geometry_hash(support.geometry)
+                        if key not in cache:
+                            cache[key] = derive_facets(support, backend, enrichment_config)
+                        derived, raw_enrichment, enrichment_warnings = cache[key]
+                        facets.extend(paper_facets(context.id, derived))
+                        enrichment_rows.append({"context_id": context.id, "status": "complete", "spatial_support": support.model_dump(), "raw": raw_enrichment, "warnings": enrichment_warnings})
+                        unresolved.extend({"type": "enrichment_warning", "value": f"{context.id}:{warning}"} for warning in enrichment_warnings)
+                except Exception as exc:
+                    enrichment_rows.append({"context_id": context.id, "status": "failed", "error": {"type": type(exc).__name__, "message": str(exc)}})
+                    unresolved.append({"type": "enrichment_failure", "value": f"{context.id}:{type(exc).__name__}:{exc}"})
+                resolved_contexts.append(context)
+            contexts = resolved_contexts
+            write_json(paper_dir / "enrichment" / "enrichment.json", {"backend": "earth_engine", "contexts": enrichment_rows})
         with _timed_phase(timing_path, timing_report, "state_canonicalization"):
             states = canonicalize_claim_states(claims)
         manifest["status"] = "embedding"

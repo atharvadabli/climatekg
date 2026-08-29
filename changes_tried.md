@@ -269,3 +269,18 @@ Result: `46 passed`.
   ANN whole-Context similarity remains candidate-generation/tie-break data.
 - Kept combined v4.1 extraction disabled by default and retained staged v11 as
   the production indexing route.
+
+# 2026-08-29: Earth Engine-only enrichment
+
+- Created `feature/earth-engine-enrichment` from the clean integration branch.
+- Added exact GeoJSON, labeled-coordinate, and pan-India watershed-ID spatial
+  resolution.
+- Added one shared deterministic enrichment implementation for indexing and
+  querying, using Earth Engine TerraClimate, ERA5-Land, SRTM V3, and ESA
+  WorldCover.
+- Added dataset/version/time-window/geometry-hash/algorithm provenance to every
+  derived Facet and preserved raw Earth Engine statistics in trace artifacts.
+- Added a direct `enrich-area` smoke command and explicit warnings for the
+  unavailable Köppen family and unimplemented land-cover patch metrics.
+- No local raster fallback is present. Earth Engine failures are recorded and
+  no substitute values are generated.

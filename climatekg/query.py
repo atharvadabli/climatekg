@@ -9,11 +9,14 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .canonicalize import canonical_concept, canonical_direction, state_id
-from .config import QUERY_PIPELINE, ROOT, STATE_ALIASES
+from .config import PIPELINE, QUERY_PIPELINE, ROOT, STATE_ALIASES
+from .earth_engine import EarthEngineBackend
 from .embeddings import DOMAIN_ORDER, effective_facets, facet_content_text, facet_notion_text
+from .enrichment import derive_facets, query_facets
 from .extraction_models import ParsedQuery, ParsedQueryFacetBatch, SynthesisOutput
-from .models import Claim, ClaimEndpoint, Context, Facet, FinalPaper, QueryContext, QueryFacet, QuerySpec, SourceBlock, State, Transition
+from .models import Claim, ClaimEndpoint, Context, Facet, FinalPaper, QueryContext, QueryFacet, QuerySpec, SourceBlock, SpatialSupport, State, Transition
 from .ollama import OllamaClient, stage_prompt_version
+from .spatial import resolve_spatial_support
 from .utils import cosine, normalize_text_key, token_count, write_json
 from .vector_index import FaissIndexes
 
@@ -162,12 +165,26 @@ The first parse omitted the environmental information at the beginning of this q
                 valid_target = replacement
     parsed = parsed.model_copy(update={"explicit_context_facets": valid_facets, "source": valid_source, "target": valid_target, "global_requested": explicit_global})
     facets = [QueryFacet(id=f"{query_id}_F{index:03d}", domain=x.domain, notion=x.notion, description=x.description, origin="user", supporting_text_span=x.supporting_text_span) for index, x in enumerate(parsed.explicit_context_facets, 1)]
-    support = None
+    support: SpatialSupport | None = None
     if parsed.spatial_reference:
         hint = parsed.spatial_reference.kind_hint
         allowed = {"point", "patch", "watershed", "region", "climate_zone", "global", "unresolved"}
-        support = {"kind": hint if hint in allowed else "unresolved", "name": parsed.spatial_reference.text, "geometry": None, "resolution": "unresolved"}
-        warnings.append("QUERY_ENRICHMENT_SKIPPED_UNRESOLVED_SPATIAL_SUPPORT")
+        unresolved = SpatialSupport(kind=hint if hint in allowed else "unresolved", name=parsed.spatial_reference.text, geometry=None, resolution="unresolved")
+        support = resolve_spatial_support(unresolved, PIPELINE["enrichment"]["watershed_registry_path"])
+        if support.geometry is None:
+            warnings.append("QUERY_ENRICHMENT_SKIPPED_UNRESOLVED_SPATIAL_SUPPORT")
+        else:
+            try:
+                enrichment_config = PIPELINE["enrichment"]
+                backend = EarthEngineBackend(enrichment_config["earth_engine_project"], enrichment_config["datasets"], enrichment_config["reference_period"])
+                derived, raw_enrichment, enrichment_warnings = derive_facets(support, backend, enrichment_config)
+                facets.extend(query_facets(query_id, len(facets), derived))
+                warnings.extend(enrichment_warnings)
+                write_json(artifact_dir / "enrichment" / "enrichment.json", {"status": "complete", "spatial_support": support.model_dump(), "raw": raw_enrichment, "derived_facets": [item.model_dump() for item in facets if item.origin == "derived"], "warnings": enrichment_warnings})
+            except Exception as exc:
+                warning = f"QUERY_ENRICHMENT_FAILED:{type(exc).__name__}"
+                write_json(artifact_dir / "enrichment" / "enrichment.json", {"status": "failed", "spatial_support": support.model_dump(), "error": {"type": type(exc).__name__, "message": str(exc)}, "warnings": [warning]})
+                raise RuntimeError(f"{warning}: {exc}") from exc
     spec = QuerySpec(query_id=query_id, mode=_query_mode(parsed), context=QueryContext(spatial_support=support, facets=facets), source=ClaimEndpoint(concept=parsed.source.concept, state=parsed.source.state) if parsed.source else None, target=ClaimEndpoint(concept=parsed.target.concept, state=parsed.target.state) if parsed.target else None, intervention_description=parsed.intervention_description, user_question=question, ambiguities=parsed.ambiguities)
     write_json(artifact_dir / "query_spec.json", spec.model_dump(by_alias=True))
     return spec, warnings

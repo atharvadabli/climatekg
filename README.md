@@ -74,6 +74,11 @@ Nemotron Parse and PDFium use the worker executables configured in
 `climatekg/constants.py`. Missing parser requirements cause an explicit failure;
 there is no alternate PDF-parser fallback.
 
+Spatial and environmental enrichment uses Google Earth Engine only. Configure
+`EARTH_ENGINE_PROJECT` as described in
+[`docs/EARTH_ENGINE_ENRICHMENT.md`](docs/EARTH_ENGINE_ENRICHMENT.md). Local
+rasters are not used as an automatic fallback.
+
 ## Index and Query
 
 Index one or more PDFs:

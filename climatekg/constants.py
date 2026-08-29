@@ -10,6 +10,8 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
+from .environment import environment_value
+
 
 # ``validated`` is the smallest profile that retained the required structures
 # in the three-paper cross-check. ``baseline`` preserves the original levels;
@@ -222,8 +224,21 @@ INDEXING_PIPELINE: dict[str, Any] = {
         "max_context_reconciliation_rounds": 2,
     },
     "enrichment": {
+        "backend": "earth_engine",
+        "algorithm_version": "earth_engine_enrichment_v1",
+        "earth_engine_project": environment_value("EARTH_ENGINE_PROJECT"),
+        "watershed_registry_path": environment_value("CLIMATEKG_WATERSHED_REGISTRY")
+        or "E:/Atharv/lulc_suggestor_poc/13jul/assets/watershed_pan_india_simplified.geojson",
         "min_valid_polygon_coverage": 0.80,
         "wind_directional_persistence_threshold": 0.55,
+        "reference_period": {"start": "1991-01-01", "end": "2021-01-01", "label": "1991-2020"},
+        "datasets": {
+            "aridity": {"id": "IDAHO_EPSCOR/TERRACLIMATE", "version": "Earth Engine catalog", "scale_m": 4638.3},
+            "wind": {"id": "ECMWF/ERA5_LAND/MONTHLY_AGGR", "version": "Earth Engine monthly aggregates", "scale_m": 11132},
+            "terrain": {"id": "USGS/SRTMGL1_003", "version": "SRTM V3", "scale_m": 30},
+            "land_cover": {"id": "ESA/WorldCover/v200", "version": "2021 v200", "scale_m": 10},
+        },
+        "seasons": {"DJF": [12, 1, 2], "MAM": [3, 4, 5], "JJA": [6, 7, 8], "SON": [9, 10, 11]},
     },
     "graph": {
         "neo4j_uri": "bolt://localhost:7687",
