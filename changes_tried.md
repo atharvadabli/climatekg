@@ -216,3 +216,7 @@ Result: `46 passed`.
 - The combined run still omitted a material resolution-sensitivity experiment.
   Automatic routing is therefore disabled by default; see
   `docs/SMALL_PAPER_COMBINED_EXTRACTION_EXPERIMENT.md`.
+- Repeated v3 with fresh `low`, `medium`, and `high` requests. All three
+  thinking traces and JSON responses were byte-identical, with approximately
+  469 seconds runtime each. On local Ollama 0.32.9, these three non-false levels
+  did not produce different reasoning effort for this model/request.

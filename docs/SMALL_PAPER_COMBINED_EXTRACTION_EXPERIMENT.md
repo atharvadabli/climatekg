@@ -157,3 +157,38 @@ The failures have different severity:
 The staged extractor remains authoritative. A future experiment should use
 genuinely simple papers, likely below `4000` cleaned tokens, and compare
 relationship-level recall rather than object counts before enabling this route.
+
+## Fresh v3 low/medium/high replay
+
+A fresh three-call replay used the exact v3 prompt and the same 34 cleaned
+non-reference SourceBlocks.
+
+| Thinking request | Seconds | Contexts | Facets | Transitions | Claims | Thinking characters |
+|---|---:|---:|---:|---:|---:|---:|
+| low | 469.15 | 7 | 8 | 3 | 8 | 31498 |
+| medium | 468.77 | 7 | 8 | 3 | 8 | 31498 |
+| high | 468.81 | 7 | 8 | 3 | 8 | 31498 |
+
+The request files are different and contain the requested `think` value:
+`low`, `medium`, or `high`. However, all three raw responses have the same
+thinking hash and content hash:
+
+```text
+thinking SHA-256 f656d244f9328095d63bd199d2216b0f0f2d8315bec1edb2a935970b3b9ad990
+content  SHA-256 bfbf7a4a9fcb798e1ffe2d698b7c536bdc0102a6e99c31919b092b629e4f7de7
+```
+
+The local runtime was Ollama `0.32.9`; the model reports the `qwen3.5`
+renderer/parser and the generic `thinking` capability. Empirically, this model
+and runtime treated all three non-false levels identically for this request.
+The experiment therefore does not demonstrate distinct low, medium, and high
+reasoning intensities.
+
+Because the structured output is byte-identical, all three levels retain the
+same scientific strengths and the same omission: none recovers the
+resolution-degradation experiment. `medium` and `high` provide no quality or
+runtime advantage over `low` here.
+
+Fresh replay artifacts:
+
+`climatekg/runtime/outputs/small_paper_combined_v3_lmh_p000006_20260829/`

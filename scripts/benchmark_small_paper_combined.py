@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import shutil
 import time
@@ -14,7 +15,7 @@ from climatekg.ollama import OllamaClient
 from climatekg.utils import token_count, write_json
 
 
-LEVELS = ("no", "low", "medium")
+LEVELS = ("no", "low", "medium", "high")
 
 
 def _load_paper(paper_dir: Path) -> tuple[Paper, list[SourceBlock]]:
@@ -38,13 +39,17 @@ def _raw_metrics(profile_dir: Path) -> dict[str, Any]:
     raw = json.loads(raw_path.read_text(encoding="utf-8"))
     request = json.loads(request_path.read_text(encoding="utf-8"))
     request_text = json.dumps(request, ensure_ascii=False)
+    thinking = raw.get("message", {}).get("thinking", "")
+    content = raw.get("message", {}).get("content", "")
     return {
         "llm_elapsed_seconds": metrics["elapsed_seconds"],
         "prompt_eval_count": metrics.get("prompt_eval_count"),
         "eval_count": metrics.get("eval_count"),
         "estimated_complete_request_tokens": token_count(request_text),
-        "thinking_characters": len(raw.get("message", {}).get("thinking", "")),
-        "response_characters": len(raw.get("message", {}).get("content", "")),
+        "thinking_characters": len(thinking),
+        "response_characters": len(content),
+        "thinking_sha256": hashlib.sha256(thinking.encode("utf-8")).hexdigest(),
+        "content_sha256": hashlib.sha256(content.encode("utf-8")).hexdigest(),
         "request_path": str(request_path.resolve()),
         "raw_response_path": str(raw_path.resolve()),
     }
@@ -152,6 +157,14 @@ def _write_markdown(path: Path, rows: list[dict[str, Any]]) -> None:
         "These lexical checks only confirm that the known regimes appear somewhere in the structured output. Scientific review of the context hierarchy, claim scope, evidence role, and smallest sufficient evidence remains necessary.",
         "",
         "Each profile directory contains the exact request JSON, raw Ollama response including `message.thinking`, validated combined object, converted graph objects, and timing metrics.",
+        "",
+        "## Response hashes",
+        "",
+    ])
+    for row in rows:
+        lines.append(f"- `{row['thinking']}` thinking: `{row['thinking_sha256']}`; content: `{row['content_sha256']}`")
+    lines.extend([
+        "",
     ])
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
