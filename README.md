@@ -62,10 +62,13 @@ ollama pull qwen3-embedding:4b
 ```
 
 All indexing and query tuning values are defined in `climatekg/constants.py`.
-Set `REASONING_PROFILE` there to `baseline` or `no`; model names, stage settings,
-token budgets, `top_k` values, thresholds, weights, parser paths, and timeouts
-are in the same file. The older pipeline YAML files are retained only as
-historical configuration snapshots and are not read at runtime.
+The default `validated` reasoning profile uses medium reasoning for paper
+mapping, no reasoning for the remaining indexing stages, and low/medium
+reasoning for answer synthesis. `baseline` and `no` remain available for
+controlled comparisons. Model names, stage settings, token budgets, `top_k`
+values, thresholds, weights, parser paths, and timeouts are in the same file.
+The older pipeline YAML files are retained only as historical configuration
+snapshots and are not read at runtime.
 
 Nemotron Parse and PDFium use the worker executables configured in
 `climatekg/constants.py`. Missing parser requirements cause an explicit failure;

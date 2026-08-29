@@ -6,14 +6,14 @@ from climatekg.canonicalize import canonical_concept, canonical_direction, state
 from climatekg.extract import _apply_map_repair, _validate_map, _validate_map_references, _validate_map_repair, _validate_reference_only_repair, remove_internal_inventory_aliases, render_paper_map_tree, scout_setting_inventory, select_map_consolidation_blocks, validate_context_mention_resolution
 from climatekg.extraction_models import ContextHintDecision, ContextReconciliationBatch, MapContext, MapTransition, PaperMap, ScoutMention, SectionScout
 from climatekg.graph import _flatten, _inflate
-from climatekg.indexer import _clear_derived_artifacts, current_prompt_versions, index_pdf
+from climatekg.indexer import _clear_derived_artifacts, current_prompt_versions, index_pdf, indexing_derivation_fingerprint
 import json
 
 import pytest
 
 from climatekg.models import Claim, ClaimEndpoint, Context, Facet, FinalPaper, Paper, QueryContext, QueryFacet, QuerySpec, SourceBlock, Transition
 from climatekg.pdf import _split_text, _validated_parse_cache, clean_parse
-from climatekg.query import Corpus, _context_rerank_score, _is_compound_unspecified_target, context_similarity, trim_evidence_package
+from climatekg.query import Corpus, _is_compound_unspecified_target, context_similarity, trim_evidence_package
 from climatekg.reconcile import _validate_reconciliation_batch, reversal_hints
 from climatekg.retrieval import bm25
 from climatekg.utils import normalize_text_key
@@ -66,7 +66,7 @@ def test_context_similarity_separates_missing_from_mismatch() -> None:
     assert missing["domain_scores"]["climate"]["status"] == "missing_in_candidate"
 
 
-def test_context_similarity_does_not_reuse_one_facet_for_two_conditions() -> None:
+def test_context_similarity_uses_domain_wise_maxsim() -> None:
     query = [
         QueryFacet(id="Q_PATTERN", domain="spatial_configuration", notion="patch arrangement", description="alternating patches", origin="user", notion_embedding=[1.0, 0.0], content_embedding=[1.0, 0.0]),
         QueryFacet(id="Q_SCALE", domain="spatial_configuration", notion="patch size", description="large patches", origin="user", notion_embedding=[0.9, 0.1], content_embedding=[0.9, 0.1]),
@@ -76,15 +76,19 @@ def test_context_similarity_does_not_reuse_one_facet_for_two_conditions() -> Non
         Facet(id="F_SIZE", context_id="C", domain="spatial_configuration", notion="large patch scale", description="large patch size", origin="reported", evidence_block_ids=["B"], notion_embedding=[0.8, 0.2], content_embedding=[0.8, 0.2]),
     ]
     report = context_similarity(query, candidates)
-    assert len({item["candidate_facet_id"] for item in report["facet_matches"]}) == 2
+    assert [item["query_facet_id"] for item in report["facet_matches"]] == ["Q_PATTERN", "Q_SCALE"]
+    assert [item["candidate_facet_id"] for item in report["facet_matches"]] == ["F_GENERIC", "F_GENERIC"]
     assert report["missing_query_facets"] == []
 
 
-def test_context_rerank_combines_facet_and_whole_context_scores(monkeypatch: pytest.MonkeyPatch) -> None:
-    from climatekg.config import QUERY_PIPELINE
+def test_derivation_fingerprint_changes_with_scientific_settings(monkeypatch: pytest.MonkeyPatch) -> None:
+    from climatekg.config import PIPELINE
 
-    monkeypatch.setitem(QUERY_PIPELINE["context_retrieval"], "whole_context_weight", 0.2)
-    assert _context_rerank_score(0.5, 1.0) == pytest.approx(0.6)
+    baseline = indexing_derivation_fingerprint(False)
+    assert baseline == indexing_derivation_fingerprint(False)
+    assert baseline != indexing_derivation_fingerprint(True)
+    monkeypatch.setitem(PIPELINE["ollama"]["stages"]["paper_map"], "thinking", "low")
+    assert baseline != indexing_derivation_fingerprint(False)
 
 
 def _test_artifact_dir(name: str) -> Path:
@@ -284,10 +288,16 @@ def test_cached_index_return_preserves_completed_timing(tmp_path: Path) -> None:
     manifest = {"paper_id": "P000001", "pdf_sha256": sha256_file(pdf_path), "status": "complete"}
     (paper_dir / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
     final = FinalPaper(paper=Paper(id="P000001", title="Fixture", source_file="paper.pdf"), source_blocks=[], contexts=[], facets=[], transitions=[], claims=[], states=[], metadata={"prompt_versions": current_prompt_versions()})
-    (final_dir / "final_paper.json").write_text(final.model_dump_json(by_alias=True), encoding="utf-8")
+    final_path = final_dir / "final_paper.json"
+    final_path.write_text(final.model_dump_json(by_alias=True), encoding="utf-8")
     timing_path = metrics_dir / "indexing_timing.json"
     timing_path.write_text('{"status":"complete","wall_elapsed_seconds":123.0}', encoding="utf-8")
 
+    with pytest.raises(RuntimeError, match="derivation_fingerprint"):
+        index_pdf(pdf_path, data_root, "P000001")
+
+    current = final.model_copy(update={"metadata": {**final.metadata, "derivation_fingerprint": indexing_derivation_fingerprint(False)}})
+    final_path.write_text(current.model_dump_json(by_alias=True), encoding="utf-8")
     index_pdf(pdf_path, data_root, "P000001")
 
     assert json.loads(timing_path.read_text(encoding="utf-8"))["wall_elapsed_seconds"] == 123.0

@@ -253,3 +253,19 @@ Result: `46 passed`.
 - Conclusion: v4.1 improves referential integrity but does not make a one-call
   route adequate for crossed-factor papers. This paper requires the proposed
   compact two-call Context/Facet then Transition/Claim route or staged extraction.
+# 2026-08-29: Merge-ready integration branch
+
+- Created `integration/indexing-v11-combined-v41` from the completed extraction
+  experiments.
+- Replaced the accidental full-no-reasoning default with the selected validated
+  profile: mapping `medium`, Claims `no`, reconciliation/consolidation `no`, and
+  query synthesis at its original `low`/`medium` levels.
+- Added a deterministic derivation fingerprint covering extraction route,
+  prompts, models, reasoning levels, cleaning, retrieval, consolidation, and
+  canonicalization settings. Cached final artifacts are rejected when this
+  fingerprint changes.
+- Removed the unfinished atomic query-Facet assignment and whole-Context rerank
+  experiment. Context comparison again uses the specified domain-wise MaxSim;
+  ANN whole-Context similarity remains candidate-generation/tie-break data.
+- Kept combined v4.1 extraction disabled by default and retained staged v11 as
+  the production indexing route.

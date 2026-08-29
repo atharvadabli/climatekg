@@ -11,10 +11,10 @@ from copy import deepcopy
 from typing import Any
 
 
-# Select ``baseline`` for the specification's original stage-specific levels,
-# or ``no`` for the current runtime ablation. Per-stage values remain visible
-# below so a future profile can be adjusted without searching pipeline code.
-REASONING_PROFILE = "no"
+# ``validated`` is the smallest profile that retained the required structures
+# in the three-paper cross-check. ``baseline`` preserves the original levels;
+# ``no`` remains available only for controlled ablations.
+REASONING_PROFILE = "validated"
 ALLOWED_REASONING_LEVELS = {"no", "low", "medium", "high"}
 
 GENERATION_MODEL = "qwen3.6:27b"
@@ -36,7 +36,7 @@ PROMPT_VERSIONS = {
     "paper_map_candidate": "v11",
     "map_consolidation_candidate": "v11",
     "section_scout": "v4",
-    "query_parse": "v4",
+    "query_parse": "v3",
     "final_synthesis": "v4",
 }
 
@@ -64,28 +64,57 @@ BASELINE_QUERY_REASONING = {
     "final_synthesis_complex": "medium",
 }
 
+VALIDATED_INDEXING_REASONING = {
+    "small_paper_extraction": "no",
+    "paper_map": "medium",
+    "section_scout": "no",
+    "map_consolidation": "medium",
+    "paper_map_reference_id_repair": "no",
+    "paper_map_reference_repair": "medium",
+    "facet_extraction": "no",
+    "facet_reference_repair": "no",
+    "claim_extraction": "no",
+    "claim_reference_repair": "no",
+    "context_reconciliation": "no",
+    "context_reconciliation_reference_repair": "no",
+    "paper_consolidation": "no",
+    "state_adjudication": "no",
+}
 
-def _reasoning(stage: str, baseline: dict[str, str]) -> str:
+VALIDATED_QUERY_REASONING = BASELINE_QUERY_REASONING
+
+
+def _reasoning(stage: str, baseline: dict[str, str], validated: dict[str, str]) -> str:
     if REASONING_PROFILE == "no":
         return "no"
-    if REASONING_PROFILE != "baseline":
+    if REASONING_PROFILE == "baseline":
+        value = baseline[stage]
+    elif REASONING_PROFILE == "validated":
+        value = validated[stage]
+    else:
         raise ValueError(f"Unknown REASONING_PROFILE: {REASONING_PROFILE}")
-    value = baseline[stage]
     if value not in ALLOWED_REASONING_LEVELS:
         raise ValueError(f"Invalid reasoning level for {stage}: {value}")
     return value
 
 
-def _stage(stage: str, temperature: float, baseline: dict[str, str], retries: int = OLLAMA_RETRIES) -> dict[str, Any]:
+def _stage(
+    stage: str,
+    temperature: float,
+    baseline: dict[str, str],
+    validated: dict[str, str],
+    retries: int = OLLAMA_RETRIES,
+) -> dict[str, Any]:
     return {
         "temperature": temperature,
-        "thinking": _reasoning(stage, baseline),
+        "thinking": _reasoning(stage, baseline, validated),
         "retries": retries,
     }
 
 
 def _stages(
     baseline: dict[str, str],
+    validated: dict[str, str],
     temperatures: dict[str, float],
     retry_overrides: dict[str, int],
 ) -> dict[str, dict[str, Any]]:
@@ -94,6 +123,7 @@ def _stages(
             name,
             temperatures.get(name, 0.0),
             baseline,
+            validated,
             retry_overrides.get(name, OLLAMA_RETRIES),
         )
         for name in baseline
@@ -137,6 +167,7 @@ INDEXING_PIPELINE: dict[str, Any] = {
         "reasoning_profile": REASONING_PROFILE,
         "stages": _stages(
             BASELINE_INDEXING_REASONING,
+            VALIDATED_INDEXING_REASONING,
             temperatures={"paper_map": 0.1},
             retry_overrides={
                 "paper_map_reference_id_repair": 0,
@@ -228,6 +259,7 @@ QUERY_PIPELINE: dict[str, Any] = {
         "reasoning_profile": REASONING_PROFILE,
         "stages": _stages(
             BASELINE_QUERY_REASONING,
+            VALIDATED_QUERY_REASONING,
             temperatures={},
             retry_overrides={"query_parse_context_repair": 1},
         ),
@@ -249,7 +281,6 @@ QUERY_PIPELINE: dict[str, Any] = {
         "rerank_top_k": 30,
         "notion_weight_alpha": 0.35,
         "missing_coverage_penalty_lambda": 0.25,
-        "whole_context_weight": 0.15,
         "domain_weights": {
             "spatial_configuration": 1.0,
             "land_surface": 1.0,

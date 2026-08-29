@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import shutil
@@ -46,6 +47,43 @@ PROMPT_STAGES = (
 def current_prompt_versions(combined_route: bool = False) -> dict[str, str]:
     stages = (*PROMPT_STAGES, "small_paper_extraction") if combined_route else PROMPT_STAGES
     return {stage: stage_prompt_version(stage) for stage in stages}
+
+
+def indexing_derivation_fingerprint(combined_route: bool) -> str:
+    """Fingerprint settings that can change generated scientific artifacts."""
+    parsing = {
+        key: value
+        for key, value in PIPELINE["parsing"].items()
+        if key not in {"model_path", "nemotron_python", "pdfium_python", "render_timeout_seconds", "parse_timeout_seconds"}
+    }
+    ollama = {
+        key: value
+        for key, value in PIPELINE["ollama"].items()
+        if key not in {"base_url", "request_timeout_seconds", "retry_backoff_base_seconds"}
+    }
+    payload = {
+        "combined_route": combined_route,
+        "prompt_versions": current_prompt_versions(combined_route),
+        "parsing": parsing,
+        "ollama": ollama,
+        **{
+            key: PIPELINE[key]
+            for key in (
+                "paper_mapping",
+                "embeddings",
+                "blocks",
+                "source_cleaning",
+                "paper_metadata",
+                "section_scout",
+                "evidence_retrieval",
+                "consolidation",
+                "enrichment",
+                "canonicalization",
+            )
+        },
+    }
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def _clear_derived_artifacts(paper_dir: Path, data_root: Path) -> None:
@@ -115,11 +153,16 @@ def index_pdf(pdf_path: Path, data_root: Path, paper_id: str, client: OllamaClie
     if manifest.get("status") == "complete" and final_path.exists():
         cached = FinalPaper.model_validate_json(final_path.read_text(encoding="utf-8"))
         saved = cached.metadata.get("prompt_versions", {})
-        expected = current_prompt_versions(cached.metadata.get("extraction_route") == "small_paper_combined")
-        if all(saved.get(stage) == version for stage, version in expected.items()):
+        cached_combined_route = cached.metadata.get("extraction_route") == "small_paper_combined"
+        expected = current_prompt_versions(cached_combined_route)
+        expected_fingerprint = indexing_derivation_fingerprint(cached_combined_route)
+        saved_fingerprint = cached.metadata.get("derivation_fingerprint")
+        if all(saved.get(stage) == version for stage, version in expected.items()) and saved_fingerprint == expected_fingerprint:
             return cached
         if not rebuild_derived:
             changed = {stage: {"saved": saved.get(stage), "current": version} for stage, version in expected.items() if saved.get(stage) != version}
+            if saved_fingerprint != expected_fingerprint:
+                changed["derivation_fingerprint"] = {"saved": saved_fingerprint, "current": expected_fingerprint}
             raise RuntimeError(f"STALE_DERIVED_ARTIFACTS {json.dumps(changed, sort_keys=True)}; rerun with --rebuild-derived")
     if rebuild_derived:
         _clear_derived_artifacts(paper_dir, data_root)
@@ -187,7 +230,7 @@ def index_pdf(pdf_path: Path, data_root: Path, paper_id: str, client: OllamaClie
                 target.write_text(text, encoding="utf-8")
             evidence_links = [{"object_id": item.id, "source_block_id": block_id} for items in (contexts, facets, transitions, claims) for item in items for block_id in item.evidence_block_ids]
             prompt_versions = current_prompt_versions(combined_route)
-            final = FinalPaper(paper=paper, source_blocks=blocks, contexts=contexts, facets=facets, transitions=transitions, claims=claims, states=states, evidence_links=evidence_links, unresolved_conflicts=unresolved, metadata={"parser": PIPELINE["parsing"]["model"], "extractor_model": PIPELINE["ollama"]["model"], "embedding_model": PIPELINE["embeddings"]["model"], "embedding_dimension": PIPELINE["embeddings"]["dimension"], "reasoning_profile": PIPELINE["ollama"]["reasoning_profile"], "reasoning_levels": {stage: config["thinking"] for stage, config in PIPELINE["ollama"]["stages"].items()}, "extraction_route": "small_paper_combined" if combined_route else "staged", "prompt_versions": prompt_versions, "created_at": datetime.now(timezone.utc).isoformat()})
+            final = FinalPaper(paper=paper, source_blocks=blocks, contexts=contexts, facets=facets, transitions=transitions, claims=claims, states=states, evidence_links=evidence_links, unresolved_conflicts=unresolved, metadata={"parser": PIPELINE["parsing"]["model"], "extractor_model": PIPELINE["ollama"]["model"], "embedding_model": PIPELINE["embeddings"]["model"], "embedding_dimension": PIPELINE["embeddings"]["dimension"], "reasoning_profile": PIPELINE["ollama"]["reasoning_profile"], "reasoning_levels": {stage: config["thinking"] for stage, config in PIPELINE["ollama"]["stages"].items()}, "extraction_route": "small_paper_combined" if combined_route else "staged", "prompt_versions": prompt_versions, "derivation_fingerprint": indexing_derivation_fingerprint(combined_route), "created_at": datetime.now(timezone.utc).isoformat()})
             write_json(paper_dir / "final" / "final_paper.json", final.model_dump(by_alias=True))
         manifest["status"] = "complete"
         manifest["counts"] = {"source_blocks": len(blocks), "contexts": len(contexts), "facets": len(facets), "transitions": len(transitions), "claims": len(claims), "states": len(states)}

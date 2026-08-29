@@ -103,14 +103,10 @@ def parse_query(question: str, query_id: str, client: OllamaClient, artifact_dir
 Read one land-atmosphere question and extract environmental conditions explicitly stated by the user.
 
 Return valid JSON only in the supplied schema. The output field `explicit_context_facets` is a list. For each condition return:
-- `domain`: exactly one of `spatial_configuration`, `land_surface`, `hydrology`, `atmosphere`, `climate`, `substrate_terrain`, or `other`. Use `spatial_configuration` for scale, arrangement, geometry, distance, direction, or position; `land_surface` for land use, land cover, vegetation, surface material, or prescribed surface-flux treatments; `hydrology` for soil-water availability, irrigation, storage, drainage, or flow; `atmosphere` for wind, stability, humidity, or circulation; `climate` for season or long-term climate regime; and `substrate_terrain` for soil material, geology, elevation, slope, or terrain form;
-- `notion`: a concise 2-8 word name that preserves a stated category such as low, high, dry, wet, large, or small;
+- `domain`: exactly one of `spatial_configuration`, `land_surface`, `hydrology`, `atmosphere`, `climate`, `substrate_terrain`, or `other`;
+- `notion`: a concise 2-8 word name for the condition;
 - `description`: a faithful phrase or sentence describing the condition;
 - `supporting_text_span`: the exact words copied from the question.
-
-Create one item for each condition that can vary independently. Wind regime, land-cover type,
-surface arrangement, spatial scale, soil moisture, season, and time of day are separate conditions,
-even when the same copied words support more than one item.
 
 Use only conditions stated in the question."""
         repair_user = f"""USER QUESTION
@@ -223,20 +219,13 @@ def context_similarity(query_facets: list[QueryFacet | Facet], candidate_facets:
             domain_scores[domain] = {"score": None, "status": "missing_in_candidate"}
             missing.extend(x.id for x in qitems)
             continue
-        pairs = [facet_pair(query, candidate, alpha) for query in qitems for candidate in citems]
-        pairs.sort(key=lambda x: (-x["pair_score"], -x["content_similarity"], x["query_facet_id"], x["candidate_facet_id"]))
-        used_queries, used_candidates, chosen = set(), set(), []
-        for pair in pairs:
-            if pair["query_facet_id"] in used_queries or pair["candidate_facet_id"] in used_candidates:
-                continue
-            matches.append(pair)
-            chosen.append(pair["pair_score"])
-            used_queries.add(pair["query_facet_id"])
-            used_candidates.add(pair["candidate_facet_id"])
-        unmatched = [item.id for item in qitems if item.id not in used_queries]
-        missing.extend(unmatched)
-        score = sum(chosen) / len(qitems)
-        domain_scores[domain] = {"score": score, "status": "partial_match" if unmatched else "matched"}
+        chosen = []
+        for query in qitems:
+            pairs = [facet_pair(query, candidate, alpha) for candidate in citems]
+            pairs.sort(key=lambda x: (-x["pair_score"], -x["content_similarity"], x["candidate_facet_id"]))
+            matches.append(pairs[0])
+            chosen.append(pairs[0]["pair_score"])
+        domain_scores[domain] = {"score": sum(chosen) / len(chosen), "status": "matched"}
     weights = config["domain_weights"]
     known = [(weights[d], data["score"]) for d, data in domain_scores.items() if data["score"] is not None]
     total_weight = sum(weights[d] for d in qdomains)
@@ -245,11 +234,6 @@ def context_similarity(query_facets: list[QueryFacet | Facet], candidate_facets:
     coverage = known_weight / total_weight if total_weight else 0.0
     overall = semantic * (1 - missing_lambda * (1 - coverage))
     return {"semantic_similarity": semantic, "coverage": coverage, "overall_score": overall, "alpha": alpha, "missing_coverage_penalty_lambda": missing_lambda, "domain_scores": domain_scores, "facet_matches": matches, "missing_query_facets": missing}
-
-
-def _context_rerank_score(facet_score: float, whole_context_score: float) -> float:
-    weight = QUERY_PIPELINE["context_retrieval"]["whole_context_weight"]
-    return (1.0 - weight) * facet_score + weight * whole_context_score
 
 
 def retrieve_contexts(spec: QuerySpec, vectors: dict[str, list[float] | None], corpus: Corpus, indexes: FaissIndexes | None = None) -> tuple[dict[str, dict[str, Any]], list[str]]:
@@ -264,15 +248,8 @@ def retrieve_contexts(spec: QuerySpec, vectors: dict[str, list[float] | None], c
         ann = sorted(((max(0.0, cosine(query_vector, context.retrieval_embedding or [])), context) for context in corpus.contexts.values()), key=lambda x: (-x[0], x[1].id))[:top_k]
     reports = {}
     for ann_score, context in ann:
-        similarity = context_similarity(spec.context.facets, corpus.effective_facets(context.id))
-        reports[context.id] = {
-            "context_id": context.id,
-            "paper_id": context.paper_id,
-            "coarse_ann_score": ann_score,
-            "rerank_score": _context_rerank_score(similarity["overall_score"], ann_score),
-            "context_similarity": similarity,
-        }
-    ordered = sorted(reports.values(), key=lambda x: (-x["rerank_score"], -x["context_similarity"]["overall_score"], -x["coarse_ann_score"], x["context_id"]))
+        reports[context.id] = {"context_id": context.id, "paper_id": context.paper_id, "coarse_ann_score": ann_score, "context_similarity": context_similarity(spec.context.facets, corpus.effective_facets(context.id))}
+    ordered = sorted(reports.values(), key=lambda x: (-x["context_similarity"]["overall_score"], -x["context_similarity"]["semantic_similarity"], -x["coarse_ann_score"], x["context_id"]))
     retained = ordered[:QUERY_PIPELINE["context_retrieval"]["rerank_top_k"]]
     return {x["context_id"]: x for x in retained}, []
 
@@ -725,7 +702,7 @@ def run_query(
     stage("query_embedded", {name: len(vector) if vector else 0 for name, vector in vectors.items()})
     context_reports, more = retrieve_contexts(spec, vectors, corpus, indexes)
     warnings.extend(more)
-    stage("contexts_retrieved", {"candidate_count": len(context_reports), "top_contexts": [{"context_id": row["context_id"], "rerank_score": row["rerank_score"], "overall_score": row["context_similarity"]["overall_score"], "coverage": row["context_similarity"]["coverage"]} for row in list(context_reports.values())[:QUERY_PIPELINE["reporting"]["top_contexts"]]], "warnings": more})
+    stage("contexts_retrieved", {"candidate_count": len(context_reports), "top_contexts": [{"context_id": row["context_id"], "overall_score": row["context_similarity"]["overall_score"], "coverage": row["context_similarity"]["coverage"]} for row in list(context_reports.values())[:QUERY_PIPELINE["reporting"]["top_contexts"]]], "warnings": more})
     source_seeds, more = map_endpoint(spec.source, corpus, client, indexes); warnings.extend(more)
     source_warnings = more
     target_seeds, more = map_endpoint(spec.target, corpus, client, indexes); warnings.extend(more)
