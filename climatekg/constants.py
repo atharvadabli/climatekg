@@ -32,11 +32,11 @@ ROUTING_TOKENIZER_ENCODING = "o200k_base"
 FILE_HASH_CHUNK_BYTES = 1024 * 1024
 
 PROMPT_VERSIONS = {
-    "small_paper_extraction": "v4.2",
-    "paper_map": "v12",
-    "map_consolidation": "v12",
-    "paper_map_candidate": "v12",
-    "map_consolidation_candidate": "v12",
+    "small_paper_extraction": "v4.3",
+    "paper_map": "v13",
+    "map_consolidation": "v13",
+    "paper_map_candidate": "v13",
+    "map_consolidation_candidate": "v13",
     "section_scout": "v4",
     "query_parse": "v3",
     "final_synthesis": "v4",
@@ -229,6 +229,16 @@ INDEXING_PIPELINE: dict[str, Any] = {
         "earth_engine_project": environment_value("EARTH_ENGINE_PROJECT"),
         "watershed_registry_path": environment_value("CLIMATEKG_WATERSHED_REGISTRY")
         or "E:/Atharv/lulc_suggestor_poc/13jul/assets/watershed_pan_india_simplified.geojson",
+        "geocoding": {
+            "provider": "nominatim",
+            "endpoint": environment_value("CLIMATEKG_GEOCODER_URL") or "https://nominatim.openstreetmap.org",
+            "user_agent": environment_value("CLIMATEKG_GEOCODER_USER_AGENT")
+            or "ClimateKG/0.1 (https://github.com/atharvadabli)",
+            "cache_path": "climatekg/runtime/cache/geocoding/nominatim.json",
+            "minimum_interval_seconds": 1.1,
+            "result_limit": 10,
+            "timeout_seconds": 30,
+        },
         "min_valid_polygon_coverage": 0.80,
         "max_local_enrichment_area_sqkm": 1_000_000,
         "max_native_land_cover_pixels": 250_000_000,

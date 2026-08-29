@@ -41,6 +41,7 @@ class ExtractedSpatialSupport(CompleteOutputModel):
     kind: Literal["point", "patch", "watershed", "region", "climate_zone", "global", "unresolved"]
     name: str
     geometry: PointGeometry | PolygonGeometry | MultiPolygonGeometry | None = None
+    enrichable_study_location_name: str | None = None
     resolution: Literal["exact", "approximate", "named_region", "global", "unresolved"]
 
 
@@ -52,6 +53,10 @@ def _validate_extracted_spatial_support(support: ExtractedSpatialSupport | None)
         if support.resolution == "exact":
             raise ValueError("spatial resolution cannot be exact when geometry is null")
         return
+    if support.enrichable_study_location_name is not None:
+        raise ValueError("enrichable_study_location_name must be null when geometry is present")
+    if support.resolution not in ("exact", "approximate"):
+        raise ValueError("spatial resolution with geometry must be exact or approximate")
     geometry_type = geometry["type"]
     if geometry_type == "Point":
         positions = [geometry["coordinates"]]

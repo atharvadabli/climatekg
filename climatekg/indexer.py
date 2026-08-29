@@ -11,12 +11,13 @@ from pathlib import Path
 from typing import Any, Iterator
 
 from .canonicalize import canonicalize_claim_states
-from .config import PIPELINE
+from .config import PIPELINE, ROOT
 from .consolidate import consolidate_paper
 from .earth_engine import EarthEngineBackend
 from .embeddings import embed_paper, embed_source_blocks
 from .enrichment import derive_facets, paper_facets
 from .extract import extract_claims, extract_facets, map_paper, permanent_map
+from .geocoding import NominatimGeocoder
 from .models import FinalPaper, Paper
 from .ollama import OllamaClient, stage_prompt_version
 from .pdf import build_source_blocks, clean_parse, parse_pdf, register_pdf
@@ -226,12 +227,21 @@ def index_pdf(pdf_path: Path, data_root: Path, paper_id: str, client: OllamaClie
             enrichment_rows: list[dict[str, Any]] = []
             cache: dict[str, tuple[list[Any], dict[str, Any], list[str]]] = {}
             backend: EarthEngineBackend | None = None
+            geocoder = (
+                NominatimGeocoder(enrichment_config["geocoding"], ROOT)
+                if any(context.spatial_support and context.spatial_support.enrichable_study_location_name for context in contexts)
+                else None
+            )
             for context in contexts:
                 if context.spatial_support is None:
                     resolved_contexts.append(context)
                     continue
                 try:
-                    support = resolve_spatial_support(context.spatial_support, enrichment_config["watershed_registry_path"])
+                    support = resolve_spatial_support(
+                        context.spatial_support,
+                        enrichment_config["watershed_registry_path"],
+                        geocoder,
+                    )
                     context = context.model_copy(update={"spatial_support": support})
                     if support.geometry is not None:
                         backend = backend or EarthEngineBackend(enrichment_config["earth_engine_project"], enrichment_config["datasets"], enrichment_config["reference_period"])

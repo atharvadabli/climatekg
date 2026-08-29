@@ -7,6 +7,7 @@ from .config import PIPELINE, ROOT
 from .combined_extraction import EvidenceCatalog, flatten_small_paper_v4, render_evidence_catalog
 from .extract import _split_prompt, permanent_map, render_paper_map_tree
 from .extraction_models import PaperMap, SmallPaperExtraction, constrained_small_paper_v4_schema
+from .location_extraction import enforce_copied_location_names
 from .models import Claim, Context, Facet, Paper, SourceBlock, Transition
 from .ollama import OllamaClient
 from .utils import token_count, unique_in_order, write_json
@@ -148,6 +149,7 @@ def extract_small_paper(
             input_block_ids=[block.id for block in useful],
             retries=stage["retries"],
         )
+        nested_result = enforce_copied_location_names(nested_result, (block.text for block in useful))
         write_json(artifact_dir / "evidence_handle_catalog.json", catalog.as_rows())
         write_json(artifact_dir / "schema_validated.json", nested_result.model_dump(by_alias=True))
         result = flatten_small_paper_v4(nested_result, catalog)

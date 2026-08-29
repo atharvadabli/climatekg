@@ -14,6 +14,7 @@ from .earth_engine import EarthEngineBackend
 from .embeddings import DOMAIN_ORDER, effective_facets, facet_content_text, facet_notion_text
 from .enrichment import derive_facets, query_facets
 from .extraction_models import ParsedQuery, ParsedQueryFacetBatch, SynthesisOutput
+from .geocoding import NominatimGeocoder
 from .models import Claim, ClaimEndpoint, Context, Facet, FinalPaper, QueryContext, QueryFacet, QuerySpec, SourceBlock, SpatialSupport, State, Transition
 from .ollama import OllamaClient, stage_prompt_version
 from .spatial import resolve_spatial_support
@@ -169,13 +170,22 @@ The first parse omitted the environmental information at the beginning of this q
     if parsed.spatial_reference:
         hint = parsed.spatial_reference.kind_hint
         allowed = {"point", "patch", "watershed", "region", "climate_zone", "global", "unresolved"}
-        unresolved = SpatialSupport(kind=hint if hint in allowed else "unresolved", name=parsed.spatial_reference.text, geometry=None, resolution="unresolved")
-        support = resolve_spatial_support(unresolved, PIPELINE["enrichment"]["watershed_registry_path"])
+        enrichment_config = PIPELINE["enrichment"]
+        unresolved = SpatialSupport(
+            kind=hint if hint in allowed else "unresolved",
+            name=parsed.spatial_reference.text,
+            geometry=None,
+            enrichable_study_location_name=None if explicit_global else parsed.spatial_reference.text,
+            resolution="global" if explicit_global else "unresolved",
+        )
+        geocoder = None if explicit_global else NominatimGeocoder(enrichment_config["geocoding"], ROOT)
+        support = resolve_spatial_support(unresolved, enrichment_config["watershed_registry_path"], geocoder)
         if support.geometry is None:
+            if support.enrichable_study_location_name:
+                warnings.append("SPATIAL_REFERENCE_AMBIGUOUS")
             warnings.append("QUERY_ENRICHMENT_SKIPPED_UNRESOLVED_SPATIAL_SUPPORT")
         else:
             try:
-                enrichment_config = PIPELINE["enrichment"]
                 backend = EarthEngineBackend(enrichment_config["earth_engine_project"], enrichment_config["datasets"], enrichment_config["reference_period"])
                 derived, raw_enrichment, enrichment_warnings = derive_facets(support, backend, enrichment_config)
                 facets.extend(query_facets(query_id, len(facets), derived))

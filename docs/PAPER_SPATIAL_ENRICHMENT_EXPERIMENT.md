@@ -118,12 +118,12 @@ climatekg/runtime/outputs/paper_spatial_enrichment_experiment/P000015/
 
 1. Keep spatial extraction inside the existing mapping call and retain the
    typed schema validation.
-2. Add a deterministic, versioned gazetteer cache for exact polygon and point
-   matches with administrative/country qualifier checks. Do not use an LLM to
-   invent coordinates or select ambiguous candidates.
-3. Enrich exact points and local polygons only. Keep broad, global,
-   idealized, latitude-only, and moving-track settings unresolved unless an
-   appropriate geometry is explicitly available.
+2. Use the deterministic, versioned gazetteer cache for names with
+   administrative/country qualifier checks. The LLM only copies the qualified
+   study-place name; it does not invent coordinates or select candidates.
+3. Enrich exact points, local polygons, and uniquely resolved approximate
+   points. Keep broad, global, idealized, latitude-only, ambiguous, and
+   moving-track settings unresolved unless appropriate geometry is available.
 4. Initially exclude WorldCover from paper scenario enrichment unless its date
    and meaning are compatible with the observed setting. Continue using it for
    current-area query enrichment.
@@ -137,7 +137,44 @@ climatekg/runtime/outputs/paper_spatial_enrichment_experiment/P000015/
 
 ## Status
 
-The geometry schema and prompt changes are usable. The full paper-enrichment
-feature should remain experimental until named-place resolution, scenario-safe
-land-cover handling, shallowest-context attachment, and a local-site corpus
-test are completed.
+The geometry schema, prompt changes, and cached named-place resolution are
+usable. A Context now stores `enrichable_study_location_name` only for a real
+observed or geographically anchored study area that lacks coordinates. A
+unique qualified gazetteer match becomes an approximate Point; the cache saves
+the query, retrieval time, candidates, selected candidate, and decision reason.
+
+The full paper-enrichment feature should remain experimental until
+scenario-safe land-cover handling, shallowest-context attachment, and a
+local-site corpus test are completed.
+
+## P000019 prompt replay
+
+The first full-paper replay used the new field but still returned
+`Rondônia, Brazil`. The country was not present in the supplied SourceBlocks.
+The saved thinking shows that Qwen recognized the paper's wording
+`Rondônia, Amazonia`, then deliberately substituted Brazil because it judged
+that name more suitable for lookup. This was a prompt-design failure: asking
+for a lookup-ready name invited the model to use geographic knowledge.
+
+The prompt now requests one exact continuous place-name span copied from the
+input, with the shortest independently identifying span preferred. A
+deterministic copy check removes and records any unsupported value without an
+additional LLM call.
+
+Results:
+
+| Replay | Input | Time | Extracted lookup name | Result |
+|---|---:|---:|---|---|
+| Full map | 23,524 prompt tokens | 452.3 s | `Rondônia, Brazil` | Rejected by copy rule |
+| Focused location check | 3 SourceBlocks | 139.8 s | `Rondônia` | Accepted and uniquely geocoded |
+
+Trace artifacts:
+
+```text
+climatekg/runtime/outputs/paper_spatial_enrichment_experiment/P000019_named_location_replay/
+climatekg/runtime/outputs/paper_spatial_enrichment_experiment/P000019_named_location_focused/
+climatekg/runtime/cache/geocoding/nominatim.json
+```
+
+These runtime artifacts are intentionally excluded from Git but remain on the
+local machine for inspection.

@@ -365,6 +365,7 @@ Optional:
     "type": "Point",
     "coordinates": [-60.02, -3.11]
   },
+  "enrichable_study_location_name": null,
   "resolution": "exact"
 }
 ```
@@ -416,6 +417,7 @@ Rules:
     "kind": "region",
     "name": "Central Amazon",
     "geometry": null,
+    "enrichable_study_location_name": "Central Amazon, Brazil",
     "resolution": "named_region"
   },
   "evidence_block_ids": [
@@ -691,6 +693,7 @@ These are **soft semantic-writing targets**, not hard token/word validators. The
 | `Context.label` | Concise human-readable noun phrase, usually **3–12 words**. Identify the study/scenario state, not the paper's result. Prefer wording grounded in the paper. |
 | `Context.aliases[]` | Paper-local names, abbreviations, experiment IDs, or near-verbatim labels used to refer to that Context. Usually **1–8 words each**. Do not create generic semantic synonyms merely for retrieval. |
 | `SpatialSupport.name` | Use the paper-, registry-, or gazetteer-supported place/site/region name. Do not add geographic specificity that is not supported. |
+| `SpatialSupport.enrichable_study_location_name` | Use `null` when geometry is already present. Otherwise copy one exact continuous place-name span from the evidence, usually 1-8 words. Choose the shortest span that independently identifies the real place directly analyzed by the paper. It may describe an observed study area or a simulation tied to a real geographic domain. Preserve stated qualifiers only when needed for disambiguation. Use `null` for idealized/global domains, ambiguous places, and background-only locations. |
 | `Facet.notion` | Short open-vocabulary scientific noun phrase, usually **2–8 words**. It names *what aspect is being described*, not its full value/state. Avoid complete sentences and avoid stuffing magnitude/season/direction into the notion when those belong in `description`. |
 | `Facet.description` | Usually **20–60 words**. Write one self-contained, evidence-faithful description of the coherent notion. Preserve scientifically important quantities, ranges, units, direction, seasonality, layer, spatial configuration, and qualifications. It may exceed 60 words when needed for a genuinely complex but still single notion. If multiple independently retrievable notions are present, split the Facet instead. |
 | `Transition.label` | Concise comparison/intervention name, usually **2–10 words**. Example: `forest-to-pasture experiment`. |
@@ -1143,6 +1146,7 @@ The exact standalone Qwen3.6-27B prompt is versioned as `paper_map_v11` in `prom
         "kind": "region",
         "name": "Central Amazon",
         "geometry": null,
+        "enrichable_study_location_name": "Central Amazon, Brazil",
         "resolution": "named_region"
       },
       "evidence_block_ids": ["P000123:S02:P0014"],
@@ -4498,14 +4502,15 @@ Resolution precedence:
 ```text
 explicit geometry in paper metadata/application
 > known registry ID
-> exact gazetteer polygon match
-> exact gazetteer point match
+> unique qualified match for `enrichable_study_location_name`
 > unresolved
 ```
 
 For a gazetteer name with multiple candidates, resolve automatically only when exactly one candidate matches all explicit administrative/country qualifiers from the paper. Otherwise set `resolution="unresolved"` and skip local enrichment.
 
 Never choose the highest-population or nearest centroid candidate without explicit disambiguating evidence.
+
+When the unique gazetteer match supplies a representative latitude/longitude rather than paper-stated coordinates, store it as Point geometry with `resolution="approximate"`. Preserve the extracted lookup name and the cached candidate/decision record. Approximate point enrichment is valid for screening, but it is not equivalent to an exact study boundary; this distinction remains visible in Context artifacts and reports.
 
 ---
 

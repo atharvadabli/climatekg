@@ -7,6 +7,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from .geocoding import NominatimGeocoder
 from .models import SpatialSupport
 
 
@@ -75,28 +76,40 @@ def _coordinate_geometry(text: str) -> dict[str, Any] | None:
     return None
 
 
-def resolve_spatial_support(support: SpatialSupport, watershed_registry_path: str) -> SpatialSupport:
+def resolve_spatial_support(
+    support: SpatialSupport,
+    watershed_registry_path: str,
+    geocoder: NominatimGeocoder | None = None,
+) -> SpatialSupport:
     """Apply the deterministic part of the specification's resolution precedence."""
     if support.geometry is not None:
         geometry = validate_geojson_geometry(support.geometry)
         kind = "point" if geometry["type"] == "Point" else support.kind
-        return support.model_copy(update={"kind": kind, "geometry": geometry, "resolution": "exact"})
+        resolution = support.resolution if support.resolution in ("exact", "approximate") else "exact"
+        return support.model_copy(update={"kind": kind, "geometry": geometry, "resolution": resolution})
+
+    if support.kind == "global":
+        return support.model_copy(update={"geometry": None, "enrichable_study_location_name": None, "resolution": "global"})
 
     point = _coordinate_geometry(support.name)
     if point is not None:
         return support.model_copy(update={"kind": "point", "geometry": point, "resolution": "exact"})
 
     identifiers = re.findall(r"\bC\d{2}[A-Z]{3}\d{2}\b", support.name.upper())
-    if not identifiers:
-        return support.model_copy(update={"geometry": None, "resolution": "unresolved"})
-    registry = _watershed_registry(watershed_registry_path)
-    matches = [identifier for identifier in identifiers if identifier in registry]
-    if len(set(matches)) == 1:
-        identifier = matches[0]
-        return SpatialSupport(
-            kind="watershed",
-            name=identifier,
-            geometry=registry[identifier],
-            resolution="exact",
-        )
+    if identifiers:
+        registry = _watershed_registry(watershed_registry_path)
+        matches = [identifier for identifier in identifiers if identifier in registry]
+        if len(set(matches)) == 1:
+            identifier = matches[0]
+            return SpatialSupport(
+                kind="watershed",
+                name=identifier,
+                geometry=registry[identifier],
+                enrichable_study_location_name=None,
+                resolution="exact",
+            )
+    if support.enrichable_study_location_name and geocoder is not None:
+        decision = geocoder.resolve(support.enrichable_study_location_name)
+        if decision.geometry is not None:
+            return support.model_copy(update={"kind": "point", "geometry": decision.geometry, "resolution": "approximate"})
     return support.model_copy(update={"geometry": None, "resolution": "unresolved"})

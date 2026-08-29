@@ -7,6 +7,7 @@ from typing import Any
 
 from .config import PIPELINE, ROOT
 from .extraction_models import ClaimBatch, FacetBatch, MapContext, MapTransition, PaperMap, SectionScout
+from .location_extraction import enforce_copied_location_names
 from .models import Claim, Context, Facet, Paper, SourceBlock, Transition
 from .ollama import OllamaClient
 from .retrieval import bm25, exact_alias_hit, semantic
@@ -486,6 +487,7 @@ def map_paper(paper: Paper, blocks: list[SourceBlock], paper_dir: Path, client: 
             proposed = client.structured(stage="paper_map_reference_repair", system=repair_system, user=second_repair, schema=PaperMap, model=cfg["ollama"]["model"], temperature=repair_cfg["temperature"], thinking=repair_cfg["thinking"], artifact_dir=paper_dir / "extraction" / "map", paper_id=paper.id, input_block_ids=[x.id for x in repair_blocks], retries=cfg["ollama"]["final_repair_retries"])
             write_json(repair_candidate_path, proposed.model_dump(by_alias=True))
             result = _apply_map_repair(original, proposed, block_ids)
+    result = enforce_copied_location_names(result, (block.text for block in blocks))
     write_json(paper_dir / "extraction" / "map" / "paper_map.json", result.model_dump(by_alias=True))
     (paper_dir / "extraction" / "map" / "paper_map.tree.txt").write_text(render_paper_map_tree(result), encoding="utf-8")
     return result

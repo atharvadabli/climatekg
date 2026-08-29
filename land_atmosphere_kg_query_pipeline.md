@@ -203,6 +203,7 @@ Do not create a large query ontology.
     "kind": "watershed",
     "name": "user watershed",
     "geometry": null,
+    "enrichable_study_location_name": null,
     "resolution": "exact"
   },
   "facets": [
@@ -2152,6 +2153,8 @@ Use this exact precedence:
 Named-place resolution may auto-resolve only when exactly one gazetteer candidate satisfies all explicit administrative/country qualifiers. Otherwise keep `geometry=null` and warning `SPATIAL_REFERENCE_AMBIGUOUS`.
 
 The generative model never geocodes.
+
+For a non-global named query place without caller-supplied geometry, copy the user's complete place phrase into `enrichable_study_location_name`. A unique qualified gazetteer match becomes approximate Point geometry. Query artifacts must retain the extracted name, resolved geometry, approximate resolution, and cached resolver decision.
 
 ---
 

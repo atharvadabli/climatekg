@@ -11,6 +11,7 @@ import pytest
 
 from climatekg.ollama import OllamaClient
 from climatekg.extraction_models import MapContext, PaperMap, SectionScout, SmallPaperExtraction
+from climatekg.location_extraction import enforce_copied_location_names
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -99,6 +100,36 @@ def test_paper_map_structured_schema_requires_every_declared_field() -> None:
     for name in ("MapContext", "MapTransition"):
         item_schema = schema["$defs"][name]
         assert set(item_schema["required"]) == set(item_schema["properties"])
+    spatial_schema = schema["$defs"]["ExtractedSpatialSupport"]
+    assert "enrichable_study_location_name" in spatial_schema["required"]
+
+
+def test_unsupported_geocoding_qualifier_is_removed_and_recorded() -> None:
+    mapped = PaperMap(
+        contexts=[MapContext(
+            temp_id="C1",
+            label="simulation domain",
+            parent_temp_ids=[],
+            split_reason=None,
+            aliases=[],
+            spatial_support={
+                "kind": "region",
+                "name": "Rondônia, Amazonia",
+                "geometry": None,
+                "enrichable_study_location_name": "Rondônia, Brazil",
+                "resolution": "named_region",
+            },
+            evidence_block_ids=["B1"],
+            facet_seed_block_ids=[],
+        )],
+        transitions=[],
+        context_mention_resolution={},
+        global_claim_seed_block_ids=[],
+        ambiguities=[],
+    )
+    checked = enforce_copied_location_names(mapped, ["The simulations cover Rondônia, Amazonia."])
+    assert checked.contexts[0].spatial_support.enrichable_study_location_name is None
+    assert checked.ambiguities == ["ENRICHABLE_STUDY_LOCATION_NOT_COPIED:C1:Rondônia, Brazil"]
 
 
 def test_extracted_spatial_support_requires_valid_geojson() -> None:
@@ -115,6 +146,7 @@ def test_extracted_spatial_support_requires_valid_geojson() -> None:
         "kind": "region",
         "name": "southern domain",
         "geometry": {"lat_range": [-45, -8], "lon_range": [-90, -35]},
+        "enrichable_study_location_name": None,
         "resolution": "approximate",
     }
     with pytest.raises(ValueError):
@@ -123,6 +155,7 @@ def test_extracted_spatial_support_requires_valid_geojson() -> None:
         "kind": "point",
         "name": "named site",
         "geometry": None,
+        "enrichable_study_location_name": "named site, country",
         "resolution": "exact",
     }
     with pytest.raises(ValueError, match="cannot be exact"):
@@ -131,6 +164,7 @@ def test_extracted_spatial_support_requires_valid_geojson() -> None:
         "kind": "point",
         "name": "measurement site",
         "geometry": {"type": "Point", "coordinates": [-75.2, 40.1]},
+        "enrichable_study_location_name": None,
         "resolution": "exact",
     }
     parsed = MapContext.model_validate({**base, "spatial_support": valid})
@@ -140,10 +174,16 @@ def test_extracted_spatial_support_requires_valid_geojson() -> None:
         "kind": "region",
         "name": "bounded domain",
         "geometry": {"type": "Polygon", "coordinates": [[-90, -8], [-35, -8], [-35, -45], [-90, -45], [-90, -8]]},
+        "enrichable_study_location_name": None,
         "resolution": "approximate",
     }
     with pytest.raises(ValueError):
         MapContext.model_validate({**base, "spatial_support": missing_ring_level})
+    with pytest.raises(ValueError, match="must be null"):
+        MapContext.model_validate({
+            **base,
+            "spatial_support": {**valid, "enrichable_study_location_name": "measurement site, country"},
+        })
     scout_schema = SectionScout.model_json_schema()
     assert set(scout_schema["required"]) == set(scout_schema["properties"])
     combined_schema = SmallPaperExtraction.model_json_schema()

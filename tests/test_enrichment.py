@@ -9,6 +9,7 @@ import pytest
 from climatekg.config import PIPELINE
 from climatekg.earth_engine import EarthEngineBackend, EarthEngineConfigurationError
 from climatekg.enrichment import derive_facets, query_facets
+from climatekg.geocoding import NominatimGeocoder
 from climatekg.models import SpatialSupport
 from climatekg.spatial import geometry_hash, resolve_spatial_support, validate_geojson_geometry
 
@@ -73,6 +74,94 @@ def test_explicit_coordinates_take_precedence_without_registry() -> None:
     resolved = resolve_spatial_support(unresolved, "missing.geojson")
     assert resolved.kind == "point"
     assert resolved.geometry == {"type": "Point", "coordinates": [77.4, 12.3]}
+
+
+def test_explicit_approximate_geometry_keeps_its_resolution() -> None:
+    support = SpatialSupport(
+        kind="point",
+        name="approximately located site",
+        geometry={"type": "Point", "coordinates": [77.4, 12.3]},
+        resolution="approximate",
+    )
+    assert resolve_spatial_support(support, "missing.geojson").resolution == "approximate"
+
+
+def _geocoder_config(cache_path: str = "cache/geocoding.json") -> dict[str, Any]:
+    return {
+        "provider": "nominatim",
+        "endpoint": "https://example.invalid",
+        "user_agent": "ClimateKG test",
+        "cache_path": cache_path,
+        "minimum_interval_seconds": 0,
+        "result_limit": 10,
+        "timeout_seconds": 1,
+    }
+
+
+def test_unique_qualified_study_location_resolves_and_is_cached(tmp_path: Path) -> None:
+    calls: list[str] = []
+
+    def fetch(url: str, headers: dict[str, str], timeout: float) -> list[dict[str, Any]]:
+        calls.append(url)
+        assert headers["User-Agent"] == "ClimateKG test"
+        return [{
+            "lat": "-3.10",
+            "lon": "-60.02",
+            "display_name": "Central Amazon, Amazonas, Brazil",
+            "address": {"state": "Amazonas", "country": "Brazil"},
+        }]
+
+    geocoder = NominatimGeocoder(_geocoder_config(), tmp_path, fetch)
+    support = SpatialSupport(
+        kind="region",
+        name="Central Amazon study domain",
+        geometry=None,
+        enrichable_study_location_name="Central Amazon, Brazil",
+        resolution="named_region",
+    )
+    first = resolve_spatial_support(support, "unused.geojson", geocoder)
+    second = resolve_spatial_support(support, "unused.geojson", geocoder)
+    assert first.geometry == {"type": "Point", "coordinates": [-60.02, -3.1]}
+    assert first.resolution == "approximate"
+    assert first.enrichable_study_location_name == "Central Amazon, Brazil"
+    assert second == first
+    assert len(calls) == 1
+    cache = json.loads((tmp_path / "cache/geocoding.json").read_text(encoding="utf-8"))
+    assert cache["entries"]["central amazon brazil"]["selected"]["display_name"].endswith("Brazil")
+
+
+def test_ambiguous_named_place_remains_unresolved(tmp_path: Path) -> None:
+    candidates = [
+        {"lat": "1", "lon": "2", "display_name": "Springfield, State, Country", "address": {}},
+        {"lat": "3", "lon": "4", "display_name": "Springfield, State, Country", "address": {}},
+    ]
+    geocoder = NominatimGeocoder(_geocoder_config(), tmp_path, lambda *_: candidates)
+    support = SpatialSupport(
+        kind="region",
+        name="Springfield study area",
+        geometry=None,
+        enrichable_study_location_name="Springfield, State, Country",
+        resolution="named_region",
+    )
+    resolved = resolve_spatial_support(support, "unused.geojson", geocoder)
+    assert resolved.geometry is None
+    assert resolved.resolution == "unresolved"
+
+
+def test_global_support_does_not_call_geocoder(tmp_path: Path) -> None:
+    geocoder = NominatimGeocoder(
+        _geocoder_config(),
+        tmp_path,
+        lambda *_: (_ for _ in ()).throw(AssertionError("global support must not be geocoded")),
+    )
+    support = SpatialSupport(
+        kind="global",
+        name="global domain",
+        geometry=None,
+        enrichable_study_location_name=None,
+        resolution="global",
+    )
+    assert resolve_spatial_support(support, "unused.geojson", geocoder) == support
 
 
 def test_geometry_validation_and_hash_are_deterministic() -> None:

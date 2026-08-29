@@ -68,7 +68,7 @@ For each `contexts` item, return:
 - `parent_temp_ids`: List the temporary IDs whose conditions this setting inherits. Use an empty list for a root.
 - `split_reason`: Use `null` for a root. For a child, classify why it is separate using exactly one of `separate_reported_finding`, `sign_or_null_reversal`, `misleading_parent_scope`, or `explicit_transition_state`.
 - `aliases`: Copy paper-local experiment IDs, scenario names, control names, abbreviations, or alternative names that refer to this same setting. Use an empty list when none are stated.
-- `spatial_support`: Use `null` when no location is stated. Otherwise return `kind`, `name`, `geometry`, and `resolution` as defined below.
+- `spatial_support`: Use `null` when no location is stated. Otherwise return `kind`, `name`, `geometry`, `enrichable_study_location_name`, and `resolution` as defined below.
 - `evidence_block_ids`: Copy the smallest set of SourceBlock IDs that directly establishes the setting.
 - `facet_seed_block_ids`: Copy SourceBlock IDs containing environmental, temporal, spatial, model, or experimental conditions for this setting. Use an empty list when none are available.
 
@@ -76,6 +76,7 @@ For `spatial_support`:
 - `kind`: Use exactly one of `point`, `patch`, `watershed`, `region`, `climate_zone`, `global`, or `unresolved`.
 - `name`: Copy the site, domain, region, or area name stated in the passages.
 - `geometry`: Use `null` unless the passages explicitly state enough coordinates for this setting. For one stated site coordinate, return `{{"type":"Point","coordinates":[longitude,latitude]}}`. For four stated domain bounds, return `{{"type":"Polygon","coordinates":[[[west,north],[east,north],[east,south],[west,south],[west,north]]]}}`. Polygon coordinates contain a list of closed rings, so the three opening brackets are required. Use only `Point`, `Polygon`, or `MultiPolygon`, with exactly the keys `type` and `coordinates`.
+- `enrichable_study_location_name`: Use `null` when `geometry` is present. When geometry is absent, copy one exact continuous place-name span from the passages, usually 1-8 words. Choose the shortest span that independently identifies the real place analyzed by this paper, including a simulation tied to a real geographic domain. Preserve stated qualifiers only when the shorter name is ambiguous. The returned words must occur in the input. Use `null` for an idealized or global domain, an ambiguous place, or a place mentioned only as background.
 - `resolution`: Use `exact` when `geometry` contains exact stated coordinates, `approximate` when it contains explicitly approximate coordinates, `named_region` for a stated local or regional name without geometry, `global` for a global domain, or `unresolved` when the place itself is uncertain.
 
 Spatial coordinates must describe the current paper's analyzed site or domain. A station used only to initialize a model, a place mentioned only in cited background work, one coordinate axis without the other, and a moving track without complete geometry do not establish a Point or Polygon for the setting.

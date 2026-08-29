@@ -24,6 +24,7 @@ class SpatialSupport(StrictModel):
     kind: Literal["point", "patch", "watershed", "region", "climate_zone", "global", "unresolved"]
     name: str
     geometry: dict[str, Any] | None = None
+    enrichable_study_location_name: str | None = None
     resolution: Literal["exact", "approximate", "named_region", "global", "unresolved"]
 
 
