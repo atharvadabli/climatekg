@@ -3,8 +3,9 @@ from __future__ import annotations
 from typing import Any, Literal
 
 from pydantic import Field, model_validator
+from typing_extensions import TypedDict
 
-from .models import ClaimEndpoint, Domain, SpatialSupport, StrictModel
+from .models import ClaimEndpoint, Domain, StrictModel
 
 
 class CompleteOutputModel(StrictModel):
@@ -18,15 +19,72 @@ class CompleteOutputModel(StrictModel):
         return schema
 
 
+Position = tuple[float, float]
+
+
+class PointGeometry(TypedDict):
+    type: Literal["Point"]
+    coordinates: Position
+
+
+class PolygonGeometry(TypedDict):
+    type: Literal["Polygon"]
+    coordinates: list[list[Position]]
+
+
+class MultiPolygonGeometry(TypedDict):
+    type: Literal["MultiPolygon"]
+    coordinates: list[list[list[Position]]]
+
+
+class ExtractedSpatialSupport(CompleteOutputModel):
+    kind: Literal["point", "patch", "watershed", "region", "climate_zone", "global", "unresolved"]
+    name: str
+    geometry: PointGeometry | PolygonGeometry | MultiPolygonGeometry | None = None
+    resolution: Literal["exact", "approximate", "named_region", "global", "unresolved"]
+
+
+def _validate_extracted_spatial_support(support: ExtractedSpatialSupport | None) -> None:
+    if support is None:
+        return
+    geometry = support.geometry
+    if geometry is None:
+        if support.resolution == "exact":
+            raise ValueError("spatial resolution cannot be exact when geometry is null")
+        return
+    geometry_type = geometry["type"]
+    if geometry_type == "Point":
+        positions = [geometry["coordinates"]]
+    elif geometry_type == "Polygon":
+        rings = geometry["coordinates"]
+        if not rings or any(len(ring) < 4 or ring[0] != ring[-1] for ring in rings):
+            raise ValueError("Polygon rings must contain at least four positions and be closed")
+        positions = [position for ring in rings for position in ring]
+    else:
+        polygons = geometry["coordinates"]
+        if not polygons or any(not rings for rings in polygons):
+            raise ValueError("MultiPolygon must contain at least one polygon and ring")
+        if any(len(ring) < 4 or ring[0] != ring[-1] for rings in polygons for ring in rings):
+            raise ValueError("MultiPolygon rings must contain at least four positions and be closed")
+        positions = [position for rings in polygons for ring in rings for position in ring]
+    if not positions or any(not -180 <= lon <= 180 or not -90 <= lat <= 90 for lon, lat in positions):
+        raise ValueError("geometry positions must be valid [longitude, latitude] pairs")
+
+
 class MapContext(CompleteOutputModel):
     temp_id: str
     label: str
     parent_temp_ids: list[str] = Field(default_factory=list)
     split_reason: Literal["separate_reported_finding", "sign_or_null_reversal", "misleading_parent_scope", "explicit_transition_state"] | None = None
     aliases: list[str] = Field(default_factory=list)
-    spatial_support: SpatialSupport | None = None
+    spatial_support: ExtractedSpatialSupport | None = None
     evidence_block_ids: list[str]
     facet_seed_block_ids: list[str] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_spatial_geometry(self) -> "MapContext":
+        _validate_extracted_spatial_support(self.spatial_support)
+        return self
 
 
 class MapTransition(CompleteOutputModel):
@@ -154,11 +212,16 @@ class SmallPaperContextV4(CompleteOutputModel):
     parent_temp_ids: list[str] = Field(default_factory=list)
     split_reason: Literal["separate_reported_finding", "sign_or_null_reversal", "misleading_parent_scope", "explicit_transition_state"] | None = None
     aliases: list[str] = Field(default_factory=list)
-    spatial_support: SpatialSupport | None = None
+    spatial_support: ExtractedSpatialSupport | None = None
     evidence_handles: list[str]
     facet_seed_handles: list[str] = Field(default_factory=list)
     facets: list[SmallPaperFacetV4] = Field(default_factory=list)
     claims: list[SmallPaperClaimV4] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_spatial_geometry(self) -> "SmallPaperContextV4":
+        _validate_extracted_spatial_support(self.spatial_support)
+        return self
 
 
 class SmallPaperTransitionV4(CompleteOutputModel):

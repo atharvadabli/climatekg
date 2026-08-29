@@ -193,18 +193,67 @@ def derive_facets(support: SpatialSupport, backend: EarthEngineBackend, config: 
     if support.geometry is None:
         return [], {}, ["ENRICHMENT_SKIPPED_UNRESOLVED_SPATIAL_SUPPORT"]
     geometry = support.geometry
+    area_sqkm = backend.area_sqkm(geometry)
+    area_limit = float(config["max_local_enrichment_area_sqkm"])
+    if geometry["type"] != "Point" and area_sqkm > area_limit:
+        warning = f"ENRICHMENT_SKIPPED_BROAD_REGION:area_sqkm={area_sqkm:.1f}:threshold={area_limit:.1f}"
+        return [], {
+            "area_sqkm": area_sqkm,
+            "status": "skipped",
+            "reason": "broad_region_area_limit",
+            "area_threshold_sqkm": area_limit,
+        }, [warning]
+    land_cover_scale = float(config["datasets"]["land_cover"]["scale_m"])
+    terrain_scale = float(config["datasets"]["terrain"]["scale_m"])
+    estimated_land_cover_pixels = area_sqkm * 1_000_000.0 / (land_cover_scale ** 2)
+    estimated_terrain_pixels = area_sqkm * 1_000_000.0 / (terrain_scale ** 2)
+    land_cover_limit = int(config["max_native_land_cover_pixels"])
+    terrain_limit = int(config["max_native_terrain_pixels"])
+    skip_land_cover = geometry["type"] != "Point" and estimated_land_cover_pixels > land_cover_limit
+    skip_terrain = geometry["type"] != "Point" and estimated_terrain_pixels > terrain_limit
+    land_cover_raw = (
+        {
+            "status": "skipped",
+            "reason": "native_pixel_scale_limit",
+            "estimated_pixels": round(estimated_land_cover_pixels),
+            "pixel_threshold": land_cover_limit,
+            "coverage": 0.0,
+            "fractions": {},
+        }
+        if skip_land_cover else backend.land_cover(geometry)
+    )
+    terrain_raw = (
+        {
+            "status": "skipped",
+            "reason": "native_pixel_scale_limit",
+            "estimated_pixels": round(estimated_terrain_pixels),
+            "pixel_threshold": terrain_limit,
+            "coverage": 0.0,
+        }
+        if skip_terrain else backend.terrain(geometry)
+    )
     raw = {
-        "area_sqkm": backend.area_sqkm(geometry),
+        "area_sqkm": area_sqkm,
         "climate_regime": backend.climate_regime(geometry),
         "aridity": backend.aridity(geometry),
         "wind": backend.wind(geometry),
-        "terrain": backend.terrain(geometry),
-        "land_cover": backend.land_cover(geometry),
+        "terrain": terrain_raw,
+        "land_cover": land_cover_raw,
     }
     minimum = config["min_valid_polygon_coverage"]
     warnings: list[str] = []
     facets: list[DerivedFacet] = []
+    if skip_land_cover:
+        warnings.append(
+            f"ENRICHMENT_SKIPPED_SCALE_LIMIT:land_cover:estimated_pixels={round(estimated_land_cover_pixels)}:threshold={land_cover_limit}"
+        )
+    if skip_terrain:
+        warnings.append(
+            f"ENRICHMENT_SKIPPED_SCALE_LIMIT:terrain:estimated_pixels={round(estimated_terrain_pixels)}:threshold={terrain_limit}"
+        )
     for family in ("climate_regime", "aridity", "terrain", "land_cover"):
+        if raw[family].get("status") == "skipped":
+            continue
         if raw[family].get("coverage", 0.0) < minimum:
             warnings.append(f"ENRICHMENT_LOW_COVERAGE:{family}")
     if raw["aridity"].get("coverage", 0.0) >= minimum:
@@ -224,7 +273,8 @@ def derive_facets(support: SpatialSupport, backend: EarthEngineBackend, config: 
         facet = land_cover_facet(raw["land_cover"], config, geometry)
         if facet:
             facets.append(facet)
-    warnings.append("ENRICHMENT_LAND_COVER_CONFIGURATION_METRICS_NOT_IMPLEMENTED")
+    if not skip_land_cover:
+        warnings.append("ENRICHMENT_LAND_COVER_CONFIGURATION_METRICS_NOT_IMPLEMENTED")
     return facets, raw, warnings
 
 

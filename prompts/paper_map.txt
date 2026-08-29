@@ -75,8 +75,10 @@ For each `contexts` item, return:
 For `spatial_support`:
 - `kind`: Use exactly one of `point`, `patch`, `watershed`, `region`, `climate_zone`, `global`, or `unresolved`.
 - `name`: Copy the site, domain, region, or area name stated in the passages.
-- `geometry`: Copy stated coordinates or geometry into a JSON object. Use `null` when absent.
-- `resolution`: Use exactly one of `exact`, `approximate`, `named_region`, `global`, or `unresolved`.
+- `geometry`: Use `null` unless the passages explicitly state enough coordinates for this setting. For one stated site coordinate, return `{{"type":"Point","coordinates":[longitude,latitude]}}`. For four stated domain bounds, return `{{"type":"Polygon","coordinates":[[[west,north],[east,north],[east,south],[west,south],[west,north]]]}}`. Polygon coordinates contain a list of closed rings, so the three opening brackets are required. Use only `Point`, `Polygon`, or `MultiPolygon`, with exactly the keys `type` and `coordinates`.
+- `resolution`: Use `exact` when `geometry` contains exact stated coordinates, `approximate` when it contains explicitly approximate coordinates, `named_region` for a stated local or regional name without geometry, `global` for a global domain, or `unresolved` when the place itself is uncertain.
+
+Spatial coordinates must describe the current paper's analyzed site or domain. A station used only to initialize a model, a place mentioned only in cited background work, one coordinate axis without the other, and a moving track without complete geometry do not establish a Point or Polygon for the setting.
 
 For each `transitions` item, return:
 - `temp_id`: Generate one unique temporary ID.

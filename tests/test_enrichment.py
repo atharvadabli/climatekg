@@ -43,6 +43,14 @@ class FakeBackend:
         return {"coverage": 0.98, "fractions": {"40": 0.7, "10": 0.25, "50": 0.05}}
 
 
+class BroadRegionBackend(FakeBackend):
+    def area_sqkm(self, geometry: dict[str, Any]) -> float:
+        return 2_000_000.0
+
+    def climate_regime(self, geometry: dict[str, Any]) -> dict[str, Any]:
+        raise AssertionError("broad-region enrichment should stop before raster calls")
+
+
 def _registry(path: Path) -> None:
     path.write_text(json.dumps({
         "type": "FeatureCollection",
@@ -95,6 +103,31 @@ def test_query_facet_ids_continue_after_user_facets() -> None:
     facets = query_facets("Q1", 2, derived)
     assert facets[0].id == "Q1_F003"
     assert all(facet.origin == "derived" and facet.source for facet in facets)
+
+
+def test_large_polygon_skips_high_resolution_families_only() -> None:
+    config = {
+        **PIPELINE["enrichment"],
+        "max_native_land_cover_pixels": 100,
+        "max_native_terrain_pixels": 100,
+    }
+    support = SpatialSupport(kind="region", name="large domain", geometry=POLYGON, resolution="exact")
+    derived, raw, warnings = derive_facets(support, FakeBackend(), config)
+    assert raw["land_cover"]["status"] == "skipped"
+    assert raw["terrain"]["status"] == "skipped"
+    assert not any(item.notion == "land-cover composition" for item in derived)
+    assert any(warning.startswith("ENRICHMENT_SKIPPED_SCALE_LIMIT:land_cover") for warning in warnings)
+    assert any(warning.startswith("ENRICHMENT_SKIPPED_SCALE_LIMIT:terrain") for warning in warnings)
+    assert any(item.notion == "Koppen-Geiger climate regime" for item in derived)
+
+
+def test_broad_region_stops_before_raster_calls() -> None:
+    config = PIPELINE["enrichment"]
+    support = SpatialSupport(kind="region", name="continental domain", geometry=POLYGON, resolution="approximate")
+    derived, raw, warnings = derive_facets(support, BroadRegionBackend(), config)
+    assert derived == []
+    assert raw["status"] == "skipped"
+    assert warnings[0].startswith("ENRICHMENT_SKIPPED_BROAD_REGION")
 
 
 def test_earth_engine_requires_explicit_project() -> None:

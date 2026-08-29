@@ -96,6 +96,12 @@ The output preserves the resolved geometry, geodesic polygon area in square
 kilometres, raw dataset statistics, rendered Facets, provenance, coverage, and
 warnings.
 
+Local enrichment stops before raster calls when polygon area exceeds the
+configured `max_local_enrichment_area_sqkm`. For smaller polygons, native SRTM
+and WorldCover processing also has configurable pixel budgets. These checks
+emit threshold, estimate, and rejection reason; they never silently coarsen a
+categorical raster.
+
 ## Explicit Boundaries
 
 - The Koppen-Geiger runtime source is the configured KMZ. Missing files,

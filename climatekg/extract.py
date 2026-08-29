@@ -504,7 +504,7 @@ def permanent_map(paper: Paper, mapped: PaperMap) -> tuple[list[Context], list[T
             done.add(item.temp_id)
             pending.remove(item)
     ids = {item.temp_id: f"{paper.id}_C{index:03d}" for index, item in enumerate(ordered, 1)}
-    contexts = [Context(id=ids[x.temp_id], paper_id=paper.id, parent_ids=[ids[p] for p in x.parent_temp_ids], label=x.label, aliases=x.aliases, spatial_support=x.spatial_support, evidence_block_ids=x.evidence_block_ids) for x in ordered]
+    contexts = [Context(id=ids[x.temp_id], paper_id=paper.id, parent_ids=[ids[p] for p in x.parent_temp_ids], label=x.label, aliases=x.aliases, spatial_support=x.spatial_support.model_dump() if x.spatial_support else None, evidence_block_ids=x.evidence_block_ids) for x in ordered]
     transitions = [Transition(id=f"{paper.id}_T{index:03d}", paper_id=paper.id, from_context_id=ids[x.from_context_temp_id], to_context_id=ids[x.to_context_temp_id], label=x.label, aliases=x.aliases, description=x.description, evidence_block_ids=x.evidence_block_ids) for index, x in enumerate(mapped.transitions, 1)]
     registry = {x.id: {"label": x.label, "parent_ids": x.parent_ids, "aliases": x.aliases} for x in contexts}
     return contexts, transitions, {"registry": registry, "temp_to_permanent": ids}

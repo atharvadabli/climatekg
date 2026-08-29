@@ -7,9 +7,10 @@ from string import Formatter
 import uuid
 
 from pydantic import BaseModel
+import pytest
 
 from climatekg.ollama import OllamaClient
-from climatekg.extraction_models import PaperMap, SectionScout, SmallPaperExtraction
+from climatekg.extraction_models import MapContext, PaperMap, SectionScout, SmallPaperExtraction
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -98,6 +99,51 @@ def test_paper_map_structured_schema_requires_every_declared_field() -> None:
     for name in ("MapContext", "MapTransition"):
         item_schema = schema["$defs"][name]
         assert set(item_schema["required"]) == set(item_schema["properties"])
+
+
+def test_extracted_spatial_support_requires_valid_geojson() -> None:
+    base = {
+        "temp_id": "C1",
+        "label": "study domain",
+        "parent_temp_ids": [],
+        "split_reason": None,
+        "aliases": [],
+        "evidence_block_ids": ["B1"],
+        "facet_seed_block_ids": [],
+    }
+    invalid = {
+        "kind": "region",
+        "name": "southern domain",
+        "geometry": {"lat_range": [-45, -8], "lon_range": [-90, -35]},
+        "resolution": "approximate",
+    }
+    with pytest.raises(ValueError):
+        MapContext.model_validate({**base, "spatial_support": invalid})
+    exact_without_geometry = {
+        "kind": "point",
+        "name": "named site",
+        "geometry": None,
+        "resolution": "exact",
+    }
+    with pytest.raises(ValueError, match="cannot be exact"):
+        MapContext.model_validate({**base, "spatial_support": exact_without_geometry})
+    valid = {
+        "kind": "point",
+        "name": "measurement site",
+        "geometry": {"type": "Point", "coordinates": [-75.2, 40.1]},
+        "resolution": "exact",
+    }
+    parsed = MapContext.model_validate({**base, "spatial_support": valid})
+    assert parsed.spatial_support.model_dump(mode="json")["geometry"] == valid["geometry"]
+
+    missing_ring_level = {
+        "kind": "region",
+        "name": "bounded domain",
+        "geometry": {"type": "Polygon", "coordinates": [[-90, -8], [-35, -8], [-35, -45], [-90, -45], [-90, -8]]},
+        "resolution": "approximate",
+    }
+    with pytest.raises(ValueError):
+        MapContext.model_validate({**base, "spatial_support": missing_ring_level})
     scout_schema = SectionScout.model_json_schema()
     assert set(scout_schema["required"]) == set(scout_schema["properties"])
     combined_schema = SmallPaperExtraction.model_json_schema()

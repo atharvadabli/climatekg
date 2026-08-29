@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import Any
 
 from .koppen import KoppenRaster
@@ -96,24 +97,35 @@ class EarthEngineBackend:
             .select(["u_component_of_wind_10m", "v_component_of_wind_10m"])
         )
 
-        def summarize(item: Any) -> Any:
-            image = self.ee.Image(item)
-            values = image.reduceRegion(
-                reducer=self.ee.Reducer.mean(),
-                geometry=target,
-                scale=scale,
-                maxPixels=10_000_000_000,
-                tileScale=4,
-            )
-            return self.ee.Dictionary(values).set("month", image.date().get("month")).set("date", image.date().format("YYYY-MM"))
-
-        summaries = collection.toList(collection.size()).map(summarize).getInfo()
+        stack = collection.toBands()
+        band_names = stack.bandNames()
+        weighted_names = band_names.map(lambda name: self.ee.String(name).cat("_weighted"))
+        area_names = band_names.map(lambda name: self.ee.String(name).cat("_area"))
+        pixel_area = self.ee.Image.pixelArea()
+        reduction_image = stack.multiply(pixel_area).rename(weighted_names).addBands(
+            stack.mask().multiply(pixel_area).rename(area_names)
+        )
+        summaries = self._reduce(reduction_image, self.ee.Reducer.sum(), target, scale)
+        names = band_names.getInfo()
+        timestamps = collection.aggregate_array("system:time_start").getInfo()
+        if len(names) != 2 * len(timestamps):
+            raise ValueError("unexpected ERA5-Land wind stack structure")
         records = []
-        for properties in summaries:
-            u = properties.get("u_component_of_wind_10m")
-            v = properties.get("v_component_of_wind_10m")
-            if u is not None and v is not None:
-                records.append({"date": properties.get("date"), "month": int(properties["month"]), "u": float(u), "v": float(v)})
+        for index, timestamp in enumerate(timestamps):
+            u_name, v_name = names[2 * index:2 * index + 2]
+            if not u_name.endswith("u_component_of_wind_10m") or not v_name.endswith("v_component_of_wind_10m"):
+                raise ValueError("unexpected ERA5-Land wind band order")
+            u_area, v_area = summaries.get(f"{u_name}_area"), summaries.get(f"{v_name}_area")
+            u_sum, v_sum = summaries.get(f"{u_name}_weighted"), summaries.get(f"{v_name}_weighted")
+            if u_sum is None or v_sum is None or not u_area or not v_area:
+                continue
+            date = datetime.fromtimestamp(float(timestamp) / 1000.0, timezone.utc)
+            records.append({
+                "date": date.strftime("%Y-%m"),
+                "month": date.month,
+                "u": float(u_sum) / float(u_area),
+                "v": float(v_sum) / float(v_area),
+            })
         return records
 
     def terrain(self, geometry: dict[str, Any]) -> dict[str, Any]:

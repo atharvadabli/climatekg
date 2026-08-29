@@ -32,11 +32,11 @@ ROUTING_TOKENIZER_ENCODING = "o200k_base"
 FILE_HASH_CHUNK_BYTES = 1024 * 1024
 
 PROMPT_VERSIONS = {
-    "small_paper_extraction": "v4.1",
-    "paper_map": "v11",
-    "map_consolidation": "v11",
-    "paper_map_candidate": "v11",
-    "map_consolidation_candidate": "v11",
+    "small_paper_extraction": "v4.2",
+    "paper_map": "v12",
+    "map_consolidation": "v12",
+    "paper_map_candidate": "v12",
+    "map_consolidation_candidate": "v12",
     "section_scout": "v4",
     "query_parse": "v3",
     "final_synthesis": "v4",
@@ -230,6 +230,9 @@ INDEXING_PIPELINE: dict[str, Any] = {
         "watershed_registry_path": environment_value("CLIMATEKG_WATERSHED_REGISTRY")
         or "E:/Atharv/lulc_suggestor_poc/13jul/assets/watershed_pan_india_simplified.geojson",
         "min_valid_polygon_coverage": 0.80,
+        "max_local_enrichment_area_sqkm": 1_000_000,
+        "max_native_land_cover_pixels": 250_000_000,
+        "max_native_terrain_pixels": 500_000_000,
         "wind_directional_persistence_threshold": 0.55,
         "reference_period": {"start": "1991-01-01", "end": "2021-01-01", "label": "1991-2020"},
         "datasets": {
