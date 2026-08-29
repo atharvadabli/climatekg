@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -38,12 +39,34 @@ def relevance(path: Path) -> tuple[int, str]:
     return -score, path.as_posix().casefold()
 
 
+def file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def build_manifest(input_dir: Path, base_manifest: Path) -> list[dict[str, str]]:
     records = json.loads(base_manifest.read_text(encoding="utf-8"))
     selected = {Path(item["filename"]).as_posix().casefold() for item in records}
+    selected_hashes = {file_sha256(input_dir / item["filename"]) for item in records}
     for category, quota in QUOTAS.items():
         candidates = sorted((input_dir / category).glob("*.pdf"), key=relevance)
-        chosen = [path for path in candidates if path.relative_to(input_dir).as_posix().casefold() not in selected][:quota]
+        eligible = [path for path in candidates if path.relative_to(input_dir).as_posix().casefold() not in selected]
+        chosen = eligible[:quota]
+        reserves = iter(eligible[quota:])
+        for index, path in enumerate(chosen):
+            digest = file_sha256(path)
+            while digest in selected_hashes:
+                path = next(reserves, None)
+                if path is None:
+                    break
+                digest = file_sha256(path)
+            if path is None:
+                break
+            chosen[index] = path
+            selected_hashes.add(digest)
         if len(chosen) != quota:
             raise RuntimeError(f"{category}: requested {quota} PDFs, found {len(chosen)}")
         for path in chosen:

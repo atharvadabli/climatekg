@@ -61,6 +61,26 @@ def test_prompts_avoid_pipeline_dependent_phrasing() -> None:
         assert phrase not in combined
 
 
+def test_complete_setting_v11_candidates_are_standalone_and_consistent() -> None:
+    candidate_dir = PROMPT_DIR / "experiments" / "complete_setting_v11"
+    cases = {
+        "paper_map_v11.txt": {"paper_id", "paper_text"},
+        "map_consolidation_v11.txt": {"paper_metadata", "scout_outputs", "selected_blocks"},
+    }
+    for name, placeholders in cases.items():
+        text = (candidate_dir / name).read_text(encoding="utf-8")
+        assert text.startswith("SYSTEM\n")
+        assert text.count("\nUSER\n") == 1
+        assert _fields(text) == placeholders
+        assert "Settings are defined by their conditions" in text
+        assert "Do not construct a full cross-product" in text
+        assert "similar or null results" in text
+        assert "A leaf that still contains several individually evaluated values is incomplete" in text
+        assert "only when the paper analyzes that group as a setting for multiple findings" not in text
+    assert (PROMPT_DIR / "paper_map.txt").read_bytes() == (candidate_dir / "paper_map_v11.txt").read_bytes()
+    assert (PROMPT_DIR / "map_consolidation.txt").read_bytes() == (candidate_dir / "map_consolidation_v11.txt").read_bytes()
+
+
 def test_paper_map_structured_schema_requires_every_declared_field() -> None:
     schema = PaperMap.model_json_schema()
     assert set(schema["required"]) == set(schema["properties"])

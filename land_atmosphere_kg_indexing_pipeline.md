@@ -83,7 +83,7 @@ A valid Facet may be:
 
 Numbers, ranges, units, categories, seasonality, spatial relationships, and descriptive information remain inside the description unless a later deterministic enrichment procedure creates a structured derived description.
 
-`Facet` has no separate `scope` field. If a qualifier such as season, atmospheric layer, subregion, or time of day is part of the Facet's meaning, preserve it naturally in `description`. If the qualifier creates a genuinely different environmental/scenario state for multiple findings, represent that difference with a child `Context`.
+`Facet` has no separate `scope` field. If a qualifier such as season, atmospheric layer, subregion, or time of day is part of the Facet's meaning, preserve it naturally in `description`. If the paper directly analyzes different values of that qualifier as distinct applicability conditions, represent the analyzed combinations with child `Context` branches even when each branch supports only one finding or produces a similar/null result.
 
 ---
 
@@ -1047,7 +1047,7 @@ Do **not** extract detailed Facets or Claims yet.
 
 ## Prompt: `paper_map.txt`
 
-The exact standalone Qwen3.6-27B prompt is versioned as `paper_map_v10` in `prompts/paper_map.txt`. It must:
+The exact standalone Qwen3.6-27B prompt is versioned as `paper_map_v11` in `prompts/paper_map.txt`. It must:
 
 - define a study setting, inheritance, complete effective setting, and comparison without assuming project knowledge;
 - implement the complete-setting tree algorithm in Section 97.9;
@@ -1168,7 +1168,7 @@ Input:
 
 ## Prompt: `map_consolidation.txt`
 
-The exact standalone Qwen3.6-27B prompt is versioned as `map_consolidation_v10` in `prompts/map_consolidation.txt`. It has the same complete-setting requirements as `paper_map_v10`, and additionally explains the distinction between preliminary scout notes and selected original evidence.
+The exact standalone Qwen3.6-27B prompt is versioned as `map_consolidation_v11` in `prompts/map_consolidation.txt`. It has the same complete-setting requirements as `paper_map_v11`, and additionally explains the distinction between preliminary scout notes and selected original evidence.
 
 The output schema is the same `paper_map` schema used for short papers.
 
@@ -4858,17 +4858,31 @@ Effective(C) = Facets(C) union Facets(all ancestors of C)
 
 `Effective(C)` must contain the combination of conditions needed to understand where findings scoped to `C` apply. Conditions that vary independently in the experiment must not be emitted only as disconnected sibling Contexts when the paper reports results for their combinations.
 
-For factorial, sensitivity, treatment, seasonal, regional, or model-comparison studies:
+Setting identity is determined by the conditions that define applicability, not by whether the
+result changes. For factorial, sensitivity, treatment, seasonal, regional, or model-comparison
+studies:
 
 1. put paper-wide conditions in a root;
 2. put conditions shared by several reported settings in intermediate parents;
-3. preserve every separately reported experiment, control, scenario, site, season, or case as a leaf or as an exact paper-local alias of the corresponding complete setting;
-4. place each differing experimental value on the branch where it applies;
-5. construct Transitions between complete endpoints that hold other relevant conditions fixed when the paper does so.
+3. preserve every directly analyzed experiment, control, scenario, site, season, period, regime,
+   named run, and variable-value combination as a complete leaf or as an exact paper-local alias of
+   that complete setting;
+4. represent a list/range/sweep of individually evaluated values as a family parent with one child
+   for every value actually evaluated;
+5. place each differing experimental value on the branch where it applies;
+6. do not invent a Cartesian combination that the paper did not analyze;
+7. construct Transitions between complete endpoints that hold other relevant conditions fixed when
+   the paper does so.
 
-"Minimum Context hierarchy" means minimum repetition through inheritance. It does not permit dropping the identity of a separately reported setting.
+"Minimum Context hierarchy" means minimum repetition through inheritance. It does not permit
+dropping or merging directly analyzed combinations because their results are similar, equal, null,
+or represented by one finding each.
 
-Outcome-defined groups become Contexts only when the paper analyzes the group as a setting for multiple findings. Otherwise the outcome is represented by Claims supported by result SourceBlocks.
+A condition-defined group such as a season, time window, soil-moisture range, wind regime, model
+configuration, site, or treatment value becomes a Context whenever the paper directly uses it to
+stratify an analysis. A group defined only by its observed outcome becomes a Context only when the
+paper subsequently analyzes that group under additional conditions. Otherwise the outcome is
+represented by Claims supported by result SourceBlocks.
 
 Mapping prompts must state this rule in ordinary language and must not contain benchmark-paper names or identifiers. Prompt evaluation uses a small multi-structure corpus, but corpus examples are not inserted into production prompts.
 

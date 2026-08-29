@@ -73,6 +73,11 @@ def _hint_bundle(hint: dict[str, Any], blocks: list[SourceBlock]) -> list[Source
     return [item for item in blocks if item.order in orders and item.block_type != "reference"]
 
 
+def _explicit_hint_block_ids(text: str, blocks: list[SourceBlock]) -> list[str]:
+    """Retain valid SourceBlock IDs that the upstream hint names explicitly."""
+    return [block.id for block in blocks if block.id in text]
+
+
 def _validate_reconciliation_batch(batch: ContextReconciliationBatch, hints: list[dict[str, Any]], context_ids: set[str]) -> None:
     hint_by_id = {item["hint_id"]: item for item in hints}
     if {item.hint_id for item in batch.decisions} != set(hint_by_id):
@@ -138,7 +143,11 @@ def reconcile_contexts(paper: Paper, contexts: list[Context], transitions: list[
     hints = reversal_hints(claims, contexts, transitions)
     for text in explicit_hints:
         bundle = evidence_bundle(blocks, [text], [], [], client)
-        hints.append({"hint_id": f"EH{len(hints)+1:03d}", "text": text, "affected_claim_ids": [], "evidence_block_ids": [item.id for item in bundle]})
+        evidence_ids = unique_in_order(
+            [*_explicit_hint_block_ids(text, blocks), *(item.id for item in bundle)],
+            {item.id: item.order for item in blocks},
+        )
+        hints.append({"hint_id": f"EH{len(hints)+1:03d}", "text": text, "affected_claim_ids": [], "evidence_block_ids": evidence_ids})
     if not hints:
         write_json(paper_dir / "extraction" / "reconciliation" / "report.json", {"status": "NOT_REQUIRED", "hints": []})
         return contexts, facets, claims, []

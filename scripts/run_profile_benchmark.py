@@ -11,11 +11,26 @@ from climatekg.indexer import index_pdf, load_corpus
 from climatekg.models import FinalPaper
 from climatekg.parquet_graph import ParquetGraph
 from climatekg.utils import write_json
-from run_indexing_benchmark import _write_report
-from run_reasoning_matrix import apply_profile
+try:
+    from scripts.run_indexing_benchmark import _write_report
+    from scripts.run_reasoning_matrix import apply_profile
+except ModuleNotFoundError:
+    from run_indexing_benchmark import _write_report
+    from run_reasoning_matrix import apply_profile
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _percentile(values: list[float], fraction: float) -> float:
+    ordered = sorted(values)
+    if not ordered:
+        raise ValueError("percentile requires at least one value")
+    position = (len(ordered) - 1) * fraction
+    lower = int(position)
+    upper = min(lower + 1, len(ordered) - 1)
+    weight = position - lower
+    return ordered[lower] * (1 - weight) + ordered[upper] * weight
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -46,6 +61,8 @@ def _write_profile_benchmark(output_root: Path, profile: str) -> None:
         f"- Failed papers: {len(failed)}",
         f"- Mean paper runtime: {statistics.mean(minutes):.2f} minutes" if minutes else "- Mean paper runtime: unavailable",
         f"- Median paper runtime: {statistics.median(minutes):.2f} minutes" if minutes else "- Median paper runtime: unavailable",
+        f"- 90th-percentile paper runtime: {_percentile(minutes, 0.9):.2f} minutes" if minutes else "- 90th-percentile paper runtime: unavailable",
+        f"- Paper runtime range: {min(minutes):.2f}-{max(minutes):.2f} minutes" if minutes else "- Paper runtime range: unavailable",
         f"- Total LLM time: {summary['llm_wall_seconds'] / 60:.2f} minutes",
         f"- Projected serial time for 50 papers: {statistics.mean(minutes) * 50 / 60:.2f} hours" if minutes else "- Projected serial time for 50 papers: unavailable",
         f"- Parquet/FAISS build: {summary['parquet_build_seconds']:.2f} seconds" if summary.get("parquet_build_seconds") is not None else "- Parquet/FAISS build: unavailable",

@@ -185,3 +185,21 @@ Result: `46 passed`.
   measured mean, projected serial runtime is 15.73 hours.
 - Added a deterministic 50-paper corpus builder and resumable profile benchmark
   runner. Scientific extraction behavior was not changed.
+
+# 2026-08-29: Complete-setting prompt v11
+
+- Compared full Qwen thinking for two byte-identical P000006 map requests.
+  Both recognized dry/wet and day/night regimes; v10 sometimes removed them as
+  sensitivity analyses because its regime rules conflicted.
+- Rewrote paper-map and long-paper consolidation prompts using the standalone
+  Qwen3.6-27B prompt-writing skill.
+- Defined Context identity from directly analyzed combinations of location,
+  setup, time, season, regime, treatment, and variable values, independently of
+  whether results differ.
+- Required an evaluated list/range/sweep to be represented as a family parent
+  with value-specific children, without inventing unobserved cross-products.
+- Controlled replays passed on P000006 (7 Contexts/3 Transitions), P000001
+  (16/4), and P000003 (13/6).
+- Promoted both prompts to v11 and aligned the normative indexing specification.
+- Stopped the v10 large-corpus run after 20 attempts to avoid mixing prompt
+  versions; its partial benchmark artifacts remain preserved.

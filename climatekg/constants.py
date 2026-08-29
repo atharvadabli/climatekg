@@ -29,8 +29,10 @@ TOKEN_ESTIMATE_CHARACTERS_PER_TOKEN = 3.5
 FILE_HASH_CHUNK_BYTES = 1024 * 1024
 
 PROMPT_VERSIONS = {
-    "paper_map": "v10",
-    "map_consolidation": "v10",
+    "paper_map": "v11",
+    "map_consolidation": "v11",
+    "paper_map_candidate": "v11",
+    "map_consolidation_candidate": "v11",
     "section_scout": "v4",
     "query_parse": "v4",
     "final_synthesis": "v4",

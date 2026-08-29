@@ -266,7 +266,7 @@ def test_explicit_derived_rebuild_retains_parse_and_blocks() -> None:
         assert (paper_dir / "blocks" / "artifact.txt").exists()
         assert not (paper_dir / "extraction").exists()
         assert not (paper_dir / "final").exists()
-        assert current_prompt_versions()["map_consolidation"] == "v10"
+        assert current_prompt_versions()["map_consolidation"] == "v11"
         assert current_prompt_versions()["section_scout"] == "v4"
     finally:
         shutil.rmtree(data_root, ignore_errors=True)
