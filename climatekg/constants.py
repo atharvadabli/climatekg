@@ -225,7 +225,7 @@ INDEXING_PIPELINE: dict[str, Any] = {
     },
     "enrichment": {
         "backend": "earth_engine",
-        "algorithm_version": "earth_engine_enrichment_v1",
+        "algorithm_version": "spatial_enrichment_v2",
         "earth_engine_project": environment_value("EARTH_ENGINE_PROJECT"),
         "watershed_registry_path": environment_value("CLIMATEKG_WATERSHED_REGISTRY")
         or "E:/Atharv/lulc_suggestor_poc/13jul/assets/watershed_pan_india_simplified.geojson",
@@ -233,6 +233,14 @@ INDEXING_PIPELINE: dict[str, Any] = {
         "wind_directional_persistence_threshold": 0.55,
         "reference_period": {"start": "1991-01-01", "end": "2021-01-01", "label": "1991-2020"},
         "datasets": {
+            "climate_regime": {
+                "id": "Global_1986-2010_KG_5m.kmz.zip",
+                "version": "Kottek et al. (2006), updated 1986-2010 normals (2017 release)",
+                "scale_m": 9276.6,
+                "temporal_window": "1986-2010",
+                "source_path": environment_value("KOPPEN_GEIGER_SOURCE")
+                or "E:/Atharv/lulc_suggestor_poc/13jul/assets/Global_1986-2010_KG_5m.kmz.zip",
+            },
             "aridity": {"id": "IDAHO_EPSCOR/TERRACLIMATE", "version": "Earth Engine catalog", "scale_m": 4638.3},
             "wind": {"id": "ECMWF/ERA5_LAND/MONTHLY_AGGR", "version": "Earth Engine monthly aggregates", "scale_m": 11132},
             "terrain": {"id": "USGS/SRTMGL1_003", "version": "SRTM V3", "scale_m": 30},

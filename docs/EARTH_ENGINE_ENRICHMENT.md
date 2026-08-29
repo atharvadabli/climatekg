@@ -2,10 +2,12 @@
 
 ## Scope
 
-ClimateKG uses Google Earth Engine as the only raster enrichment backend. It
-does not fall back to files on the local machine. The pan-India watershed
-GeoJSON is used only as an application registry that resolves a stable
-watershed ID to an exact polygon.
+ClimateKG uses Google Earth Engine for aridity, wind, terrain, and land-cover
+enrichment. Climate regime uses the explicitly configured 1986-2010
+Koppen-Geiger KMZ because that product is not in the Earth Engine public
+catalog. Neither source path has a fallback. The pan-India watershed GeoJSON
+is used only as an application registry that resolves a stable watershed ID
+to an exact polygon.
 
 The same `derive_facets` function is called during paper indexing and query
 processing. Every emitted Facet records the dataset, version, temporal window,
@@ -24,6 +26,7 @@ Create the ignored `.env` file:
 
 ```text
 EARTH_ENGINE_PROJECT=your-earth-engine-enabled-google-cloud-project
+KOPPEN_GEIGER_SOURCE=E:/path/to/Global_1986-2010_KG_5m.kmz.zip
 CLIMATEKG_WATERSHED_REGISTRY=E:/path/to/watershed_pan_india_simplified.geojson
 ```
 
@@ -32,8 +35,9 @@ refresh token, service-account key, or key JSON content in `.env`.
 
 ## Dataset Contract
 
-| Family | Earth Engine dataset | Period/version | Output |
+| Family | Configured dataset | Period/version | Output |
 |---|---|---|---|
+| Climate regime | `Global_1986-2010_KG_5m.kmz.zip` | 1986-2010 normals | Koppen-Geiger class area fractions |
 | Aridity | `IDAHO_EPSCOR/TERRACLIMATE` | 1991-2020 | annual P, annual PET, P/PET, aridity class |
 | Wind | `ECMWF/ERA5_LAND/MONTHLY_AGGR` | 1991-2020 | seasonal mean speed, wind-from direction, directional persistence |
 | Terrain | `USGS/SRTMGL1_003` | SRTM V3 | elevation p10/median/p90, relief, median slope |
@@ -45,6 +49,17 @@ Dataset documentation:
 - https://developers.google.com/earth-engine/datasets/catalog/ECMWF_ERA5_LAND_MONTHLY_AGGR
 - https://developers.google.com/earth-engine/datasets/catalog/USGS_SRTMGL1_003
 - https://developers.google.com/earth-engine/datasets/catalog/ESA_WorldCover_v200
+
+The climate reader uses the exact 31 map colors and restores the source PNG's
+4320x2160 5-arc-minute categorical grid. It rejects unexpected colors rather
+than guessing a class. The optional preparation script produces a GeoTIFF and
+source-checksum manifest for later Earth Engine upload.
+
+```powershell
+.\.venv-climatekg\Scripts\python.exe scripts\prepare_koppen_earth_engine_asset.py `
+  "E:\Atharv\lulc_suggestor_poc\13jul\assets\Global_1986-2010_KG_5m.kmz.zip" `
+  "climatekg\runtime\cache\koppen\koppen_geiger_1986_2010.tif"
+```
 
 ## Resolution Precedence Implemented
 
@@ -77,13 +92,14 @@ By a GeoJSON Geometry or one-feature GeoJSON file:
   --output climatekg/runtime/outputs/enrichment/planning_area.json
 ```
 
-The output preserves the resolved geometry, raw dataset statistics, rendered
-Facets, provenance, coverage, and warnings.
+The output preserves the resolved geometry, geodesic polygon area in square
+kilometres, raw dataset statistics, rendered Facets, provenance, coverage, and
+warnings.
 
 ## Explicit Boundaries
 
-- No Köppen-Geiger dataset is configured in Earth Engine. The run records
-  `ENRICHMENT_CLIMATE_REGIME_NOT_CONFIGURED` and emits no climate-regime Facet.
+- The Koppen-Geiger runtime source is the configured KMZ. Missing files,
+  unknown colors, and insufficient polygon coverage fail visibly.
 - WorldCover class fractions are implemented. Connected-component sizes and
   edge density are not yet implemented, so the run records
   `ENRICHMENT_LAND_COVER_CONFIGURATION_METRICS_NOT_IMPLEMENTED` and emits no
@@ -95,4 +111,4 @@ Facets, provenance, coverage, and warnings.
 - Earth Engine initialization or computation failure is recorded explicitly.
   A resolved-location query stops instead of continuing without enrichment;
   indexing records the optional-stage failure as required by the indexing
-  specification. No local raster is substituted.
+  specification. No substitute dataset is used.

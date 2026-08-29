@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from .koppen import KoppenRaster
+
 
 class EarthEngineConfigurationError(RuntimeError):
     pass
@@ -24,9 +26,15 @@ class EarthEngineBackend:
         self.ee = ee
         self.datasets = datasets
         self.period = period
+        self.koppen = KoppenRaster(datasets["climate_regime"]["source_path"])
 
     def _geometry(self, geometry: dict[str, Any]) -> Any:
         return self.ee.Geometry(geometry)
+
+    def area_sqkm(self, geometry: dict[str, Any]) -> float:
+        if geometry["type"] == "Point":
+            return 0.0
+        return float(self._geometry(geometry).area(maxError=1).getInfo()) / 1_000_000.0
 
     def _reduce(self, image: Any, reducer: Any, geometry: Any, scale: float) -> dict[str, Any]:
         result = image.reduceRegion(
@@ -144,3 +152,6 @@ class EarthEngineBackend:
         total_area = float(target.area(maxError=1).getInfo())
         fractions = {key: value / valid_area for key, value in areas.items()} if valid_area else {}
         return {"coverage": min(1.0, valid_area / max(total_area, 1.0)), "fractions": fractions}
+
+    def climate_regime(self, geometry: dict[str, Any]) -> dict[str, Any]:
+        return self.koppen.summarize(geometry)

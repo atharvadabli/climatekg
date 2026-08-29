@@ -20,8 +20,14 @@ POLYGON = {
 
 
 class FakeBackend:
+    def area_sqkm(self, geometry: dict[str, Any]) -> float:
+        return 123.4
+
     def aridity(self, geometry: dict[str, Any]) -> dict[str, Any]:
         return {"coverage": 0.95, "precipitation_mm": 600.0, "pet_mm": 1500.0}
+
+    def climate_regime(self, geometry: dict[str, Any]) -> dict[str, Any]:
+        return {"coverage": 1.0, "fractions": {"14": 0.72, "13": 0.28}}
 
     def wind(self, geometry: dict[str, Any]) -> list[dict[str, Any]]:
         records = []
@@ -72,12 +78,14 @@ def test_shared_enrichment_builds_provenanced_facets() -> None:
     config = PIPELINE["enrichment"]
     support = SpatialSupport(kind="watershed", name="C01ABC01", geometry=POLYGON, resolution="exact")
     derived, raw, warnings = derive_facets(support, FakeBackend(), config)
-    assert {item.domain for item in derived} >= {"hydrology", "atmosphere", "substrate_terrain", "land_surface"}
+    assert {item.domain for item in derived} >= {"climate", "hydrology", "atmosphere", "substrate_terrain", "land_surface"}
     assert any("P/PET is 0.400" in item.description and "semi-arid" in item.description for item in derived)
     assert len([item for item in derived if item.domain == "atmosphere"]) == 4
     assert all(item.source.geometry_hash == geometry_hash(POLYGON) for item in derived)
     assert raw["land_cover"]["fractions"]["40"] == 0.7
-    assert "ENRICHMENT_CLIMATE_REGIME_NOT_CONFIGURED" in warnings
+    assert raw["area_sqkm"] == 123.4
+    assert any("Dominant 1986-2010 Koppen-Geiger" in item.description and "Csc 72.0%" in item.description for item in derived)
+    assert "ENRICHMENT_CLIMATE_REGIME_NOT_CONFIGURED" not in warnings
 
 
 def test_query_facet_ids_continue_after_user_facets() -> None:

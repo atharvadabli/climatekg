@@ -23,6 +23,14 @@ LAND_COVER_CLASSES = {
     "100": "moss and lichen",
 }
 
+KOPPEN_CLASSES = {
+    str(index): name
+    for index, name in enumerate(
+        ("Af", "Am", "As", "Aw", "BSh", "BSk", "BWh", "BWk", "Cfa", "Cfb", "Cfc", "Csa", "Csb", "Csc", "Cwa", "Cwb", "Cwc", "Dfa", "Dfb", "Dfc", "Dfd", "Dsa", "Dsb", "Dsc", "Dsd", "Dwa", "Dwb", "Dwc", "Dwd", "EF", "ET"),
+        1,
+    )
+}
+
 
 @dataclass(frozen=True)
 class DerivedFacet:
@@ -39,7 +47,8 @@ def _source(config: dict[str, Any], family: str, geometry: dict[str, Any], metho
         dataset=dataset["id"],
         version=dataset["version"],
         method=f"{method}; {config['algorithm_version']}",
-        temporal_window=config["reference_period"]["label"] if family in {"aridity", "wind"} else None,
+        temporal_window=dataset.get("temporal_window")
+        or (config["reference_period"]["label"] if family in {"aridity", "wind"} else None),
         geometry_hash=geometry_hash(geometry),
     )
 
@@ -158,11 +167,35 @@ def land_cover_facet(raw: dict[str, Any], config: dict[str, Any], geometry: dict
     )
 
 
+def climate_regime_facet(raw: dict[str, Any], config: dict[str, Any], geometry: dict[str, Any]) -> DerivedFacet | None:
+    fractions = raw.get("fractions", {})
+    if not fractions:
+        return None
+    ordered = sorted(fractions.items(), key=lambda item: (-item[1], item[0]))
+    retained: list[tuple[str, float]] = []
+    cumulative = 0.0
+    for item in ordered:
+        retained.append(item)
+        cumulative += item[1]
+        if cumulative >= 0.80 or len(retained) == 3:
+            break
+    parts = [f"{KOPPEN_CLASSES.get(code, f'class {code}')} {fraction * 100:.1f}%" for code, fraction in retained]
+    qualifier = "Dominant" if ordered[0][1] >= 0.60 else "Mixed"
+    return DerivedFacet(
+        domain="climate",
+        notion="Koppen-Geiger climate regime",
+        description=f"{qualifier} 1986-2010 Koppen-Geiger classes by pixel area: " + "; ".join(parts) + ".",
+        source=_source(config, "climate_regime", geometry, "native 5-arc-minute categorical pixel-area class fractions"),
+    )
+
+
 def derive_facets(support: SpatialSupport, backend: EarthEngineBackend, config: dict[str, Any]) -> tuple[list[DerivedFacet], dict[str, Any], list[str]]:
     if support.geometry is None:
         return [], {}, ["ENRICHMENT_SKIPPED_UNRESOLVED_SPATIAL_SUPPORT"]
     geometry = support.geometry
     raw = {
+        "area_sqkm": backend.area_sqkm(geometry),
+        "climate_regime": backend.climate_regime(geometry),
         "aridity": backend.aridity(geometry),
         "wind": backend.wind(geometry),
         "terrain": backend.terrain(geometry),
@@ -171,11 +204,15 @@ def derive_facets(support: SpatialSupport, backend: EarthEngineBackend, config: 
     minimum = config["min_valid_polygon_coverage"]
     warnings: list[str] = []
     facets: list[DerivedFacet] = []
-    for family in ("aridity", "terrain", "land_cover"):
+    for family in ("climate_regime", "aridity", "terrain", "land_cover"):
         if raw[family].get("coverage", 0.0) < minimum:
             warnings.append(f"ENRICHMENT_LOW_COVERAGE:{family}")
     if raw["aridity"].get("coverage", 0.0) >= minimum:
         facet = aridity_facet(raw["aridity"], config, geometry)
+        if facet:
+            facets.append(facet)
+    if raw["climate_regime"].get("coverage", 0.0) >= minimum:
+        facet = climate_regime_facet(raw["climate_regime"], config, geometry)
         if facet:
             facets.append(facet)
     facets.extend(wind_facets(raw["wind"], config, geometry))
@@ -187,7 +224,6 @@ def derive_facets(support: SpatialSupport, backend: EarthEngineBackend, config: 
         facet = land_cover_facet(raw["land_cover"], config, geometry)
         if facet:
             facets.append(facet)
-    warnings.append("ENRICHMENT_CLIMATE_REGIME_NOT_CONFIGURED")
     warnings.append("ENRICHMENT_LAND_COVER_CONFIGURATION_METRICS_NOT_IMPLEMENTED")
     return facets, raw, warnings
 

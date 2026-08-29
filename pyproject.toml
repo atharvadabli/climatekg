@@ -2,7 +2,7 @@
 name = "land-atmosphere-kg"
 version = "0.1.0"
 requires-python = ">=3.11"
-dependencies = ["pydantic>=2.10", "pyarrow>=18", "numpy>=2", "faiss-cpu>=1.15,<2", "tiktoken>=0.9,<1", "earthengine-api>=1.7,<2"]
+dependencies = ["pydantic>=2.10", "pyarrow>=18", "numpy>=2", "faiss-cpu>=1.15,<2", "tiktoken>=0.9,<1", "earthengine-api>=1.7,<2", "Pillow>=12,<13", "rasterio>=1.4,<2"]
 
 [build-system]
 requires = ["setuptools>=77", "wheel"]
