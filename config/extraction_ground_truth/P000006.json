@@ -6,52 +6,77 @@
     {
       "key": "root_global_event_analysis",
       "description": "Global analysis of afternoon rain events against antecedent surface soil moisture between 60S and 60N, pairing a 0.25 degree afternoon rainfall maximum with rainfall minima in a 1.25 degree box, excluding mountains, coasts, water bodies, strong climatological soil-moisture gradients, and tropical forest.",
-      "evidence": ["P000006:S00:P0009", "P000006:S01:P0028"]
+      "evidence": [
+        "P000006:S00:P0009",
+        "P000006:S01:P0028"
+      ]
     },
     {
       "key": "obs_satellite_baseline",
       "description": "Satellite observational branch at 0.25 degree using merged ASCAT (2007-11) and AMSR-E (2002-2011) soil moisture with 3-hourly CMORPH precipitation.",
-      "evidence": ["P000006:S00:P0010", "P000006:S01:P0027"]
+      "evidence": [
+        "P000006:S00:P0010",
+        "P000006:S01:P0027"
+      ]
     },
     {
       "key": "obs_degraded_1deg",
       "description": "The same observational analysis repeated after degrading spatial resolution from 0.25 to 1.0 degree, which yields about one tenth of the events.",
-      "evidence": ["P000006:S00:P0015"]
+      "evidence": [
+        "P000006:S00:P0015"
+      ]
     },
     {
       "key": "obs_alternative_precip",
       "description": "The same observational analysis repeated with two alternative precipitation data sets in place of CMORPH.",
-      "evidence": ["P000006:S00:P0016"]
+      "evidence": [
+        "P000006:S00:P0016"
+      ]
     },
     {
       "key": "obs_semiarid_regions",
       "description": "Semi-arid and arid region subset of the observational analysis: North Africa, Eastern Australia, Central Asia and Southern Africa, where surface fluxes are sensitive to soil moisture and convective events are frequent.",
-      "evidence": ["P000006:S00:P0010", "P000006:S00:P0003"]
+      "evidence": [
+        "P000006:S00:P0010",
+        "P000006:S00:P0003"
+      ]
     },
     {
       "key": "obs_mean_soil_moisture_strata",
       "description": "Observational events stratified by areal-mean 1.25 degree pre-event soil moisture, from the driest bins to values above 0.20 m3 m-3.",
-      "evidence": ["P000006:S00:P0017"]
+      "evidence": [
+        "P000006:S00:P0017"
+      ]
     },
     {
       "key": "obs_daytime_window",
       "description": "Observational events stratified by time of first precipitation after the 1:30 local-time soil moisture observation, restricted to the 12:00-15:00 daytime window.",
-      "evidence": ["P000006:S00:P0020"]
+      "evidence": [
+        "P000006:S00:P0020"
+      ]
     },
     {
       "key": "obs_nighttime_window",
       "description": "The same lag stratification restricted to the 21:00-3:00 night window.",
-      "evidence": ["P000006:S00:P0020"]
+      "evidence": [
+        "P000006:S00:P0020"
+      ]
     },
     {
       "key": "model_ensemble",
       "description": "Six global weather and climate models at 0.5 to 2.0 degree analysed with 3-hourly diagnostics, a reduced 3x3 event box, a 6:00-8:59 local soil-moisture window, and convective rain accumulated over the following 9 hours.",
-      "evidence": ["P000006:S00:P0021", "P000006:S01:P0029"]
+      "evidence": [
+        "P000006:S00:P0021",
+        "P000006:S01:P0029"
+      ]
     },
     {
       "key": "model_single_exception",
       "description": "The single reanalysis model (Fig. 3e, MERRA) that produces more than the expected 10 per cent of grid cells with P<10, largely from mid-latitude contributions.",
-      "evidence": ["P000006:S00:P0021", "P000006:S00:P0024"]
+      "evidence": [
+        "P000006:S00:P0021",
+        "P000006:S00:P0024"
+      ]
     }
   ],
   "claims": [
@@ -62,9 +87,13 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Across all six continents studied, afternoon rain falls preferentially over soils that are relatively dry compared with the surrounding area, with 28.9 per cent of analysed grid cells below the tenth percentile against an expected 10 per cent.",
-      "evidence": ["P000006:S00:P0003", "P000006:S00:P0010"],
+      "evidence": [
+        "P000006:S00:P0003",
+        "P000006:S00:P0010"
+      ],
       "matched_claim_id": "P000006_CL001",
-      "match_note": "Extracted with the same direction and endpoints."
+      "match_note": "Extracted with the same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "obs_dry_preference_semiarid_strongest",
@@ -73,9 +102,13 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The dry-soil preference emerges most clearly over semi-arid regions, where surface fluxes are sensitive to soil moisture and convective events are frequent, forming clusters over North Africa, Eastern Australia, Central Asia and Southern Africa.",
-      "evidence": ["P000006:S00:P0003", "P000006:S00:P0010"],
+      "evidence": [
+        "P000006:S00:P0003",
+        "P000006:S00:P0010"
+      ],
       "matched_claim_id": null,
-      "match_note": "The extracted CL001 description mentions semi-arid regions in passing, but no separate record represents climate regime as a condition that modulates signal strength."
+      "match_note": "The extracted CL001 description mentions semi-arid regions in passing, but no separate record represents climate regime as a condition that modulates signal strength.",
+      "tier": "main"
     },
     {
       "key": "obs_significance_all_continents",
@@ -84,9 +117,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The dry-soil signal is statistically significant at the 99 per cent level over all continents and in all climate zones except tropical forest, where soil moisture retrievals are unavailable.",
-      "evidence": ["P000006:S00:P0015"],
+      "evidence": [
+        "P000006:S00:P0015"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "obs_robust_to_resolution",
@@ -95,9 +131,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Degrading the analysis from 0.25 to 1.0 degree reduces the event count roughly tenfold but still yields a statistically robust preference for rain over drier soil across the tropics, notably North Africa and Australia.",
-      "evidence": ["P000006:S00:P0015"],
+      "evidence": [
+        "P000006:S00:P0015"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. This is a scale-dependence result that the counting rules require to be kept separate."
+      "match_note": "Not extracted. This is a scale-dependence result that the counting rules require to be kept separate.",
+      "tier": "supporting"
     },
     {
       "key": "obs_robust_to_precip_dataset",
@@ -106,9 +145,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Two alternative precipitation data sets reproduce the same global preference for rain over drier soil and the same contributing regions.",
-      "evidence": ["P000006:S00:P0016"],
+      "evidence": [
+        "P000006:S00:P0016"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "obs_signal_strongest_driest_mean",
@@ -117,9 +159,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The most negative values of the pre-rain soil moisture difference occur under the driest areal-mean conditions.",
-      "evidence": ["P000006:S00:P0017"],
+      "evidence": [
+        "P000006:S00:P0017"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "main"
     },
     {
       "key": "obs_threshold_020",
@@ -128,9 +173,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The dry-soil signal loses significance at the 95 per cent level above an areal-mean soil moisture of 0.20 m3 m-3.",
-      "evidence": ["P000006:S00:P0017"],
+      "evidence": [
+        "P000006:S00:P0017"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. A numerical applicability threshold, which the counting rules require as its own record."
+      "match_note": "Not extracted. A numerical applicability threshold, which the counting rules require as its own record.",
+      "tier": "main"
     },
     {
       "key": "obs_diurnal_cycle",
@@ -139,9 +187,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The pre-rain soil moisture difference exhibits a pronounced diurnal cycle that is still evident 36 hours after the soil moisture observation.",
-      "evidence": ["P000006:S00:P0020"],
+      "evidence": [
+        "P000006:S00:P0020"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "obs_daytime_minimum",
@@ -150,9 +201,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The strongest preference for rain over drier soil occurs during daytime, in particular between 12:00 and 15:00 local time.",
-      "evidence": ["P000006:S00:P0020"],
+      "evidence": [
+        "P000006:S00:P0020"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "main"
     },
     {
       "key": "obs_night_sign_reversal",
@@ -161,9 +215,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Between 21:00 and 3:00 the opposite signal emerges, with rain events more likely over wetter soils.",
-      "evidence": ["P000006:S00:P0020"],
+      "evidence": [
+        "P000006:S00:P0020"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. This is the paper's own diurnal sign reversal and is exactly the kind of context-dependent fact the query pipeline is meant to preserve."
+      "match_note": "Not extracted. This is the paper's own diurnal sign reversal and is exactly the kind of context-dependent fact the query pipeline is meant to preserve.",
+      "tier": "main"
     },
     {
       "key": "obs_no_positive_feedback_at_scale",
@@ -172,9 +229,13 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "At the 50-100 km scale analysed, no evidence is found for a positive feedback, that is, a preference for rain over wetter soils.",
-      "evidence": ["P000006:S00:P0003", "P000006:S00:P0022"],
+      "evidence": [
+        "P000006:S00:P0003",
+        "P000006:S00:P0022"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted as a separate null result; only the dry-soil preference was captured."
+      "match_note": "Not extracted as a separate null result; only the dry-soil preference was captured.",
+      "tier": "main"
     },
     {
       "key": "model_wet_preference",
@@ -183,9 +244,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Six global models show a strong preference for convective rain over wet soils across large parts of the world, in contrast with the observations.",
-      "evidence": ["P000006:S00:P0021"],
+      "evidence": [
+        "P000006:S00:P0021"
+      ],
       "matched_claim_id": "P000006_CL002",
-      "match_note": "Extracted with the same direction and endpoints."
+      "match_note": "Extracted with the same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "model_single_exception",
@@ -194,9 +258,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Only one of the six models produces more than the expected 10 per cent of grid cells below the tenth percentile, and it does so largely through mid-latitude contributions.",
-      "evidence": ["P000006:S00:P0021"],
+      "evidence": [
+        "P000006:S00:P0021"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "model_tropics_strongest",
@@ -205,9 +272,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The cross-model signal favouring precipitation over wet soil is particularly strong across the tropics.",
-      "evidence": ["P000006:S00:P0021"],
+      "evidence": [
+        "P000006:S00:P0021"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "interp_convective_parameterization",
@@ -216,9 +286,12 @@
       "relation": "causal",
       "role": "AUTHORS_INTERPRETATION_OF_OWN_RESULT",
       "statement": "The authors attribute the simulated wet-soil preference to convective parameterizations whose triggering is overly sensitive to the daytime increase of moist instability, which is faster over wetter soils.",
-      "evidence": ["P000006:S00:P0021"],
+      "evidence": [
+        "P000006:S00:P0021"
+      ],
       "matched_claim_id": "P000006_CL003",
-      "match_note": "Extracted with the same direction and endpoints."
+      "match_note": "Extracted with the same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "interp_sensible_heat_mechanism",
@@ -227,9 +300,12 @@
       "relation": "causal",
       "role": "AUTHORS_INTERPRETATION_OF_OWN_RESULT",
       "statement": "The authors state that their observed result is mechanistically consistent with enhanced afternoon moist convection driven by increased sensible heat flux over drier soils, by mesoscale variability in soil moisture, or by both.",
-      "evidence": ["P000006:S00:P0003"],
+      "evidence": [
+        "P000006:S00:P0003"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted, although it is the paper's stated mechanism for its headline result."
+      "match_note": "Not extracted, although it is the paper's stated mechanism for its headline result.",
+      "tier": "main"
     }
   ]
 }

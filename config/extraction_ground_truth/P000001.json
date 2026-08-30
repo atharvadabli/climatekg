@@ -6,72 +6,105 @@
     {
       "key": "root_wind_farm_assessment",
       "description": "Combined field-data and regional-model assessment of how utility-scale wind farms affect near-surface air temperature.",
-      "evidence": ["P000001:S00:P0005", "P000001:S00:P0007"]
+      "evidence": [
+        "P000001:S00:P0005",
+        "P000001:S00:P0007"
+      ]
     },
     {
       "key": "san_gorgonio_campaign",
       "description": "San Gorgonio, California field campaign of 18 June to 9 August 1989 over a farm of 23 m turbines with 8.5 m blades in 41 rows spaced 120 m apart, sampled only when wind blew perpendicular to the slope.",
-      "evidence": ["P000001:S01:P0012", "P000001:S05:P0057"]
+      "evidence": [
+        "P000001:S01:P0012",
+        "P000001:S05:P0057"
+      ]
     },
     {
       "key": "upwind_tower",
       "description": "The upwind meteorological tower at 33.896 N, 116.604 W, elevation 290 m, measuring 5 m air temperature.",
-      "evidence": ["P000001:S05:P0057", "P000001:S05:P0058"]
+      "evidence": [
+        "P000001:S05:P0057",
+        "P000001:S05:P0058"
+      ]
     },
     {
       "key": "downwind_tower",
       "description": "The downwind meteorological tower at 33.875 N, 116.562 W, elevation 214 m.",
-      "evidence": ["P000001:S05:P0057"]
+      "evidence": [
+        "P000001:S05:P0057"
+      ]
     },
     {
       "key": "edwards_afb_profiles",
       "description": "Vertical temperature profiles from Edwards Air Force Base during June-August 1989, at 4 AM, 10 AM and 4 PM.",
-      "evidence": ["P000001:S01:P0016"]
+      "evidence": [
+        "P000001:S01:P0016"
+      ]
     },
     {
       "key": "rams_control",
       "description": "RAMS control simulations with the wind turbine parameterization off, one hour long, initialised from 153 WMO soundings across four seasons and 21 western US stations.",
-      "evidence": ["P000001:S02:P0018", "P000001:S02:P0026"]
+      "evidence": [
+        "P000001:S02:P0018",
+        "P000001:S02:P0026"
+      ]
     },
     {
       "key": "rams_wind_farm",
       "description": "Paired RAMS simulations with the rotor parameterization on for a 7x3 array of 100 m turbines with 100 m rotor diameter spaced 1 km apart.",
-      "evidence": ["P000001:S02:P0018"]
+      "evidence": [
+        "P000001:S02:P0018"
+      ]
     },
     {
       "key": "positive_lapse_rate",
       "description": "Simulations stratified by positive 0-300 m potential temperature lapse rate, that is stable conditions.",
-      "evidence": ["P000001:S02:P0027", "P000001:S02:P0031"]
+      "evidence": [
+        "P000001:S02:P0027",
+        "P000001:S02:P0031"
+      ]
     },
     {
       "key": "negative_lapse_rate",
       "description": "Simulations stratified by negative lapse rate, that is unstable conditions.",
-      "evidence": ["P000001:S02:P0031"]
+      "evidence": [
+        "P000001:S02:P0031"
+      ]
     },
     {
       "key": "hub_height_wind_strata",
       "description": "Simulations stratified by mean ambient hub-height wind speed from below 2 m/s to above 20 m/s.",
-      "evidence": ["P000001:S02:P0032"]
+      "evidence": [
+        "P000001:S02:P0032"
+      ]
     },
     {
       "key": "ambient_tke_strata",
       "description": "Simulations stratified by mean background lower-ABL turbulent kinetic energy from the control runs.",
-      "evidence": ["P000001:S02:P0037"]
+      "evidence": [
+        "P000001:S02:P0037"
+      ]
     },
     {
       "key": "surface_dissipation_strata",
       "description": "Simulations stratified by mean background surface kinetic energy dissipation rate, with thresholds at 2.7 and 6 W/m2.",
-      "evidence": ["P000001:S02:P0038"]
+      "evidence": [
+        "P000001:S02:P0038"
+      ]
     },
     {
       "key": "rotor_tke_sensitivity",
       "description": "Sensitivity ensembles with rotor-added turbulent kinetic energy set to 0, 0.5, 1, 2, 5, 10 and 15 m2/s2, each with 153 simulations.",
-      "evidence": ["P000001:S03:P0041"]
+      "evidence": [
+        "P000001:S03:P0041"
+      ]
     },
     {
       "key": "jra25_global_dissipation",
       "description": "Global land surface kinetic energy dissipation computed from the 25-year six-hourly JRA25 reanalysis on a 2.5 degree grid with 41 vertical levels.",
-      "evidence": ["P000001:S03:P0048"]
+      "evidence": [
+        "P000001:S03:P0048"
+      ]
     }
   ],
   "claims": [
@@ -82,9 +115,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Near-surface air temperatures downwind of the wind farm are higher than upwind during night and early morning hours.",
-      "evidence": ["P000001:S01:P0013"],
+      "evidence": [
+        "P000001:S01:P0013"
+      ],
       "matched_claim_id": "P000001_CL001",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "observed_day_cooling",
@@ -93,9 +129,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "For the rest of the day the reverse holds, so the wind farm cools downwind near-surface air relative to upwind.",
-      "evidence": ["P000001:S01:P0013"],
+      "evidence": [
+        "P000001:S01:P0013"
+      ],
       "matched_claim_id": "P000001_CL002",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "observed_significance",
@@ -104,9 +143,13 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The observed temperature signal is statistically significant for most hours of the day, with the strongest significance in the afternoon cooling hours.",
-      "evidence": ["P000001:S01:P0013", "P000001:S02:P0029"],
+      "evidence": [
+        "P000001:S01:P0013",
+        "P000001:S02:P0029"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted, so the extracted diurnal claims carry no confidence information."
+      "match_note": "Not extracted, so the extracted diurnal claims carry no confidence information.",
+      "tier": "supporting"
     },
     {
       "key": "lapse_rate_corroboration",
@@ -115,9 +158,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "A positive lapse rate at 4 AM and negative lapse rates at 10 AM and 4 PM correspond to observed warming at 4 AM and cooling at 10 AM and 4 PM.",
-      "evidence": ["P000001:S01:P0016"],
+      "evidence": [
+        "P000001:S01:P0016"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. This observational link between stability and the sign of the effect is the paper's key conditioning fact."
+      "match_note": "Not extracted. This observational link between stability and the sign of the effect is the paper's key conditioning fact.",
+      "tier": "main"
     },
     {
       "key": "simulated_warming_stable",
@@ -126,9 +172,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "In the simulations wind turbine rotors create warming under positive lapse rates.",
-      "evidence": ["P000001:S02:P0031"],
+      "evidence": [
+        "P000001:S02:P0031"
+      ],
       "matched_claim_id": "P000001_CL003",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "simulated_cooling_unstable",
@@ -137,9 +186,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "In the simulations wind turbine rotors create cooling under negative lapse rates.",
-      "evidence": ["P000001:S02:P0031"],
+      "evidence": [
+        "P000001:S02:P0031"
+      ],
       "matched_claim_id": "P000001_CL004",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "scatter_under_stable",
@@ -148,9 +200,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "There is more scatter in the temperature change under positive lapse rates because the range of wind speeds is much wider under stable conditions.",
-      "evidence": ["P000001:S02:P0031"],
+      "evidence": [
+        "P000001:S02:P0031"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "wind_speed_low_cutoff",
@@ -159,9 +214,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The temperature signal becomes zero at hub-height wind speeds less than 2 m/s.",
-      "evidence": ["P000001:S02:P0032"],
+      "evidence": [
+        "P000001:S02:P0032"
+      ],
       "matched_claim_id": "P000001_CL005",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "wind_speed_high_cutoff",
@@ -170,9 +228,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The temperature signal becomes zero at hub-height wind speeds greater than 20 m/s.",
-      "evidence": ["P000001:S02:P0032"],
+      "evidence": [
+        "P000001:S02:P0032"
+      ],
       "matched_claim_id": "P000001_CL006",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "wind_speed_peak",
@@ -181,9 +242,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The temperature signal peaks at approximately 12 m/s hub-height wind speed, following a Gaussian shape.",
-      "evidence": ["P000001:S02:P0032"],
+      "evidence": [
+        "P000001:S02:P0032"
+      ],
       "matched_claim_id": "P000001_CL007",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "rotor_cutout_explanation",
@@ -192,9 +256,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Above 20 m/s the rotors are designed to stop, so they work only intermittently and the mean surface temperature impact falls.",
-      "evidence": ["P000001:S02:P0032"],
+      "evidence": [
+        "P000001:S02:P0032"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "ambient_tke_damping",
@@ -203,9 +270,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Temperature effects are large when ambient turbulent kinetic energy is small and small when it is large, because a well-mixed profile gains little from additional rotor mixing.",
-      "evidence": ["P000001:S02:P0037"],
+      "evidence": [
+        "P000001:S02:P0037"
+      ],
       "matched_claim_id": "P000001_CL008",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "dissipation_threshold_27",
@@ -214,9 +284,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The rotor impact starts to decrease once the background surface kinetic energy dissipation rate exceeds 2.7 W/m2.",
-      "evidence": ["P000001:S02:P0038"],
+      "evidence": [
+        "P000001:S02:P0038"
+      ],
       "matched_claim_id": "P000001_CL010",
-      "match_note": "Same direction and threshold."
+      "match_note": "Same direction and threshold.",
+      "tier": "main"
     },
     {
       "key": "dissipation_threshold_6",
@@ -225,9 +298,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The rotor impact becomes almost zero at dissipation rates higher than 6 W/m2.",
-      "evidence": ["P000001:S02:P0038"],
+      "evidence": [
+        "P000001:S02:P0038"
+      ],
       "matched_claim_id": "P000001_CL009",
-      "match_note": "Same direction and threshold."
+      "match_note": "Same direction and threshold.",
+      "tier": "main"
     },
     {
       "key": "rotor_tke_stronger_impact",
@@ -236,9 +312,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Rotors that generate more turbulence in their wakes have a stronger impact on near-surface air temperatures.",
-      "evidence": ["P000001:S03:P0041"],
+      "evidence": [
+        "P000001:S03:P0041"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. This is the paper's first mitigation lever."
+      "match_note": "Not extracted. This is the paper's first mitigation lever.",
+      "tier": "main"
     },
     {
       "key": "rotor_tke_reduces_downstream_ke",
@@ -247,9 +326,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Turbulence generation draws on the kinetic energy of the mean flow, so higher-turbulence rotors further reduce the energy available to downstream turbines.",
-      "evidence": ["P000001:S03:P0042"],
+      "evidence": [
+        "P000001:S03:P0042"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "main"
     },
     {
       "key": "rotor_tke_optimum_05",
@@ -258,9 +340,13 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Absorbed power increases for rotor turbulence between 0 and 0.5 m2/s2 and decreases thereafter, because a small wake turbulence triggers beneficial entrainment before consumption outweighs replenishment.",
-      "evidence": ["P000001:S03:P0043", "P000001:S03:P0046"],
+      "evidence": [
+        "P000001:S03:P0043",
+        "P000001:S03:P0046"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. A non-monotonic optimum, exactly the kind of relationship the counting rules require to be preserved."
+      "match_note": "Not extracted. A non-monotonic optimum, exactly the kind of relationship the counting rules require to be preserved.",
+      "tier": "main"
     },
     {
       "key": "tke_dissipation_correlation",
@@ -269,9 +355,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Simulated ABL turbulent kinetic energy and surface kinetic energy dissipation rate are strongly correlated at r = 0.9475, which justifies using dissipation as a turbulence proxy.",
-      "evidence": ["P000001:S03:P0047"],
+      "evidence": [
+        "P000001:S03:P0047"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted, so the substitution underlying the global siting map is unsupported in the graph."
+      "match_note": "Not extracted, so the substitution underlying the global siting map is unsupported in the graph.",
+      "tier": "supporting"
     },
     {
       "key": "global_mean_dissipation",
@@ -280,9 +369,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The global average surface kinetic energy dissipation is estimated at 2.1 W/m2.",
-      "evidence": ["P000001:S03:P0048"],
+      "evidence": [
+        "P000001:S03:P0048"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "dissipation_high_over_topography",
@@ -291,9 +383,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Surface kinetic energy dissipation is high over high topography, which together with accessibility rules those regions out for wind farms.",
-      "evidence": ["P000001:S03:P0049"],
+      "evidence": [
+        "P000001:S03:P0049"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "low_impact_regions_identified",
@@ -302,9 +397,13 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Large parts of North and Central America, southern South America, northern Europe, Russia, northern China, the Rift Valley, southern Africa, southern Australia and New Zealand are identified as suitable for low-impact wind farms.",
-      "evidence": ["P000001:S03:P0049", "P000001:S04:P0054"],
+      "evidence": [
+        "P000001:S03:P0049",
+        "P000001:S04:P0054"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. The paper's siting recommendation, which is its most directly actionable output, is absent."
+      "match_note": "Not extracted. The paper's siting recommendation, which is its most directly actionable output, is absent.",
+      "tier": "main"
     },
     {
       "key": "overlap_with_wind_resource",
@@ -313,9 +412,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The low-impact map overlaps considerably with published wind resource maps, making the US Great Plains and Midwest attractive on both criteria.",
-      "evidence": ["P000001:S03:P0050"],
+      "evidence": [
+        "P000001:S03:P0050"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "main"
     },
     {
       "key": "interp_vertical_mixing_mechanism",
@@ -324,9 +426,13 @@
       "relation": "causal",
       "role": "AUTHORS_INTERPRETATION_OF_OWN_RESULT",
       "statement": "Enhanced vertical mixing brings warm air down under a positive lapse rate and cool air down under a negative lapse rate, which explains the observed diurnal sign reversal.",
-      "evidence": ["P000001:S01:P0014", "P000001:S01:P0016"],
+      "evidence": [
+        "P000001:S01:P0014",
+        "P000001:S01:P0016"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted, so the extracted warming and cooling records stand without the mechanism that reconciles them."
+      "match_note": "Not extracted, so the extracted warming and cooling records stand without the mechanism that reconciles them.",
+      "tier": "main"
     }
   ]
 }

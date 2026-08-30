@@ -6,72 +6,111 @@
     {
       "key": "root_european_gam",
       "description": "Generalised additive models linking observed land surface temperature to broad-leaved tree fraction across Europe for 2009-2014, controlling for latitude, longitude, elevation and topography.",
-      "evidence": ["P000012:S00:P0010", "P000012:S00:P0012", "P000012:S05:P0034"]
+      "evidence": [
+        "P000012:S00:P0010",
+        "P000012:S00:P0012",
+        "P000012:S05:P0034"
+      ]
     },
     {
       "key": "seviri_lst",
       "description": "SEVIRI hourly land surface temperature product, giving 24 values per month.",
-      "evidence": ["P000012:S05:P0034", "P000012:S02:P0020"]
+      "evidence": [
+        "P000012:S05:P0034",
+        "P000012:S02:P0020"
+      ]
     },
     {
       "key": "modis_lst",
       "description": "MODIS land surface temperature product with four acquisitions per day at approximately 01:30, 10:30, 13:30 and 22:30.",
-      "evidence": ["P000012:S05:P0034", "P000012:S02:P0020"]
+      "evidence": [
+        "P000012:S05:P0034",
+        "P000012:S02:P0020"
+      ]
     },
     {
       "key": "atlantic_region",
       "description": "The Atlantic biogeographical region, with an oceanic climate and less limiting soil moisture.",
-      "evidence": ["P000012:S01:P0014", "P000012:S02:P0018"]
+      "evidence": [
+        "P000012:S01:P0014",
+        "P000012:S02:P0018"
+      ]
     },
     {
       "key": "continental_region",
       "description": "The Continental biogeographical region.",
-      "evidence": ["P000012:S01:P0014"]
+      "evidence": [
+        "P000012:S01:P0014"
+      ]
     },
     {
       "key": "mediterranean_region",
       "description": "The Mediterranean biogeographical region, with high incoming shortwave radiation and dry summers.",
-      "evidence": ["P000012:S01:P0014", "P000012:S02:P0018"]
+      "evidence": [
+        "P000012:S01:P0014",
+        "P000012:S02:P0018"
+      ]
     },
     {
       "key": "boreal_region",
       "description": "The Boreal biogeographical region, with lower incoming shortwave radiation.",
-      "evidence": ["P000012:S01:P0014", "P000012:S02:P0018"]
+      "evidence": [
+        "P000012:S01:P0014",
+        "P000012:S02:P0018"
+      ]
     },
     {
       "key": "alpine_region",
       "description": "The Alpine biogeographical region, which contains the Swiss in-situ comparison sites.",
-      "evidence": ["P000012:S01:P0014", "P000012:S02:P0025"]
+      "evidence": [
+        "P000012:S01:P0014",
+        "P000012:S02:P0025"
+      ]
     },
     {
       "key": "summer_daytime",
       "description": "Summer daytime hours, when the cooling signal is largest.",
-      "evidence": ["P000012:S01:P0014", "P000012:S02:P0022"]
+      "evidence": [
+        "P000012:S01:P0014",
+        "P000012:S02:P0022"
+      ]
     },
     {
       "key": "summer_nighttime",
       "description": "Nighttime hours, when energy-balance differences between forest types are small.",
-      "evidence": ["P000012:S01:P0014", "P000012:S02:P0024"]
+      "evidence": [
+        "P000012:S01:P0014",
+        "P000012:S02:P0024"
+      ]
     },
     {
       "key": "winter",
       "description": "Winter daytime, evaluated separately and giving region-dependent signs.",
-      "evidence": ["P000012:S01:P0014"]
+      "evidence": [
+        "P000012:S01:P0014"
+      ]
     },
     {
       "key": "temperature_quantile_strata",
       "description": "Observed daily maximum temperatures separated into quantiles from 0.1 to 0.9 within each biogeographical region.",
-      "evidence": ["P000012:S01:P0016", "P000012:S02:P0023"]
+      "evidence": [
+        "P000012:S01:P0016",
+        "P000012:S02:P0023"
+      ]
     },
     {
       "key": "in_situ_paired_sites",
       "description": "Ten paired forest and open-land in-situ sites in Switzerland measuring 2 m air temperature within the canopy.",
-      "evidence": ["P000012:S02:P0025"]
+      "evidence": [
+        "P000012:S02:P0025"
+      ]
     },
     {
       "key": "annual_mean_response",
       "description": "The annual mean temperature response, in which seasonal and diurnal cycles largely average out.",
-      "evidence": ["P000012:S01:P0015"]
+      "evidence": [
+        "P000012:S01:P0015"
+      ]
     }
   ],
   "claims": [
@@ -82,9 +121,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "An increase in broad-leaved tree fraction induces summer daytime cooling in all five biogeographical regions.",
-      "evidence": ["P000012:S01:P0014"],
+      "evidence": [
+        "P000012:S01:P0014"
+      ],
       "matched_claim_id": "P000012_CL001",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "btf_atlantic_largest",
@@ -93,9 +135,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The cooling is largest in the Atlantic region, reaching up to 2 K in August.",
-      "evidence": ["P000012:S01:P0014"],
+      "evidence": [
+        "P000012:S01:P0014"
+      ],
       "matched_claim_id": "P000012_CL002",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "btf_other_regions_range",
@@ -104,9 +149,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "In the four other regions the summer cooling lies roughly between 0.5 and 1.5 K.",
-      "evidence": ["P000012:S01:P0014"],
+      "evidence": [
+        "P000012:S01:P0014"
+      ],
       "matched_claim_id": "P000012_CL003",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "btf_nighttime_warming",
@@ -115,9 +163,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "At night there is a slight warming effect throughout the year in every region except the Mediterranean.",
-      "evidence": ["P000012:S01:P0014"],
+      "evidence": [
+        "P000012:S01:P0014"
+      ],
       "matched_claim_id": "P000012_CL004",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "btf_winter_sign_varies",
@@ -126,9 +177,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "In winter, daytime cooling or warming occurs depending on the region.",
-      "evidence": ["P000012:S01:P0014"],
+      "evidence": [
+        "P000012:S01:P0014"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. A seasonal sign ambiguity, so the extracted claims imply an unconditioned cooling."
+      "match_note": "Not extracted. A seasonal sign ambiguity, so the extracted claims imply an unconditioned cooling.",
+      "tier": "main"
     },
     {
       "key": "modis_seviri_agreement",
@@ -137,9 +191,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The MODIS and SEVIRI signals strongly agree for most regions despite differing resolutions and retrieval methods.",
-      "evidence": ["P000012:S01:P0015"],
+      "evidence": [
+        "P000012:S01:P0015"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "mediterranean_product_disagreement",
@@ -148,9 +205,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "In the Mediterranean the summer daytime cooling is much larger for SEVIRI, up to 1.5 K, than for MODIS, up to 0.85 K.",
-      "evidence": ["P000012:S01:P0015"],
+      "evidence": [
+        "P000012:S01:P0015"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. A measurement-dependent magnitude disagreement."
+      "match_note": "Not extracted. A measurement-dependent magnitude disagreement.",
+      "tier": "supporting"
     },
     {
       "key": "annual_mean_near_zero",
@@ -159,9 +219,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Seasonal and diurnal cycles largely average out, so the annual mean temperature response in several regions is close to zero.",
-      "evidence": ["P000012:S01:P0015"],
+      "evidence": [
+        "P000012:S01:P0015"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. Without it, the extracted cooling claims read as an annual-mean benefit, which the paper explicitly denies."
+      "match_note": "Not extracted. Without it, the extracted cooling claims read as an annual-mean benefit, which the paper explicitly denies.",
+      "tier": "main"
     },
     {
       "key": "two_daily_observations_approximate",
@@ -170,9 +233,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The two MODIS Aqua observations per day can roughly approximate the annual mean effect of an increasing broad-leaved tree fraction.",
-      "evidence": ["P000012:S01:P0015"],
+      "evidence": [
+        "P000012:S01:P0015"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "earlier_daily_maximum",
@@ -181,9 +247,13 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Daily maximum temperatures occurred earlier over broad-leaved than over needle-leaved forests in most regions.",
-      "evidence": ["P000012:S01:P0015", "P000012:S02:P0024"],
+      "evidence": [
+        "P000012:S01:P0015",
+        "P000012:S02:P0024"
+      ],
       "matched_claim_id": "P000012_CL006",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "cooling_amplified_at_high_quantiles",
@@ -192,9 +262,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Within each biogeographical region the summer cooling effect is larger for higher daily maximum temperature quantiles.",
-      "evidence": ["P000012:S01:P0016"],
+      "evidence": [
+        "P000012:S01:P0016"
+      ],
       "matched_claim_id": "P000012_CL005",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "between_region_not_temperature_ordered",
@@ -203,9 +276,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Cooling potential is related to background temperature within a region but not between regions: the Mediterranean is hottest yet cools less than the Atlantic and similarly to the Continental region at high quantiles.",
-      "evidence": ["P000012:S01:P0016"],
+      "evidence": [
+        "P000012:S01:P0016"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. This blocks the naive transfer rule that hotter places gain more."
+      "match_note": "Not extracted. This blocks the naive transfer rule that hotter places gain more.",
+      "tier": "main"
     },
     {
       "key": "mediterranean_saturates",
@@ -214,9 +290,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "In the Mediterranean the summertime cooling hardly increases between the 0.6 and 0.9 quantiles, plausibly because soil moisture limitation attenuates the evapotranspiration difference.",
-      "evidence": ["P000012:S02:P0019"],
+      "evidence": [
+        "P000012:S02:P0019"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. A saturation threshold that matters for dry-region transfer."
+      "match_note": "Not extracted. A saturation threshold that matters for dry-region transfer.",
+      "tier": "main"
     },
     {
       "key": "hot_day_reduction_magnitudes",
@@ -225,9 +304,13 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The reduction of daily maximum temperatures during the hottest days reaches up to 1.8 K in the Atlantic region and up to 1.5 K in the Continental and Mediterranean regions.",
-      "evidence": ["P000012:S00:P0007", "P000012:S03:P0030"],
+      "evidence": [
+        "P000012:S00:P0007",
+        "P000012:S03:P0030"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted; the headline magnitudes for hot extremes are absent even though the generic quantile relation was captured."
+      "match_note": "Not extracted; the headline magnitudes for hot extremes are absent even though the generic quantile relation was captured.",
+      "tier": "main"
     },
     {
       "key": "linear_in_btf",
@@ -236,9 +319,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Land surface temperature decreases approximately linearly with the increase in broad-leaved tree fraction, so a moderate increase still has substantial impact.",
-      "evidence": ["P000012:S02:P0028"],
+      "evidence": [
+        "P000012:S02:P0028"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted, so no partial-adoption scenario can be scaled from the graph."
+      "match_note": "Not extracted, so no partial-adoption scenario can be scaled from the graph.",
+      "tier": "main"
     },
     {
       "key": "in_situ_corroborates",
@@ -247,9 +333,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "In-situ observations corroborate that the cooling potential increases from lower to higher summer daily maximum temperatures and agree with the Alpine diurnal and seasonal cycles.",
-      "evidence": ["P000012:S02:P0025"],
+      "evidence": [
+        "P000012:S02:P0025"
+      ],
       "matched_claim_id": "P000012_CL008",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "in_situ_nighttime_disagreement",
@@ -258,9 +347,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Station data suggest lower nighttime temperature for broad-leaved trees while the remote sensing analysis shows a very weak or slightly positive nighttime signal.",
-      "evidence": ["P000012:S02:P0025"],
+      "evidence": [
+        "P000012:S02:P0025"
+      ],
       "matched_claim_id": "P000012_CL009",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "supporting"
     },
     {
       "key": "forest_open_land_difference",
@@ -269,9 +361,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "An increase in broad-leaved tree fraction decreases the summer daily maximum temperature difference between forest and open land.",
-      "evidence": ["P000012:S02:P0025"],
+      "evidence": [
+        "P000012:S02:P0025"
+      ],
       "matched_claim_id": "P000012_CL007",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "interp_albedo_latent_heat",
@@ -280,9 +375,12 @@
       "relation": "causal",
       "role": "AUTHORS_INTERPRETATION_OF_OWN_RESULT",
       "statement": "The authors attribute the lower summer temperature over broad-leaved forest to a larger reflected shortwave fraction and a generally larger latent heat flux from higher stomatal conductance.",
-      "evidence": ["P000012:S02:P0018"],
+      "evidence": [
+        "P000012:S02:P0018"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted, so the extracted temperature claims carry no mechanism."
+      "match_note": "Not extracted, so the extracted temperature claims carry no mechanism.",
+      "tier": "main"
     },
     {
       "key": "interp_boreal_low_shortwave",
@@ -291,9 +389,12 @@
       "relation": "causal",
       "role": "AUTHORS_INTERPRETATION_OF_OWN_RESULT",
       "statement": "The moderate boreal cooling signal is attributed to lower incoming shortwave radiation reducing the temperature impact of the higher broad-leaved albedo.",
-      "evidence": ["P000012:S02:P0018"],
+      "evidence": [
+        "P000012:S02:P0018"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "interp_mediterranean_traits",
@@ -302,9 +403,12 @@
       "relation": "causal",
       "role": "AUTHORS_INTERPRETATION_OF_OWN_RESULT",
       "statement": "Mediterranean broad-leaved species have evolved smaller leaves and lower evapotranspiration rates, so the evapotranspiration contrast with needle-leaved species is potentially smaller there.",
-      "evidence": ["P000012:S02:P0018"],
+      "evidence": [
+        "P000012:S02:P0018"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "interp_atlantic_soil_moisture",
@@ -313,9 +417,12 @@
       "relation": "causal",
       "role": "AUTHORS_INTERPRETATION_OF_OWN_RESULT",
       "statement": "Because soil moisture is less limiting in the Atlantic region, physiological differences in evapotranspiration between broad- and needle-leaved species become more prominent there.",
-      "evidence": ["P000012:S02:P0018"],
+      "evidence": [
+        "P000012:S02:P0018"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. This is the condition that explains why the Atlantic region cools most."
+      "match_note": "Not extracted. This is the condition that explains why the Atlantic region cools most.",
+      "tier": "supporting"
     },
     {
       "key": "interp_stomatal_closure_timing",
@@ -324,9 +431,12 @@
       "relation": "causal",
       "role": "AUTHORS_INTERPRETATION_OF_OWN_RESULT",
       "statement": "Conifers close stomata earlier than many deciduous broad-leaved species, giving a stronger latent heat decline over needle-leaved forest and hence greater broad-leaved cooling in the afternoon.",
-      "evidence": ["P000012:S02:P0024"],
+      "evidence": [
+        "P000012:S02:P0024"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     }
   ]
 }

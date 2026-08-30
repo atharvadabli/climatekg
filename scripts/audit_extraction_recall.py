@@ -52,6 +52,9 @@ def audit_paper(annotation: dict[str, Any], extraction: dict[str, Any]) -> dict[
     # A record is unsupported only when it maps to no reference claim at all;
     # extra records that restate a matched reference claim are counted as redundant.
     unsupported = len(extraction["claims"]) - len(matched) - len(redundant)
+    by_key = {claim["key"]: claim for claim in claims}
+    main = [claim for claim in claims if claim.get("tier") == "main"]
+    main_matched = [key for key in matched if by_key[key].get("tier") == "main"]
     return {
         "paper_id": annotation["paper_id"],
         "title": annotation["title"],
@@ -64,9 +67,15 @@ def audit_paper(annotation: dict[str, Any], extraction: dict[str, Any]) -> dict[
         "extracted_claims": len(extraction["claims"]),
         "matched_claims": len(matched),
         "claim_recall": round(len(matched) / len(claims), 3) if claims else None,
+        "main_claims": len(main),
+        "main_matched": len(main_matched),
+        "main_claim_recall": round(len(main_matched) / len(main), 3) if main else None,
         "redundant_claims": len(redundant),
         "unsupported_claims": unsupported,
         "reference_roles": dict(roles),
+        "missed_main_claim_keys": [
+            claim["key"] for claim in main if claim.get("matched_claim_id") is None
+        ],
         "missed_claim_keys": unmatched,
         "invalid_matches": invalid,
     }
@@ -102,6 +111,13 @@ def main() -> None:
         "extracted_claims": extracted_claims,
         "matched_claims": matched_claims,
         "claim_recall": round(matched_claims / reference_claims, 3) if reference_claims else None,
+        "main_claims": sum(row["main_claims"] for row in rows),
+        "main_matched": sum(row["main_matched"] for row in rows),
+        "main_claim_recall": round(
+            sum(row["main_matched"] for row in rows) / sum(row["main_claims"] for row in rows), 3
+        )
+        if sum(row["main_claims"] for row in rows)
+        else None,
         "redundant_claims": sum(row["redundant_claims"] for row in rows),
         "unsupported_claims": sum(row["unsupported_claims"] for row in rows),
         "claim_precision": round(
@@ -113,15 +129,15 @@ def main() -> None:
     }
 
     print(
-        f"{'paper':9} {'ref_set':>8} {'ext_set':>8} {'ref_cl':>7} {'ext_cl':>7} "
-        f"{'match':>6} {'recall':>7} {'dup':>4} {'unsup':>6}  title"
+        f"{'paper':9} {'ref_set':>8} {'ext_set':>8} {'main':>5} {'m_hit':>6} {'m_rec':>7} "
+        f"{'all':>5} {'a_rec':>7} {'dup':>4} {'unsup':>6}  title"
     )
     for row in rows:
         print(
             f"{row['paper_id']:9} {row['reference_settings']:>8} {row['extracted_settings']:>8} "
-            f"{row['reference_claims']:>7} {row['extracted_claims']:>7} {row['matched_claims']:>6} "
-            f"{str(row['claim_recall']):>7} {row['redundant_claims']:>4} {row['unsupported_claims']:>6}  "
-            f"{row['title'][:40]}"
+            f"{row['main_claims']:>5} {row['main_matched']:>6} {str(row['main_claim_recall']):>7} "
+            f"{row['reference_claims']:>5} {str(row['claim_recall']):>7} "
+            f"{row['redundant_claims']:>4} {row['unsupported_claims']:>6}  {row['title'][:36]}"
         )
     print()
     print(json.dumps(summary, indent=2))

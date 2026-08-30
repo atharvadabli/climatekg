@@ -1,0 +1,304 @@
+\documentclass{article}
+
+\usepackage[nonatbib]{tackling_climate_workshop_style}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{natbib}
+\usetikzlibrary{arrows.meta, positioning}
+
+\bibliographystyle{plainnat}
+
+\title{Context-Gated Knowledge-Graph Retrieval over Land--Atmosphere\\Literature for Land-Use Scenario Design}
+
+\author{%
+  Anonymous Author(s) \\
+  Affiliation \\
+  Address \\
+  \texttt{email}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Deciding which land-use changes to test in a convection-permitting weather model is
+expensive: each candidate scenario costs a full numerical experiment, so the candidate
+set must be narrowed before any model runs. The literature is the natural filter, but
+the effects it reports reverse sign with season, background wind, soil moisture, patch
+scale, and latitude, and retrieval systems that return passages or entity communities
+strip those conditions away and answer confidently without them. Our position is that
+the study conditions under which a finding holds must be retrievable objects in their
+own right, not incidental text inside a passage. We build ClimateKG, which extracts each
+paper in stages into a graph of StudyContexts, conditioning Facets, and directed
+ScientificClaims, and scores environmental applicability before traversing any mechanism
+edge. On a shared 18-paper corpus we benchmark it against plain passage RAG and an
+entity-adapted Microsoft GraphRAG under a matched generation model, context window and
+reasoning budget, over ten questions with claim-level gold evidence, and release a
+hand-annotated extraction ground truth for ten papers. Staged extraction recovers $0.62$
+of main findings at $0.98$ precision, and what it drops is overwhelmingly the
+conditioning structure --- diurnal sign reversals, applicability thresholds, and
+latitude-dependent branches --- which is both the argument for the approach and its
+clearest current limit.
+\end{abstract}
+
+\section{Introduction}
+
+Land-use and land-cover (LULC) change alters local climate through surface energy
+and water partitioning, and the practical question for a planning agency is not
+whether an effect exists but which candidate change to
+adopt~\citep{pielke2007overview,cao2020landscape,alkama2016biophysical}. Answering
+that credibly requires a convection-permitting model run driven by a perturbed
+land-surface state, at a resolution that resolves the mesoscale circulations through
+which land heterogeneity acts~\citep{prein2015review,ban2021ensemble,skamarock2019wrf}.
+Such runs are expensive enough that only a handful of scenarios can be tested, so the
+binding constraint is scenario selection, not simulation accuracy. This paper addresses
+the upstream problem: using the literature to assemble a small set of physically
+plausible, environment-matched candidate LULC scenarios for a watershed, which a
+modelling group can then afford to test.
+
+The obstacle is that the literature does not report context-free effects. Afternoon
+rain falls preferentially over drier soils between 12:00 and 15:00 and over wetter
+soils between 21:00 and 03:00~\citep{taylor2012afternoon}; deforestation warms the
+surface in the tropics and cools it in the boreal zone~\citep{luo2024decreased}; a
+wind farm warms near-surface air under a positive lapse rate and cools it under a
+negative one~\citep{roy2010impacts}; Saharan solar farms increase rainfall at 15\%
+panel efficiency and suppress it at 45\%~\citep{li2018sahara}; observed
+deforestation in Rond\^onia changes rainfall in the dry season under weak synoptic
+wind and not at all in the rainy season~\citep{wang1999amazonia}. Eight such
+reversals appear in the 18-paper corpus used here (Appendix~A). An answer that omits
+the condition is not incomplete --- it is wrong for one of the two branches.
+
+Existing retrieval discards exactly that structure. Passage-level
+RAG~\citep{lewis2020rag} returns chunks nearest a query embedding, so conditions
+survive only when they happen to sit in the retrieved chunk, and the generator has
+no representation separating a study's setting from its result. Graph
+retrieval~\citep{edge2024graphrag} improves multi-hop synthesis by clustering entities
+with hierarchical Leiden~\citep{traag2019leiden}, but a community is a thematic
+neighbourhood, not a statement about where a finding applies: claims from incompatible
+study environments cluster whenever their vocabulary agrees. In both designs
+applicability is a byproduct of lexical similarity, so neither can decline to transfer a
+mechanism to a setting no source paper studied.
+
+We therefore make the study environment a first-class retrievable object. ClimateKG
+indexes each paper in stages --- a map of the settings the paper actually analyses,
+then conditioning Facets per setting, then directed ScientificClaims scoped to a
+setting or to a comparison --- so every claim carries the conditions under which its
+authors reported it. At query time the user's area is described in the same Facet
+language, enriched where possible from reanalysis and climate
+classification~\citep{hersbach2020era5,beck2018koppen}, and applicability is scored
+\emph{before} any mechanism edge is traversed. Answers ground to claim identifiers
+and page-level source blocks, and the pipeline reports when spatial transfer is
+blocked instead of producing a placement recommendation. We contribute (i) this
+context-gated design, in which conditions gate traversal rather than decorate it;
+(ii) a controlled three-system benchmark over one corpus with matched generation
+settings, on ten questions with claim-level gold evidence; and (iii) a
+hand-annotated extraction ground truth over ten papers separating main from
+supporting findings, which quantifies what staged extraction recovers and what it
+systematically drops.
+
+\section{Method}
+\label{sec:method}
+
+\paragraph{Literature corpus.}
+The working library holds 138 papers on LULC--climate interaction, organised by
+intervention class --- deforestation (46), generic LULC change (28), afforestation (7),
+irrigation (5), wind and solar farms (5), and single or paired papers on rice paddy,
+reservoirs, cropping practice, plantation, greening, degradation, cropland expansion and
+wetland restoration --- following the interventions actionable at watershed scale in the
+target region. All experiments use a frozen 18-paper subset spanning the mechanisms
+above, so every system indexes identical text; it yields 2{,}746 SourceBlocks.
+
+\paragraph{Staged indexing.}
+Extraction proceeds in three stages rather than one, because the object a claim
+belongs to must exist before the claim can attach to it (Figure~\ref{fig:pipeline}).
+Documents are parsed into stable SourceBlocks carrying page and section provenance.
+The \emph{paper map} stage builds a tree of the study settings the paper actually
+analyses --- each simulation branch, season, forcing level, site, and
+control--treatment pair --- with the comparisons between them. The \emph{facet}
+stage attaches conditioning records per setting across spatial-configuration,
+land-surface, hydrology, atmosphere, climate, and terrain domains. Only then does
+the \emph{claim} stage run, once per setting or comparison, extracting directed
+relationships between two endpoints with a relation type, evidence role,
+conditioning facets, and exact supporting SourceBlocks. Per-scope extraction is what
+makes conditional findings expressible: a seasonal null result and a dry-season rainfall
+response become separate records because they belong to separate scopes, whereas a
+single whole-paper pass has nowhere to put the distinction. Downstream stages are
+refinements --- conservative state canonicalisation through an explicit alias registry,
+and optional spatial enrichment. The 18-paper graph holds 181 StudyContexts, 556 Facets,
+58 Transitions, 279 ScientificClaims, 411 States and 1{,}485 evidence links.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  font=\scriptsize,
+  box/.style={draw, rounded corners=2pt, minimum height=7mm, align=center, inner xsep=3pt},
+  stage/.style={box, fill=black!5},
+  opt/.style={box, dashed, fill=white},
+  arr/.style={-{Stealth[length=4pt]}, thick}
+]
+\node[stage] (parse) {Parse\\SourceBlocks};
+\node[stage, right=4mm of parse] (map) {Paper map\\settings\,+\,comparisons};
+\node[stage, right=4mm of map] (facet) {Facets\\per setting};
+\node[stage, right=4mm of facet] (claim) {Claims\\per scope};
+\node[stage, right=4mm of claim] (canon) {State\\canonicalisation};
+\node[stage, right=4mm of canon] (graph) {Property\\graph};
+\draw[arr] (parse) -- (map);
+\draw[arr] (map) -- (facet);
+\draw[arr] (facet) -- (claim);
+\draw[arr] (claim) -- (canon);
+\draw[arr] (canon) -- (graph);
+\end{tikzpicture}
+\caption{Staged indexing. Optional refinements --- spatial enrichment feeding the facet
+stage, and context reconciliation feeding the claim stage --- are omitted. Claims are
+extracted once per setting or comparison, so a finding holding only in one season or
+forcing regime has a scope to belong to.}
+\label{fig:pipeline}
+\end{figure}
+
+\paragraph{Baselines.}
+Both baselines consume the same exported SourceBlock text with references and page
+furniture removed. \textbf{Plain RAG} chunks it into 287 passages, embeds them, and
+retrieves the top eight by cosine similarity with a light metadata boost.
+\textbf{Entity-adapted GraphRAG} is Microsoft GraphRAG~\citep{edge2024graphrag} with
+its extraction stage replaced by ours: canonical States become entities and
+ScientificClaims become directed relationships carrying relation type, study context,
+conditioning facets, paper and supporting blocks. Everything downstream --- hierarchical
+Leiden clustering, community summarisation, community retrieval --- runs unmodified,
+giving 399 entities, 279 relationships and 134 communities, all at level~0 because most
+components already fall below the maximum community size. This is deliberately not an
+independent extraction baseline; it isolates whether community retrieval uses the
+\emph{same} extracted objects better than context-gated traversal.
+
+\paragraph{Query pipelines.}
+ClimateKG parses the question into optional source and target endpoints, an
+intervention description, and explicit context facets in the same schema as the
+index. Place names are recorded but never expanded into assumed environmental
+properties; those come from the user or from deterministic enrichment. Context
+retrieval scores each paper setting for semantic similarity and coverage, keeping
+missing coverage distinct from genuine mismatch. Claims are ranked over separate
+context, mechanism, intervention, and endpoint channels combined only at ranking time;
+direct evidence and graph-traversed paths form separate lanes; and the top eight paths
+plus contradicting alternatives are packaged with their exact SourceBlocks for
+synthesis. GraphRAG instead embeds the question, selects the top five communities,
+re-ranks their relationships, and supplies up to 18 claim records. All three systems
+use \texttt{qwen3.6:27b} for generation, \texttt{qwen3-embedding:4b} for embedding, a
+32{,}768-token context, and a medium thinking budget.
+
+\section{Experiments}
+\label{sec:experiments}
+
+Ten questions are frozen in advance: eight in-corpus questions with gold
+ScientificClaim identifiers read off the extracted claim inventory, and two out-of-corpus
+transfer questions with expected source papers but no gold claims, since a correct answer
+there is a conditioned hypothesis rather than a retrieval hit. They probe single-paper
+mechanisms, thresholds, single-variable sensitivity, cross-paper agreement, mechanism
+chains, observation--model disagreement, and sign reversal.
+
+\paragraph{Extraction fidelity.}
+We annotated ten papers by hand from the same parsed text the extractor consumed,
+recording every study setting and own-result relationship and tagging each as a
+\emph{main} finding (foregrounded in the abstract or conclusions, or a sign reversal,
+threshold, or stated condition) or a \emph{supporting} one (robustness checks,
+significance statements, incidental magnitudes). Over the ten papers the pipeline
+recovers 111 of 178 main findings ($0.624$) and 122 of 265 total ($0.460$), at
+precision $0.984$; per-paper values span $0.30$ to $0.84$ (Appendix~B). Two findings
+matter more than the headline number. Recall is set by how finely the paper map cut the
+paper rather than by the claim stage: the correlation between claim scopes and
+main-claim recall is $r=0.65$, and both single-scope papers sit at the bottom. And what
+is missed is not a random sample but the conditioning structure specifically --- the
+lowest-recall paper loses its diurnal sign reversal and its
+$0.20$\,m$^3$\,m$^{-3}$ threshold, the deforestation paper the entire
+tropical-warming/boreal-cooling split, the Saharan paper the panel-efficiency case where
+the effect reverses. Each is a reversal in Appendix~A. Staged extraction reliably
+captures headline effects and systematically drops the conditions that decide when they
+hold --- at once the strongest argument for representing conditions explicitly and the
+clearest bound on how well any downstream retriever can do.
+
+\paragraph{Query benchmark.}
+Table~\ref{tab:query} reports gold claim recall on the eight in-corpus questions.
+ClimateKG averages $0.599$, with five questions fully recovered and two failures,
+neither a retrieval failure. On the Rond\^onia question every path comes from the correct
+paper, but the eight-path budget captures the seasonal branches and not the
+weakened-wind ones. On the irrigation question the gold claims rank
+2nd, 5th, 6th and 7th of 200 candidates and are discarded before synthesis: the parser
+emitted two outcome variables as context facets, switching the gate on, and the gate
+dropped every claim whose applicability was \emph{unknown} rather than mismatched ---
+contradicting the pipeline's own invariant that missing coverage is not mismatch.
+
+\begin{table}[t]
+\caption{Gold ScientificClaim recall on the eight in-corpus questions. Out-of-corpus
+transfer questions are excluded because a correct answer there is a conditioned
+hypothesis, not a retrieval hit.}
+\label{tab:query}
+\centering
+\small
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+\textbf{Question} & \textbf{Probes} & \textbf{Gold} & \textbf{Hit} & \textbf{Recall} \\
+\midrule
+Q1 heterogeneous 14.4\,km patches & single-paper mechanism & 4 & 4 & 1.000 \\
+Q5 background wind 0 to 1\,m\,s$^{-1}$ & single-variable sensitivity & 5 & 5 & 1.000 \\
+Q7 deforestation cloud offset & multi-step mechanism chain & 4 & 4 & 1.000 \\
+Q8 dry vs.\ wet soil rainfall & observation--model disagreement & 3 & 3 & 1.000 \\
+Q4 patch-size threshold & threshold and scale dependence & 3 & 1 & 0.333 \\
+Q9 afforestation sign & cross-paper sign reversal & 6 & 2 & 0.333 \\
+Q2 Rond\^onia season and wind & seasonal conditioning & 8 & 1 & 0.125 \\
+Q6 irrigation and extremes & cross-paper agreement & 6 & 0 & 0.000 \\
+\midrule
+\textbf{Mean} & & & & \textbf{0.599} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Transfer behaviour.}
+The out-of-corpus questions separate the systems more sharply than recall does. Asked
+about 10--15\,km alternating irrigated and dry patches in semi-arid Rajasthan, GraphRAG
+blended US Midwest drought claims into its answer and advised that planners might
+``leverage'' the dry-patch convection tendency --- a placement recommendation for a
+region no source paper studied. Plain RAG returned generic irrigation caveats, never
+reaching the heterogeneity experiment that is the closest analogue. ClimateKG retrieved
+it, reported \texttt{spatial transfer explicitly blocked}, and surfaced the conflict
+between the user's stated weak monsoon wind and the derived ERA5 JJA mean of
+$3.09$\,m\,s$^{-1}$.
+
+\section{Discussion and outlook}
+
+These answers constrain a scenario set rather than replace a model. The pipeline returns
+mechanism claims whose study conditions match the enriched query context, each carrying
+the patch scale, wind regime, season and soil-moisture state under which it was reported
+--- exactly the parameters of a raster land-cover perturbation: which classes to convert,
+at what patch size, in what arrangement relative to prevailing wind. The output is a
+handful of candidate scenarios with provenance back to page-level
+text, ready to be harmonised into land-surface inputs~\citep{hurtt2020luh2} and tested in
+a convection-permitting run~\citep{skamarock2019wrf}.
+
+The evidence is limited: ten questions, eighteen papers, one generation model, single
+runs. Gold claim sets were read off the extracted inventory, so the query benchmark
+measures whether a system finds the evidence the graph contains, not whether the graph
+contains the right evidence --- the extraction audit addresses the latter, and the two
+must be read together. Setting counts are totals not matched pairs, RAGAS-style
+scoring is in progress, and the ground truth, though auditable against recorded
+evidence blocks, has not been independently re-annotated. Ten questions support no claim
+of general superiority; they support only that the three
+systems fail differently, and that one declines to transfer. Two fixes set the next
+step: finer scope segmentation in the paper map, the binding constraint on extraction
+recall, and a context gate treating unknown coverage as unknown rather than
+disqualifying --- both serving the one property a literature-derived scenario needs,
+that the conditions under which an effect holds survive to the answer.
+
+\bibliography{references}
+
+\appendix
+\input{appendix}
+
+\end{document}

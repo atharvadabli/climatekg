@@ -6,82 +6,121 @@
     {
       "key": "root_odisha_1981_2010",
       "description": "Odisha state, 81-88 E and 17-23 N, analysed from 1981 to 2010 with 29 IMD stations, IMD and University of Delaware gridded temperature, and NCEP-NCAR Reanalysis-1.",
-      "evidence": ["P000020:S06:P0047", "P000020:S07:P0049"]
+      "evidence": [
+        "P000020:S06:P0047",
+        "P000020:S07:P0049"
+      ]
     },
     {
       "key": "decade_1981_1990",
       "description": "The 1981-1990 decade, over which mean temperature below 500 m fell and the diurnal temperature range rose.",
-      "evidence": ["P000020:S02:P0015"]
+      "evidence": [
+        "P000020:S02:P0015"
+      ]
     },
     {
       "key": "decade_1991_2000",
       "description": "The 1991-2000 decade, over which temperature rose by about 1 C.",
-      "evidence": ["P000020:S02:P0015"]
+      "evidence": [
+        "P000020:S02:P0015"
+      ]
     },
     {
       "key": "decade_2001_2010",
       "description": "The 2001-2010 decade, the focus of the LULC attribution because validated LULC and EOS-era satellite products are available.",
-      "evidence": ["P000020:S02:P0015", "P000020:S02:P0024"]
+      "evidence": [
+        "P000020:S02:P0015",
+        "P000020:S02:P0024"
+      ]
     },
     {
       "key": "stations_below_500m",
       "description": "Stations below 500 m above mean sea level, the plains subset used for most decadal statistics.",
-      "evidence": ["P000020:S02:P0015"]
+      "evidence": [
+        "P000020:S02:P0015"
+      ]
     },
     {
       "key": "stations_above_500m",
       "description": "High-altitude stations above 500 m, analysed separately and showing smaller trends.",
-      "evidence": ["P000020:S02:P0015", "P000020:S02:P0017"]
+      "evidence": [
+        "P000020:S02:P0015",
+        "P000020:S02:P0017"
+      ]
     },
     {
       "key": "season_djf",
       "description": "December-February season, evaluated separately in the decadal trend analysis.",
-      "evidence": ["P000020:S02:P0019"]
+      "evidence": [
+        "P000020:S02:P0019"
+      ]
     },
     {
       "key": "season_mam",
       "description": "March-May season, evaluated separately in the decadal trend analysis.",
-      "evidence": ["P000020:S02:P0019"]
+      "evidence": [
+        "P000020:S02:P0019"
+      ]
     },
     {
       "key": "season_jja",
       "description": "June-August season, evaluated separately in the decadal trend analysis.",
-      "evidence": ["P000020:S02:P0019"]
+      "evidence": [
+        "P000020:S02:P0019"
+      ]
     },
     {
       "key": "season_son",
       "description": "September-November season, evaluated separately in the decadal trend analysis.",
-      "evidence": ["P000020:S02:P0019"]
+      "evidence": [
+        "P000020:S02:P0019"
+      ]
     },
     {
       "key": "enso_excluded",
       "description": "Analysis repeated with extreme ENSO years 1982, 1983, 1997 and 1998 removed.",
-      "evidence": ["P000020:S02:P0017"]
+      "evidence": [
+        "P000020:S02:P0017"
+      ]
     },
     {
       "key": "omr_analysis",
       "description": "Observation minus reanalysis analysis at 0.5 degree resolution, using NNR which does not assimilate surface temperature, moisture or winds.",
-      "evidence": ["P000020:S02:P0022", "P000020:S08:P0053"]
+      "evidence": [
+        "P000020:S02:P0022",
+        "P000020:S08:P0053"
+      ]
     },
     {
       "key": "lulc_change_2004_2010",
       "description": "AWiFS 1 km land use and land cover classification compared between 2004 and 2010, aggregated to 10 km.",
-      "evidence": ["P000020:S02:P0025", "P000020:S02:P0028"]
+      "evidence": [
+        "P000020:S02:P0025",
+        "P000020:S02:P0028"
+      ]
     },
     {
       "key": "ndvi_2001_2010",
       "description": "MODIS-Terra NDVI trends for 2001-2010, annually and by season.",
-      "evidence": ["P000020:S02:P0028", "P000020:S02:P0030"]
+      "evidence": [
+        "P000020:S02:P0028",
+        "P000020:S02:P0030"
+      ]
     },
     {
       "key": "urban_district_headquarters",
       "description": "District headquarters, in particular Bhubaneswar and Cuttack, where the OMR share of observed warming is quantified.",
-      "evidence": ["P000020:S02:P0032"]
+      "evidence": [
+        "P000020:S02:P0032"
+      ]
     },
     {
       "key": "surface_flux_2001_2010",
       "description": "NCEP CFSv2 latent and sensible heat flux changes over 2001-2010 at 30 km resolution.",
-      "evidence": ["P000020:S02:P0033", "P000020:S03:P0037"]
+      "evidence": [
+        "P000020:S02:P0033",
+        "P000020:S03:P0037"
+      ]
     }
   ],
   "claims": [
@@ -92,9 +131,13 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The state warmed by about 0.3 C over 1981-2010, with the most accelerated warming of about 0.9 C in the recent 2001-2010 decade.",
-      "evidence": ["P000020:S01:P0006", "P000020:S04:P0040"],
+      "evidence": [
+        "P000020:S01:P0006",
+        "P000020:S04:P0040"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. The headline thirty-year trend is absent; only the decade-to-decade contrast was captured."
+      "match_note": "Not extracted. The headline thirty-year trend is absent; only the decade-to-decade contrast was captured.",
+      "tier": "main"
     },
     {
       "key": "decadal_sign_reversal",
@@ -103,9 +146,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Mean temperature below 500 m fell by about 0.7 C in 1981-1990 and rose by about 0.8 C in 2001-2010, a reversal of sign between decades.",
-      "evidence": ["P000020:S02:P0015"],
+      "evidence": [
+        "P000020:S02:P0015"
+      ],
       "matched_claim_id": "P000020_CL001",
-      "match_note": "Extracted as the decadal contrast with both magnitudes."
+      "match_note": "Extracted as the decadal contrast with both magnitudes.",
+      "tier": "main"
     },
     {
       "key": "middle_decade_warming",
@@ -114,9 +160,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The 1991-2000 decade shows an increase of about 1 C, the largest of the three decades.",
-      "evidence": ["P000020:S02:P0015"],
+      "evidence": [
+        "P000020:S02:P0015"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted; the middle decade is missing from the claim record even though a context exists for it."
+      "match_note": "Not extracted; the middle decade is missing from the claim record even though a context exists for it.",
+      "tier": "main"
     },
     {
       "key": "trend_independent_of_location",
@@ -125,9 +174,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The surface temperature trend is positive irrespective of whether the station is coastal or non-coastal and of altitude, significant at 95 per cent in most cases.",
-      "evidence": ["P000020:S02:P0015"],
+      "evidence": [
+        "P000020:S02:P0015"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "minimum_temperature_reversal",
@@ -136,9 +188,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Minimum temperature decreased during 1981-1990 while maximum temperature rose, then increased by about 1.2 C over the two recent decades against about 0.13 C for maximum temperature.",
-      "evidence": ["P000020:S02:P0015"],
+      "evidence": [
+        "P000020:S02:P0015"
+      ],
       "matched_claim_id": "P000020_CL004",
-      "match_note": "Extracted as the minimum-temperature reversal."
+      "match_note": "Extracted as the minimum-temperature reversal.",
+      "tier": "main"
     },
     {
       "key": "dtr_reversal",
@@ -147,9 +202,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Diurnal temperature range rose by about 1.16 C during the 1980s then fell by about 0.46 C and 1.19 C in the two following decades below 500 m.",
-      "evidence": ["P000020:S02:P0015"],
+      "evidence": [
+        "P000020:S02:P0015"
+      ],
       "matched_claim_id": "P000020_CL002",
-      "match_note": "Extracted with both magnitudes."
+      "match_note": "Extracted with both magnitudes.",
+      "tier": "main"
     },
     {
       "key": "altitude_dependence",
@@ -158,9 +216,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Overall trends are larger for low altitude stations than for those at higher altitudes.",
-      "evidence": ["P000020:S02:P0017"],
+      "evidence": [
+        "P000020:S02:P0017"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "enso_robustness",
@@ -169,9 +230,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Results computed with and without the extreme ENSO years 1982, 1983, 1997 and 1998 are consistent.",
-      "evidence": ["P000020:S02:P0017"],
+      "evidence": [
+        "P000020:S02:P0017"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "seasonal_reversal",
@@ -180,9 +244,13 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Between 1981 and 1990 temperature fell by 0.3 to 0.9 C depending on season, and the region has warmed by about 0.4 to 0.9 C since 1991 on the same seasonal basis.",
-      "evidence": ["P000020:S02:P0018", "P000020:S02:P0019"],
+      "evidence": [
+        "P000020:S02:P0018",
+        "P000020:S02:P0019"
+      ],
       "matched_claim_id": "P000020_CL003",
-      "match_note": "Extracted as the seasonal reversal with both ranges."
+      "match_note": "Extracted as the seasonal reversal with both ranges.",
+      "tier": "main"
     },
     {
       "key": "seasonal_ordering",
@@ -191,9 +259,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The largest rate of temperature increase occurs in JJA and SON and the smallest in DJF.",
-      "evidence": ["P000020:S02:P0019"],
+      "evidence": [
+        "P000020:S02:P0019"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted, although four seasonal settings were evaluated."
+      "match_note": "Not extracted, although four seasonal settings were evaluated.",
+      "tier": "supporting"
     },
     {
       "key": "minimum_faster_all_seasons",
@@ -202,9 +273,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Irrespective of season, minimum temperature has increased much faster than maximum temperature since 1991.",
-      "evidence": ["P000020:S02:P0019"],
+      "evidence": [
+        "P000020:S02:P0019"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "dtr_spatial_opposition",
@@ -213,9 +287,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Spatial patterns for mean, minimum and maximum temperature are similar across decades, while the diurnal temperature range shows opposing trends, rising in the 1981 decade and falling afterwards.",
-      "evidence": ["P000020:S02:P0021"],
+      "evidence": [
+        "P000020:S02:P0021"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "minimum_more_widespread",
@@ -224,9 +301,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The increase in minimum temperature is more widespread spatially than the other temperature trends, which may indicate that climate change overwhelms LULC impacts at that scale.",
-      "evidence": ["P000020:S02:P0021"],
+      "evidence": [
+        "P000020:S02:P0021"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "omr_first_decade_negative",
@@ -235,9 +315,13 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The first decade shows a declining OMR trend of about -0.04 C per year, which the authors attribute to reanalysis dataset development rather than to land use and therefore exclude from further analysis.",
-      "evidence": ["P000020:S02:P0022", "P000020:S02:P0024"],
+      "evidence": [
+        "P000020:S02:P0022",
+        "P000020:S02:P0024"
+      ],
       "matched_claim_id": "P000020_CL005",
-      "match_note": "Extracted as the declining OMR trend."
+      "match_note": "Extracted as the declining OMR trend.",
+      "tier": "supporting"
     },
     {
       "key": "omr_urban_coincidence",
@@ -246,9 +330,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The highest increasing OMR trend of about 0.04 C per year coincides with Bhubaneswar and Cuttack, shifting from the west of the state to the east in the most recent decade.",
-      "evidence": ["P000020:S02:P0024"],
+      "evidence": [
+        "P000020:S02:P0024"
+      ],
       "matched_claim_id": "P000020_CL007",
-      "match_note": "Extracted as spatial coincidence between the OMR pattern and urban centres."
+      "match_note": "Extracted as spatial coincidence between the OMR pattern and urban centres.",
+      "tier": "main"
     },
     {
       "key": "lulc_change_northeast",
@@ -257,9 +344,13 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The largest land use and land cover changes occur over the north-eastern part of the state.",
-      "evidence": ["P000020:S02:P0025", "P000020:S02:P0028"],
+      "evidence": [
+        "P000020:S02:P0025",
+        "P000020:S02:P0028"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "lulc_map_matches_omr",
@@ -268,9 +359,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The land cover change map matches the OMR trend map for the decade since 2001, giving independent confirmation that the OMR pattern reflects temperature change associated with land cover change.",
-      "evidence": ["P000020:S02:P0028"],
+      "evidence": [
+        "P000020:S02:P0028"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted as its own record, although it is the paper's central attribution argument."
+      "match_note": "Not extracted as its own record, although it is the paper's central attribution argument.",
+      "tier": "main"
     },
     {
       "key": "rabi_kharif_shift",
@@ -279,9 +373,13 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Rabi crop cultivation increased by about 97 per cent at the cost of Kharif crops, showing agricultural diversification and changing cropping patterns.",
-      "evidence": ["P000020:S02:P0028", "P000020:S04:P0044"],
+      "evidence": [
+        "P000020:S02:P0028",
+        "P000020:S04:P0044"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted, so the specific land-use transition driving the warming is absent from the graph."
+      "match_note": "Not extracted, so the specific land-use transition driving the warming is absent from the graph.",
+      "tier": "main"
     },
     {
       "key": "green_vegetation_decline",
@@ -290,9 +388,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Green vegetation decreased over the state, with a large NDVI decline especially over the eastern part.",
-      "evidence": ["P000020:S02:P0028"],
+      "evidence": [
+        "P000020:S02:P0028"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted as its own record; NDVI appears only as the source endpoint of the flux claims."
+      "match_note": "Not extracted as its own record; NDVI appears only as the source endpoint of the flux claims.",
+      "tier": "main"
     },
     {
       "key": "ndvi_omr_lulc_coincidence",
@@ -301,9 +402,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The NDVI change pattern coincides with both the OMR pattern and the land cover change pattern, supporting attribution to changes in green cover and cropping.",
-      "evidence": ["P000020:S02:P0029"],
+      "evidence": [
+        "P000020:S02:P0029"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "main"
     },
     {
       "key": "lulc_share_of_warming",
@@ -312,9 +416,13 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Between a quarter and a half of the observed warming since 2001 is associated with land use and land cover change, the higher figure applying over urban centres.",
-      "evidence": ["P000020:S01:P0006", "P000020:S04:P0042"],
+      "evidence": [
+        "P000020:S01:P0006",
+        "P000020:S04:P0042"
+      ],
       "matched_claim_id": "P000020_CL006",
-      "match_note": "Extracted as LULC-driven temperature rise concentrated in urban centres, though without the quantified share."
+      "match_note": "Extracted as LULC-driven temperature rise concentrated in urban centres, though without the quantified share.",
+      "tier": "main"
     },
     {
       "key": "urban_share_quantified",
@@ -323,9 +431,13 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Cuttack and Bhubaneswar show OMR shares of about 40 and 50 per cent of observed warming over 2001-2010, and the rise is larger for larger cities than for smaller towns.",
-      "evidence": ["P000020:S02:P0032", "P000020:S02:P0034"],
+      "evidence": [
+        "P000020:S02:P0032",
+        "P000020:S02:P0034"
+      ],
       "matched_claim_id": "P000020_CL008",
-      "match_note": "Extracted as the enhanced urban LULC warming signature."
+      "match_note": "Extracted as the enhanced urban LULC warming signature.",
+      "tier": "main"
     },
     {
       "key": "ndvi_shf_association",
@@ -334,9 +446,13 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The decreasing NDVI trend is accompanied by an increasing sensible heat flux over eastern Odisha for 2001-2010.",
-      "evidence": ["P000020:S03:P0037", "P000020:S04:P0043"],
+      "evidence": [
+        "P000020:S03:P0037",
+        "P000020:S04:P0043"
+      ],
       "matched_claim_id": "P000020_CL009",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "ndvi_lhf_association",
@@ -345,9 +461,13 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The decreasing NDVI trend is accompanied by a decreasing latent heat flux over eastern Odisha for 2001-2010.",
-      "evidence": ["P000020:S03:P0037", "P000020:S04:P0043"],
+      "evidence": [
+        "P000020:S03:P0037",
+        "P000020:S04:P0043"
+      ],
       "matched_claim_id": "P000020_CL010",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "flux_changes_favour_warming_lhf",
@@ -356,9 +476,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The observed decrease in latent heat flux favours warming over the eastern part of Odisha.",
-      "evidence": ["P000020:S03:P0037"],
+      "evidence": [
+        "P000020:S03:P0037"
+      ],
       "matched_claim_id": "P000020_CL013",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "flux_changes_favour_warming_shf",
@@ -367,9 +490,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The observed increase in sensible heat flux favours warming over the eastern part of Odisha.",
-      "evidence": ["P000020:S03:P0037"],
+      "evidence": [
+        "P000020:S03:P0037"
+      ],
       "matched_claim_id": "P000020_CL014",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "rate_comparable_to_other_regions",
@@ -378,9 +504,12 @@
       "relation": "associative",
       "role": "AUTHORS_INTERPRETATION_OF_OWN_RESULT",
       "statement": "The authors note that their rate of about 0.1 C per decade is comparable with rates reported for other rapidly developing regions.",
-      "evidence": ["P000020:S04:P0039"],
+      "evidence": [
+        "P000020:S04:P0039"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     }
   ],
   "notes": [

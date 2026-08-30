@@ -6,72 +6,103 @@
     {
       "key": "root_msg_observation",
       "description": "Ten years (2004-2013) of 15-minute Meteosat Second Generation SEVIRI imagery over western European temperate forests without pronounced orography, evaluated for daylight hours 6-18 UTC.",
-      "evidence": ["P000014:S01:P0015", "P000014:S04:P0037"]
+      "evidence": [
+        "P000014:S01:P0015",
+        "P000014:S04:P0037"
+      ]
     },
     {
       "key": "landes_region",
       "description": "The Landes region, a planted maritime pine forest larger than 12,000 km2, JJA temperature 20.9 C and JJA precipitation 143 mm.",
-      "evidence": ["P000014:S01:P0014"]
+      "evidence": [
+        "P000014:S01:P0014"
+      ]
     },
     {
       "key": "sologne_region",
       "description": "The Sologne region, dominated by original broadleaf oak cover, JJA temperature 19.3 C and JJA precipitation 150 mm.",
-      "evidence": ["P000014:S01:P0014"]
+      "evidence": [
+        "P000014:S01:P0014"
+      ]
     },
     {
       "key": "cpp_algorithm",
       "description": "Cloud frequency derived with the physics-based MSG-CPP algorithm using multiple low-resolution channels and a cloud optical thickness threshold of 0.3.",
-      "evidence": ["P000014:S04:P0038"]
+      "evidence": [
+        "P000014:S04:P0038"
+      ]
     },
     {
       "key": "hrv_algorithm",
       "description": "Cloud frequency derived independently with the empirical MSG-HRV algorithm using only the 1 km high-resolution visible broadband channel.",
-      "evidence": ["P000014:S04:P0039"]
+      "evidence": [
+        "P000014:S04:P0039"
+      ]
     },
     {
       "key": "jja_season",
       "description": "The June-August summer stratum used for the main cloud frequency contrast.",
-      "evidence": ["P000014:S02:P0017"]
+      "evidence": [
+        "P000014:S02:P0017"
+      ]
     },
     {
       "key": "non_jja_season",
       "description": "The remainder of the year, analysed for Sologne to establish the seasonal switch in cloud preference.",
-      "evidence": ["P000014:S02:P0021"]
+      "evidence": [
+        "P000014:S02:P0021"
+      ]
     },
     {
       "key": "diurnal_windows",
       "description": "Diurnal stratification of JJA cloud cover into the early morning development phase, the 11-13 UTC window, and the 15-16 UTC evening persistence phase.",
-      "evidence": ["P000014:S02:P0022"]
+      "evidence": [
+        "P000014:S02:P0022"
+      ]
     },
     {
       "key": "wind_classified_landes",
       "description": "Landes days classified by 10 m meridional wind speed and direction, contrasting calm conditions with regional average wind speeds above 1 m/s.",
-      "evidence": ["P000014:S02:P0023", "P000014:S02:P0026"]
+      "evidence": [
+        "P000014:S02:P0023",
+        "P000014:S02:P0026"
+      ]
     },
     {
       "key": "wind_classified_sologne",
       "description": "The same wind classification applied to the smaller Sologne forest, where edge effects are harder to detect.",
-      "evidence": ["P000014:S02:P0026"]
+      "evidence": [
+        "P000014:S02:P0026"
+      ]
     },
     {
       "key": "synoptic_pressure_strata",
       "description": "Days stratified by sea level pressure to test dependence on synoptic conditions.",
-      "evidence": ["P000014:S02:P0026"]
+      "evidence": [
+        "P000014:S02:P0026"
+      ]
     },
     {
       "key": "pre_klaus_period",
       "description": "The 2004-2008 period over the Landes area that later suffered maximum windthrow, used as the reference for the cyclone Klaus natural experiment.",
-      "evidence": ["P000014:S02:P0028"]
+      "evidence": [
+        "P000014:S02:P0028"
+      ]
     },
     {
       "key": "post_klaus_period",
       "description": "The 2009-2013 period following the 24 January 2009 landfall of cyclone Klaus and the resulting windthrow of the Landes forest.",
-      "evidence": ["P000014:S02:P0027", "P000014:S02:P0028"]
+      "evidence": [
+        "P000014:S02:P0027",
+        "P000014:S02:P0028"
+      ]
     },
     {
       "key": "klaus_control_boxes",
       "description": "Boxes outside the storm-affected area and the Sologne region, used as controls for the Klaus analysis.",
-      "evidence": ["P000014:S02:P0028"]
+      "evidence": [
+        "P000014:S02:P0028"
+      ]
     }
   ],
   "claims": [
@@ -82,9 +113,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "For both regions summertime clouds occur more frequently over forest than over surrounding agricultural land, with a fractional JJA cloud frequency increase generally in the range 0.05-0.15.",
-      "evidence": ["P000014:S02:P0017"],
+      "evidence": [
+        "P000014:S02:P0017"
+      ],
       "matched_claim_id": "P000014_CL001",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "spatial_pattern_matches_forest_cover",
@@ -93,9 +127,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The spatial pattern of cloud frequency closely resembles the pattern of forest cover.",
-      "evidence": ["P000014:S02:P0017"],
+      "evidence": [
+        "P000014:S02:P0017"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "main"
     },
     {
       "key": "two_algorithms_agree",
@@ -104,9 +141,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The MSG-CPP and MSG-HRV products yield similar spatial patterns, so the contrast is not an artefact of one retrieval.",
-      "evidence": ["P000014:S02:P0017"],
+      "evidence": [
+        "P000014:S02:P0017"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "robust_to_thresholds",
@@ -115,9 +155,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Sensitivity analyses show the result is robust over a range of cloud detection thresholds.",
-      "evidence": ["P000014:S02:P0017"],
+      "evidence": [
+        "P000014:S02:P0017"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "landes_stronger_than_sologne",
@@ -126,9 +169,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Daily JJA forest minus non-forest cloud frequency differences are significant for both regions but markedly stronger for Landes than for Sologne.",
-      "evidence": ["P000014:S02:P0017"],
+      "evidence": [
+        "P000014:S02:P0017"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted, so forest size as a modulating condition is missing from the graph."
+      "match_note": "Not extracted, so forest size as a modulating condition is missing from the graph.",
+      "tier": "main"
     },
     {
       "key": "nonforest_boxes_no_difference",
@@ -137,9 +183,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Non-forested boxes do not differ significantly from each other, showing that the forest-induced change is independent of regional-scale gradients in cloud climatology.",
-      "evidence": ["P000014:S02:P0017"],
+      "evidence": [
+        "P000014:S02:P0017"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. This is the paper's own control result."
+      "match_note": "Not extracted. This is the paper's own control result.",
+      "tier": "supporting"
     },
     {
       "key": "forest_only_cloud_cases",
@@ -148,9 +197,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "High-resolution snapshots reveal conditions in which clouds occur only over forest, and in isolated cases this develops into preferred triggering of deep convection.",
-      "evidence": ["P000014:S02:P0020"],
+      "evidence": [
+        "P000014:S02:P0020"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "main"
     },
     {
       "key": "seasonal_switch_jja_only",
@@ -159,9 +211,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "For Sologne there is a significant preference for clouds over forest during JJA, while outside that period the difference in cloud frequency is not significant.",
-      "evidence": ["P000014:S02:P0021"],
+      "evidence": [
+        "P000014:S02:P0021"
+      ],
       "matched_claim_id": "P000014_CL007",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "diurnal_earlier_onset_longer_persistence",
@@ -170,9 +225,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Over forest clouds develop earlier and faster, peaking around 08:00 UTC, and persist longer into the evening with a peak difference at 15:00-16:00 UTC.",
-      "evidence": ["P000014:S02:P0022"],
+      "evidence": [
+        "P000014:S02:P0022"
+      ],
       "matched_claim_id": "P000014_CL002",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "no_difference_11_13_utc",
@@ -181,9 +239,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "There is no significant forest minus non-forest difference between 11 and 13 UTC, probably because clouds have developed fully over both surfaces.",
-      "evidence": ["P000014:S02:P0022"],
+      "evidence": [
+        "P000014:S02:P0022"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. A time-of-day null result that the counting rules require to be kept."
+      "match_note": "Not extracted. A time-of-day null result that the counting rules require to be kept.",
+      "tier": "supporting"
     },
     {
       "key": "downwind_edge_enhancement",
@@ -192,9 +253,13 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Landes shows consistently higher cloud frequency at the downwind and to a lesser extent the cross-wind forest edge under all wind directions, most pronounced above about 1 m/s regional average wind speed.",
-      "evidence": ["P000014:S02:P0023", "P000014:S02:P0026"],
+      "evidence": [
+        "P000014:S02:P0023",
+        "P000014:S02:P0026"
+      ],
       "matched_claim_id": "P000014_CL003",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "sologne_no_wind_dependence",
@@ -203,9 +268,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "No clear relation between cloud frequency patterns and regional wind conditions was found for the smaller Sologne forest, where edge effects are harder to detect.",
-      "evidence": ["P000014:S02:P0026"],
+      "evidence": [
+        "P000014:S02:P0026"
+      ],
       "matched_claim_id": "P000014_CL008",
-      "match_note": "Extracted as a no-clear-dependence record."
+      "match_note": "Extracted as a no-clear-dependence record.",
+      "tier": "main"
     },
     {
       "key": "no_slp_dependence",
@@ -214,9 +282,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "No strong dependence was found between sea level pressure and the cloud frequency difference, suggesting the contrast occurs under a range of synoptic conditions with possibly different dominant mechanisms.",
-      "evidence": ["P000014:S02:P0026"],
+      "evidence": [
+        "P000014:S02:P0026"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted; distinct from the wind-speed result already captured by CL008."
+      "match_note": "Not extracted; distinct from the wind-speed result already captured by CL008.",
+      "tier": "supporting"
     },
     {
       "key": "lst_divergence_summer",
@@ -225,9 +296,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Land surface temperature rises progressively over surrounding areas through summer, by up to 10 K for Sologne, while forest LST stays stable, indicating sustained forest evapotranspiration against declining evaporation outside.",
-      "evidence": ["P000014:S02:P0026"],
+      "evidence": [
+        "P000014:S02:P0026"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "klaus_windthrow_cloud_decrease",
@@ -236,9 +310,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Over the most damaged Landes area, JJA cloud frequency fell by up to 0.20 in 2009-2013 relative to 2004-2008.",
-      "evidence": ["P000014:S02:P0028"],
+      "evidence": [
+        "P000014:S02:P0028"
+      ],
       "matched_claim_id": "P000014_CL009",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "klaus_controls_no_change",
@@ -247,9 +324,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "No significant cloud frequency change was found for boxes outside the storm-affected area or for Sologne, isolating the windthrow effect.",
-      "evidence": ["P000014:S02:P0028"],
+      "evidence": [
+        "P000014:S02:P0028"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. This control is what makes the Klaus result attributable."
+      "match_note": "Not extracted. This control is what makes the Klaus result attributable.",
+      "tier": "supporting"
     },
     {
       "key": "klaus_seasonal_amplitude_collapse",
@@ -258,9 +338,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The seasonal amplitude of the forest minus non-forest cloud difference fell from 0.114 before 2009 to 0.020 afterwards, almost an order of magnitude.",
-      "evidence": ["P000014:S02:P0028"],
+      "evidence": [
+        "P000014:S02:P0028"
+      ],
       "matched_claim_id": "P000014_CL010",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "recovery_time_over_5_years",
@@ -269,9 +352,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The recovery time of these forests with respect to their impact on cloud formation is well over five years and possibly much longer.",
-      "evidence": ["P000014:S02:P0028"],
+      "evidence": [
+        "P000014:S02:P0028"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "main"
     },
     {
       "key": "forest_lower_albedo",
@@ -280,9 +366,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Albedo is 0.11-0.14 over the Sologne and Landes forests against 0.16-0.19 over the more reflective surroundings, a difference large enough to affect boundary-layer growth.",
-      "evidence": ["P000014:S03:P0030"],
+      "evidence": [
+        "P000014:S03:P0030"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted as its own record, although it is the quantitative basis of the proposed mechanism."
+      "match_note": "Not extracted as its own record, although it is the quantitative basis of the proposed mechanism.",
+      "tier": "supporting"
     },
     {
       "key": "sologne_evi_harvest_warming",
@@ -291,9 +380,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "In Sologne the enhanced vegetation index starts higher outside the forest but falls strongly through summer because of harvesting, producing strong surface warming of the surroundings.",
-      "evidence": ["P000014:S02:P0021"],
+      "evidence": [
+        "P000014:S02:P0021"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "landes_evi_contrast_small",
@@ -302,9 +394,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "At Landes the spatial vegetation index contrast is small and of variable sign in late summer, so canopy structure alone is not a main determinant of the cloud frequency difference.",
-      "evidence": ["P000014:S02:P0022"],
+      "evidence": [
+        "P000014:S02:P0022"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "interp_albedo_roughness_convection",
@@ -313,9 +408,13 @@
       "relation": "causal",
       "role": "AUTHORS_INTERPRETATION_OF_OWN_RESULT",
       "statement": "The authors' conceptual model attributes the cloud enhancement to lower albedo and higher roughness producing larger turbulent exchange and thermal convection, amplified by frictional convergence and a forest breeze.",
-      "evidence": ["P000014:S03:P0030", "P000014:S03:P0031"],
+      "evidence": [
+        "P000014:S03:P0030",
+        "P000014:S03:P0031"
+      ],
       "matched_claim_id": "P000014_CL004",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "sologne_broadleaf_cloud_increase",
@@ -324,9 +423,13 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The broadleaf-dominated Sologne forest shows increased cloud occurrence relative to its surroundings.",
-      "evidence": ["P000014:S02:P0017", "P000014:S01:P0014"],
+      "evidence": [
+        "P000014:S02:P0017",
+        "P000014:S01:P0014"
+      ],
       "matched_claim_id": "P000014_CL005",
-      "match_note": "Same direction and endpoints, scoped to the broadleaf region."
+      "match_note": "Same direction and endpoints, scoped to the broadleaf region.",
+      "tier": "main"
     },
     {
       "key": "sologne_broadleaf_timing",
@@ -335,9 +438,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The broadleaf Sologne forest shows earlier cloud onset and longer persistence than its surroundings.",
-      "evidence": ["P000014:S02:P0022"],
+      "evidence": [
+        "P000014:S02:P0022"
+      ],
       "matched_claim_id": "P000014_CL006",
-      "match_note": "Same direction and endpoints, scoped to the broadleaf region."
+      "match_note": "Same direction and endpoints, scoped to the broadleaf region.",
+      "tier": "main"
     }
   ]
 }

@@ -6,87 +6,124 @@
     {
       "key": "root_midwest_1910_2014",
       "description": "US Midwest weather stations, June-August daily maximum temperature, 1910-2014, analysed by quantile regression and excluding the Dust Bowl of the 1930s and the 1970s-1990s aerosol cooling interval.",
-      "evidence": ["P000007:S01:P0006", "P000007:S01:P0007"]
+      "evidence": [
+        "P000007:S01:P0006",
+        "P000007:S01:P0007"
+      ]
     },
     {
       "key": "percentile_5th",
       "description": "The 5th percentile of daily maximum temperature, evaluated separately.",
-      "evidence": ["P000007:S01:P0006"]
+      "evidence": [
+        "P000007:S01:P0006"
+      ]
     },
     {
       "key": "percentile_50th",
       "description": "The median of daily maximum temperature, evaluated separately.",
-      "evidence": ["P000007:S01:P0006"]
+      "evidence": [
+        "P000007:S01:P0006"
+      ]
     },
     {
       "key": "percentile_95th",
       "description": "The 95th percentile of daily maximum temperature, the extreme-heat metric of primary interest.",
-      "evidence": ["P000007:S01:P0006"]
+      "evidence": [
+        "P000007:S01:P0006"
+      ]
     },
     {
       "key": "recent_period_1980_2014",
       "description": "Trends recomputed from 1980 to 2014 to test whether the pattern survives the decline of aerosol forcing.",
-      "evidence": ["P000007:S01:P0006", "P000007:S05:P0032"]
+      "evidence": [
+        "P000007:S01:P0006",
+        "P000007:S05:P0032"
+      ]
     },
     {
       "key": "precipitation_trends",
       "description": "Total June-August precipitation trends, and stations grouped by precipitation trend above 3 mm per decade.",
-      "evidence": ["P000007:S01:P0008"]
+      "evidence": [
+        "P000007:S01:P0008"
+      ]
     },
     {
       "key": "land_conversion_areas",
       "description": "Areas with the greatest rates of land conversion to cropland since 1910, averaging about 3 per cent of grid cell area per decade.",
-      "evidence": ["P000007:S02:P0015"]
+      "evidence": [
+        "P000007:S02:P0015"
+      ]
     },
     {
       "key": "cropland_abandonment_areas",
       "description": "Areas with the greatest cropland abandonment.",
-      "evidence": ["P000007:S02:P0015"]
+      "evidence": [
+        "P000007:S02:P0015"
+      ]
     },
     {
       "key": "irrigation_increase_counties",
       "description": "Counties with increases in irrigated area greater than 10 per cent of county area per decade, from agricultural census data.",
-      "evidence": ["P000007:S03:P0017"]
+      "evidence": [
+        "P000007:S03:P0017"
+      ]
     },
     {
       "key": "eastern_nebraska_high_irrigation",
       "description": "Eastern Nebraska, where irrigation trends exceed 7 per cent of county area per decade.",
-      "evidence": ["P000007:S03:P0017"]
+      "evidence": [
+        "P000007:S03:P0017"
+      ]
     },
     {
       "key": "nppan_intensification_counties",
       "description": "Counties binned by trend in area-normalised crop net primary productivity, with the top bin exceeding 4.5 g C m-2 yr-1.",
-      "evidence": ["P000007:S04:P0027", "P000007:S04:P0028"]
+      "evidence": [
+        "P000007:S04:P0027",
+        "P000007:S04:P0028"
+      ]
     },
     {
       "key": "rainfed_excluding_irrigated",
       "description": "The intensification analysis restricted to stations with less than 10 per cent irrigated area, isolating rainfed cropland.",
-      "evidence": ["P000007:S04:P0029"]
+      "evidence": [
+        "P000007:S04:P0029"
+      ]
     },
     {
       "key": "irrigated_drought",
       "description": "Counties with irrigation growth of at least 5 per cent of county area per decade, during months classified as drought by the self-calibrated Penman-Monteith Palmer index.",
-      "evidence": ["P000007:S06:P0034"]
+      "evidence": [
+        "P000007:S06:P0034"
+      ]
     },
     {
       "key": "irrigated_nondrought",
       "description": "The same irrigated counties during non-drought months.",
-      "evidence": ["P000007:S06:P0034"]
+      "evidence": [
+        "P000007:S06:P0034"
+      ]
     },
     {
       "key": "rainfed_drought",
       "description": "Rainfed counties with a NPPan trend above 2.5 g C m-2 yr-2, during drought months.",
-      "evidence": ["P000007:S06:P0034"]
+      "evidence": [
+        "P000007:S06:P0034"
+      ]
     },
     {
       "key": "rainfed_nondrought",
       "description": "The same rainfed counties during non-drought months.",
-      "evidence": ["P000007:S06:P0034"]
+      "evidence": [
+        "P000007:S06:P0034"
+      ]
     },
     {
       "key": "nao_analysis",
       "description": "Assessment of the North Atlantic Oscillation index as an alternative explanation, including the post-1995 reversal.",
-      "evidence": ["P000007:S05:P0032"]
+      "evidence": [
+        "P000007:S05:P0032"
+      ]
     }
   ],
   "claims": [
@@ -97,9 +134,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The hottest growing-season temperatures in the US Midwest have cooled since 1910, against the overall US warming trend.",
-      "evidence": ["P000007:S01:P0006"],
+      "evidence": [
+        "P000007:S01:P0006"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. The paper's baseline observation is missing; every extracted claim conditions cooling on a land-use driver."
+      "match_note": "Not extracted. The paper's baseline observation is missing; every extracted claim conditions cooling on a land-use driver.",
+      "tier": "main"
     },
     {
       "key": "percentile_dependence",
@@ -108,9 +148,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Cooling is strongest at the 95th percentile, less evident in median trends, and temperatures are generally warming at the 5th percentile.",
-      "evidence": ["P000007:S01:P0006"],
+      "evidence": [
+        "P000007:S01:P0006"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. This percentile dependence is the paper's key evidence for an evapotranspiration mechanism."
+      "match_note": "Not extracted. This percentile dependence is the paper's key evidence for an evapotranspiration mechanism.",
+      "tier": "main"
     },
     {
       "key": "robust_to_dustbowl_aerosol_recent",
@@ -119,9 +162,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The trends are robust to excluding the 1930s Dust Bowl, to excluding the 1970s-1990s aerosol cooling period, and to focusing only on 1980-2014.",
-      "evidence": ["P000007:S01:P0006"],
+      "evidence": [
+        "P000007:S01:P0006"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "precipitation_increase",
@@ -130,9 +176,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Summer precipitation increased over much of the upper Midwest during the same period.",
-      "evidence": ["P000007:S01:P0008"],
+      "evidence": [
+        "P000007:S01:P0008"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "main"
     },
     {
       "key": "precip_cooling_colocation",
@@ -141,9 +190,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Patterns of increased precipitation and 95th percentile cooling are co-located, with stations above 3 mm per decade corresponding significantly to cooling regions.",
-      "evidence": ["P000007:S01:P0008"],
+      "evidence": [
+        "P000007:S01:P0008"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "main"
     },
     {
       "key": "land_conversion_no_cooling",
@@ -152,9 +204,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Areas with the greatest rates of land conversion to cropland show no statistically significant cooling, contrary to the commonly proposed connection.",
-      "evidence": ["P000007:S02:P0015"],
+      "evidence": [
+        "P000007:S02:P0015"
+      ],
       "matched_claim_id": "P000007_CL001",
-      "match_note": "Extracted as a null result."
+      "match_note": "Extracted as a null result.",
+      "tier": "main"
     },
     {
       "key": "cropland_abandonment_cooling",
@@ -163,9 +218,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Areas with the greatest cropland abandonment have on average experienced significant cooling, contrary to the proposed connection with conversion.",
-      "evidence": ["P000007:S02:P0015"],
+      "evidence": [
+        "P000007:S02:P0015"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. This counterintuitive opposite-direction result is absent."
+      "match_note": "Not extracted. This counterintuitive opposite-direction result is absent.",
+      "tier": "main"
     },
     {
       "key": "irrigation_increase_cooling",
@@ -174,10 +232,17 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Weather stations in counties whose irrigated area grew by more than 10 per cent of county area per decade show significant cooling of extreme summer temperatures.",
-      "evidence": ["P000007:S03:P0017"],
+      "evidence": [
+        "P000007:S03:P0017"
+      ],
       "matched_claim_id": "P000007_CL002",
-      "duplicate_claim_ids": ["P000007_CL004", "P000007_CL007", "P000007_CL008"],
-      "match_note": "Extracted four times over. CL002, CL004, CL007 and CL008 all record irrigation expansion leading to cooling of summer temperature extremes with no distinguishing condition, so three of them are redundant."
+      "duplicate_claim_ids": [
+        "P000007_CL004",
+        "P000007_CL007",
+        "P000007_CL008"
+      ],
+      "match_note": "Extracted four times over. CL002, CL004, CL007 and CL008 all record irrigation expansion leading to cooling of summer temperature extremes with no distinguishing condition, so three of them are redundant.",
+      "tier": "main"
     },
     {
       "key": "eastern_nebraska_rate",
@@ -186,9 +251,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Where irrigation increases were largest, in eastern Nebraska, 95th percentile temperatures cooled at 0.30 C per decade.",
-      "evidence": ["P000007:S03:P0017"],
+      "evidence": [
+        "P000007:S03:P0017"
+      ],
       "matched_claim_id": "P000007_CL003",
-      "match_note": "Same direction and magnitude."
+      "match_note": "Same direction and magnitude.",
+      "tier": "main"
     },
     {
       "key": "irrigation_cooling_limited_extent",
@@ -197,9 +265,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Significant irrigation-associated cooling is found only in Nebraska, Arkansas and the western US, and accounts for only about 11 per cent of the 134 million hectares cooling at 0.2 C per decade or more.",
-      "evidence": ["P000007:S03:P0017"],
+      "evidence": [
+        "P000007:S03:P0017"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted, so the extracted irrigation claims carry no scope limit."
+      "match_note": "Not extracted, so the extracted irrigation claims carry no scope limit.",
+      "tier": "main"
     },
     {
       "key": "nppan_intensification_cooling",
@@ -208,9 +279,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Counties with NPPan trends above 4.5 g C m-2 yr-1 show highly significant cooling of 0.22 C per decade in 95th percentile temperatures.",
-      "evidence": ["P000007:S04:P0028"],
+      "evidence": [
+        "P000007:S04:P0028"
+      ],
       "matched_claim_id": "P000007_CL005",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "nppan_dose_response",
@@ -219,9 +293,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Counties with sequentially lower NPPan trends show correspondingly smaller rates of cooling, a graded dose-response.",
-      "evidence": ["P000007:S04:P0028"],
+      "evidence": [
+        "P000007:S04:P0028"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "nppan_robust_excluding_irrigated",
@@ -230,9 +307,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The intensification-cooling relation is robust to excluding locations with more than 10 per cent irrigated area, so it holds for rainfed cropland.",
-      "evidence": ["P000007:S04:P0029"],
+      "evidence": [
+        "P000007:S04:P0029"
+      ],
       "matched_claim_id": "P000007_CL009",
-      "match_note": "Extracted for rainfed intensification."
+      "match_note": "Extracted for rainfed intensification.",
+      "tier": "main"
     },
     {
       "key": "nppan_seven_times_more_area",
@@ -241,9 +321,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Increasing NPPan is associated with seven times more cooling land area than irrigation.",
-      "evidence": ["P000007:S04:P0029"],
+      "evidence": [
+        "P000007:S04:P0029"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted, so the relative importance of the two drivers is lost."
+      "match_note": "Not extracted, so the relative importance of the two drivers is lost.",
+      "tier": "main"
     },
     {
       "key": "irrigated_cooling_regardless_of_drought",
@@ -252,9 +335,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Regions with large growth in irrigation show cooling regardless of drought status.",
-      "evidence": ["P000007:S06:P0034"],
+      "evidence": [
+        "P000007:S06:P0034"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. This is the contrast that makes the rainfed drought result interpretable."
+      "match_note": "Not extracted. This is the contrast that makes the rainfed drought result interpretable.",
+      "tier": "main"
     },
     {
       "key": "rainfed_cooling_nondrought_only",
@@ -263,9 +349,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Rainfed areas cool during non-drought conditions but show no cooling trend during drought.",
-      "evidence": ["P000007:S06:P0034"],
+      "evidence": [
+        "P000007:S06:P0034"
+      ],
       "matched_claim_id": "P000007_CL010",
-      "match_note": "Extracted as the rainfed null result under drought."
+      "match_note": "Extracted as the rainfed null result under drought.",
+      "tier": "main"
     },
     {
       "key": "drought_soil_moisture_warming",
@@ -274,9 +363,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Inadequate soil moisture eliminates the capacity for greater evapotranspiration, so modern drought events feature greater warming as baseline cooler temperatures revert to historically high extremes.",
-      "evidence": ["P000007:S06:P0034"],
+      "evidence": [
+        "P000007:S06:P0034"
+      ],
       "matched_claim_id": "P000007_CL011",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "drought_nondrought_difference_3c",
@@ -285,9 +377,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Differences between drought and non-drought trends reach approximately 3 C during 1988 and 2012.",
-      "evidence": ["P000007:S06:P0034"],
+      "evidence": [
+        "P000007:S06:P0034"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "aerosol_not_responsible",
@@ -296,9 +391,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Trends computed since 1980 show a cooling pattern similar to the longer-term trends despite diminishing aerosol influence.",
-      "evidence": ["P000007:S05:P0032"],
+      "evidence": [
+        "P000007:S05:P0032"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. A rejected alternative explanation."
+      "match_note": "Not extracted. A rejected alternative explanation.",
+      "tier": "supporting"
     },
     {
       "key": "nao_not_responsible",
@@ -307,9 +405,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The reversal of the North Atlantic Oscillation trend after 1995 together with sustained recent cooling suggests it has little influence on the hottest growing-season temperatures.",
-      "evidence": ["P000007:S05:P0032"],
+      "evidence": [
+        "P000007:S05:P0032"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. A second rejected alternative explanation."
+      "match_note": "Not extracted. A second rejected alternative explanation.",
+      "tier": "supporting"
     },
     {
       "key": "interp_et_potential_mechanism",
@@ -318,9 +419,13 @@
       "relation": "causal",
       "role": "AUTHORS_INTERPRETATION_OF_OWN_RESULT",
       "statement": "The authors' preferred explanation is that intensification, including regional irrigation growth, cools through increased evapotranspiration, especially on the hottest days.",
-      "evidence": ["P000007:S07:P0036", "P000007:S04:P0026"],
+      "evidence": [
+        "P000007:S07:P0036",
+        "P000007:S04:P0026"
+      ],
       "matched_claim_id": "P000007_CL006",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "interp_et_increases_precipitation",
@@ -329,9 +434,12 @@
       "relation": "causal",
       "role": "AUTHORS_INTERPRETATION_OF_OWN_RESULT",
       "statement": "The authors propose that increased evapotranspiration also raises precipitation and overall rates of water recycling in the region.",
-      "evidence": ["P000007:S07:P0036"],
+      "evidence": [
+        "P000007:S07:P0036"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "main"
     }
   ]
 }

@@ -1,0 +1,90 @@
+\section{Reported sign reversals in the benchmark corpus}
+\label{app:reversals}
+
+Each row is a single intervention whose reported effect changes direction with a
+stated condition. An answer that omits the condition column is wrong for one of the
+two branches. All rows are traceable to extracted ScientificClaim identifiers in the
+released graph.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}p{2.8cm}p{3.2cm}p{7.2cm}@{}}
+\toprule
+\textbf{Intervention} & \textbf{Conditioning variable} & \textbf{Reported reversal} \\
+\midrule
+Soil moisture anomaly & Time of day~\citep{taylor2012afternoon} & Rain over drier soil 12:00--15:00; over wetter soil 21:00--03:00 \\
+Soil moisture anomaly & Observation vs.\ model~\citep{taylor2012afternoon} & Observations favour dry soils; parameterised models favour wet soils \\
+Deforestation & Latitude~\citep{luo2024decreased} & Surface warming in the tropics; cooling in the boreal zone \\
+Wind farm & Lapse rate~\citep{roy2010impacts} & Warming under stable air at night; cooling under unstable air by day \\
+Solar farm & Panel efficiency~\citep{li2018sahara} & Rainfall increase at 15\%; cooling and rainfall suppression at 45\% \\
+Deforestation (Rond\^onia) & Season and synoptic wind~\citep{wang1999amazonia} & No effect in the rainy season; cloud only in the break period; localised rain in the dry season under weak wind \\
+Afforestation & Soil moisture~\citep{swann2012midlatitude} & Warming where the water supply gap widens; ameliorated where moisture is abundant \\
+Surface heterogeneity & Patch size~\citep{lee2019heterogeneity} & Transition to deep convection above ${\sim}5$\,km; boundary-layer mixing below \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Full extraction audit}
+\label{app:extraction}
+
+Ten papers annotated by hand from the exported SourceBlock text, using the counting
+rules of the extraction prompts so that reference and system objects are the same kind
+of thing. Study settings are one per complete combination of conditions the paper
+directly analyses. Claims are one per directed own-result relationship; only
+\texttt{OWN\_RESULT} and \texttt{AUTHORS\_INTERPRETATION\_OF\_OWN\_RESULT} count,
+because the pipeline discards the other two evidence roles. \emph{Main} findings are
+those foregrounded in the abstract or numbered conclusions, plus every sign reversal,
+threshold, and stated condition that changes when a main finding applies.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}lrrrrrrr@{}}
+\toprule
+\textbf{Paper} & \textbf{Ref.\ set.} & \textbf{Ext.\ set.} & \textbf{Main} & \textbf{Hit} & \textbf{Main rec.} & \textbf{All} & \textbf{All rec.} \\
+\midrule
+Rond\^onia deforestation~\citep{wang1999amazonia} & 16 & 20 & 32 & 27 & 0.844 & 50 & 0.660 \\
+European forest clouds~\citep{teuling2017cloud} & 14 & 9 & 14 & 10 & 0.714 & 24 & 0.417 \\
+Saharan wind/solar farms~\citep{li2018sahara} & 11 & 5 & 22 & 15 & 0.682 & 28 & 0.643 \\
+Odisha LULC warming~\citep{gogoi2019odisha} & 16 & 9 & 17 & 11 & 0.647 & 27 & 0.444 \\
+Wind farm temperatures~\citep{roy2010impacts} & 14 & 9 & 17 & 10 & 0.588 & 23 & 0.435 \\
+Deforestation cloud offset~\citep{luo2024decreased} & 13 & 3 & 16 & 9 & 0.562 & 24 & 0.375 \\
+Mid-latitude afforestation~\citep{swann2012midlatitude} & 13 & 3 & 18 & 10 & 0.556 & 28 & 0.357 \\
+Broad-leaved fraction~\citep{schwaab2020broadleaved} & 14 & 10 & 15 & 8 & 0.533 & 23 & 0.391 \\
+US Midwest cooling~\citep{mueller2016cooling} & 17 & 8 & 17 & 8 & 0.471 & 22 & 0.364 \\
+Afternoon rain, drier soils~\citep{taylor2012afternoon} & 10 & 3 & 10 & 3 & 0.300 & 16 & 0.188 \\
+\midrule
+\textbf{Total} & 138 & 79 & 178 & 111 & \textbf{0.624} & 265 & 0.460 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Precision over the ten papers is $0.984$: of 127 extracted claims, 122 match a
+reference claim, two are cited background mis-assigned as own results, and three are
+duplicates of a single irrigation-cooling relationship.
+
+\section{Benchmark corpus}
+\label{app:corpus}
+
+The frozen 18-paper subset covers wind farms, deforestation and cloud cover, global
+and regional irrigation, mesoscale vegetation heterogeneity, soil-moisture--rainfall
+coupling, cropland intensification, large-scale renewable installations, forest cloud
+enhancement, mid-latitude afforestation, broad-leaved species composition, land-use
+change in South America, global greening, cover crops, observed Amazonian
+deforestation, LULC warming in eastern India, and land-surface heterogeneity with
+background wind. Full identifiers, titles, and per-paper object counts accompany the
+released graph.
+
+\section{Reproduction}
+\label{app:repro}
+
+The shared corpus, the ClimateKG graph, the ten-question benchmark, the extraction
+ground truth, and the collation scripts are released with the code. The corpus is
+assembled by \texttt{scripts/build\_three\_system\_corpus.py}, ClimateKG queries run
+through \texttt{scripts/run\_three\_system\_queries.py}, the two baselines through
+\texttt{baselines/climatekg\_comparison/run.py} with a \texttt{--think} flag that
+matches the ClimateKG synthesis budget, results are collated by
+\texttt{scripts/report\_three\_system\_comparison.py}, and the extraction audit is
+recomputed by \texttt{scripts/audit\_extraction\_recall.py}. Every number in this paper
+is produced by one of those scripts from saved run artifacts.

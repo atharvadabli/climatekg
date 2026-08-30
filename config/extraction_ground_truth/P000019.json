@@ -6,82 +6,122 @@
     {
       "key": "root_mm5v2_rondonia",
       "description": "MM5V2 nested simulations over Rondonia with a 480 km outer domain at 12 km and a 240 km inner domain at 4 km, 24 sigma levels to 100 hPa, non-hydrostatic, explicit convection on the inner domain, 72 hours from 2000 LT.",
-      "evidence": ["P000019:S06:P0044"]
+      "evidence": [
+        "P000019:S06:P0044"
+      ]
     },
     {
       "key": "break_original_control",
       "description": "Break period 3-6 November 1990, original synoptic wind, uniform forest control run.",
-      "evidence": ["P000019:S08:P0055", "P000019:S08:P0056"]
+      "evidence": [
+        "P000019:S08:P0055",
+        "P000019:S08:P0056"
+      ]
     },
     {
       "key": "break_original_deforestation",
       "description": "Break period, original synoptic wind, observed fish-bone deforestation pattern.",
-      "evidence": ["P000019:S08:P0056", "P000019:S06:P0047"]
+      "evidence": [
+        "P000019:S08:P0056",
+        "P000019:S06:P0047"
+      ]
     },
     {
       "key": "break_reduced_control",
       "description": "Break period with synoptic wind reduced by a factor of ten, uniform forest control run.",
-      "evidence": ["P000019:S08:P0061", "P000019:S08:P0062"]
+      "evidence": [
+        "P000019:S08:P0061",
+        "P000019:S08:P0062"
+      ]
     },
     {
       "key": "break_reduced_deforestation",
       "description": "Break period with synoptic wind reduced by a factor of ten, observed deforestation.",
-      "evidence": ["P000019:S08:P0061", "P000019:S08:P0064"]
+      "evidence": [
+        "P000019:S08:P0061",
+        "P000019:S08:P0064"
+      ]
     },
     {
       "key": "break_reduced_2km",
       "description": "Break period reduced-wind deforestation run repeated at 2 km grid spacing to test resolution sensitivity.",
-      "evidence": ["P000019:S08:P0066"]
+      "evidence": [
+        "P000019:S08:P0066"
+      ]
     },
     {
       "key": "rainy_original_control",
       "description": "Rainy season 3-6 January 1990, original synoptic wind, uniform forest control run.",
-      "evidence": ["P000019:S09:P0071", "P000019:S09:P0072"]
+      "evidence": [
+        "P000019:S09:P0071",
+        "P000019:S09:P0072"
+      ]
     },
     {
       "key": "rainy_original_deforestation",
       "description": "Rainy season, original synoptic wind, observed deforestation.",
-      "evidence": ["P000019:S09:P0072"]
+      "evidence": [
+        "P000019:S09:P0072"
+      ]
     },
     {
       "key": "rainy_reduced_control",
       "description": "Rainy season with synoptic wind reduced by a factor of ten, uniform forest control run.",
-      "evidence": ["P000019:S09:P0076", "P000019:S09:P0079"]
+      "evidence": [
+        "P000019:S09:P0076",
+        "P000019:S09:P0079"
+      ]
     },
     {
       "key": "rainy_reduced_deforestation",
       "description": "Rainy season with synoptic wind reduced by a factor of ten, observed deforestation.",
-      "evidence": ["P000019:S09:P0076"]
+      "evidence": [
+        "P000019:S09:P0076"
+      ]
     },
     {
       "key": "dry_control",
       "description": "Dry season 30 June to 3 July 1990, uniform forest control run.",
-      "evidence": ["P000019:S10:P0083"]
+      "evidence": [
+        "P000019:S10:P0083"
+      ]
     },
     {
       "key": "dry_deforestation",
       "description": "Dry season, observed deforestation.",
-      "evidence": ["P000019:S10:P0083"]
+      "evidence": [
+        "P000019:S10:P0083"
+      ]
     },
     {
       "key": "dry_day_one",
       "description": "First dry-season simulation day, when synoptic wind was weakest and mesoscale circulations strongest.",
-      "evidence": ["P000019:S10:P0092", "P000019:S10:P0094"]
+      "evidence": [
+        "P000019:S10:P0092",
+        "P000019:S10:P0094"
+      ]
     },
     {
       "key": "dry_day_two",
       "description": "Second dry-season simulation day, when synoptic wind was strongest and mesoscale circulations weakest.",
-      "evidence": ["P000019:S10:P0092", "P000019:S10:P0094"]
+      "evidence": [
+        "P000019:S10:P0092",
+        "P000019:S10:P0094"
+      ]
     },
     {
       "key": "dry_day_three",
       "description": "Third dry-season simulation day, with a weaker enhancement of afternoon shallow clouds.",
-      "evidence": ["P000019:S10:P0086"]
+      "evidence": [
+        "P000019:S10:P0086"
+      ]
     },
     {
       "key": "domain_forest_corners",
       "description": "The uniformly forested upper-right and lower-left corners of the inner domain, with CAPE of about 600 J and 200 J respectively, used to separate PBL-triggered from mesoscale-triggered clouds.",
-      "evidence": ["P000019:S10:P0088"]
+      "evidence": [
+        "P000019:S10:P0088"
+      ]
     }
   ],
   "claims": [
@@ -92,9 +132,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The model predicted no more than 0.1 mm of three-day cumulative rainfall at isolated locations in the control run and almost none in the deforestation run.",
-      "evidence": ["P000019:S08:P0056"],
+      "evidence": [
+        "P000019:S08:P0056"
+      ],
       "matched_claim_id": "P000019_CL001",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "break_original_no_cloudiness",
@@ -103,9 +146,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Afternoon cloudiness was not observed in either the control or the deforestation run.",
-      "evidence": ["P000019:S08:P0057"],
+      "evidence": [
+        "P000019:S08:P0057"
+      ],
       "matched_claim_id": "P000019_CL002",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "break_mesoscale_heat_flux_induced",
@@ -114,9 +160,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Deforestation induced a well-defined mesoscale heat flux structure whose space-time distribution agreed with earlier studies.",
-      "evidence": ["P000019:S08:P0057"],
+      "evidence": [
+        "P000019:S08:P0057"
+      ],
       "matched_claim_id": "P000019_CL003",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "deforestation_strengthens_mesoscale_circulation",
@@ -125,9 +174,13 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The heterogeneous deforestation pattern induced mesoscale circulations of increased intensity over the deforested domain.",
-      "evidence": ["P000019:S08:P0057", "P000019:S08:P0062"],
+      "evidence": [
+        "P000019:S08:P0057",
+        "P000019:S08:P0062"
+      ],
       "matched_claim_id": "P000019_CL004",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "break_circulation_below_unstable_level",
@@ -136,9 +189,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Under original synoptic wind the mesoscale circulations were not strong enough to overcome the sounding energy barrier, being weak and with vanishing mesoscale heat flux near the most-unstable level of about 840 hPa.",
-      "evidence": ["P000019:S08:P0060"],
+      "evidence": [
+        "P000019:S08:P0060"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. This vertical mismatch is the mechanism explaining the break-period null result."
+      "match_note": "Not extracted. This vertical mismatch is the mechanism explaining the break-period null result.",
+      "tier": "main"
     },
     {
       "key": "break_reduced_rainfall_similar",
@@ -147,9 +203,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Rainfall patterns in the deforestation and control runs were qualitatively similar, with sporadic rain cells at somewhat different locations that did not resemble the land cover pattern.",
-      "evidence": ["P000019:S08:P0062"],
+      "evidence": [
+        "P000019:S08:P0062"
+      ],
       "matched_claim_id": "P000019_CL019",
-      "match_note": "Extracted as no significant difference from control."
+      "match_note": "Extracted as no significant difference from control.",
+      "tier": "main"
     },
     {
       "key": "break_reduced_enhanced_cloud",
@@ -158,9 +217,13 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Enhanced cloud was simulated over the deforested locations at levels between 900 and 800 hPa.",
-      "evidence": ["P000019:S08:P0062", "P000019:S08:P0064"],
+      "evidence": [
+        "P000019:S08:P0062",
+        "P000019:S08:P0064"
+      ],
       "matched_claim_id": "P000019_CL006",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "break_reduced_cloud_recurs",
@@ -169,9 +232,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Enhanced cloudiness over the deforested areas also occurred in the afternoons of the second and third simulation days.",
-      "evidence": ["P000019:S08:P0062"],
+      "evidence": [
+        "P000019:S08:P0062"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted, so the persistence of the effect across days is unavailable."
+      "match_note": "Not extracted, so the persistence of the effect across days is unavailable.",
+      "tier": "supporting"
     },
     {
       "key": "reduced_wind_stronger_circulation",
@@ -180,9 +246,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The mesoscale circulations measured by mesoscale heat flux were stronger under the weakened synoptic wind condition.",
-      "evidence": ["P000019:S08:P0062"],
+      "evidence": [
+        "P000019:S08:P0062"
+      ],
       "matched_claim_id": "P000019_CL020",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "reduced_wind_higher_circulation",
@@ -191,9 +260,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The circulations reached higher altitudes than the most-unstable level of about 840 hPa under reduced synoptic wind.",
-      "evidence": ["P000019:S08:P0064"],
+      "evidence": [
+        "P000019:S08:P0064"
+      ],
       "matched_claim_id": "P000019_CL021",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "reduced_wind_less_stable",
@@ -202,9 +274,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The atmosphere was less stable under reduced synoptic wind, with greater CAPE and smaller convective inhibition.",
-      "evidence": ["P000019:S08:P0064"],
+      "evidence": [
+        "P000019:S08:P0064"
+      ],
       "matched_claim_id": "P000019_CL005",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "reduced_wind_enhanced_afternoon_cloud",
@@ -213,9 +288,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The weakened synoptic wind environment was the one in which mesoscale circulations were responsible for triggering enhanced afternoon cloudiness over the deforested areas.",
-      "evidence": ["P000019:S08:P0064"],
+      "evidence": [
+        "P000019:S08:P0064"
+      ],
       "matched_claim_id": "P000019_CL022",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "break_reduced_little_rainfall",
@@ -224,9 +302,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The low-level cumulus clouds produced little precipitation, with sparse rainfall cells that do not overlap the cloud locations, so deforestation may enhance afternoon cloudiness while contributing little local rainfall.",
-      "evidence": ["P000019:S08:P0064"],
+      "evidence": [
+        "P000019:S08:P0064"
+      ],
       "matched_claim_id": "P000019_CL023",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "resolution_cloudiness_consistent",
@@ -235,9 +316,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Cloudiness simulated at 2 km agreed at least qualitatively with the corresponding 4 km simulation.",
-      "evidence": ["P000019:S08:P0066"],
+      "evidence": [
+        "P000019:S08:P0066"
+      ],
       "matched_claim_id": "P000019_CL030",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "supporting"
     },
     {
       "key": "resolution_rainfall_consistent",
@@ -246,9 +330,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Rainfall simulated at 2 km agreed at least qualitatively with the corresponding 4 km simulation.",
-      "evidence": ["P000019:S08:P0066"],
+      "evidence": [
+        "P000019:S08:P0066"
+      ],
       "matched_claim_id": "P000019_CL031",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "supporting"
     },
     {
       "key": "resolution_larger_rain_rates",
@@ -257,9 +344,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The 2 km simulation produced larger rain rates than the 4 km simulation.",
-      "evidence": ["P000019:S08:P0066"],
+      "evidence": [
+        "P000019:S08:P0066"
+      ],
       "matched_claim_id": "P000019_CL032",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "supporting"
     },
     {
       "key": "resolution_higher_cloud_water",
@@ -268,9 +358,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The 2 km simulation produced higher cloud water content than the 4 km simulation.",
-      "evidence": ["P000019:S08:P0066"],
+      "evidence": [
+        "P000019:S08:P0066"
+      ],
       "matched_claim_id": "P000019_CL033",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "supporting"
     },
     {
       "key": "rainy_sounding_unstable",
@@ -279,9 +372,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The rainy-season atmosphere is conditionally unstable with relatively large CAPE, small convective inhibition, and a most-unstable level of about 970 hPa very close to the surface, far more unstable than the break period.",
-      "evidence": ["P000019:S09:P0072"],
+      "evidence": [
+        "P000019:S09:P0072"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted, so the reason the rainy season behaves differently is missing."
+      "match_note": "Not extracted, so the reason the rainy season behaves differently is missing.",
+      "tier": "main"
     },
     {
       "key": "rainy_active_deep_convection",
@@ -290,9 +386,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Active deep convection and intensive rainfall were obtained in both the deforestation and the control runs.",
-      "evidence": ["P000019:S09:P0072"],
+      "evidence": [
+        "P000019:S09:P0072"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "rainy_rainfall_identical",
@@ -301,9 +400,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The distributions of rainfall from the control and deforestation runs were nearly identical in the rainy season.",
-      "evidence": ["P000019:S09:P0072"],
+      "evidence": [
+        "P000019:S09:P0072"
+      ],
       "matched_claim_id": "P000019_CL008",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "rainy_cloudiness_identical",
@@ -312,9 +414,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The distributions of high clouds from the control and deforestation runs were nearly identical in the rainy season.",
-      "evidence": ["P000019:S09:P0072"],
+      "evidence": [
+        "P000019:S09:P0072"
+      ],
       "matched_claim_id": "P000019_CL009",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "rainy_no_shallow_clouds",
@@ -323,9 +428,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Shallow clouds did not occur at all in the rainy-season simulations.",
-      "evidence": ["P000019:S09:P0072"],
+      "evidence": [
+        "P000019:S09:P0072"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "rainy_land_cover_no_role_cloud",
@@ -334,9 +442,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Variability in land cover played no role in shaping the distribution of cloudiness during the rainy season.",
-      "evidence": ["P000019:S09:P0074"],
+      "evidence": [
+        "P000019:S09:P0074"
+      ],
       "matched_claim_id": "P000019_CL028",
-      "match_note": "Extracted as a no-shaping-effect record."
+      "match_note": "Extracted as a no-shaping-effect record.",
+      "tier": "main"
     },
     {
       "key": "rainy_land_cover_no_role_rain",
@@ -345,9 +456,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Variability in land cover played no role in shaping the distribution of rainfall during the rainy season.",
-      "evidence": ["P000019:S09:P0074"],
+      "evidence": [
+        "P000019:S09:P0074"
+      ],
       "matched_claim_id": "P000019_CL029",
-      "match_note": "Extracted as a no-shaping-effect record."
+      "match_note": "Extracted as a no-shaping-effect record.",
+      "tier": "main"
     },
     {
       "key": "rainy_reduced_cloud_coverage_shrinks",
@@ -356,9 +470,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The spatial coverage of afternoon cloudiness was greatly reduced under weakened synoptic wind in the rainy season.",
-      "evidence": ["P000019:S09:P0076"],
+      "evidence": [
+        "P000019:S09:P0076"
+      ],
       "matched_claim_id": "P000019_CL024",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "rainy_reduced_cloud_location_shift",
@@ -367,9 +484,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The clouds also occurred at different locations under the weakened synoptic wind.",
-      "evidence": ["P000019:S09:P0076"],
+      "evidence": [
+        "P000019:S09:P0076"
+      ],
       "matched_claim_id": "P000019_CL026",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "supporting"
     },
     {
       "key": "rainy_reduced_high_clouds_only",
@@ -378,9 +498,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Deep convection still led to high-level clouds above 500 hPa peaking near 300 hPa and no low-level clouds were generated.",
-      "evidence": ["P000019:S09:P0076"],
+      "evidence": [
+        "P000019:S09:P0076"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. This distinguishes the rainy-season reduced-wind case from the break-period reduced-wind case, which produced low cloud."
+      "match_note": "Not extracted. This distinguishes the rainy-season reduced-wind case from the break-period reduced-wind case, which produced low cloud.",
+      "tier": "main"
     },
     {
       "key": "rainy_reduced_rain_area_shrinks",
@@ -389,9 +512,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The area receiving rainfall shrank considerably, leaving only isolated rainfall cells.",
-      "evidence": ["P000019:S09:P0076"],
+      "evidence": [
+        "P000019:S09:P0076"
+      ],
       "matched_claim_id": "P000019_CL025",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "rainy_reduced_cape_decrease",
@@ -400,9 +526,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The reduction is attributed to weakened large-scale ascent and reduced moisture convergence, consistent with a much smaller CAPE and a less unstable atmosphere.",
-      "evidence": ["P000019:S09:P0079"],
+      "evidence": [
+        "P000019:S09:P0079"
+      ],
       "matched_claim_id": "P000019_CL027",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "supporting"
     },
     {
       "key": "rainy_reduced_land_surface_irrelevant",
@@ -411,9 +540,13 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "No correlation was found between rainfall and land cover in either run, so land surface processes were irrelevant to the convection processes over this period.",
-      "evidence": ["P000019:S09:P0079", "P000019:S09:P0080"],
+      "evidence": [
+        "P000019:S09:P0079",
+        "P000019:S09:P0080"
+      ],
       "matched_claim_id": "P000019_CL014",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "rainy_reduced_no_mesoscale_circulation",
@@ -422,9 +555,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Mesoscale circulations did not develop under reduced synoptic wind in the rainy season, because the mesoscale heat flux was essentially zero.",
-      "evidence": ["P000019:S09:P0081"],
+      "evidence": [
+        "P000019:S09:P0081"
+      ],
       "matched_claim_id": "P000019_CL013",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "rainy_original_flux_artifact",
@@ -433,9 +569,12 @@
       "relation": "causal",
       "role": "AUTHORS_INTERPRETATION_OF_OWN_RESULT",
       "statement": "The apparent mesoscale heat flux under original rainy-season wind is judged an artifact rather than a real signal, because it shows periodicity with height, negative near-surface values, and the wrong dependence on synoptic wind.",
-      "evidence": ["P000019:S09:P0081"],
+      "evidence": [
+        "P000019:S09:P0081"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. A diagnostic-validity caveat that a naive reader of the graph would miss."
+      "match_note": "Not extracted. A diagnostic-validity caveat that a naive reader of the graph would miss.",
+      "tier": "supporting"
     },
     {
       "key": "dry_moderate_rainfall_both",
@@ -444,9 +583,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Moderate three-day cumulative rainfall was simulated in both the control and deforestation runs, with an evident difference between the two rainfall patterns.",
-      "evidence": ["P000019:S10:P0083"],
+      "evidence": [
+        "P000019:S10:P0083"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "dry_broader_rain_coverage",
@@ -455,9 +597,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Precipitation from the deforestation run had broader coverage than the control during the first afternoon, when localized deep convection occurred over the deforested region.",
-      "evidence": ["P000019:S10:P0083"],
+      "evidence": [
+        "P000019:S10:P0083"
+      ],
       "matched_claim_id": "P000019_CL018",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "dry_rain_land_cover_signature",
@@ -466,9 +611,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The rainfall organisation reflects a land cover signature, with rain cells slightly shifted north-west of the deforested areas because of the prevailing wind.",
-      "evidence": ["P000019:S10:P0083"],
+      "evidence": [
+        "P000019:S10:P0083"
+      ],
       "matched_claim_id": "P000019_CL011",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "dry_later_days_random",
@@ -477,9 +625,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "On the second and third days the deforestation-run rainfall patterns looked random, did not reflect land cover, and were not qualitatively different from the control.",
-      "evidence": ["P000019:S10:P0083"],
+      "evidence": [
+        "P000019:S10:P0083"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. The land cover signature is present on one day out of three, which the extracted claims do not convey."
+      "match_note": "Not extracted. The land cover signature is present on one day out of three, which the extracted claims do not convey.",
+      "tier": "main"
     },
     {
       "key": "dry_shallow_cloud_enhancement",
@@ -488,9 +639,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "An enhancement of shallow cumulus clouds near the 800 hPa level was simulated over the deforested areas in the first afternoon.",
-      "evidence": ["P000019:S10:P0084"],
+      "evidence": [
+        "P000019:S10:P0084"
+      ],
       "matched_claim_id": "P000019_CL016",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "dry_high_cloud_precipitating",
@@ -499,9 +653,13 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Enhanced high cumulus clouds near 300 hPa were simulated over the partially cleared areas and, contrary to the non-precipitating shallow clouds, contributed local rainfall.",
-      "evidence": ["P000019:S10:P0084", "P000019:S10:P0086"],
+      "evidence": [
+        "P000019:S10:P0084",
+        "P000019:S10:P0086"
+      ],
       "matched_claim_id": "P000019_CL017",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "dry_third_day_weaker",
@@ -510,9 +668,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "A weaker enhancement of afternoon shallow clouds was simulated in the deforestation run on the third day.",
-      "evidence": ["P000019:S10:P0086"],
+      "evidence": [
+        "P000019:S10:P0086"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "dry_clouds_short_lived",
@@ -521,9 +682,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The enhanced shallow clouds were short lived, lasting about four hours from 1400 LT on the first day and 1500 LT on the third day.",
-      "evidence": ["P000019:S10:P0086"],
+      "evidence": [
+        "P000019:S10:P0086"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. Duration is exactly the kind of detail a scenario designer needs."
+      "match_note": "Not extracted. Duration is exactly the kind of detail a scenario designer needs.",
+      "tier": "supporting"
     },
     {
       "key": "dry_second_afternoon_no_signature",
@@ -532,9 +696,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "Sporadic low clouds occurred in the second afternoon with no resemblance to the land cover pattern.",
-      "evidence": ["P000019:S10:P0086"],
+      "evidence": [
+        "P000019:S10:P0086"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "dry_pbl_triggered_corner_clouds",
@@ -543,9 +710,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Low-level clouds in the uniformly forested upper-right corner of both runs were triggered by PBL turbulence rather than mesoscale circulation, since there was no differential heating there.",
-      "evidence": ["P000019:S10:P0088"],
+      "evidence": [
+        "P000019:S10:P0088"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. This control separates the mesoscale mechanism from ordinary boundary-layer convection."
+      "match_note": "Not extracted. This control separates the mesoscale mechanism from ordinary boundary-layer convection.",
+      "tier": "supporting"
     },
     {
       "key": "dry_low_cape_corner_cloud_free",
@@ -554,9 +724,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The lower-left forested corner remained cloud free despite stronger surface sensible heat flux, because its CAPE was only about 200 J.",
-      "evidence": ["P000019:S10:P0088"],
+      "evidence": [
+        "P000019:S10:P0088"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. A counterintuitive result: stronger surface heating did not produce cloud where instability was insufficient."
+      "match_note": "Not extracted. A counterintuitive result: stronger surface heating did not produce cloud where instability was insufficient.",
+      "tier": "supporting"
     },
     {
       "key": "dry_flux_structure_interpretation",
@@ -565,9 +738,13 @@
       "relation": "causal",
       "role": "AUTHORS_INTERPRETATION_OF_OWN_RESULT",
       "statement": "Below about 750 hPa the flux structure indicates mesoscale circulations, while above it the structure follows the cloud distribution and is attributed to condensation heating during moist convection.",
-      "evidence": ["P000019:S10:P0091", "P000019:S10:P0092"],
+      "evidence": [
+        "P000019:S10:P0091",
+        "P000019:S10:P0092"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted."
+      "match_note": "Not extracted.",
+      "tier": "supporting"
     },
     {
       "key": "dry_second_afternoon_control_stronger",
@@ -576,9 +753,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The negative heat flux during the second afternoon indicates that overall moist convection was stronger in the control run than in the deforestation run.",
-      "evidence": ["P000019:S10:P0092"],
+      "evidence": [
+        "P000019:S10:P0092"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. A reversal in which deforestation weakened rather than enhanced convection."
+      "match_note": "Not extracted. A reversal in which deforestation weakened rather than enhanced convection.",
+      "tier": "supporting"
     },
     {
       "key": "synoptic_wind_inhibits_circulation",
@@ -587,9 +767,13 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "Mesoscale circulation was strongest on the first dry-season day and weakest on the second, matching the synoptic wind being weakest and strongest respectively, because synoptic wind inhibits mesoscale circulation development.",
-      "evidence": ["P000019:S10:P0094", "P000019:S10:P0096"],
+      "evidence": [
+        "P000019:S10:P0094",
+        "P000019:S10:P0096"
+      ],
       "matched_claim_id": "P000019_CL010",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "dry_circulation_triggers_convection",
@@ -598,9 +782,13 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The organised mesoscale circulations caused by deforestation trigger convection that enhances afternoon cloudiness and local rainfall in the dry season.",
-      "evidence": ["P000019:S10:P0095", "P000019:S10:P0096"],
+      "evidence": [
+        "P000019:S10:P0095",
+        "P000019:S10:P0096"
+      ],
       "matched_claim_id": "P000019_CL015",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "dry_cloudiness_land_cover_pattern",
@@ -609,9 +797,12 @@
       "relation": "associative",
       "role": "OWN_RESULT",
       "statement": "The majority of enhanced shallow clouds formed over the deforested patches, following closely the pattern of land cover.",
-      "evidence": ["P000019:S10:P0086"],
+      "evidence": [
+        "P000019:S10:P0086"
+      ],
       "matched_claim_id": "P000019_CL012",
-      "match_note": "Same direction and endpoints."
+      "match_note": "Same direction and endpoints.",
+      "tier": "main"
     },
     {
       "key": "conclusion_rainy_season_no_effect",
@@ -620,9 +811,12 @@
       "relation": "causal",
       "role": "OWN_RESULT",
       "statement": "The model predicted that deforestation had no effect on rainfall and cloudiness distributions during the rainy season, when mesoscale circulations were inhibited by relatively strong synoptic forcing.",
-      "evidence": ["P000019:S11:P0101"],
+      "evidence": [
+        "P000019:S11:P0101"
+      ],
       "matched_claim_id": "P000019_CL007",
-      "match_note": "Extracted as a no-detectable-change record."
+      "match_note": "Extracted as a no-detectable-change record.",
+      "tier": "main"
     },
     {
       "key": "conclusion_forcing_balance",
@@ -631,9 +825,13 @@
       "relation": "causal",
       "role": "AUTHORS_INTERPRETATION_OF_OWN_RESULT",
       "statement": "The impact of deforestation at the roughly ten kilometre scale on local convection and rainfall depends on the relative strength of synoptic-scale, mesoscale and local forcings.",
-      "evidence": ["P000019:S11:P0099", "P000019:S11:P0100"],
+      "evidence": [
+        "P000019:S11:P0099",
+        "P000019:S11:P0100"
+      ],
       "matched_claim_id": null,
-      "match_note": "Not extracted. This is the paper's single most transferable statement and the one a scenario designer would most want."
+      "match_note": "Not extracted. This is the paper's single most transferable statement and the one a scenario designer would most want.",
+      "tier": "main"
     }
   ]
 }
