@@ -1,0 +1,382 @@
+{
+  "paper_id": "P000013",
+  "title": "Mid-latitude afforestation shifts general circulation and tropical precipitation",
+  "markdown": "climatekg/runtime/outputs/baseline_comparison_20260830_v2/corpus/markdown/R1_P000013.md",
+  "settings": [
+    {
+      "key": "root_cam_clm_casa_slab",
+      "description": "NCAR CAM 3.0-CLM 3.5-CASA' with an interactive carbon cycle and an interactive slab ocean holding lateral ocean heat transport fixed, run to equilibrium.",
+      "evidence": ["P000013:S03:P0022", "P000013:S05:P0051"]
+    },
+    {
+      "key": "control_run",
+      "description": "The control run with present-day vegetation distribution.",
+      "evidence": ["P000013:S03:P0023"]
+    },
+    {
+      "key": "tree_afforestation_experiment",
+      "description": "The TREE experiment converting all C3 grass and agriculture between 30 N and 60 N to broad-leaf deciduous trees, totalling 18 million km2 or 19.2 per cent of the surface area in that band.",
+      "evidence": ["P000013:S03:P0023"]
+    },
+    {
+      "key": "agricultural_only_sensitivity",
+      "description": "Additional sensitivity studies converting only agricultural land to forest.",
+      "evidence": ["P000013:S03:P0024"]
+    },
+    {
+      "key": "widening_water_supply_gap",
+      "description": "Afforested locations where the water supply gap index 1 - ET/PET widens, meaning the surface cannot meet atmospheric evaporative demand.",
+      "evidence": ["P000013:S03:P0033", "P000013:S03:P0035"]
+    },
+    {
+      "key": "narrowing_water_supply_gap",
+      "description": "Afforested locations with abundant soil moisture where the water supply gap narrows.",
+      "evidence": ["P000013:S03:P0036", "P000013:S03:P0038"]
+    },
+    {
+      "key": "jja_season",
+      "description": "The June-August season, over which the water supply gap and the surface energy terms are evaluated.",
+      "evidence": ["P000013:S03:P0033", "P000013:S03:P0037"]
+    },
+    {
+      "key": "midlatitude_band",
+      "description": "The 30 N to 60 N band, where the conversion is imposed and the local energy and water budgets are reported.",
+      "evidence": ["P000013:S03:P0023", "P000013:S03:P0032"]
+    },
+    {
+      "key": "boreal_north_of_60",
+      "description": "Boreal regions north of 60 N, reported separately for the below-ground carbon response.",
+      "evidence": ["P000013:S04:P0044"]
+    },
+    {
+      "key": "amazon_southern_edge",
+      "description": "The southern edge of the Amazon forest, where the precipitation maximum shifts away.",
+      "evidence": ["P000013:S03:P0039", "P000013:S03:P0042"]
+    },
+    {
+      "key": "sahel_sahara",
+      "description": "The Sahara and upper Sahel, where precipitation increases.",
+      "evidence": ["P000013:S03:P0039", "P000013:S03:P0042"]
+    },
+    {
+      "key": "tropics_unmodified",
+      "description": "Tropical and unmodified mid-latitude regions, reported separately in the carbon accounting.",
+      "evidence": ["P000013:S04:P0044"]
+    },
+    {
+      "key": "coupled_carbon_accounting",
+      "description": "Equilibrium accounting combining terrestrial uptake with the compensating oceanic CO2 release of 60 to 85 per cent.",
+      "evidence": ["P000013:S04:P0045"]
+    }
+  ],
+  "claims": [
+    {
+      "key": "albedo_to_absorbed_solar",
+      "from": "surface albedo decrease from afforestation",
+      "to": "absorbed solar radiation at the surface",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Afforestation darkens the surface, and the primary change in the surface energy budget is an increase in absorbed solar radiation.",
+      "evidence": ["P000013:S03:P0025"],
+      "matched_claim_id": "P000013_CL001",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "absorbed_solar_to_temperature",
+      "from": "increased absorbed solar radiation at the surface",
+      "to": "surface air temperature",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "The increased absorbed solar radiation raises near-surface air temperatures north of 30 N.",
+      "evidence": ["P000013:S03:P0025"],
+      "matched_claim_id": "P000013_CL002",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "albedo_all_seasons",
+      "from": "the albedo difference between grasses and trees",
+      "to": "seasonality of the albedo anomaly",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "The albedo difference is evident in all seasons, showing it is not entirely due to snow masking by trees but to the specified grass-tree albedo contrast.",
+      "evidence": ["P000013:S03:P0025"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted, so the snow-masking alternative is not ruled out in the graph."
+    },
+    {
+      "key": "sea_ice_albedo_change",
+      "from": "decreased summer sea ice area",
+      "to": "absorbed solar radiation over ocean",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Albedo also changes over the ocean through a decrease in summer sea ice area, adding to the absorbed solar anomaly.",
+      "evidence": ["P000013:S03:P0031"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "cloud_radiative_feedback",
+      "from": "cloud cover decrease following afforestation",
+      "to": "net top-of-atmosphere radiation",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Cloud radiative forcing acts as a weak positive feedback, adding 0.44 W/m2 to the net incoming radiation, about 9 per cent of the vegetation-driven change.",
+      "evidence": ["P000013:S03:P0031"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "cloud_cover_decrease_profile",
+      "from": "mid-latitude afforestation",
+      "to": "cloud cover by vertical level",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Cloud cover decreases by 2 per cent at all vertical levels and by 4.5 per cent at low levels, with three quarters of the forcing shortwave and one quarter longwave.",
+      "evidence": ["P000013:S03:P0031"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "midlatitude_warming_093",
+      "from": "mid-latitude afforestation",
+      "to": "Northern Hemisphere mid-latitude annual mean temperature",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Northern Hemisphere mid-latitude temperature rises by 0.93 C in the annual mean at equilibrium.",
+      "evidence": ["P000013:S03:P0032"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "temperature_to_water_vapour",
+      "from": "surface air temperature increase",
+      "to": "atmospheric water vapour",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Water vapour increases by 6.9 per cent over Northern Hemisphere mid-latitudes, consistent with the Clausius-Clapeyron expectation of about 7 per cent per degree of warming.",
+      "evidence": ["P000013:S03:P0032"],
+      "matched_claim_id": "P000013_CL004",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "water_vapour_to_longwave",
+      "from": "atmospheric water vapour increase",
+      "to": "downward longwave radiation",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "The water vapour increase enhances downward longwave radiation at the surface.",
+      "evidence": ["P000013:S03:P0032"],
+      "matched_claim_id": "P000013_CL005",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "moisture_export_from_midlatitudes",
+      "from": "mid-latitude afforestation",
+      "to": "regional moisture budget",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Precipitation and evaporation both increase in the mid-latitudes but evaporation increases more, exporting 1.1 kg/s of water from the region.",
+      "evidence": ["P000013:S03:P0032"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "evaporation_land_ocean_split",
+      "from": "the mid-latitude evaporation increase",
+      "to": "land and ocean contributions",
+      "relation": "associative",
+      "role": "OWN_RESULT",
+      "statement": "Two thirds of the evaporation increase comes from land at 22.7 kg/s and one third from the ocean at 10.4 kg/s.",
+      "evidence": ["P000013:S03:P0032"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "water_supply_gap_widens_summer",
+      "from": "mid-latitude afforestation in summer",
+      "to": "water supply gap index",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "The water supply gap primarily widens in afforested regions during summer, indicating relatively drier conditions.",
+      "evidence": ["P000013:S03:P0033"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "lai_uncorrelated_with_drying",
+      "from": "total leaf area index",
+      "to": "afforestation-induced widening of the water supply gap",
+      "relation": "associative",
+      "role": "OWN_RESULT",
+      "statement": "Total leaf area index is uncorrelated with the change in dryness measured by the widening water supply gap, at r = 0.07 and p = 0.12.",
+      "evidence": ["P000013:S03:P0033"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted. A null result that guards against reading the drying as a vegetation-density effect."
+    },
+    {
+      "key": "water_gap_widening_greater_warming",
+      "from": "widening water supply gap",
+      "to": "near-surface air temperature increase",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Where the water supply gap widens the absorbed energy cannot leave as latent heat, so surface temperature rises by 0.62 C in the Northern Hemisphere annual mean and the energy leaves as sensible heat and longwave flux.",
+      "evidence": ["P000013:S03:P0035"],
+      "matched_claim_id": "P000013_CL003",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "abundant_moisture_ameliorates",
+      "from": "abundant soil moisture in afforested areas",
+      "to": "the warming from enhanced solar absorption",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "In afforested areas with abundant soil moisture the enhanced latent heat loss can ameliorate the warming from enhanced solar absorption and net longwave radiation.",
+      "evidence": ["P000013:S03:P0036"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted. This is the branch that decides whether afforestation warms, so its absence leaves the extracted warming chain unconditioned."
+    },
+    {
+      "key": "jja_warming_difference_2c",
+      "from": "widening versus narrowing water supply gap",
+      "to": "summer temperature increase",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Mid-latitude locations with a widening water supply gap warm 2 C more in summer than those with a narrowing gap, 3.5 C against 1.5 C for JJA.",
+      "evidence": ["P000013:S03:P0038"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "interp_soil_moisture_explains_model_spread",
+      "from": "differences in soil moisture representation across models",
+      "to": "divergence in the simulated mid-latitude forest impact",
+      "relation": "causal",
+      "role": "AUTHORS_INTERPRETATION_OF_OWN_RESULT",
+      "statement": "The dependence of the warming response on soil moisture status may explain why models disagree on the impact of mid-latitude forests.",
+      "evidence": ["P000013:S03:P0038"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "northward_precipitation_shift",
+      "from": "mid-latitude afforestation",
+      "to": "position of the precipitation belts",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Afforestation shifts precipitation belts northward, particularly over the Pacific but also over the Atlantic and South America.",
+      "evidence": ["P000013:S03:P0039"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted as its own record; only the two regional consequences were captured."
+    },
+    {
+      "key": "energy_transport_reduction",
+      "from": "increased Northern Hemisphere energy absorption",
+      "to": "northward atmospheric energy transport at the equator",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Northward atmospheric energy transport at the equator falls from 1.21 PW by 0.17 PW, a 13 per cent reduction, confirming southward redistribution of the anomalous energy.",
+      "evidence": ["P000013:S03:P0040"],
+      "matched_claim_id": "P000013_CL006",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "hadley_shift_amazon_drying",
+      "from": "northward shift of the Hadley circulation",
+      "to": "precipitation over the southern Amazon basin",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "The northward shift dries the southern edge of the Amazon forest.",
+      "evidence": ["P000013:S03:P0042"],
+      "matched_claim_id": "P000013_CL007",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "hadley_shift_sahel_wetting",
+      "from": "northward shift of the Hadley circulation",
+      "to": "precipitation over the Sahel and Sahara",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "The northward shift increases precipitation over the Sahara and upper Sahel.",
+      "evidence": ["P000013:S03:P0042"],
+      "matched_claim_id": "P000013_CL008",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "amazon_productivity_decrease",
+      "from": "drying of the southern Amazon",
+      "to": "terrestrial net primary productivity",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "The drying of the southern Amazon causes a decrease in productivity, showing that extratropical forest change affects tropical carbon cycling.",
+      "evidence": ["P000013:S03:P0042"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "sahel_wetting_no_productivity_gain",
+      "from": "increased precipitation over the Sahara and upper Sahel",
+      "to": "terrestrial productivity and carbon balance",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "The added water is released directly as ground evaporation under prescribed land cover, so no productivity increase and no carbon balance change occur.",
+      "evidence": ["P000013:S03:P0042"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted. An asymmetry between the drying and wetting responses that a planner would need."
+    },
+    {
+      "key": "land_carbon_uptake",
+      "from": "conversion of grass and crops to forest",
+      "to": "terrestrial carbon storage",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "The land takes up 270 PgC across the afforested locations at equilibrium, 155 PgC above ground and 112 PgC below ground.",
+      "evidence": ["P000013:S04:P0044"],
+      "matched_claim_id": "P000013_CL009",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "boreal_carbon_loss",
+      "from": "higher temperatures accelerating decomposition",
+      "to": "boreal below-ground carbon storage",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Boreal regions north of 60 N lose 28 PgC from below-ground carbon pools as higher temperatures accelerate decomposition.",
+      "evidence": ["P000013:S04:P0044"],
+      "matched_claim_id": "P000013_CL010",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "remote_carbon_losses_and_net",
+      "from": "mid-latitude afforestation",
+      "to": "net global biospheric carbon sequestration",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "A further 3 PgC is lost from unmodified mid-latitudes and 9 PgC from the tropics, leaving a net global biospheric sequestration of 228 PgC.",
+      "evidence": ["P000013:S04:P0044"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "co2_and_global_cooling",
+      "from": "net biospheric carbon uptake with compensating oceanic release",
+      "to": "atmospheric CO2 and global mean temperature",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Atmospheric CO2 falls by 16-46 ppm, giving a global cooling of 0.2 to 0.7 C.",
+      "evidence": ["P000013:S04:P0045"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "net_global_temperature_change",
+      "from": "combined biogeophysical warming and biogeochemical cooling",
+      "to": "global mean temperature",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Biogeophysical effects alone warm the globe by 0.3 C, and combined with the CO2 cooling the net global change is -0.4 to +0.1 C, so the two nearly cancel while regional impacts remain substantial.",
+      "evidence": ["P000013:S04:P0045", "P000013:S04:P0046"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted. The paper's headline framing, that a near-zero global signal hides large regional effects, is absent from the graph."
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "version": "three_system_v1",
+  "systems": ["plain_rag", "microsoft_graphrag", "climatekg"],
+  "shared_generation_model": "qwen3.6:27b",
+  "shared_embedding_model": "qwen3-embedding:4b",
+  "shared_context_tokens": 32768,
+  "corpus": "climatekg/runtime/outputs/three_system_benchmark/climatekg_corpus",
+  "corpus_note": "18 papers. The heterogeneity paper indexed under hierarchy_e2e_het_v10 as P000001 is re-namespaced to P000018 so that it can coexist with the staged wind-farm paper P000001. Baseline namespaces R1_Pxxxxxx and R2_P000001 map onto the same papers.",
+  "gold_note": "expected_evidence lists ScientificClaim identifiers that a complete answer must be grounded in. They were selected by reading the extracted claim inventory of the shared corpus, not by running any system.",
+  "queries": [
+    {
+      "id": "Q1_IN_HETEROGENEITY",
+      "corpus_relation": "in_corpus",
+      "probes": "single_paper_mechanism",
+      "question": "Under zero background wind over a heterogeneous chessboard surface with 14.4 km dry and wet patches, how does surface heat-flux heterogeneity affect local cloud development and precipitation?",
+      "must_preserve": ["zero background wind", "14.4 km patches", "dry and wet patch configuration"],
+      "expected_evidence": ["P000018_CL001", "P000018_CL002", "P000018_CL003", "P000018_CL004"],
+      "counterintuitive_point": "Horizontal circulations can reduce near-surface dry-wet temperature contrast while promoting deeper convection over sufficiently large dry patches."
+    },
+    {
+      "id": "Q2_IN_RONDONIA",
+      "corpus_relation": "in_corpus",
+      "probes": "seasonal_and_synoptic_conditioning",
+      "question": "How did observed deforestation patterns in Rondônia affect clouds and rainfall in the rainy, break, and dry-season simulations, and how did synoptic wind condition the response?",
+      "must_preserve": ["Rondônia", "rainy season", "break period", "dry season", "original versus weakened synoptic wind"],
+      "expected_evidence": ["P000019_CL001", "P000019_CL006", "P000019_CL007", "P000019_CL010", "P000019_CL015", "P000019_CL017", "P000019_CL020", "P000019_CL022"],
+      "counterintuitive_point": "The same land pattern produces null, cloud-only, or rainfall responses depending on season and synoptic forcing."
+    },
+    {
+      "id": "Q3_OUT_SEMIARID",
+      "corpus_relation": "out_of_corpus_location",
+      "probes": "environmental_transfer_with_refusal",
+      "question": "For a semi-arid planning area in Rajasthan with strong daytime heating, weak monsoon background wind, and proposed 10-15 km alternating irrigated and dry land patches, what literature-supported local cloud or rainfall mechanisms are transferable, and what remains uncertain?",
+      "must_preserve": ["semi-arid", "Rajasthan", "weak monsoon background wind", "10-15 km alternating irrigated and dry patches"],
+      "expected_evidence": [],
+      "expected_papers": ["P000018", "P000006", "P000003"],
+      "counterintuitive_point": "Environmental analogy may support a mechanism hypothesis but cannot establish a local effect or cardinal placement without local geometry and validation."
+    },
+    {
+      "id": "Q4_IN_PATCH_SCALE",
+      "corpus_relation": "in_corpus",
+      "probes": "threshold_and_scale_dependence",
+      "question": "Above what surface patch size does land-surface heterogeneity produce a boundary-layer moisture pool and a transition to deeper convection, and what happens to the boundary layer below that scale?",
+      "must_preserve": ["patch size threshold", "moisture pool near boundary-layer top", "behaviour below the threshold"],
+      "expected_evidence": ["P000018_CL008", "P000018_CL010", "P000018_CL012"],
+      "counterintuitive_point": "Below the threshold the boundary layer mixes across patches, so heterogeneity intensifies updrafts without organising a moisture pool."
+    },
+    {
+      "id": "Q5_IN_WIND_SENSITIVITY",
+      "corpus_relation": "in_corpus",
+      "probes": "single_variable_sensitivity",
+      "question": "How does raising the background wind from 0 to 1 m/s change the secondary circulation, the convergence-zone location, and whether the transition to deeper convection still occurs over a heterogeneous surface?",
+      "must_preserve": ["0 to 1 m/s background wind", "convergence zone displacement", "whether the transition survives"],
+      "expected_evidence": ["P000018_CL013", "P000018_CL014", "P000018_CL015", "P000018_CL016", "P000018_CL017"],
+      "counterintuitive_point": "A weak wind destroys the symmetry of the circulation and displaces convergence downwind, yet the convection transition itself is maintained."
+    },
+    {
+      "id": "Q6_IN_IRRIGATION_EXTREMES",
+      "corpus_relation": "in_corpus",
+      "probes": "cross_paper_agreement",
+      "question": "What do the indexed studies report about how irrigation changes near-surface temperature over irrigated versus surrounding non-irrigated land, and what happens to daytime and nighttime temperature extremes?",
+      "must_preserve": ["irrigated versus non-irrigated contrast", "daytime maximum", "nighttime minimum"],
+      "expected_evidence": ["P000003_CL006", "P000003_CL007", "P000004_CL004", "P000004_CL005", "P000007_CL002", "P000007_CL003"],
+      "counterintuitive_point": "Irrigation cools irrigated land and daytime maxima while warming surrounding non-irrigated land and nighttime minima."
+    },
+    {
+      "id": "Q7_IN_DEFOREST_CLOUD_OFFSET",
+      "corpus_relation": "in_corpus",
+      "probes": "multi_step_mechanism_chain",
+      "question": "Through which surface-energy mechanism does deforestation reduce cloud cover, and how much of the albedo-driven cooling does that cloud response offset?",
+      "must_preserve": ["turbulent heat flux pathway", "cloud cover decrease", "magnitude of the offset"],
+      "expected_evidence": ["P000002_CL004", "P000002_CL007", "P000002_CL008", "P000002_CL009"],
+      "counterintuitive_point": "The cloud response works against the albedo cooling rather than reinforcing it, offsetting roughly half of it."
+    },
+    {
+      "id": "Q8_IN_SOIL_MOISTURE_SIGN",
+      "corpus_relation": "in_corpus",
+      "probes": "observation_model_disagreement",
+      "question": "Is afternoon convective rainfall reported as more likely over drier or over wetter soil patches, and do observations and convection-parameterised models agree on the sign?",
+      "must_preserve": ["observed preference", "simulated preference", "reason for the disagreement"],
+      "expected_evidence": ["P000006_CL001", "P000006_CL002", "P000006_CL003"],
+      "counterintuitive_point": "Observations favour drier soils while parameterised models favour wetter soils, so the sign is a model artefact rather than a settled result."
+    },
+    {
+      "id": "Q9_IN_AFFORESTATION_SIGN",
+      "corpus_relation": "in_corpus",
+      "probes": "cross_paper_sign_reversal",
+      "question": "Does afforestation warm or cool the surface, and which reported conditions decide the sign of the temperature response?",
+      "must_preserve": ["albedo pathway", "evapotranspiration pathway", "conditions that flip the sign"],
+      "expected_evidence": ["P000013_CL001", "P000013_CL002", "P000015_CL013", "P000015_CL016", "P000015_CL051", "P000012_CL001"],
+      "counterintuitive_point": "The same intervention cools in some reported settings and warms in others, so an unconditioned answer is wrong in half the corpus."
+    },
+    {
+      "id": "Q10_OUT_WESTERN_GHATS",
+      "corpus_relation": "out_of_corpus_location",
+      "probes": "scenario_design_transfer",
+      "question": "For a monsoon-fed watershed in the Western Ghats foothills, would converting degraded scrub to broad-leaved plantation in 5-10 km blocks reduce local summer daytime hot extremes, and what would have to be verified before proposing such a scenario?",
+      "must_preserve": ["Western Ghats", "broad-leaved plantation", "5-10 km blocks", "summer daytime hot extremes"],
+      "expected_evidence": [],
+      "expected_papers": ["P000012", "P000015", "P000018"],
+      "counterintuitive_point": "Broad-leaved cooling of hot extremes is reported for European forests, so transfer to a monsoon watershed is a hypothesis that a numerical experiment must test, not a finding."
+    }
+  ],
+  "audit_fields": [
+    "directly_supported_statements",
+    "citation_precision",
+    "citation_coverage",
+    "conditioning_variables_preserved",
+    "incompatible_evidence_used",
+    "causal_associative_distinction_preserved",
+    "unsupported_location_specific_recommendation",
+    "answer_latency_seconds"
+  ]
+}

@@ -1,0 +1,338 @@
+{
+  "paper_id": "P000002",
+  "title": "Decreased cloud cover partially offsets the cooling effects of surface albedo change due to deforestation",
+  "markdown": "climatekg/runtime/outputs/baseline_comparison_20260830_v2/corpus/markdown/R1_P000002.md",
+  "settings": [
+    {
+      "key": "root_global_cloud_profile_assessment",
+      "description": "Global assessment of cloud fraction profile and radiative response to deforestation using two independent approaches.",
+      "evidence": ["P000002:S00:P0014", "P000002:S02:P0017"]
+    },
+    {
+      "key": "cmip6_deforest_glob",
+      "description": "Five CMIP6 GCMs running the LUMIP idealised deforest-glob simulation, removing 20 million km2 of forest at 400,000 km2 per year over 50 years, compared with piControl over the last 30 years.",
+      "evidence": ["P000002:S02:P0017", "P000002:S06:P0037"]
+    },
+    {
+      "key": "cmip6_local_effect_isolated",
+      "description": "The chessboard-like extraction of local effects from the total GCM signal, separating local from non-local responses.",
+      "evidence": ["P000002:S00:P0014", "P000002:S02:P0018"]
+    },
+    {
+      "key": "era5_space_for_time",
+      "description": "Space-for-time substitution contrasting multi-year mean ERA5 cloud fraction profiles between neighbouring unaltered forested and open-land grids classified by MODIS land cover.",
+      "evidence": ["P000002:S02:P0017"]
+    },
+    {
+      "key": "tropical_region",
+      "description": "Tropical latitudes, where evapotranspiration dominates the temperature and flux response.",
+      "evidence": ["P000002:S03:P0025", "P000002:S03:P0026"]
+    },
+    {
+      "key": "boreal_region",
+      "description": "Boreal latitudes, where surface albedo dominates the temperature and flux response.",
+      "evidence": ["P000002:S03:P0025", "P000002:S03:P0026"]
+    },
+    {
+      "key": "low_level_clouds",
+      "description": "Cloud cover below 700 hPa, closely coupled to surface heating and moisture fluxes.",
+      "evidence": ["P000002:S02:P0019"]
+    },
+    {
+      "key": "high_level_clouds",
+      "description": "Cloud cover above 500 hPa, analysed separately because deep convective tops set the maximum altitude of any deforestation effect.",
+      "evidence": ["P000002:S02:P0019"]
+    },
+    {
+      "key": "all_sky_toa",
+      "description": "Top-of-atmosphere outgoing radiation under all-sky conditions, reflecting combined surface and cloud changes.",
+      "evidence": ["P000002:S04:P0033"]
+    },
+    {
+      "key": "clear_sky_toa",
+      "description": "Top-of-atmosphere outgoing radiation under clear-sky conditions, isolating surface property changes.",
+      "evidence": ["P000002:S04:P0033"]
+    },
+    {
+      "key": "cloud_radiative_effect",
+      "description": "The all-sky minus clear-sky difference, giving the cloud radiative effect used for the offset ratio.",
+      "evidence": ["P000002:S04:P0033"]
+    },
+    {
+      "key": "shortwave_component",
+      "description": "The shortwave component of the radiative perturbation, evaluated separately.",
+      "evidence": ["P000002:S04:P0034"]
+    },
+    {
+      "key": "longwave_component",
+      "description": "The longwave component of the radiative perturbation, evaluated separately.",
+      "evidence": ["P000002:S04:P0034"]
+    }
+  ],
+  "claims": [
+    {
+      "key": "low_cloud_decrease_global",
+      "from": "deforestation fraction increase",
+      "to": "low-level cloud fraction below 700 hPa",
+      "relation": "associative",
+      "role": "OWN_RESULT",
+      "statement": "Globally, cloud cover below 700 hPa decreases in response to deforestation, with the response most pronounced in low-level clouds.",
+      "evidence": ["P000002:S02:P0019"],
+      "matched_claim_id": "P000002_CL001",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "tropical_high_cloud_decrease",
+      "from": "deforestation fraction increase",
+      "to": "tropical high-level cloud fraction above 500 hPa",
+      "relation": "associative",
+      "role": "OWN_RESULT",
+      "statement": "Additional reductions are found for tropical high-level clouds above 500 hPa.",
+      "evidence": ["P000002:S02:P0019"],
+      "matched_claim_id": "P000002_CL002",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "two_methods_consistent",
+      "from": "idealised GCM deforestation and ERA5 space-for-time substitution",
+      "to": "spatial pattern of the cloud profile sensitivity",
+      "relation": "associative",
+      "role": "OWN_RESULT",
+      "statement": "Despite differing principles, both methods agree on the spatial distribution of the cloud vertical profile response per unit deforestation fraction.",
+      "evidence": ["P000002:S02:P0019"],
+      "matched_claim_id": "P000002_CL003",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "local_isolation_removes_model_spread",
+      "from": "isolation of local effects from the total GCM signal",
+      "to": "inter-model consistency of the cloud response pattern",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Once local effects are isolated the GCMs reveal consistent spatial patterns, implying that the documented inter-model inconsistencies arise primarily from non-local effects.",
+      "evidence": ["P000002:S02:P0019"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted. This is the paper's methodological result explaining prior disagreement."
+    },
+    {
+      "key": "high_cloud_effect_tropics_only",
+      "from": "regional deep convective cloud top height",
+      "to": "maximum altitude at which deforestation affects clouds",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Because tropical deep convective cloud tops reach higher altitudes than boreal ones, deforestation is more likely to affect high-level clouds in the tropics.",
+      "evidence": ["P000002:S02:P0019"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "tropical_surface_warming",
+      "from": "forest to open land conversion in the tropics",
+      "to": "surface air temperature",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "In tropical regions the shift from forest to open land induces surface warming because the evapotranspiration effect prevails, with the albedo change partially counteracting it.",
+      "evidence": ["P000002:S03:P0025"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "boreal_surface_cooling",
+      "from": "forest to open land conversion in the boreal zone",
+      "to": "surface air temperature",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "In the boreal zone the overall biophysical effect of deforestation produces surface cooling in the GCMs, the opposite sign to the tropics.",
+      "evidence": ["P000002:S03:P0025"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted. The tropical-boreal sign reversal is entirely absent from the extracted claims."
+    },
+    {
+      "key": "albedo_et_latitude_dependence",
+      "from": "latitude",
+      "to": "relative dominance of surface albedo versus evapotranspiration",
+      "relation": "associative",
+      "role": "OWN_RESULT",
+      "statement": "The influence of surface albedo becomes more pronounced with increasing latitude while the influence of evapotranspiration diminishes, so albedo is the predominant cooling factor in boreal regions.",
+      "evidence": ["P000002:S03:P0025"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted. This is the condition that decides the sign of the temperature response."
+    },
+    {
+      "key": "boreal_cooling_method_disagreement",
+      "from": "space-for-time substitution versus GCM simulation",
+      "to": "detectability of boreal surface cooling",
+      "relation": "associative",
+      "role": "OWN_RESULT",
+      "statement": "Boreal surface cooling is not as evident from the space-for-time substitution approach because surface air temperature responds non-linearly to radiative and non-radiative processes.",
+      "evidence": ["P000002:S03:P0025"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "deforestation_latent_heat_decrease",
+      "from": "deforestation as land cover change",
+      "to": "latent heat flux",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "In the tropics the decline in surface turbulent heat flux stems primarily from reduced latent heat flux, because evapotranspiration dominates there.",
+      "evidence": ["P000002:S03:P0026"],
+      "matched_claim_id": "P000002_CL005",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "deforestation_sensible_heat_decrease",
+      "from": "deforestation as land cover change",
+      "to": "sensible heat flux",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "In the boreal zone the reduction in incoming solar radiation and the drop in surface air temperature from higher albedo produce a substantial decrease in sensible heat flux.",
+      "evidence": ["P000002:S03:P0026"],
+      "matched_claim_id": "P000002_CL006",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "deforestation_turbulent_heat_decrease",
+      "from": "deforestation as land cover change",
+      "to": "surface turbulent heat flux",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Combining the latent and sensible heat changes, surface turbulent heat flux decreases globally following deforestation.",
+      "evidence": ["P000002:S03:P0027"],
+      "matched_claim_id": "P000002_CL004",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "roughness_wind_speed_increase",
+      "from": "decreased surface roughness from deforestation",
+      "to": "near-surface wind speed and exchange rate",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Deforestation increases near-surface wind speed through reduced roughness, which enhances the heat and water vapour exchange rate and acts to increase turbulent fluxes.",
+      "evidence": ["P000002:S03:P0026"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted. This is the competing term that the gradient effect must overcome."
+    },
+    {
+      "key": "temperature_gradient_outweighs_wind_boreal",
+      "from": "decreased surface-to-air temperature gradient in boreal zones",
+      "to": "sensible heat flux",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "In boreal zones the decreased surface-to-air temperature gradient outweighs the near-surface wind speed increase, giving a net reduction in sensible heat flux.",
+      "evidence": ["P000002:S03:P0027"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "humidity_gradient_drives_lh",
+      "from": "decreased surface-to-air humidity gradient",
+      "to": "latent heat flux",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "The decreased humidity gradient inferred from reduced evapotranspiration primarily drives the reduction in latent heat flux despite the wind speed increase.",
+      "evidence": ["P000002:S03:P0027"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "turbulent_flux_to_cloud_cover",
+      "from": "decreased surface turbulent heat flux",
+      "to": "cloud cover",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Cloud cover responds to the reduced turbulent heat flux through decreased water vapour supply from lower latent heat in the tropics and weakened uplift from lower sensible heat in boreal regions.",
+      "evidence": ["P000002:S03:P0027"],
+      "matched_claim_id": "P000002_CL007",
+      "match_note": "Same direction and endpoints, though the extracted record does not carry the two regional pathways."
+    },
+    {
+      "key": "secondary_circulation_sign_by_region",
+      "from": "secondary mesoscale circulation driven by sensible heat contrast",
+      "to": "direction of the local cloud response over open land",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Secondary circulation gives cloud enhancement over open land with higher sensible heat than adjacent forest in the tropics and cloud inhibition over open land with lower sensible heat in boreal areas.",
+      "evidence": ["P000002:S03:P0029"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted. Another regionally sign-reversing mechanism that is lost."
+    },
+    {
+      "key": "land_cover_diversity_explains_method_gap",
+      "from": "deforestation target land cover, grassland only in CMIP6 versus diverse in ERA5",
+      "to": "difference between the two methods' results",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "CMIP6 models convert forest only to grassland while adjacent ERA5 grids carry diverse land covers, which explains why the two methods differ.",
+      "evidence": ["P000002:S03:P0030"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "surface_governs_toa_clouds_buffer",
+      "from": "deforestation",
+      "to": "top-of-atmosphere outgoing radiation",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Worldwide, changes in surface properties largely govern the overall outgoing radiation change while cloud cover changes act as a buffer.",
+      "evidence": ["P000002:S04:P0033"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "cmip6_offset_44",
+      "from": "reduced cloud cover in the CMIP6 idealised experiments",
+      "to": "share of surface albedo cooling offset",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "From the CMIP6 idealised deforestation experiments, reduced cloud cover offsets approximately 44 per cent of the surface albedo cooling effect.",
+      "evidence": ["P000002:S04:P0033"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted. The method-specific magnitude is missing."
+    },
+    {
+      "key": "era5_offset_26",
+      "from": "reduced cloud cover in the ERA5 space-for-time substitution",
+      "to": "share of surface albedo cooling offset",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "From the ERA5 space-for-time substitution the relative offset is about 26 per cent, substantially smaller than the model estimate.",
+      "evidence": ["P000002:S00:P0007", "P000002:S04:P0033"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted, so the abstract's stated method disparity of 44 versus 26 per cent is unavailable."
+    },
+    {
+      "key": "offset_stable_across_latitudes",
+      "from": "reduced cloud cover",
+      "to": "share of surface albedo cooling offset by latitude",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "The compensatory impact of cloud cover relative to the surface albedo change is stable across latitudes at roughly 50 per cent.",
+      "evidence": ["P000002:S04:P0033"],
+      "matched_claim_id": "P000002_CL009",
+      "match_note": "Extracted as the approximately 50 per cent offset."
+    },
+    {
+      "key": "cloud_albedo_counteracts_surface_albedo",
+      "from": "deforestation-induced reduction in cloudy-sky albedo",
+      "to": "increased surface albedo cooling",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "The reduction in cloudy-sky albedo partially counteracts the increased surface albedo by nearly half in the global average.",
+      "evidence": ["P000002:S04:P0034"],
+      "matched_claim_id": "P000002_CL008",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "shortwave_dominates",
+      "from": "shortwave versus longwave radiative components",
+      "to": "the climate perturbation from deforestation",
+      "relation": "associative",
+      "role": "OWN_RESULT",
+      "statement": "The perturbations come mainly from shortwave radiation, indicating that surface and cloud albedo changes are the dominant causes.",
+      "evidence": ["P000002:S04:P0034"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    }
+  ]
+}

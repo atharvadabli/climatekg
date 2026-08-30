@@ -1,0 +1,372 @@
+{
+  "paper_id": "P000010",
+  "title": "Climate model shows large-scale wind and solar farms in the Sahara increase rain and vegetation",
+  "markdown": "climatekg/runtime/outputs/baseline_comparison_20260830_v2/corpus/markdown/R1_P000010.md",
+  "settings": [
+    {
+      "key": "root_model_domain",
+      "description": "Coarse-resolution climate model with dynamic vegetation applied to the Sahara, the most arid parts of the Arabian Desert, and the neighbouring Sahel.",
+      "evidence": ["P000010:S00:P0008", "P000010:S00:P0024"]
+    },
+    {
+      "key": "control",
+      "description": "Control experiment with no wind or solar installations, giving a Sahara precipitation baseline of 0.24 mm/day.",
+      "evidence": ["P000010:S00:P0010", "P000010:S00:P0016"]
+    },
+    {
+      "key": "wind_farm",
+      "description": "Large-scale wind farm installation covering the Sahara, generating about 3 TW.",
+      "evidence": ["P000010:S00:P0009", "P000010:S00:P0010"]
+    },
+    {
+      "key": "solar_farm_15pct",
+      "description": "Large-scale solar farm installation covering the Sahara with 15 per cent panel conversion efficiency, generating about 79 TW.",
+      "evidence": ["P000010:S00:P0009", "P000010:S00:P0020"]
+    },
+    {
+      "key": "combined_farms",
+      "description": "Wind and solar farms deployed together in the Sahara.",
+      "evidence": ["P000010:S00:P0016"]
+    },
+    {
+      "key": "wind_farm_mechanism_decomposition",
+      "description": "Additional wind farm experiments that separate the climate change induced by the initial roughness change from that induced by the subsequent vegetation-albedo feedback.",
+      "evidence": ["P000010:S00:P0017"]
+    },
+    {
+      "key": "solar_farm_45pct",
+      "description": "Solar farm sensitivity experiment at 45 per cent conversion efficiency, at which effective albedo rises above the background desert albedo.",
+      "evidence": ["P000010:S00:P0020"]
+    },
+    {
+      "key": "solar_farm_30pct",
+      "description": "Solar farm sensitivity experiment at an intermediate 30 per cent conversion efficiency.",
+      "evidence": ["P000010:S00:P0020", "P000010:S00:P0023"]
+    },
+    {
+      "key": "global_desert_expansion",
+      "description": "Experiment expanding wind and solar farms from the Sahara to the world's other deserts.",
+      "evidence": ["P000010:S00:P0025", "P000010:S00:P0026"]
+    },
+    {
+      "key": "spatial_configuration_variants",
+      "description": "Wind farm experiments using checkerboard and quarter spatial configurations within the Sahara.",
+      "evidence": ["P000010:S00:P0026"]
+    },
+    {
+      "key": "sahel_subregion",
+      "description": "The Sahel transition region reported separately from the Sahara because it is highly sensitive to land change.",
+      "evidence": ["P000010:S00:P0008", "P000010:S00:P0016"]
+    }
+  ],
+  "claims": [
+    {
+      "key": "wind_temp_regional",
+      "from": "large-scale wind farm in the Sahara",
+      "to": "near-surface air temperature",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "The wind farm causes significant regional warming of near-surface air temperature of +2.16 K.",
+      "evidence": ["P000010:S00:P0010"],
+      "matched_claim_id": "P000010_CL001",
+      "match_note": "Same direction and magnitude."
+    },
+    {
+      "key": "wind_temp_asymmetry",
+      "from": "large-scale wind farm in the Sahara",
+      "to": "diurnal asymmetry of the warming",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Wind-farm warming is larger in minimum than in maximum temperature (+2.36 versus +1.85 K) because turbines enhance vertical mixing and bring warmer air down during stable nights.",
+      "evidence": ["P000010:S00:P0010"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted. Only the mean +2.16 K response was captured, so the timing dependence is lost."
+    },
+    {
+      "key": "wind_precip_sahara",
+      "from": "large-scale wind farm in the Sahara",
+      "to": "precipitation rate over farm areas",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Wind farms increase precipitation by up to +0.25 mm/day over installation areas, doubling the 0.24 mm/day control value.",
+      "evidence": ["P000010:S00:P0010"],
+      "matched_claim_id": "P000010_CL002",
+      "match_note": "Same direction and magnitude."
+    },
+    {
+      "key": "wind_precip_sahel",
+      "from": "large-scale wind farm in the Sahara",
+      "to": "Sahel precipitation rate",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Sahel precipitation increases by +1.12 mm/day under the wind farm experiment.",
+      "evidence": ["P000010:S00:P0010"],
+      "matched_claim_id": "P000010_CL003",
+      "match_note": "Same direction and magnitude."
+    },
+    {
+      "key": "wind_vegetation_cover",
+      "from": "large-scale wind farm in the Sahara",
+      "to": "vegetation cover fraction",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Vegetation cover fraction increases by +0.084 under the wind farm experiment.",
+      "evidence": ["P000010:S00:P0010"],
+      "matched_claim_id": "P000010_CL004",
+      "match_note": "Same direction and magnitude."
+    },
+    {
+      "key": "wind_lai",
+      "from": "large-scale wind farm in the Sahara",
+      "to": "leaf area index",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Leaf area index increases by +0.50 m2/m2 under the wind farm experiment.",
+      "evidence": ["P000010:S00:P0010"],
+      "matched_claim_id": "P000010_CL005",
+      "match_note": "Same direction and magnitude."
+    },
+    {
+      "key": "wind_root_carbon",
+      "from": "large-scale wind farm in the Sahara",
+      "to": "root carbon",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Root carbon increases by +0.08 kgC/m2 under the wind farm experiment.",
+      "evidence": ["P000010:S00:P0010"],
+      "matched_claim_id": "P000010_CL006",
+      "match_note": "Same direction and magnitude."
+    },
+    {
+      "key": "wind_windspeed_reduction",
+      "from": "increased surface drag from wind turbines",
+      "to": "wind speed",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Increased surface drag from the turbines reduces wind speed by about 36 per cent.",
+      "evidence": ["P000010:S00:P0010"],
+      "matched_claim_id": "P000010_CL007",
+      "match_note": "Same direction and magnitude."
+    },
+    {
+      "key": "wind_sahel_slight_cooling",
+      "from": "recovered vegetation in the wetter Sahel",
+      "to": "surface temperature in the Sahel",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "A slight cooling is observed in the wetter Sahel because recovered vegetation increases evaporation and decreases sensible heat flux, opposing the regional warming.",
+      "evidence": ["P000010:S00:P0010"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted. This is a within-experiment sign reversal, the exact case the counting rules require to be kept separate."
+    },
+    {
+      "key": "wind_friction_convergence_mechanism",
+      "from": "increased surface friction reducing wind velocity and Coriolis force",
+      "to": "surface and moisture convergence toward the Saharan heat low",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Increased surface friction reduces wind velocity and the associated Coriolis force, leaving a dominant pressure gradient toward the Saharan heat low that produces surface convergence, upward motion, moisture convergence and higher humidity.",
+      "evidence": ["P000010:S00:P0010"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted. This is the paper's stated dynamical mechanism for the wind-farm rainfall increase."
+    },
+    {
+      "key": "solar_temp_increase",
+      "from": "large-scale solar farm in the Sahara",
+      "to": "surface air temperature",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Solar farms increase surface air temperature through direct albedo reduction and the resulting albedo-precipitation-vegetation feedback.",
+      "evidence": ["P000010:S00:P0011"],
+      "matched_claim_id": "P000010_CL011",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "solar_temp_daytime_asymmetry",
+      "from": "large-scale solar farm in the Sahara",
+      "to": "diurnal asymmetry of the warming",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Solar-farm warming is stronger in maximum temperature (+1.28 K) than in minimum temperature (+0.97 K) because albedo reduction mainly affects net radiation during daytime, the opposite asymmetry to wind farms.",
+      "evidence": ["P000010:S00:P0011", "P000010:S00:P0015"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted, so the contrast with the wind-farm nighttime asymmetry is unavailable to the graph."
+    },
+    {
+      "key": "solar_precip_sahara",
+      "from": "large-scale solar farm in the Sahara",
+      "to": "Sahara precipitation rate",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Solar farms raise precipitation at farm locations in the Sahara by +0.13 mm/day, a 50 per cent increase over the control.",
+      "evidence": ["P000010:S00:P0015"],
+      "matched_claim_id": "P000010_CL012",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "solar_precip_sahel",
+      "from": "large-scale solar farm in the Sahara",
+      "to": "Sahel precipitation rate",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Sahel precipitation increases by +0.57 mm/day under the solar farm experiment.",
+      "evidence": ["P000010:S00:P0015"],
+      "matched_claim_id": "P000010_CL013",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "solar_windspeed_no_change",
+      "from": "large-scale solar farm in the Sahara",
+      "to": "wind speed",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Unlike the wind farm experiment, the solar farm experiment produces very little change in wind speed.",
+      "evidence": ["P000010:S00:P0015"],
+      "matched_claim_id": "P000010_CL014",
+      "match_note": "Extracted as a no-detectable-change record."
+    },
+    {
+      "key": "combined_precip_sahara",
+      "from": "combined wind and solar farms in the Sahara",
+      "to": "Sahara precipitation rate",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Combined deployment raises Sahara precipitation from 0.24 to 0.59 mm/day, about a 150 per cent increase.",
+      "evidence": ["P000010:S00:P0016"],
+      "matched_claim_id": "P000010_CL016",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "combined_temp",
+      "from": "combined wind and solar farms in the Sahara",
+      "to": "surface air temperature",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Combined deployment raises temperature by +2.65 K, only slightly more than the solar farm alone.",
+      "evidence": ["P000010:S00:P0016"],
+      "matched_claim_id": "P000010_CL017",
+      "match_note": "Same direction and magnitude."
+    },
+    {
+      "key": "combined_precip_sahel",
+      "from": "combined wind and solar farms in the Sahara",
+      "to": "Sahel precipitation",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "The most substantial precipitation increase occurs in the Sahel, between +200 and +500 mm/year.",
+      "evidence": ["P000010:S00:P0016"],
+      "matched_claim_id": "P000010_CL018",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "roughness_temp_contribution",
+      "from": "surface roughness increase from turbines",
+      "to": "surface air temperature",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Roughness change contributes +1.00 K of the wind-farm warming, because wind reduction weakens near-surface vertical turbulent transport.",
+      "evidence": ["P000010:S00:P0017"],
+      "matched_claim_id": "P000010_CL008",
+      "match_note": "Same direction and magnitude."
+    },
+    {
+      "key": "vegetation_temp_contribution",
+      "from": "vegetation feedback through albedo reduction and roughness increase",
+      "to": "surface air temperature",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Vegetation feedback contributes +1.16 K of the wind-farm warming, almost equal to the roughness contribution.",
+      "evidence": ["P000010:S00:P0017"],
+      "matched_claim_id": "P000010_CL009",
+      "match_note": "Same direction and magnitude."
+    },
+    {
+      "key": "vegetation_precip_contribution",
+      "from": "vegetation feedback",
+      "to": "precipitation rate",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Vegetation feedback supplies 80 per cent of the wind-farm precipitation increase (+0.20 mm/day), with roughness acting mainly as the initial trigger.",
+      "evidence": ["P000010:S00:P0018"],
+      "matched_claim_id": "P000010_CL010",
+      "match_note": "Same direction and magnitude."
+    },
+    {
+      "key": "solar_albedo_precip_mechanism",
+      "from": "surface albedo decrease from solar panels",
+      "to": "precipitation rate",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Lower panel albedo increases absorbed solar radiation and surface warming, lowering surface pressure and producing convergence, rising motion and more precipitation.",
+      "evidence": ["P000010:S00:P0017"],
+      "matched_claim_id": "P000010_CL015",
+      "match_note": "Same direction and endpoints."
+    },
+    {
+      "key": "high_efficiency_albedo_increase_cooling",
+      "from": "solar panel conversion efficiency of 45 per cent raising effective albedo",
+      "to": "surface temperature and precipitation",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "If panel efficiency is high enough to raise effective albedo above the background, the climate impact reverses to surface cooling with precipitation suppression.",
+      "evidence": ["P000010:S00:P0019", "P000010:S00:P0020"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted. The sign of the solar-farm effect depends on this condition, so its absence makes the extracted solar claims unconditioned."
+    },
+    {
+      "key": "intermediate_efficiency_negligible",
+      "from": "solar panel conversion efficiency of 30 per cent",
+      "to": "climate impact",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "An intermediate 30 per cent conversion efficiency produces negligible albedo change and therefore insignificant climate impacts.",
+      "evidence": ["P000010:S00:P0020", "P000010:S00:P0023"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted. A null result that the counting rules require to be kept."
+    },
+    {
+      "key": "expansion_other_deserts_no_gain",
+      "from": "expanding farms from the Sahara to the world's other deserts",
+      "to": "magnitude of the climate impact",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Expanding wind and solar farms from the Sahara to the world's other deserts does not significantly increase the climate impact.",
+      "evidence": ["P000010:S00:P0025", "P000010:S00:P0026"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    },
+    {
+      "key": "other_deserts_not_significant",
+      "from": "other deserts with scattered distribution, smaller size and weaker albedo change",
+      "to": "significance of the climate impact",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "The impact is not significant in many other deserts because of their scattered geographical distribution, smaller sizes and weaker albedo changes, so the effect is particular to the Sahara.",
+      "evidence": ["P000010:S00:P0026", "P000010:S00:P0004"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted. This is the paper's own statement that its headline result is location specific."
+    },
+    {
+      "key": "spatial_configuration_dependence",
+      "from": "spatial configuration of the farms, checkerboard versus quarter",
+      "to": "spatial distribution of the climate impact",
+      "relation": "causal",
+      "role": "OWN_RESULT",
+      "statement": "Even within the Sahara the impacts depend on the specific location and spatial distribution of the farms, with uneven impacts under checkerboard and quarter configurations.",
+      "evidence": ["P000010:S00:P0026"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted, although spatial configuration is exactly the property scenario design needs."
+    },
+    {
+      "key": "interp_vegetation_feedback_necessary",
+      "from": "omission of vegetation feedback from the model",
+      "to": "estimated temperature and precipitation impacts",
+      "relation": "causal",
+      "role": "AUTHORS_INTERPRETATION_OF_OWN_RESULT",
+      "statement": "The authors conclude that models without vegetation feedback would considerably underestimate the temperature and precipitation impacts of large-scale Saharan wind farms.",
+      "evidence": ["P000010:S00:P0018"],
+      "matched_claim_id": null,
+      "match_note": "Not extracted."
+    }
+  ]
+}

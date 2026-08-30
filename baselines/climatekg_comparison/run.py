@@ -69,6 +69,12 @@ def main() -> None:
     parser.add_argument("--ollama-url", default="http://localhost:11434")
     parser.add_argument("--embed-model", default="qwen3-embedding:4b")
     parser.add_argument("--chat-model", default="qwen3.6:27b")
+    parser.add_argument(
+        "--think",
+        default="no",
+        choices=("no", "low", "medium", "high"),
+        help="Thinking budget for both baselines; match it to the ClimateKG synthesis stage for a fair comparison.",
+    )
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     papers = discover_papers([args.staged_root, args.heterogeneity_root])
@@ -120,6 +126,8 @@ def main() -> None:
                 args.embed_model,
                 "--chat-model",
                 args.chat_model,
+                "--think",
+                args.think,
                 "query",
                 "--top-k",
                 "8",
@@ -150,6 +158,7 @@ def main() -> None:
             args.ollama_url,
             args.embed_model,
             args.chat_model,
+            thinking=args.think,
         )
         query_output.write_text(
             json.dumps(result, indent=2, ensure_ascii=False, default=json_default), encoding="utf-8"

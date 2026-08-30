@@ -174,14 +174,14 @@ def embed_texts(base_url: str, model: str, texts: list[str]) -> list[list[float]
     return embeddings
 
 
-def chat(base_url: str, model: str, prompt: str) -> str:
+def chat(base_url: str, model: str, prompt: str, thinking: str = "no") -> tuple[str, str]:
     result = post_json(
         base_url,
         "/api/chat",
         {
             "model": model,
             "stream": False,
-            "think": False,
+            "think": False if thinking == "no" else thinking,
             "options": {"num_ctx": OLLAMA_CONTEXT_TOKENS},
             "messages": [
                 {
@@ -203,7 +203,8 @@ def chat(base_url: str, model: str, prompt: str) -> str:
         raise RuntimeError("Ollama chat response did not contain message.content.")
     if not content.strip():
         raise RuntimeError("Ollama returned an empty answer. Try lowering --top-k or reducing --chunk-words.")
-    return content.strip()
+    thought = message.get("thinking")
+    return content.strip(), thought.strip() if isinstance(thought, str) else ""
 
 
 def load_papers(source_csv: Path) -> list[Paper]:
@@ -717,7 +718,11 @@ def query_index(args: argparse.Namespace) -> None:
         + "\n\n".join(context_blocks)
         + "\n\nAnswer with concise synthesis and source citations."
     )
-    answer = chat(args.ollama_url, args.chat_model, prompt)
+    answer, thinking = chat(args.ollama_url, args.chat_model, prompt, args.think)
+    if thinking:
+        print("THINKING")
+        print(thinking)
+        print("END THINKING")
     print(answer)
     print_sources(sources)
 
@@ -730,6 +735,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--ollama-url", default=DEFAULT_OLLAMA_URL)
     parser.add_argument("--embed-model", default=DEFAULT_EMBED_MODEL)
     parser.add_argument("--chat-model", default=DEFAULT_CHAT_MODEL)
+    parser.add_argument("--think", default="no", choices=("no", "low", "medium", "high"), help="Ollama thinking budget for answer generation.")
 
     subparsers = parser.add_subparsers(dest="command", required=True)
 

@@ -198,6 +198,7 @@ def query_index(
     chat_model: str,
     top_communities: int = 5,
     max_relationships: int = 18,
+    thinking: str = "no",
 ) -> dict[str, Any]:
     started = time.perf_counter()
     communities = pd.read_parquet(output_dir / "communities.parquet")
@@ -253,9 +254,10 @@ def query_index(
         "reported by the papers from application to a new location. State important missing conditions "
         "or uncertainties."
     )
-    raw = answer(ollama_url, chat_model, prompt)
+    raw = answer(ollama_url, chat_model, prompt, thinking)
     return {
         "question": question,
+        "thinking_budget": thinking,
         "selected_communities": selected[["id", "level", "size", "score"]].to_dict("records"),
         "evidence": evidence,
         "prompt": prompt,
