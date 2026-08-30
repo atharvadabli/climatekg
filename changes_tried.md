@@ -284,3 +284,30 @@ Result: `46 passed`.
   unavailable Köppen family and unimplemented land-cover patch metrics.
 - No local raster fallback is present. Earth Engine failures are recorded and
   no substitute values are generated.
+
+# 2026-08-30: Shared-corpus RAG and GraphRAG baseline audit
+
+- Traced the Rondonia and Rajasthan query failures through saved parse requests,
+  query reports, synthesis prompts, final responses, and Qwen thinking.
+- Confirmed that the final model recognized missing or non-transferable evidence;
+  the failures originated in query representation, State seeding, path selection,
+  and evidence packaging.
+- Added a reproducible topology audit. The 17-paper mechanism projection has
+  261 Claims, 367 canonical States, 118 weak components, 16 exact two-Claim
+  paths, and 12 exact three-Claim paths.
+- Exported one deduplicated 18-paper SourceBlock corpus for both baselines.
+- Plain RAG uses only cleaned paper passages. The GraphRAG adapter uses canonical
+  States as entities, Claims as relationships, and Microsoft GraphRAG 3.1.1's
+  hierarchical Leiden implementation for thematic communities.
+- Preserved Claim type, Context/Facet metadata, Paper identity, and exact
+  SourceBlock provenance in the adapted GraphRAG tables.
+- Kept GraphRAG communities distinct from ClimateKG's scientific Context gating;
+  community co-membership is not treated as proof that Claims can form a valid
+  mechanism chain.
+- Completed all three queries. Plain RAG took 27.63-40.30 seconds per query;
+  GraphRAG took 38.34-55.94 seconds. The adapted index formed 134 level-0
+  communities from 399 States and 279 Claim relationships.
+- For Rondonia, GraphRAG selected 18 Claims from the correct `P000019` paper.
+  This confirms that the existing ClimateKG failure occurred after successful
+  Claim retrieval, when State-seeded path selection replaced the relevant
+  evidence with generic deforestation paths.

@@ -24,7 +24,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-
 DEFAULT_SOURCE_CSV = Path(r"E:\Atharv\lit_200\parsed_pdfs\parsed_papers.csv")
 DEFAULT_KOPPEN_MANIFEST = Path(
     r"E:\Atharv\lulc_suggestor_poc\manuallly_extracting_with_agent\categorized_by_koppen\classification_manifest.csv"
@@ -33,6 +32,7 @@ DEFAULT_INDEX_DIR = Path("rag_index")
 DEFAULT_EMBED_MODEL = "qwen3-embedding:4b"
 DEFAULT_CHAT_MODEL = "qwen3.6:27b"
 DEFAULT_OLLAMA_URL = os.environ.get("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+OLLAMA_CONTEXT_TOKENS = int(os.environ.get("CLIMATEKG_OLLAMA_CONTEXT_TOKENS", "32768"))
 SKIP_RETRIEVAL_HEADINGS = {
     "references",
     "acknowledgements",
@@ -182,6 +182,7 @@ def chat(base_url: str, model: str, prompt: str) -> str:
             "model": model,
             "stream": False,
             "think": False,
+            "options": {"num_ctx": OLLAMA_CONTEXT_TOKENS},
             "messages": [
                 {
                     "role": "system",
