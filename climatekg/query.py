@@ -462,6 +462,59 @@ def search_paths(spec: QuerySpec, corpus: Corpus, ranked: list[dict[str, Any]], 
     return [{"claim_ids": x["claims"], "state_ids": x["states"], **{k: x[k] for k in ("A_path", "C_path", "M_path", "length_factor", "R_path", "context_unknown", "coherence_unknown")}} for x in completed[:QUERY_PIPELINE["path_search"]["max_paths"]]]
 
 
+def select_direct_evidence_paths(
+    spec: QuerySpec,
+    corpus: Corpus,
+    ranked: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Keep query-focused Claims even when exact State wording blocks traversal."""
+    config = QUERY_PIPELINE["evidence_assembly"]
+    require_known = bool(spec.context.facets) and config["require_known_context_for_direct_claims"]
+    selected = []
+    for row in ranked:
+        if not ({"claim_ann", "transition_ann"} & set(row["channels"])):
+            continue
+        if require_known and row["A_claim"] is None:
+            continue
+        claim_id = row["claim_id"]
+        selected.append(
+            {
+                "claim_ids": [claim_id],
+                "state_ids": list(_claim_state_ids(corpus.claims[claim_id])),
+                "evidence_lane": "direct",
+                **_path_score([row], [claim_id], corpus),
+            }
+        )
+        if len(selected) >= config["direct_claim_paths"]:
+            break
+    return selected
+
+
+def assemble_evidence_paths(
+    direct_paths: list[dict[str, Any]],
+    graph_paths: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Reserve bounded space for both direct findings and graph-organized chains."""
+    config = QUERY_PIPELINE["evidence_assembly"]
+    assembled = []
+    seen: set[tuple[str, ...]] = set()
+    for lane, candidates, limit in (
+        ("direct", direct_paths, config["direct_claim_paths"]),
+        ("graph", graph_paths, config["graph_paths"]),
+    ):
+        retained = 0
+        for path in candidates:
+            key = tuple(path["claim_ids"])
+            if key in seen:
+                continue
+            assembled.append({**path, "evidence_lane": lane})
+            seen.add(key)
+            retained += 1
+            if retained >= limit:
+                break
+    return assembled
+
+
 SPATIAL_RULES = {
     "local_advection": ["propagate downwind", "downstream propagation", "background wind carries", "advected downwind", "upstream patch", "downstream patch"],
     "patch_gradient_edge": ["patch", "edge", "boundary", "gradient", "heterogeneity", "mosaic", "dry patch", "wet patch", "patch size"],
@@ -736,8 +789,11 @@ def run_query(
     stage("states_mapped", {"source_seeds": source_seeds, "target_seeds": target_seeds, "warnings": source_warnings + more})
     ranked = rank_claims(spec, vectors, corpus, context_reports, source_seeds, target_seeds, indexes)
     stage("claims_ranked", {"candidate_count": len(ranked), "top_claims": [{key: row[key] for key in ("claim_id", "R_claim", "A_claim", "context_coverage", "channels")} for row in ranked[:QUERY_PIPELINE["reporting"]["top_claims"]]]})
-    paths = search_paths(spec, corpus, ranked, source_seeds, target_seeds)
-    stage("paths_searched", {"path_count": len(paths), "top_paths": [{key: row[key] for key in ("claim_ids", "R_path", "A_path", "C_path", "context_unknown", "coherence_unknown")} for row in paths[:QUERY_PIPELINE["reporting"]["top_paths"]]]})
+    graph_paths = search_paths(spec, corpus, ranked, source_seeds, target_seeds)
+    direct_paths = select_direct_evidence_paths(spec, corpus, ranked)
+    paths = assemble_evidence_paths(direct_paths, graph_paths)
+    stage("paths_searched", {"path_count": len(graph_paths), "top_paths": [{key: row[key] for key in ("claim_ids", "R_path", "A_path", "C_path", "context_unknown", "coherence_unknown")} for row in graph_paths[:QUERY_PIPELINE["reporting"]["top_paths"]]]})
+    stage("evidence_assembled", {"direct_path_count": len(direct_paths), "graph_path_count": len(graph_paths), "assembled_path_count": len(paths), "assembled_paths": [{"claim_ids": row["claim_ids"], "evidence_lane": row["evidence_lane"]} for row in paths]})
     alternatives = retrieve_alternatives(paths, ranked, corpus, spec)
     stage("alternatives_retrieved", {"count": len(alternatives), "claim_ids": [row["claim_id"] for row in alternatives]})
     selected_blocks = select_source_blocks(paths[:QUERY_PIPELINE["synthesis"]["top_paths"]], corpus, vectors["claim"], [item["claim_id"] for item in alternatives])
@@ -746,7 +802,7 @@ def run_query(
     stage("evidence_trimmed", {"path_count": len(synthesis_paths), "alternative_count": len(synthesis_alternatives), "source_block_count": sum(len(items) for items in selected_blocks.values()), "warnings": more})
     answer, synthesis, more = synthesize(spec, synthesis_paths, ranked, synthesis_alternatives, selected_blocks, corpus, client, artifact_dir); warnings.extend(more)
     stage("answer_synthesized", {"answer_characters": len(answer), "grounded_item_count": len(synthesis.get("items", [])), "provenance_claim_count": len(synthesis.get("provenance", {})), "warnings": more})
-    report = {"query_id": query_id, "query_pipeline_version": "0.1", "query_spec": _query_spec_payload(spec), "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "claim_candidates": ranked, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis")}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
+    report = {"query_id": query_id, "query_pipeline_version": "0.2-experiment", "query_spec": _query_spec_payload(spec), "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "claim_candidates": ranked, "direct_evidence_paths": direct_paths, "graph_paths": graph_paths, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis")}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
     write_json(artifact_dir / "query_report.json", report)
     (artifact_dir / "answer.md").write_text(answer, encoding="utf-8")
     stage("artifacts_written", {"query_report": str(artifact_dir / "query_report.json"), "answer": str(artifact_dir / "answer.md")})

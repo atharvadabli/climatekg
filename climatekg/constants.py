@@ -345,8 +345,13 @@ QUERY_PIPELINE: dict[str, Any] = {
         "path_length_penalty": 0.08,
         "tie_margin": 0.02,
     },
+    "evidence_assembly": {
+        "direct_claim_paths": 8,
+        "graph_paths": 4,
+        "require_known_context_for_direct_claims": True,
+    },
     "synthesis": {
-        "top_paths": 8,
+        "top_paths": 12,
         "max_claims": 24,
         "max_source_blocks_per_claim": 2,
         "evidence_input_budget_tokens": 16000,

@@ -95,3 +95,59 @@ def test_comparison_query_detection_uses_intervention_text() -> None:
     ordinary = QuerySpec(query_id="Q", mode="global", context=QueryContext(), intervention_description="irrigation expansion", user_question="What changes?")
     assert _is_comparison_query(comparison)
     assert not _is_comparison_query(ordinary)
+
+
+def _direct_evidence_test_corpus():
+    from climatekg.models import Claim, Context, FinalPaper, Paper, SourceBlock
+    from climatekg.query import Corpus
+
+    paper = Paper(id="P", title="Paper", source_file="paper.pdf")
+    block = SourceBlock(id="B", paper_id="P", order=1, page=1, block_type="paragraph", text="Supported result.", source_locator={"page": 1})
+    context = Context(id="C", paper_id="P", label="study")
+    claims = [
+        Claim(
+            id=claim_id,
+            paper_id="P",
+            scope_type="context",
+            scope_id="C",
+            **{"from": {"concept": source, "state": "changed"}},
+            to={"concept": "rainfall", "state": "decrease"},
+            relation="causal",
+            description="Rainfall decreased.",
+            evidence_role="OWN_RESULT",
+            evidence_block_ids=["B"],
+        )
+        for claim_id, source in (("CL_ENDPOINT", "deforestation"), ("CL_KNOWN", "land-cover pattern"), ("CL_UNKNOWN", "forest loss"))
+    ]
+    return Corpus([FinalPaper(paper=paper, source_blocks=[block], contexts=[context], facets=[], transitions=[], claims=claims, states=[])])
+
+
+def test_direct_evidence_lane_uses_semantic_retrieval_not_endpoint_only() -> None:
+    from climatekg.models import QueryContext, QuerySpec
+    from climatekg.query import select_direct_evidence_paths
+
+    spec = QuerySpec(query_id="Q", mode="forward", context=QueryContext(), source={"concept": "deforestation", "state": ""}, user_question="What changed?")
+    ranked = [
+        {"claim_id": "CL_ENDPOINT", "R_claim": 0.99, "A_claim": None, "channels": ["source_endpoint"]},
+        {"claim_id": "CL_KNOWN", "R_claim": 0.80, "A_claim": 0.70, "channels": ["claim_ann"]},
+    ]
+
+    paths = select_direct_evidence_paths(spec, _direct_evidence_test_corpus(), ranked)
+
+    assert [path["claim_ids"] for path in paths] == [["CL_KNOWN"]]
+
+
+def test_direct_evidence_lane_requires_known_applicability_for_context_query() -> None:
+    from climatekg.models import QueryContext, QueryFacet, QuerySpec
+    from climatekg.query import select_direct_evidence_paths
+
+    facet = QueryFacet(id="Q_F1", domain="climate", notion="rainy season", description="rainy season", origin="user")
+    spec = QuerySpec(query_id="Q", mode="forward", context=QueryContext(facets=[facet]), source={"concept": "deforestation", "state": ""}, user_question="What changed in the rainy season?")
+    ranked = [
+        {"claim_id": "CL_UNKNOWN", "R_claim": 0.90, "A_claim": None, "channels": ["claim_ann"]},
+        {"claim_id": "CL_KNOWN", "R_claim": 0.80, "A_claim": 0.70, "channels": ["transition_ann"]},
+    ]
+
+    paths = select_direct_evidence_paths(spec, _direct_evidence_test_corpus(), ranked)
+
+    assert [path["claim_ids"] for path in paths] == [["CL_KNOWN"]]

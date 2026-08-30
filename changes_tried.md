@@ -311,3 +311,18 @@ Result: `46 passed`.
   This confirms that the existing ClimateKG failure occurred after successful
   Claim retrieval, when State-seeded path selection replaced the relevant
   evidence with generic deforestation paths.
+
+# 2026-08-30: Query evidence/path redesign
+
+- Created `experiment/query-evidence-path-redesign` from the completed baseline
+  audit branch.
+- Froze Q1/Q2/Q3 and the Q2 failure trace before modifying retrieval.
+- Change 1 reserves separate bounded evidence lanes for query-focused,
+  Context-gated direct Claims and State-connected graph paths. Graph traversal
+  no longer has sole authority to admit Claims to synthesis.
+- Change 1 Q2 result: the direct lane retained eight `P000019` Claims spanning
+  rainy, break, and dry periods; the generated answer now addressed the requested
+  seasonal and wind-conditioned findings. The four graph slots remained generic
+  `P000002` paths, confirming that path seeding is the next independent issue.
+- Change 1 tests: `40 passed`. Full-run LLM time was 19.87 seconds for parsing
+  and 269.74 seconds for synthesis.
