@@ -100,3 +100,71 @@ Assessment: successful. Graph traversal is now query-focused and scientifically
 honest about the absence of a chain. It also reveals an indexing limitation:
 the paper's Claims do not currently share exact canonical intermediate States,
 so this paper supports direct findings but not a multi-step mechanism path.
+
+## Change 3: preserve spatial geometry and separate derived context
+
+Design:
+
+- The standalone Qwen query prompt now states that patch size, spacing, shape,
+  orientation, edge position, and arrangement are
+  `spatial_configuration` conditions. Numerical values and units must be copied.
+- This instruction is generic and contains no example from an indexed paper.
+- Deterministic code identifies user and derived Context Facets that describe
+  the same environmental variable. It records both without assigning agreement,
+  contradiction, or a categorical interpretation.
+- Derived enrichment remains available to Context retrieval and applicability
+  scoring. Qwen synthesis receives user-stated Context only; this prevents the
+  model from freely adjudicating derived climatology.
+- The answer renderer appends one grouped, traceable limitation per overlapping
+  user variable. No LLM retry or text-based repair is used.
+
+Results:
+
+- Full deterministic suite: `89 passed` in 2.41 seconds.
+- Final full Q3 run: `Q3_CHANGE3_FINAL_V2`, saved under
+  `climatekg/runtime/outputs/query_evidence_path_redesign/change_3/`.
+- Query parsing: 19.12 seconds, 993 prompt tokens, 528 output tokens.
+- Final synthesis: 346.63 seconds, 20,003 model-reported prompt tokens, 1,016
+  output tokens.
+- Three independent revised-prompt parses retained a separate spatial Facet
+  containing `10-15 km alternating irrigated and dry land patches`.
+- That Facet obtained explicit spatial matches in retrieved Contexts, including
+  `P000014_F010` at 0.461 and `P000005_F008` at 0.402. The earlier parse had no
+  separately inspectable scale match.
+- The evidence package contained eight direct findings and one real two-Claim
+  chain, `P000020_CL009 -> P000020_CL014`.
+- Four seasonal wind records were retained in the report as
+  `coexisting_not_adjudicated`. They were absent from the Qwen request and were
+  rendered as one grouped limitation with all five supporting Query Facet IDs.
+- The answer distinguished cloud evidence from the absence of direct rainfall
+  support and did not translate the literature into a Rajasthan patch-layout
+  recommendation.
+
+Assessment: successful at preserving the numerical spatial condition and making
+local-data tension visible without an LLM adjudication. It does not establish
+that 10-15 km is an applicable design scale; the present corpus lacks direct
+evidence for that proposed Rajasthan geometry.
+
+## Final comparison
+
+| Version | Relevant direct evidence protected | Generic endpoint paths in Q2 package | Q3 scale separately matchable | User/derived wind relation |
+|---|---:|---:|---:|---|
+| Baseline | No | 4 | No | silently coexisted |
+| Change 1 | Yes | 4 | No | silently coexisted |
+| Change 2 | Yes | 0 | No | silently coexisted |
+| Change 3 | Yes | 0 | Yes | reported, not adjudicated |
+
+The final design has three fixed stages rather than a trial sequence: retrieve
+context-gated semantic findings, expand genuine connected paths from those
+anchors, and assemble bounded direct and graph evidence lanes. Query geometry
+and derived-data comparisons are represented before retrieval; failures are
+reported, not retried through alternate algorithms.
+
+## Remaining issue not changed in this experiment
+
+The documented path formula still gives unknown applicability a multiplier of
+`1.0` while known applicability is multiplied by its measured value, even though
+`R_claim` already contains applicability. Context-specific graph construction
+now excludes unknown-applicability Claims, so this defect no longer caused the
+Q2/Q3 failures tested here. The formula should be benchmarked as a separate
+scoring experiment rather than mixed into this retrieval redesign.

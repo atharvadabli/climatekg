@@ -64,6 +64,12 @@ def test_prompts_avoid_pipeline_dependent_phrasing() -> None:
         assert phrase not in combined
 
 
+def test_query_prompt_preserves_land_pattern_geometry_as_context() -> None:
+    text = (PROMPT_DIR / "query_parse.txt").read_text(encoding="utf-8")
+    assert "Create a `spatial_configuration` item" in text
+    assert "Preserve numerical values and units" in text
+
+
 def test_small_paper_prompt_requires_value_specific_context_coverage() -> None:
     text = (PROMPT_DIR / "small_paper_extraction.txt").read_text(encoding="utf-8")
     assert "every separately analyzed combination is represented" in text

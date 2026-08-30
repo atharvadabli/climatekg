@@ -3199,6 +3199,70 @@ The pipeline is implementation-ready only when:
 
 Passing these tests is more important than reproducing an exact number of Contexts/Facets/Claims.
 
+## 63.11 Version 0.2 evidence and Context revision
+
+This versioned revision supersedes the conflicting admission and evidence-package
+rules in Sections 61.16, 61.19, and 61.25. The State adjacency, cycle checks,
+path scoring, contradiction retrieval, provenance, and grounding rules remain
+unchanged.
+
+### Query geometry
+
+When the user's question states land-pattern size, spacing, shape, orientation,
+edge/interior position, or arrangement, query parsing must emit a separate
+`spatial_configuration` Facet. Copy numerical values and units. The same phrase
+may also remain in the source endpoint or intervention description because those
+fields serve different retrieval channels.
+
+### Context-gated semantic anchors
+
+For forward, backward, and global modes:
+
+1. select semantic Claim or Transition-Claim candidates in `R_claim` order;
+2. when Query Context is non-empty, retain as graph anchors only Claims with
+   known `A_claim`;
+3. initialize traversal from each retained anchor Claim's terminal State for
+   forward/global search or initial State for backward search;
+4. expand only through retained candidate Claims using exact canonical State
+   adjacency;
+5. report only paths containing at least two Claims as graph paths.
+
+Do not interpret a singleton anchor as a graph path. Do not create an edge from
+embedding similarity. Explicit A-to-B mode continues to start at mapped source
+States and is complete only at a mapped target State.
+
+### Bounded evidence lanes
+
+Assemble synthesis evidence from two fixed lanes:
+
+```text
+direct lane: top 8 semantic Claim/Transition candidates
+graph lane:  top 4 connected paths
+```
+
+For a non-empty Query Context, direct Claims and graph Claims must have known
+applicability. Deduplicate identical Claim-ID sequences, preserve lane identity
+in `query_report.json`, and leave unused graph capacity empty when no connected
+path exists. Graph traversal organizes connected evidence but cannot remove a
+semantically retrieved direct finding.
+
+### User and derived Context
+
+Derived enrichment remains part of Context retrieval and applicability scoring.
+When a user-stated Facet and one or more derived Facets describe the same
+environmental variable:
+
+1. record each pair as `coexisting_not_adjudicated` in
+   `context_evidence_comparisons`;
+2. do not infer categorical agreement, mismatch, or a season mapping without a
+   configured scientific rule;
+3. send only user-stated Facets to free-form final synthesis;
+4. append one deterministic grouped limitation containing the user statement,
+   derived measurements, their Facet IDs, and the non-adjudication status.
+
+This keeps local datasets available for retrieval while preventing the synthesis
+model from silently replacing or interpreting the user's stated conditions.
+
 
 # 64. Final architectural summary
 

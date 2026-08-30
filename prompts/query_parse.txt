@@ -32,6 +32,8 @@ Return valid JSON only. The JSON Schema supplied with this request is authoritat
   - `description`: Faithful phrase or sentence describing the stated condition.
   - `supporting_text_span`: Exact copied words from the question.
 
+  Create a `spatial_configuration` item whenever the question states a land-pattern size, spacing, shape, orientation, edge position, interior position, or arrangement such as alternating patches or a mosaic. Preserve numerical values and units in both `description` and `supporting_text_span`. The same phrase may also appear in `source` or `intervention_description`; these fields record different parts of the request.
+
 - `spatial_reference`: A named place or supplied spatial identifier, or `null`.
   - `text`: Copy the complete location text.
   - `kind_hint`: A short type such as `region`, `watershed`, `coordinates`, or `administrative_area` when the wording states or strongly identifies the type. Otherwise `null`.
@@ -43,6 +45,7 @@ Return valid JSON only. The JSON Schema supplied with this request is authoritat
 HOW TO HANDLE COMMON QUESTIONS
 
 - Environmental phrases introduced by words such as `in`, `under`, `during`, or `with` normally become explicit condition records.
+- A numerical patch size or other land-pattern geometry is an explicit `spatial_configuration` condition even when it appears inside the proposed intervention.
 - A pure place name belongs in `spatial_reference`. Do not duplicate the same pure place text as a spatial condition record.
 - Words such as `effect`, `impact`, `affect`, and `reported` describe the question, not a scientific endpoint state.
 - A comparison such as `drier or wetter` contains two alternatives. Preserve the comparison in `intervention_description` and leave endpoints unspecified when choosing one endpoint would discard an alternative.

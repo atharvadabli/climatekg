@@ -191,3 +191,46 @@ def test_forward_graph_search_starts_from_query_focused_claim() -> None:
     assert ["CL_KNOWN", "CL_NEXT"] in claim_paths
     assert ["CL_KNOWN"] not in claim_paths
     assert all("CL_ENDPOINT" not in path for path in claim_paths)
+
+
+def test_context_evidence_comparisons_keep_user_and_derived_wind_separate() -> None:
+    from climatekg.models import QueryContext, QueryFacet, QuerySpec
+    from climatekg.query import context_evidence_comparisons
+
+    facets = [
+        QueryFacet(id="Q_F1", domain="atmosphere", notion="weak background wind", description="Weak background wind is assumed.", origin="user"),
+        QueryFacet(id="Q_F2", domain="atmosphere", notion="seasonal wind regime", description="Mean wind speed is 3.1 m/s.", origin="derived"),
+        QueryFacet(id="Q_F3", domain="atmosphere", notion="daytime heating", description="Strong daytime heating is assumed.", origin="user"),
+    ]
+    spec = QuerySpec(query_id="Q", mode="global", context=QueryContext(facets=facets), user_question="question")
+
+    comparisons = context_evidence_comparisons(spec)
+
+    assert comparisons == [
+        {
+            "user_facet_id": "Q_F1",
+            "derived_facet_id": "Q_F2",
+            "shared_variables": ["wind"],
+            "status": "coexisting_not_adjudicated",
+            "user_description": "Weak background wind is assumed.",
+            "derived_description": "Mean wind speed is 3.1 m/s.",
+        }
+    ]
+
+
+def test_context_comparison_limitation_is_grouped_and_traceable() -> None:
+    from climatekg.query import context_comparison_limitations
+
+    items = context_comparison_limitations([
+        {"user_facet_id": "Q_F1", "derived_facet_id": "Q_F2", "shared_variables": ["wind"], "status": "coexisting_not_adjudicated", "user_description": "Weak monsoon wind is assumed.", "derived_description": "DJF wind is 1.0 m/s."},
+        {"user_facet_id": "Q_F1", "derived_facet_id": "Q_F3", "shared_variables": ["wind"], "status": "coexisting_not_adjudicated", "user_description": "Weak monsoon wind is assumed.", "derived_description": "JJA wind is 3.1 m/s."},
+    ])
+
+    assert len(items) == 1
+    item = items[0]
+    assert item.kind == "limitation"
+    assert item.support_claim_ids == []
+    assert item.support_query_facet_ids == ["Q_F1", "Q_F2", "Q_F3"]
+    assert "DJF wind is 1.0 m/s" in item.text
+    assert "JJA wind is 3.1 m/s" in item.text
+    assert "was not adjudicated" in item.text

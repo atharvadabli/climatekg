@@ -335,3 +335,16 @@ Result: `46 passed`.
   from 21,630 to 18,166 model-reported tokens and synthesis time fell from 269.74
   to 228.91 seconds.
 - Change 2 tests: `86 passed`.
+- Change 3 revises the standalone Qwen query prompt so explicit land-pattern
+  geometry, including numerical patch scale, becomes a separately matchable
+  `spatial_configuration` Facet.
+- User-stated and derived Facets describing the same variable are now recorded
+  as `coexisting_not_adjudicated`. Derived facets affect retrieval but are not
+  sent to free-form synthesis; one deterministic grouped limitation exposes the
+  measurements without interpreting them.
+- Change 3 Q3 result: the `10-15 km` patch condition survived three independent
+  parses, matched indexed spatial Facets, and reached a package with eight direct
+  findings plus one actual two-Claim chain. Four seasonal wind measurements were
+  rendered as one unresolved comparison. The final full run used 993 parse input
+  tokens and 20,003 synthesis input tokens.
+- Change 3 tests: `89 passed`.

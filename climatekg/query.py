@@ -13,7 +13,7 @@ from .config import PIPELINE, QUERY_PIPELINE, ROOT, STATE_ALIASES
 from .earth_engine import EarthEngineBackend
 from .embeddings import DOMAIN_ORDER, effective_facets, facet_content_text, facet_notion_text
 from .enrichment import derive_facets, query_facets
-from .extraction_models import ParsedQuery, ParsedQueryFacetBatch, SynthesisOutput
+from .extraction_models import ParsedQuery, ParsedQueryFacetBatch, SynthesisItem, SynthesisOutput
 from .geocoding import NominatimGeocoder
 from .models import Claim, ClaimEndpoint, Context, Facet, FinalPaper, QueryContext, QueryFacet, QuerySpec, SourceBlock, SpatialSupport, State, Transition
 from .ollama import OllamaClient, stage_prompt_version
@@ -52,6 +52,77 @@ def _query_spec_payload(spec: QuerySpec) -> dict[str, Any]:
         facet.pop("notion_embedding", None)
         facet.pop("content_embedding", None)
     return payload
+
+
+CONTEXT_VARIABLE_PATTERNS = {
+    "wind": r"\b(?:wind|flow)\b",
+    "temperature_or_heating": r"\b(?:temperature|heating|heat)\b",
+    "precipitation": r"\b(?:precipitation|rainfall|rain)\b",
+    "moisture": r"\b(?:moisture|humidity|humid)\b",
+    "aridity": r"\b(?:aridity|arid)\b",
+    "land_cover": r"\b(?:land cover|cropland|forest|vegetation)\b",
+    "terrain": r"\b(?:terrain|elevation|slope|relief)\b",
+}
+
+
+def context_evidence_comparisons(spec: QuerySpec) -> list[dict[str, Any]]:
+    """Expose overlapping user and dataset context without inferring agreement."""
+    user_facets = [facet for facet in spec.context.facets if facet.origin == "user"]
+    derived_facets = [facet for facet in spec.context.facets if facet.origin == "derived"]
+    comparisons = []
+    for user_facet in user_facets:
+        user_text = normalize_text_key(f"{user_facet.notion} {user_facet.description}")
+        for derived_facet in derived_facets:
+            if user_facet.domain != derived_facet.domain:
+                continue
+            derived_text = normalize_text_key(f"{derived_facet.notion} {derived_facet.description}")
+            shared = [
+                variable
+                for variable, pattern in CONTEXT_VARIABLE_PATTERNS.items()
+                if re.search(pattern, user_text) and re.search(pattern, derived_text)
+            ]
+            if not shared:
+                continue
+            comparisons.append(
+                {
+                    "user_facet_id": user_facet.id,
+                    "derived_facet_id": derived_facet.id,
+                    "shared_variables": shared,
+                    "status": "coexisting_not_adjudicated",
+                    "user_description": user_facet.description,
+                    "derived_description": derived_facet.description,
+                }
+            )
+    return comparisons
+
+
+def context_comparison_limitations(comparisons: list[dict[str, Any]]) -> list[SynthesisItem]:
+    grouped: dict[tuple[str, tuple[str, ...], str], list[dict[str, Any]]] = defaultdict(list)
+    for comparison in comparisons:
+        key = (
+            comparison["user_facet_id"],
+            tuple(comparison["shared_variables"]),
+            comparison["user_description"],
+        )
+        grouped[key].append(comparison)
+    limitations = []
+    for (user_facet_id, variables, user_description), items in grouped.items():
+        clean_user_description = user_description.strip().rstrip(".;")
+        derived_descriptions = "; ".join(item["derived_description"].strip().rstrip(".;") for item in items)
+        text = (
+            f'The user specified "{clean_user_description}". Derived context records for {", ".join(variables)} '
+            f'report: {derived_descriptions} No categorical threshold or season mapping was supplied, '
+            "so agreement or mismatch was not adjudicated."
+        )
+        limitations.append(
+            SynthesisItem(
+                text=text,
+                support_claim_ids=[],
+                support_query_facet_ids=[user_facet_id, *[item["derived_facet_id"] for item in items]],
+                kind="limitation",
+            )
+        )
+    return limitations
 
 
 def _query_mode(parsed: ParsedQuery) -> str:
@@ -744,7 +815,7 @@ def trim_evidence_package(spec: QuerySpec, paths: list[dict[str, Any]], alternat
     return selected_paths, selected_alternatives, selected_blocks, warnings
 
 
-def synthesize(spec: QuerySpec, paths: list[dict[str, Any]], ranked: list[dict[str, Any]], alternatives: list[dict[str, Any]], blocks: dict[str, list[dict[str, Any]]], corpus: Corpus, client: OllamaClient, artifact_dir: Path) -> tuple[str, dict[str, Any], list[str]]:
+def synthesize(spec: QuerySpec, context_comparisons: list[dict[str, Any]], paths: list[dict[str, Any]], ranked: list[dict[str, Any]], alternatives: list[dict[str, Any]], blocks: dict[str, list[dict[str, Any]]], corpus: Corpus, client: OllamaClient, artifact_dir: Path) -> tuple[str, dict[str, Any], list[str]]:
     selected_paths = []
     row_by_id = {x["claim_id"]: x for x in ranked}
     for path in paths[:QUERY_PIPELINE["synthesis"]["top_paths"]]:
@@ -759,6 +830,7 @@ def synthesize(spec: QuerySpec, paths: list[dict[str, Any]], ranked: list[dict[s
     llm_config = QUERY_PIPELINE["ollama"]["stages"][stage_name]
     rendered = "USER QUESTION\n" + user
     query_payload = _query_spec_payload(spec)
+    query_payload["context"]["facets"] = [facet for facet in query_payload["context"]["facets"] if facet["origin"] == "user"]
     block_references = {
         claim_id: [
             {key: block[key] for key in ("id", "page", "section_path", "block_type") if key in block}
@@ -778,6 +850,7 @@ def synthesize(spec: QuerySpec, paths: list[dict[str, Any]], ranked: list[dict[s
         if item.kind == "spatial_guidance" and item.support_query_facet_ids and not any(spatial_report(corpus.claims[c], corpus)["allowed"] for c in item.support_claim_ids): okay = False
         if okay: valid.append(item)
         else: warnings.append("UNSUPPORTED_SYNTHESIS_ITEM")
+    valid.extend(context_comparison_limitations(context_comparisons))
     if not any(x.kind in scientific for x in valid):
         warnings.append("FINAL_GROUNDING_VALIDATION_FAILED")
         return "Retrieved evidence could not support a grounded answer to this question.", {"items": [], "limitations": [item.model_dump() for item in output.conditions_and_limitations]}, warnings
@@ -792,7 +865,8 @@ def synthesize(spec: QuerySpec, paths: list[dict[str, Any]], ranked: list[dict[s
             citation = f"{paper.title} ({paper.year or 'n.d.'}), pp. {','.join(map(str, pages))}, Claim {claim_id}"
             citations.append(citation)
             provenance[claim_id] = {"paper_id": paper.id, "title": paper.title, "doi": paper.doi, "source_block_ids": claim.evidence_block_ids, "pages": pages}
-        rendered_items.append(f"{item.text} [{'; '.join(citations)}]")
+        citation_text = f" [{'; '.join(citations)}]" if citations else ""
+        rendered_items.append(f"{item.text}{citation_text}")
     return "\n\n".join(rendered_items), {"items": [x.model_dump() for x in valid], "provenance": provenance}, warnings
 
 
@@ -815,7 +889,9 @@ def run_query(
 
     stage("corpus_loaded", {"papers": len(papers), "contexts": len(corpus.contexts), "facets": len(corpus.facets), "claims": len(corpus.claims), "states": len(corpus.states)})
     spec, warnings = parse_query(question, query_id, client, artifact_dir)
+    context_comparisons = context_evidence_comparisons(spec)
     stage("query_parsed", {"mode": spec.mode, "facet_count": len(spec.context.facets), "source": spec.source.model_dump() if spec.source else None, "target": spec.target.model_dump() if spec.target else None, "intervention_description": spec.intervention_description, "warnings": list(warnings)})
+    stage("context_evidence_compared", {"comparison_count": len(context_comparisons), "comparisons": context_comparisons})
     vectors = embed_query(spec, client)
     stage("query_embedded", {name: len(vector) if vector else 0 for name, vector in vectors.items()})
     context_reports, more = retrieve_contexts(spec, vectors, corpus, indexes)
@@ -844,9 +920,9 @@ def run_query(
     stage("evidence_selected", {"object_count": len(selected_blocks), "source_block_count": sum(len(items) for items in selected_blocks.values()), "object_ids": sorted(selected_blocks)})
     synthesis_paths, synthesis_alternatives, selected_blocks, more = trim_evidence_package(spec, paths, alternatives, selected_blocks, corpus); warnings.extend(more)
     stage("evidence_trimmed", {"path_count": len(synthesis_paths), "alternative_count": len(synthesis_alternatives), "source_block_count": sum(len(items) for items in selected_blocks.values()), "warnings": more})
-    answer, synthesis, more = synthesize(spec, synthesis_paths, ranked, synthesis_alternatives, selected_blocks, corpus, client, artifact_dir); warnings.extend(more)
+    answer, synthesis, more = synthesize(spec, context_comparisons, synthesis_paths, ranked, synthesis_alternatives, selected_blocks, corpus, client, artifact_dir); warnings.extend(more)
     stage("answer_synthesized", {"answer_characters": len(answer), "grounded_item_count": len(synthesis.get("items", [])), "provenance_claim_count": len(synthesis.get("provenance", {})), "warnings": more})
-    report = {"query_id": query_id, "query_pipeline_version": "0.2-experiment", "query_spec": _query_spec_payload(spec), "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "claim_candidates": ranked, "direct_evidence_paths": direct_paths, "graph_paths": graph_paths, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis")}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
+    report = {"query_id": query_id, "query_pipeline_version": "0.2-experiment", "query_spec": _query_spec_payload(spec), "context_evidence_comparisons": context_comparisons, "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "claim_candidates": ranked, "direct_evidence_paths": direct_paths, "graph_paths": graph_paths, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis")}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
     write_json(artifact_dir / "query_report.json", report)
     (artifact_dir / "answer.md").write_text(answer, encoding="utf-8")
     stage("artifacts_written", {"query_report": str(artifact_dir / "query_report.json"), "answer": str(artifact_dir / "answer.md")})
