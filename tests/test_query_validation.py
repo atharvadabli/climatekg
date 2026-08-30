@@ -119,6 +119,20 @@ def _direct_evidence_test_corpus():
         )
         for claim_id, source in (("CL_ENDPOINT", "deforestation"), ("CL_KNOWN", "land-cover pattern"), ("CL_UNKNOWN", "forest loss"))
     ]
+    claims.append(
+        Claim(
+            id="CL_NEXT",
+            paper_id="P",
+            scope_type="context",
+            scope_id="C",
+            **{"from": {"concept": "rainfall", "state": "decrease"}},
+            to={"concept": "cloud cover", "state": "decrease"},
+            relation="causal",
+            description="Reduced rainfall was followed by reduced cloud cover.",
+            evidence_role="OWN_RESULT",
+            evidence_block_ids=["B"],
+        )
+    )
     return Corpus([FinalPaper(paper=paper, source_blocks=[block], contexts=[context], facets=[], transitions=[], claims=claims, states=[])])
 
 
@@ -151,3 +165,29 @@ def test_direct_evidence_lane_requires_known_applicability_for_context_query() -
     paths = select_direct_evidence_paths(spec, _direct_evidence_test_corpus(), ranked)
 
     assert [path["claim_ids"] for path in paths] == [["CL_KNOWN"]]
+
+
+def test_forward_graph_search_starts_from_query_focused_claim() -> None:
+    from climatekg.models import QueryContext, QuerySpec
+    from climatekg.query import search_paths
+
+    spec = QuerySpec(query_id="Q", mode="forward", context=QueryContext(), source={"concept": "deforestation", "state": ""}, user_question="What changed?")
+    ranked = [
+        {"claim_id": "CL_ENDPOINT", "R_claim": 0.99, "A_claim": None, "channels": ["source_endpoint"]},
+        {"claim_id": "CL_KNOWN", "R_claim": 0.80, "A_claim": 0.70, "channels": ["claim_ann"]},
+        {"claim_id": "CL_NEXT", "R_claim": 0.70, "A_claim": 0.65, "channels": ["claim_ann"]},
+    ]
+
+    paths = search_paths(
+        spec,
+        _direct_evidence_test_corpus(),
+        ranked,
+        [("state::deforestation::changed", 1.0)],
+        [],
+        ["CL_KNOWN"],
+    )
+
+    claim_paths = [path["claim_ids"] for path in paths]
+    assert ["CL_KNOWN", "CL_NEXT"] in claim_paths
+    assert ["CL_KNOWN"] not in claim_paths
+    assert all("CL_ENDPOINT" not in path for path in claim_paths)

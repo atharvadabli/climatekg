@@ -56,3 +56,47 @@ That remaining failure is the target of Change 2.
 Observed warning: `UNSUPPORTED_SYNTHESIS_ITEM`. The structured synthesis
 validator removed one item whose cited support was not present in the supplied
 evidence. This did not remove any of the supported seasonal findings.
+
+## Change 2: query-focused Claims anchor graph expansion
+
+Design:
+
+- For forward, backward, and global questions, graph expansion begins from the
+  highest-ranked semantic Claim candidates after Context gating.
+- Expansion still requires exact canonical State joins between Claims. Semantic
+  relevance chooses where traversal starts; it does not manufacture an edge.
+- The graph lane contains only paths with at least two Claims. A singleton is a
+  direct finding, not a graph path.
+- Explicit A-to-B questions retain strict source-State to target-State traversal
+  because their answer requires a real connecting chain.
+- A context-specific path cannot include a Claim whose Context applicability is
+  unknown. Such Claims remain reported as candidates and are not treated as
+  mismatches.
+
+This is one retrieval rule, not a sequence of retries. It takes the fact-seeded
+graph-expansion principle used by HippoRAG while retaining ClimateKG's explicit
+Context gate and exact scientific Claim provenance.
+
+Results:
+
+- Full deterministic suite: `86 passed` in 2.40 seconds.
+- Corrected full Q2 run: `Q2_CHANGE2_FINAL`, saved under
+  `climatekg/runtime/outputs/query_evidence_path_redesign/change_2/`.
+- Query parsing: 11.05 seconds, 863 prompt tokens, 273 output tokens.
+- Final synthesis: 228.91 seconds, 18,166 model-reported prompt tokens, 1,212
+  output tokens.
+- The 20 graph anchors contained relevant Context-gated candidates, but no two
+  Claims had an exact connecting canonical State. The graph result was therefore
+  empty rather than a fabricated chain.
+- The assembled package retained the same eight `P000019` direct Claims and no
+  `P000002` evidence. The answer continued to cover rainy, break, and dry cases,
+  including the differing first dry-season afternoon result through alternative
+  evidence retrieval.
+- Compared with Change 1, removing four irrelevant generic paths reduced the
+  synthesis input by 3,464 model-reported tokens and synthesis time by 40.83
+  seconds.
+
+Assessment: successful. Graph traversal is now query-focused and scientifically
+honest about the absence of a chain. It also reveals an indexing limitation:
+the paper's Claims do not currently share exact canonical intermediate States,
+so this paper supports direct findings but not a multi-step mechanism path.

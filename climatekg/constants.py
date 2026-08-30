@@ -347,8 +347,10 @@ QUERY_PIPELINE: dict[str, Any] = {
     },
     "evidence_assembly": {
         "direct_claim_paths": 8,
+        "graph_anchor_claims": 20,
         "graph_paths": 4,
         "require_known_context_for_direct_claims": True,
+        "require_known_context_for_graph": True,
     },
     "synthesis": {
         "top_paths": 12,

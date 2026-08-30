@@ -427,22 +427,61 @@ def _path_score(claim_rows: list[dict[str, Any]], claim_ids: list[str] | None = 
     return {"A_path": a_path, "C_path": c_path, "M_path": mean_rank, "length_factor": factor, "R_path": rank, "context_unknown": a_path is None, "coherence_unknown": c_path is None}
 
 
-def search_paths(spec: QuerySpec, corpus: Corpus, ranked: list[dict[str, Any]], source_seeds: list[tuple[str, float]], target_seeds: list[tuple[str, float]]) -> list[dict[str, Any]]:
-    rows = {x["claim_id"]: x for x in ranked}
+def _query_focused_rows(
+    spec: QuerySpec,
+    ranked: list[dict[str, Any]],
+    limit: int,
+    require_known_context: bool,
+) -> list[dict[str, Any]]:
+    require_known = bool(spec.context.facets) and require_known_context
+    selected = []
+    for row in ranked:
+        if not ({"claim_ann", "transition_ann"} & set(row["channels"])):
+            continue
+        if require_known and row["A_claim"] is None:
+            continue
+        selected.append(row)
+        if len(selected) >= limit:
+            break
+    return selected
+
+
+def search_paths(
+    spec: QuerySpec,
+    corpus: Corpus,
+    ranked: list[dict[str, Any]],
+    source_seeds: list[tuple[str, float]],
+    target_seeds: list[tuple[str, float]],
+    anchor_claim_ids: list[str],
+) -> list[dict[str, Any]]:
+    config = QUERY_PIPELINE["evidence_assembly"]
+    require_known = bool(spec.context.facets) and config["require_known_context_for_graph"]
+    rows = {x["claim_id"]: x for x in ranked if not require_known or x["A_claim"] is not None}
     outgoing: dict[str, list[str]] = defaultdict(list)
     incoming: dict[str, list[str]] = defaultdict(list)
     for claim_id in rows:
         from_id, to_id = _claim_state_ids(corpus.claims[claim_id])
         outgoing[from_id].append(claim_id)
         incoming[to_id].append(claim_id)
-    starts = [x[0] for x in (source_seeds if spec.mode in ("forward", "a_to_b") else target_seeds)]
-    if spec.mode == "global" or not starts:
-        return [dict(claim_ids=[x["claim_id"]], state_ids=list(_claim_state_ids(corpus.claims[x["claim_id"]])), **_path_score([x], [x["claim_id"]], corpus)) for x in ranked[:QUERY_PIPELINE["path_search"]["max_paths"]]]
     targets = {x[0] for x in target_seeds}
-    beam = [{"state": state, "states": [state], "claims": []} for state in starts]
     completed = []
     reverse = spec.mode == "backward"
-    for _ in range(QUERY_PIPELINE["path_search"]["max_path_length"]):
+    if spec.mode == "a_to_b":
+        starts = [x[0] for x in source_seeds]
+        beam = [{"state": state, "states": [state], "claims": []} for state in starts]
+        expansion_depth = QUERY_PIPELINE["path_search"]["max_path_length"]
+    else:
+        beam = []
+        for claim_id in anchor_claim_ids:
+            if claim_id not in rows:
+                continue
+            from_id, to_id = _claim_state_ids(corpus.claims[claim_id])
+            states = [to_id, from_id] if reverse else [from_id, to_id]
+            item = {"state": states[-1], "states": states, "claims": [claim_id]}
+            item.update(_path_score([rows[claim_id]], [claim_id], corpus))
+            beam.append(item)
+        expansion_depth = QUERY_PIPELINE["path_search"]["max_path_length"] - 1
+    for _ in range(expansion_depth):
         expanded = []
         for partial in beam:
             for claim_id in (incoming if reverse else outgoing).get(partial["state"], []):
@@ -469,13 +508,14 @@ def select_direct_evidence_paths(
 ) -> list[dict[str, Any]]:
     """Keep query-focused Claims even when exact State wording blocks traversal."""
     config = QUERY_PIPELINE["evidence_assembly"]
-    require_known = bool(spec.context.facets) and config["require_known_context_for_direct_claims"]
+    rows = _query_focused_rows(
+        spec,
+        ranked,
+        config["direct_claim_paths"],
+        config["require_known_context_for_direct_claims"],
+    )
     selected = []
-    for row in ranked:
-        if not ({"claim_ann", "transition_ann"} & set(row["channels"])):
-            continue
-        if require_known and row["A_claim"] is None:
-            continue
+    for row in rows:
         claim_id = row["claim_id"]
         selected.append(
             {
@@ -485,8 +525,6 @@ def select_direct_evidence_paths(
                 **_path_score([row], [claim_id], corpus),
             }
         )
-        if len(selected) >= config["direct_claim_paths"]:
-            break
     return selected
 
 
@@ -789,8 +827,14 @@ def run_query(
     stage("states_mapped", {"source_seeds": source_seeds, "target_seeds": target_seeds, "warnings": source_warnings + more})
     ranked = rank_claims(spec, vectors, corpus, context_reports, source_seeds, target_seeds, indexes)
     stage("claims_ranked", {"candidate_count": len(ranked), "top_claims": [{key: row[key] for key in ("claim_id", "R_claim", "A_claim", "context_coverage", "channels")} for row in ranked[:QUERY_PIPELINE["reporting"]["top_claims"]]]})
-    graph_paths = search_paths(spec, corpus, ranked, source_seeds, target_seeds)
     direct_paths = select_direct_evidence_paths(spec, corpus, ranked)
+    anchor_rows = _query_focused_rows(
+        spec,
+        ranked,
+        QUERY_PIPELINE["evidence_assembly"]["graph_anchor_claims"],
+        QUERY_PIPELINE["evidence_assembly"]["require_known_context_for_graph"],
+    )
+    graph_paths = search_paths(spec, corpus, ranked, source_seeds, target_seeds, [row["claim_id"] for row in anchor_rows])
     paths = assemble_evidence_paths(direct_paths, graph_paths)
     stage("paths_searched", {"path_count": len(graph_paths), "top_paths": [{key: row[key] for key in ("claim_ids", "R_path", "A_path", "C_path", "context_unknown", "coherence_unknown")} for row in graph_paths[:QUERY_PIPELINE["reporting"]["top_paths"]]]})
     stage("evidence_assembled", {"direct_path_count": len(direct_paths), "graph_path_count": len(graph_paths), "assembled_path_count": len(paths), "assembled_paths": [{"claim_ids": row["claim_ids"], "evidence_lane": row["evidence_lane"]} for row in paths]})

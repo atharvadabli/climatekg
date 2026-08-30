@@ -326,3 +326,12 @@ Result: `46 passed`.
   `P000002` paths, confirming that path seeding is the next independent issue.
 - Change 1 tests: `40 passed`. Full-run LLM time was 19.87 seconds for parsing
   and 269.74 seconds for synthesis.
+- Change 2 seeds graph expansion from context-gated semantic Claim candidates
+  for forward, backward, and global questions. Explicit A-to-B traversal remains
+  strict. Only two-or-more-Claim chains qualify for the graph lane.
+- Change 2 Q2 result: 20 relevant anchors produced zero exact State-connected
+  chains, which is reported directly. No generic `P000002` paths entered the
+  evidence package. The supported answer was retained while synthesis input fell
+  from 21,630 to 18,166 model-reported tokens and synthesis time fell from 269.74
+  to 228.91 seconds.
+- Change 2 tests: `86 passed`.
