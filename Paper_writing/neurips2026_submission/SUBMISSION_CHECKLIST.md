@@ -7,8 +7,8 @@
 - Appendix includes schemas, staged extraction traces, query trace, and a
   documented retrieval failure.
 - All reported counts and timings trace to saved benchmark JSON.
-- Compiled PDF visually reviewed at 144 DPI.
-- Repository tests: 79 passed.
+- Compiled PDF page count checked: main body ends on page 4 and references begin on page 5.
+- Repository tests: 89 existing tests plus 3 benchmark-evaluation tests.
 - Custom ClimateKG, plain RAG, and Microsoft GraphRAG code are present on the
   paper branch; generated indexes and caches remain ignored.
 
@@ -26,7 +26,7 @@
 ## Results Worth Adding Only If Finished and Audited
 
 - Out-of-corpus Rajasthan query result and trace.
-- Equal-corpus plain RAG and Microsoft GraphRAG answers.
+- Remaining equal-corpus PlainRAG, community-graph, and ClimateKG answers.
 - Expert citation/path audit.
 
 Do not delay the submission for incomplete baselines. The current manuscript

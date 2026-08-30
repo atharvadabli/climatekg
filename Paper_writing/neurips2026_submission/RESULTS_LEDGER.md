@@ -2,6 +2,21 @@
 
 Only values marked **measured** may appear as completed results in the paper.
 
+## Current shared-corpus benchmark (measured)
+
+- Shared finalized corpus: 18 papers, 2,746 SourceBlocks, 181 Contexts, 556 Facets, 58 Transitions, and 279 Claims.
+- Graph projection: 399 unique canonical State nodes, 279 Claim edges, 132 weakly connected components, largest component 59 States, and 16 possible directed two-hop Claim pairs through seven intermediate States.
+- Ten-paper extraction audit: 1,539 SourceBlocks, 114 Contexts, 323 Facets, 35 Transitions, and 185 Claims; all scope, conditioning-Facet, and evidence references resolve in all ten papers.
+- Q01 zero-wind heterogeneity: PlainRAG, community graph retrieval, and ClimateKG each recovered and used all four expected Claims. Every cited identifier resolved. ClimateKG retained all required conditions and blocked unsupported spatial translation.
+- Q02 0-to-1 m/s wind: PlainRAG recovered/used 2/5 expected Claims; community graph retrieval recovered/used 4/5; ClimateKG recovered/used 5/5. Every cited identifier resolved.
+- Complete prompts, retrieval records, Qwen thinking fields, generation metrics, and answers for Q01--Q02 are preserved verbatim in `example_outputs/`.
+- Expected Claims and reference propositions are author-prepared from the indexed corpus. They are not independent gold annotations and cannot measure extraction recall.
+
+## Current benchmark still running
+
+- Q03--Q10 are executing on the local Qwen3.6--27B model. Do not report a ten-query aggregate until all three system files exist for every query and `evaluation.json` has been regenerated.
+- Wall-clock latency is currently contaminated by another process sharing the same Ollama server. Do not use these wall times for a system-efficiency comparison.
+
 ## Measured
 
 - Staged indexing run requested 50 papers, registered 20, completed 17, and

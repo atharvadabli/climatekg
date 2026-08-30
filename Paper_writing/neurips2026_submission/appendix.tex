@@ -11,8 +11,8 @@ The combined route supplies all cleaned non-reference EvidenceBlocks to a single
 Below, \code{evidence\_block\_ids} must name directly supporting passages from the current paper. IDs are permanent after assignment.
 \begin{verbatim}
 StudyContext {
-  id, paper_id, name, description,
-  parent_context_id?, evidence_block_ids[], context_embedding
+  id, paper_id, parent_ids[], label, aliases[], spatial_support?,
+  evidence_block_ids[], retrieval_embedding
 }
 ContextFacet {
   id, paper_id, context_id,
@@ -22,7 +22,7 @@ ContextFacet {
 }
 LandTransition {
   id, paper_id, from_context_id, to_context_id,
-  intervention_description, evidence_block_ids[]
+  label, aliases[], description, evidence_block_ids[]
 }
 ScientificClaim {
   id, paper_id,
@@ -69,8 +69,8 @@ CL015 & Dry season, weak wind: significant low-level mesoscale heat flux indicat
 
 This trace illustrates the representation's purpose. A graph with one unconditional \emph{deforestation $\rightarrow$ rainfall} edge would erase null and cloud-only regimes and could reverse the interpretation of a local query.
 
-\subsection{Observed retrieval failure}
-We ran the frozen Rondonia question over the 17-paper Parquet graph. The parser correctly created rainy/break/dry-season and synoptic-wind facets and added provenance-bearing local enrichment. The best P000019 StudyContext ranked sixth (context score 0.495); P000019 claims including CL001, CL007, CL008, CL010, and CL015 appeared among claim candidates. Nevertheless, the state-mapping stage emitted \code{QUERY\_UNSUPPORTED\_SOURCE\_STATE\_CLEARED}, and all four retained mechanism paths used generic P000002 deforestation claims. Synthesis therefore stated that the supplied evidence lacked seasonal and wind-conditioned findings. This was a grounded abstention relative to its selected evidence, but an end-to-end retrieval error because applicable indexed evidence existed. The saved report localizes the defect to source-state/path seeding and evidence selection after context retrieval.
+\subsection{Query redesign after an observed retrieval failure}
+An earlier Rondonia run parsed the seasonal and wind facets and retrieved P000019 Claims as candidates, but State-seeded path search retained only generic deforestation paths. The resulting answer was grounded in the selected package yet omitted available regime-specific evidence. Root-cause review led to three minimal query changes: retain a direct-evidence lane after context gating; seed optional paths with semantically relevant Claims rather than only query endpoint States; and preserve spatial quantities such as 10--15 km as independently matchable Query Facets. The direct lane does not bypass context gating and does not force unrelated Claims into a mechanism chain. Regression tests and the current benchmark use this revised query flow.
 
 \section{New-location transfer and baselines}
 The frozen out-of-corpus question describes a semi-arid Rajasthan planning area, strong daytime heating, weak monsoon background wind, and proposed alternating irrigated/dry patches of 10--15 km. A place name alone is not used to infer climate. Query enrichment may add reproducibly sourced local facets (coordinates/geometry, climate class, aridity, elevation, wind, land cover, and patch metrics), with each derived value retaining dataset and operation provenance. Retrieval may then identify analogous patch-circulation mechanisms, but the answer must report missing or mismatched facets and cannot assert local rainfall, optimal LULC, or cardinal placement without applicable evidence and local numerical or field validation.
@@ -78,7 +78,7 @@ The frozen out-of-corpus question describes a semi-arid Rajasthan planning area,
 \paragraph{Observed out-of-corpus result.}
 The query resolved Rajasthan to an approximate point and derived a TerraClimate aridity ratio of 0.209 (semi-arid), BWh K\"oppen--Geiger class, cropland land cover, terrain, and seasonal ERA5-Land winds with dataset provenance. End-to-end latency was 290.4 s: query parsing used 12.9 s (882 prompt and 325 generated tokens), while synthesis used 232.3 s (19,224 prompt and 1,026 generated tokens). The answer cited mechanisms for enhanced afternoon cloud over vegetated/cropland surfaces and downwind edge effects, and explicitly warned that the evidence came from other climate regimes and did not establish transfer to Rajasthan. However, the parser encoded the 10--15-km alternating pattern in the source state rather than a spatial-configuration facet, and the answer omitted that scale. It also failed to reconcile the user's weak-monsoon description with derived JJA wind of 3.09 m s$^{-1}$. The run therefore passed basic grounding/abstention checks but failed the full conditioning audit.
 
-The release includes three runnable systems: the proposed indexing/query pipeline, a project-owned plain RAG baseline, and Microsoft GraphRAG 3.1.1 under its MIT license. A frozen comparison file specifies the same three questions, local Qwen3.6--27B generator, shared embedding model where supported, corpus, and audit fields. Required audits are direct support, citation precision/coverage, preservation of conditioning variables, incompatible evidence use, causal/associative language, unsupported location-specific recommendations, latency, and token use. We deliberately omit incomplete baseline scores from the main paper.
+The release includes three runnable systems: the proposed pipeline, a project-owned PlainRAG baseline, and a community-retrieval adapter that uses Microsoft GraphRAG 3.1.1 hierarchical Leiden clustering over ClimateKG's State/Claim projection. A frozen ten-query file specifies the shared corpus, local generator, embedding model, evidence budget, expected Claims, and conditions. Complete human-readable traces contain every retrieved record, exact prompt, Qwen thinking field, and final response.
 
 \section{Known limitations and next validation steps}
-The pilot is not a representative literature census. PDF errors, extraction omissions, schema failures, canonicalization mistakes, and incomplete local enrichment remain possible. A claim's retrieval score is not scientific confidence, external validity, feasibility, or net climate benefit. Before planning use, the system requires a held-out, expert-annotated query benchmark; independent citation and path review; geographic coverage analysis; equal-budget RAG/GraphRAG baselines; sensitivity analysis for context weights and thresholds; and WRF experiments for selected scenarios. Any intervention also requires water, biodiversity, food, livelihood, governance, and equity assessment with affected communities.
+The pilot is not a representative literature census. PDF errors, extraction omissions, schema failures, canonicalization mistakes, and incomplete local enrichment remain possible. A Claim's retrieval score is not scientific confidence, external validity, feasibility, or net climate benefit. Before planning use, the system requires independently enumerated paper settings/findings, clause-level citation review, geographic coverage analysis, sensitivity analysis for context weights and thresholds, and WRF experiments for selected scenarios. Any intervention also requires water, biodiversity, food, livelihood, governance, and equity assessment with affected communities.

@@ -30,14 +30,14 @@ def cosine(left: list[float], right: list[float]) -> float:
     return sum(x * y for x, y in zip(left, right)) / denominator if denominator else 0.0
 
 
-def answer(base_url: str, model: str, prompt: str) -> dict[str, Any]:
+def answer(base_url: str, model: str, prompt: str, thinking: str = "no") -> dict[str, Any]:
     return post(
         base_url,
         "/api/chat",
         {
             "model": model,
             "stream": False,
-            "think": False,
+            "think": False if thinking == "no" else thinking,
             "options": {"num_ctx": OLLAMA_CONTEXT_TOKENS},
             "messages": [
                 {

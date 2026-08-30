@@ -23,6 +23,7 @@ Paper_writing/neurips2026_submission/*.blg
 Paper_writing/neurips2026_submission/*.log
 Paper_writing/neurips2026_submission/*.out
 Paper_writing/neurips2026_submission/*.toc
+Paper_writing/neurips2026_submission/main.pdf
 baselines/**/output/
 baselines/**/cache/
 baselines/**/__pycache__/

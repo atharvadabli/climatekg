@@ -1,0 +1,194 @@
+{
+  "status": "deterministic provenance audit complete; independent scientific recall annotation pending",
+  "papers": [
+    {
+      "paper_id": "R2_P000001",
+      "title": "# The Effect of Land Surface Heterogeneity and Background Wind on Shallow Cumulus Clouds and the Transition to Deeper Convection",
+      "counts": {
+        "source_blocks": 163,
+        "contexts": 26,
+        "facets": 59,
+        "transitions": 4,
+        "claims": 18
+      },
+      "deterministic_reference_errors": [],
+      "all_references_resolve": true,
+      "gold_context_count": null,
+      "gold_claim_count": null,
+      "context_recall": null,
+      "claim_recall": null,
+      "verification_status": "pending_independent_manual_verification"
+    },
+    {
+      "paper_id": "R1_P000002",
+      "title": "# Decreased cloud cover partially offsets the cooling effects of surface albedo change due to deforestation",
+      "counts": {
+        "source_blocks": 148,
+        "contexts": 3,
+        "facets": 15,
+        "transitions": 3,
+        "claims": 9
+      },
+      "deterministic_reference_errors": [],
+      "all_references_resolve": true,
+      "gold_context_count": null,
+      "gold_claim_count": null,
+      "context_recall": null,
+      "claim_recall": null,
+      "verification_status": "pending_independent_manual_verification"
+    },
+    {
+      "paper_id": "R1_P000003",
+      "title": "# Effects of global irrigation on the near-surface climate",
+      "counts": {
+        "source_blocks": 210,
+        "contexts": 11,
+        "facets": 26,
+        "transitions": 5,
+        "claims": 20
+      },
+      "deterministic_reference_errors": [],
+      "all_references_resolve": true,
+      "gold_context_count": null,
+      "gold_claim_count": null,
+      "context_recall": null,
+      "claim_recall": null,
+      "verification_status": "pending_independent_manual_verification"
+    },
+    {
+      "paper_id": "R1_P000004",
+      "title": "# Journal of Geophysical Research: Atmospheres",
+      "counts": {
+        "source_blocks": 208,
+        "contexts": 5,
+        "facets": 20,
+        "transitions": 2,
+        "claims": 15
+      },
+      "deterministic_reference_errors": [],
+      "all_references_resolve": true,
+      "gold_context_count": null,
+      "gold_claim_count": null,
+      "context_recall": null,
+      "claim_recall": null,
+      "verification_status": "pending_independent_manual_verification"
+    },
+    {
+      "paper_id": "R1_P000005",
+      "title": "# Impact of mesoscale vegetation heterogeneities on the dynamical and thermodynamic properties of the planetary boundary layer",
+      "counts": {
+        "source_blocks": 143,
+        "contexts": 9,
+        "facets": 28,
+        "transitions": 3,
+        "claims": 12
+      },
+      "deterministic_reference_errors": [],
+      "all_references_resolve": true,
+      "gold_context_count": null,
+      "gold_claim_count": null,
+      "context_recall": null,
+      "claim_recall": null,
+      "verification_status": "pending_independent_manual_verification"
+    },
+    {
+      "paper_id": "R1_P000006",
+      "title": "Afternoon rain more likely over drier soils",
+      "counts": {
+        "source_blocks": 64,
+        "contexts": 3,
+        "facets": 15,
+        "transitions": 1,
+        "claims": 3
+      },
+      "deterministic_reference_errors": [],
+      "all_references_resolve": true,
+      "gold_context_count": null,
+      "gold_claim_count": null,
+      "context_recall": null,
+      "claim_recall": null,
+      "verification_status": "pending_independent_manual_verification"
+    },
+    {
+      "paper_id": "R1_P000014",
+      "title": "# Observational evidence for cloud cover enhancement over western European forests",
+      "counts": {
+        "source_blocks": 93,
+        "contexts": 9,
+        "facets": 35,
+        "transitions": 3,
+        "claims": 10
+      },
+      "deterministic_reference_errors": [],
+      "all_references_resolve": true,
+      "gold_context_count": null,
+      "gold_claim_count": null,
+      "context_recall": null,
+      "claim_recall": null,
+      "verification_status": "pending_independent_manual_verification"
+    },
+    {
+      "paper_id": "R1_P000015",
+      "title": "# Modelling the effects of land-use/land-cover changes on the near-surface atmosphere in southern South America",
+      "counts": {
+        "source_blocks": 232,
+        "contexts": 19,
+        "facets": 42,
+        "transitions": 3,
+        "claims": 51
+      },
+      "deterministic_reference_errors": [],
+      "all_references_resolve": true,
+      "gold_context_count": null,
+      "gold_claim_count": null,
+      "context_recall": null,
+      "claim_recall": null,
+      "verification_status": "pending_independent_manual_verification"
+    },
+    {
+      "paper_id": "R1_P000019",
+      "title": "# The Impact of Observed Deforestation on the Mesoscale Distribution of Rainfall and Clouds in Amazonia",
+      "counts": {
+        "source_blocks": 142,
+        "contexts": 20,
+        "facets": 44,
+        "transitions": 8,
+        "claims": 33
+      },
+      "deterministic_reference_errors": [],
+      "all_references_resolve": true,
+      "gold_context_count": null,
+      "gold_claim_count": null,
+      "context_recall": null,
+      "claim_recall": null,
+      "verification_status": "pending_independent_manual_verification"
+    },
+    {
+      "paper_id": "R1_P000020",
+      "title": "SCIENTIFIC REPORTS",
+      "counts": {
+        "source_blocks": 136,
+        "contexts": 9,
+        "facets": 39,
+        "transitions": 3,
+        "claims": 14
+      },
+      "deterministic_reference_errors": [],
+      "all_references_resolve": true,
+      "gold_context_count": null,
+      "gold_claim_count": null,
+      "context_recall": null,
+      "claim_recall": null,
+      "verification_status": "pending_independent_manual_verification"
+    }
+  ],
+  "totals": {
+    "source_blocks": 1539,
+    "contexts": 114,
+    "facets": 323,
+    "transitions": 35,
+    "claims": 185
+  },
+  "papers_with_all_references_resolved": 10,
+  "paper_count": 10
+}

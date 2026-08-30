@@ -1,44 +1,85 @@
 {
-  "version": "pilot_v1",
+  "version": "ten_query_v1",
+  "annotation_status": "author-prepared from indexed Claims; independent expert verification pending",
   "systems": ["plain_rag", "microsoft_graphrag", "climatekg"],
   "shared_generation_model": "qwen3.6:27b",
-  "shared_embedding_model_where_supported": "qwen3-embedding:4b",
+  "generation_reasoning": {
+    "plain_rag": "medium",
+    "microsoft_graphrag_adapter": "medium",
+    "climatekg_query_parse": "no",
+    "climatekg_synthesis": "low, or medium for complex evidence packages"
+  },
+  "shared_embedding_model": "qwen3-embedding:4b",
   "queries": [
     {
-      "id": "Q1_IN_HETEROGENEITY",
-      "corpus_relation": "in_corpus",
+      "id": "Q01_HET_ZERO_WIND",
+      "category": "in_corpus_scale_condition",
       "question": "Under zero background wind over a heterogeneous chessboard surface with 14.4 km dry and wet patches, how does surface heat-flux heterogeneity affect local cloud development and precipitation?",
-      "must_preserve": ["zero background wind", "14.4 km patches", "dry and wet patch configuration"],
-      "expected_evidence": ["P000001_CL001", "P000001_CL002", "P000001_CL003", "P000001_CL004"],
-      "counterintuitive_point": "Horizontal circulations can reduce near-surface dry-wet temperature contrast while promoting deeper convection over sufficiently large dry patches."
+      "must_preserve": ["zero background wind", "14.4 km", "dry and wet patches"],
+      "expected_claim_ids": ["R2_P000001:P000001_CL001", "R2_P000001:P000001_CL002", "R2_P000001:P000001_CL003", "R2_P000001:P000001_CL004"]
     },
     {
-      "id": "Q2_IN_RONDONIA",
-      "corpus_relation": "in_corpus",
-      "question": "How did observed deforestation patterns in Rondônia affect clouds and rainfall in the rainy, break, and dry-season simulations, and how did synoptic wind condition the response?",
-      "must_preserve": ["Rondônia", "rainy season", "break period", "dry season", "original versus weakened synoptic wind"],
-      "expected_evidence": ["P000019_CL001", "P000019_CL006", "P000019_CL007", "P000019_CL008", "P000019_CL010", "P000019_CL015"],
-      "counterintuitive_point": "The same land pattern produces null, cloud-only, or rainfall responses depending on season and synoptic forcing."
+      "id": "Q02_HET_ONE_MS",
+      "category": "in_corpus_spatial_wind",
+      "question": "For 14.4 km heterogeneous dry and wet patches, how does increasing background wind from zero to 1 m/s change the secondary circulation, convergence location, cloud movement, and transition to deep convection?",
+      "must_preserve": ["14.4 km", "1 m/s", "downwind edge"],
+      "expected_claim_ids": ["R2_P000001:P000001_CL013", "R2_P000001:P000001_CL014", "R2_P000001:P000001_CL015", "R2_P000001:P000001_CL016", "R2_P000001:P000001_CL017"]
     },
     {
-      "id": "Q3_OUT_SEMIARID",
-      "corpus_relation": "out_of_corpus_location",
+      "id": "Q03_RONDONIA_REGIMES",
+      "category": "in_corpus_seasonal_regimes",
+      "question": "How did observed deforestation patterns in Rondonia affect clouds and rainfall in the rainy, break, and dry-season simulations, and how did synoptic wind condition the response?",
+      "must_preserve": ["rainy season", "break period", "dry season", "synoptic wind"],
+      "expected_claim_ids": ["R1_P000019:P000019_CL001", "R1_P000019:P000019_CL002", "R1_P000019:P000019_CL006", "R1_P000019:P000019_CL007", "R1_P000019:P000019_CL008", "R1_P000019:P000019_CL009", "R1_P000019:P000019_CL010", "R1_P000019:P000019_CL012", "R1_P000019:P000019_CL015", "R1_P000019:P000019_CL017", "R1_P000019:P000019_CL018", "R1_P000019:P000019_CL019"]
+    },
+    {
+      "id": "Q04_DRY_SOIL_CONTRADICTION",
+      "category": "observational_model_contradiction",
+      "question": "Do afternoon convective rain events preferentially occur over locally drier or wetter soils in semi-arid regions, and how do observations and climate models disagree?",
+      "must_preserve": ["semi-arid", "observations", "models", "drier", "wetter"],
+      "expected_claim_ids": ["R1_P000006:P000006_CL001", "R1_P000006:P000006_CL002", "R1_P000006:P000006_CL003"]
+    },
+    {
+      "id": "Q05_FOREST_CLOUD_EDGE",
+      "category": "observational_spatial_scale",
+      "question": "How do western European forests affect summer daytime cloud frequency and timing, and how do wind and forest size condition whether cloud enhancement appears at an edge?",
+      "must_preserve": ["summer", "wind", "forest size", "edge"],
+      "expected_claim_ids": ["R1_P000014:P000014_CL001", "R1_P000014:P000014_CL002", "R1_P000014:P000014_CL003", "R1_P000014:P000014_CL007", "R1_P000014:P000014_CL008", "R1_P000014:P000014_CL009"]
+    },
+    {
+      "id": "Q06_IRRIGATION_EXTREMES",
+      "category": "in_corpus_sign_difference",
+      "question": "How does irrigation affect annual maximum daytime temperature, annual minimum nighttime temperature, and heat-wave duration over irrigated land?",
+      "must_preserve": ["daytime maximum", "nighttime minimum", "heat-wave duration"],
+      "expected_claim_ids": ["R1_P000004:P000004_CL004", "R1_P000004:P000004_CL005", "R1_P000004:P000004_CL006"]
+    },
+    {
+      "id": "Q07_GLOBAL_IRRIGATION",
+      "category": "in_corpus_local_remote_difference",
+      "question": "In global simulations, how does irrigation change near-surface temperature over irrigated and non-irrigated areas, cloud fraction, humidity, and land precipitation?",
+      "must_preserve": ["irrigated areas", "non-irrigated areas", "cloud", "humidity", "precipitation"],
+      "expected_claim_ids": ["R1_P000003:P000003_CL004", "R1_P000003:P000003_CL005", "R1_P000003:P000003_CL006", "R1_P000003:P000003_CL007", "R1_P000003:P000003_CL011", "R1_P000003:P000003_CL020"]
+    },
+    {
+      "id": "Q08_AFFORESTATION_HYDROCLIMATE",
+      "category": "in_corpus_hydroclimate_reversal",
+      "question": "In southern South America, how did afforestation affect temperature, latent and sensible heat, and precipitation, and how did wet El Nino versus dry La Nina conditions change or reverse those responses?",
+      "must_preserve": ["southern South America", "El Nino", "La Nina", "reversal"],
+      "expected_claim_ids": ["R1_P000015:P000015_CL011", "R1_P000015:P000015_CL012", "R1_P000015:P000015_CL013", "R1_P000015:P000015_CL015", "R1_P000015:P000015_CL022", "R1_P000015:P000015_CL023", "R1_P000015:P000015_CL024", "R1_P000015:P000015_CL049", "R1_P000015:P000015_CL051"]
+    },
+    {
+      "id": "Q09_DEFORESTATION_CLOUD_ALBEDO",
+      "category": "in_corpus_counteracting_mechanism",
+      "question": "How does deforestation reduce cloud cover through surface turbulent heat fluxes, and how much can the resulting cloud change offset the surface-albedo cooling effect?",
+      "must_preserve": ["turbulent heat flux", "cloud cover", "albedo cooling", "offset"],
+      "expected_claim_ids": ["R1_P000002:P000002_CL001", "R1_P000002:P000002_CL004", "R1_P000002:P000002_CL005", "R1_P000002:P000002_CL007", "R1_P000002:P000002_CL008", "R1_P000002:P000002_CL009"]
+    },
+    {
+      "id": "Q10_RAJASTHAN_TRANSFER",
+      "category": "out_of_corpus_location_transfer",
       "question": "For a semi-arid planning area in Rajasthan with strong daytime heating, weak monsoon background wind, and proposed 10-15 km alternating irrigated and dry land patches, what literature-supported local cloud or rainfall mechanisms are transferable, and what remains uncertain?",
-      "must_preserve": ["semi-arid", "Rajasthan", "weak monsoon background wind", "10-15 km alternating irrigated and dry patches"],
-      "expected_evidence": [],
-      "counterintuitive_point": "Environmental analogy may support a mechanism hypothesis but cannot establish a local effect or cardinal placement without local geometry and validation."
+      "must_preserve": ["semi-arid", "Rajasthan", "weak monsoon wind", "10-15 km"],
+      "expected_claim_ids": ["R1_P000005:P000005_CL002", "R1_P000005:P000005_CL003", "R1_P000005:P000005_CL004", "R1_P000014:P000014_CL003", "R1_P000014:P000014_CL008", "R2_P000001:P000001_CL002", "R2_P000001:P000001_CL013", "R2_P000001:P000001_CL014", "R2_P000001:P000001_CL017"]
     }
-  ],
-  "audit_fields": [
-    "directly_supported_statements",
-    "citation_precision",
-    "citation_coverage",
-    "conditioning_variables_preserved",
-    "incompatible_evidence_used",
-    "causal_associative_distinction_preserved",
-    "unsupported_location_specific_recommendation",
-    "answer_latency_seconds",
-    "prompt_tokens",
-    "generation_tokens"
   ]
 }

@@ -198,6 +198,7 @@ def query_index(
     chat_model: str,
     top_communities: int = 5,
     max_relationships: int = 18,
+    thinking: str = "no",
 ) -> dict[str, Any]:
     started = time.perf_counter()
     communities = pd.read_parquet(output_dir / "communities.parquet")
@@ -253,7 +254,7 @@ def query_index(
         "reported by the papers from application to a new location. State important missing conditions "
         "or uncertainties."
     )
-    raw = answer(ollama_url, chat_model, prompt)
+    raw = answer(ollama_url, chat_model, prompt, thinking=thinking)
     return {
         "question": question,
         "selected_communities": selected[["id", "level", "size", "score"]].to_dict("records"),
@@ -261,5 +262,16 @@ def query_index(
         "prompt": prompt,
         "answer": raw.get("message", {}).get("content", ""),
         "thinking": raw.get("message", {}).get("thinking", ""),
+        "generation_metrics": {
+            key: raw.get(key)
+            for key in (
+                "prompt_eval_count",
+                "eval_count",
+                "prompt_eval_duration",
+                "eval_duration",
+                "total_duration",
+                "load_duration",
+            )
+        },
         "timings": {"total_seconds": round(time.perf_counter() - started, 3)},
     }

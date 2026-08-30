@@ -1,0 +1,456 @@
+========================================================================================
+SYSTEM
+========================================================================================
+
+plain_rag
+========================================================================================
+QUESTION
+========================================================================================
+
+Under zero background wind over a heterogeneous chessboard surface with 14.4 km dry and wet patches, how does surface heat-flux heterogeneity affect local cloud development and precipitation?
+========================================================================================
+RETRIEVED EVIDENCE
+========================================================================================
+
+[
+  {
+    "id": "climatekg_shared_corpus/R2_P000001#9",
+    "section": "climatekg_shared_corpus",
+    "paper": "R2_P000001",
+    "heading": "c. Scale-dependent contributions to PBL turbulence",
+    "pages": "19",
+    "markdown": "E:\\Atharv\\lulc_suggestor_poc\\19_aug_final\\climatekg\\runtime\\outputs\\baseline_comparison_20260830_v2\\corpus\\markdown\\R2_P000001.md",
+    "chunk_index": 9,
+    "text": "## c. Scale-dependent contributions to PBL turbulence We have shown that the simulations can be divided into those that transition into cumulus congestus or deep FIG. 4. Diagram of all simulations performed as a function of patch size and background wind speed. Different markers represent the occurrence of congestus cumulus/deep convection (DC) and hence the precipitation. For DC cases, color indicates the time (LST) when the convection transition occurs. FIG. 5. Daytime evolution of (a) projected cloud fraction at the surface, (b) fraction of clouds with depth deeper than 300 m, (c) in-cloud condensate water path, (d) shortwave cloud radiative forcing at surface, (e) longwave cloud radiative forcing at surface, (f) surface precipitation, (g) cloud-base height, and (h) maximum cloud-top height. In-cloud condensate water path is defined as the domain- averaged cloud condensate water path divided by the cloud fraction. The cloud radiative forcing is defined as the net whole-sky radiation minus the net clear-sky radiation at the surface. Thus, negative (positive) radiation forcing means the net surface cooling (warming) under the presence of clouds. In (a)\u2013(e), all the transition cases (DC) are enclosed in the red-shaded area, and all nontransition cases (no DC) are represented in the green-shaded area. The HOMU0 case is marked with a black solid line. In (f), each line color corresponds to transition cases that produces significant rainfall during the day. In (g) and (h), colored lines represent the transition cases denoted in (f), while the black line and green-shaded area represent HOMU0 and no DC, respectively. Except for (c) and (h), all fields are domain averaged. convection and those that remain with shallow cumulus depending on the surface heterogeneity length scale and background wind speed (Fig. 4). The influence of the surface heterogeneity on the PBL flow dynamics has been reported in several LES studies (Hadfield et al. 1991; Avissar and Schmidt 1998; Patton et al. 2005). The common finding is that the turbulence structure differs greatly from the commonly known mixed-layer scaling with an additional secondary circulation triggered by variations in surface heating. Increased horizontal wind variance near the surface and the top of the PBL develops corresponding to the convergence (divergence) at the bottom (top) branch of the triggered secondary circulation. This phenomenon is most pronounced when the heterogeneity length scale lies within the mesoscale range. In this section, we examine the influence of the heterogeneous land surface and background wind on the dynamics and thermodynamics of the turbulent flow in the PBL with an emphasis on the horizontal scale of the involved processes. Figure 7 shows the time-averaged vertical profiles of zonal wind variance, vertical wind variance, vertical moisture flux, and buoyancy flux along with their scale-dependent contributions during the shallow cu- mulus stage. We apply the scale decomposition method FIG. 6. Time-averaged horizontal size distribution of (a) clouds, (b) cloud cores, (c) subcloud thermals, and (d) thermal cores. The x axis is the size (km), and the y axis is the probability for the given size. Colors for the shaded area and solid line follow Figs. 5a\u2013e. (e)\u2013(h) Scalability of the cloud and thermal size with the heterogeneity length scale for the cases with the zero background wind speed. The x axis represents the patch size including the homogeneous case denoted as \u201cHOM.\u201d The yellow line corresponds to the size for a given probability [yellow horizontal line that transects across the size in the corresponding figure in (a)\u2013(c)], and the purple line represents the probability for a given size [the size corresponds to the purple line that vertically transects in (a)\u2013(c)]. following Kang and Ryu (2016) to verify if the given surface heterogeneity condition develops any mesoscale processes strong enough to influence the PBL characteristics. By adopting a cutoff wavelength of 4 km, any signals larger than the cutoff are labeled mesoscale, while any signals shorter than the cutoff are labeled turbulent scale (Mahrt and Gibson 1992; Kang et al. 2007; LeMone et al. 2007; Kang 2009; Moeng et al. 2010; Kang and Ryu 2016). Most of the heterogeneous land surface cases show increased variability in the zonal wind throughout the PBL, which is attributable to the increased mesoscale component (Fig. 7a). HET14U0 and HET14U1 (both are transition cases) show the largest zonal wind variability near the surface and the top of the PBL, indicating the strengthening of the mesoscale secondary circulation.",
+    "koppen_category": "",
+    "koppen_confidence": "",
+    "koppen_rationale": "",
+    "climate_groups": [],
+    "koppen_codes": [],
+    "interventions": [],
+    "stressors": [
+      "dust_wind",
+      "extreme_heat",
+      "rainfall_shift"
+    ],
+    "mechanisms": [
+      "albedo",
+      "convection"
+    ],
+    "regions": [],
+    "evidence_role": "direct_study",
+    "norm": 0.9999999699229675,
+    "score": 0.8297917926683915,
+    "vector_score": 0.6897917926683915,
+    "metadata_boost": 0.14,
+    "metadata_reasons": [
+      "stressors+0.10",
+      "direct_study+0.04"
+    ]
+  },
+  {
+    "id": "climatekg_shared_corpus/R2_P000001#7",
+    "section": "climatekg_shared_corpus",
+    "paper": "R2_P000001",
+    "heading": "a. Daytime evolution of cloud properties and cloud radiative forcing",
+    "pages": "19",
+    "markdown": "E:\\Atharv\\lulc_suggestor_poc\\19_aug_final\\climatekg\\runtime\\outputs\\baseline_comparison_20260830_v2\\corpus\\markdown\\R2_P000001.md",
+    "chunk_index": 7,
+    "text": "## a. Daytime evolution of cloud properties and cloud radiative forcing Figure 5 presents the daytime variation in cloud macrophophysical properties and cloud radiative forcing at the surface. All the simulated cloud properties show the peak around noon coinciding with the maximum time of the surface heat fluxes. The shallow cumulus clouds simulated over the homogenous land surface fluxes fall generally within the range of the nontransition case over the heterogeneous land surface. Before 1200 LST when all cases are still in the shallow cumulus stage, transition cases are marked with the lower cloud fraction but with higher domain-mean cloud water (liquid plus ice) path compared to the nontransition cases. It is consistent that the clouds in the transition cases grow deeper while convection aggregates into a narrower region. It is worth noting that the cases that produce precipitation already have deeper clouds from cloud onset. The sharp re- duction in the cloud water path in the afternoon in the transition cases represents the reduction of cloud water content by precipitation. The reduction is the largest in the HET14U0 corresponding to the strong precipitation. Figures 5d and 5e show that before noon, the net surface shortwave radiative cooling remains similar because the effects from the lower cloud fraction and the higher liquid water path in transition cases cancel out each other; however, the net surface longwave warming is reduced in transition cases because of the decrease in cloud fraction. In the afternoon, all the transition cases produce the surface precipitation with multiple peaks as shown in Fig. 5f. The peaks that follow the first pre- cipitation maximum reflect the convection developing over the cold pools that spread from the first pre- cipitation event. The precipitation rate tends to increase with the patch size for zero-background-wind cases similar FIG. 2. The daytime variation of the prescribed surface (left) SHF, (center) LHF, and (right) evaporative fraction for dry (red) and wet (blue) patches and the domain mean (black). FIG. 3. Spatial distribution of clouds and precipitation at midday for (top) HET14U0, HET5U0, and HET2U0 and for (left) HET14U0, HET14U1, and HET14U2. Grid points with clouds (anywhere in the vertical column) are shaded gray, and white\u2013green color scale represents surface precipitation rate. DRY (WET) patches are the red (blue) squares. Arrows in the HET14U1 and HET14U2 panels represent the direction and relative speed of the background wind. HOMOU0 and HOMOU0_DRY cases are also shown as a reference. to Rieck et al. (2014). The time evolution of cloud-base height is about the same in all cases, while the cloud tops show the clear separation between the transition and nontransition cases (Figs. 5g,h). In the afternoon, all transition cases have cloud tops reaching 6km and above, while all nontransition cases reach up to 4\u20135km. Cloud depth tends to gradually increase with the patch size but not in a linear way. However, as seen in HET14U1, even 1ms -1 background wind strongly influences the intensity of precipitation and cloud depth. As an aside, we note that cloud properties in Fig. 5 show an early morning peak around 0930 LST. The residual layer is responsible for the early peak in cloud fraction but does not change whether a convection transition occurs.",
+    "koppen_category": "",
+    "koppen_confidence": "",
+    "koppen_rationale": "",
+    "climate_groups": [],
+    "koppen_codes": [],
+    "interventions": [],
+    "stressors": [
+      "extreme_heat",
+      "rainfall_shift"
+    ],
+    "mechanisms": [
+      "albedo",
+      "convection"
+    ],
+    "regions": [],
+    "evidence_role": "direct_study",
+    "norm": 1.0000003816235439,
+    "score": 0.7648915079611313,
+    "vector_score": 0.6248915079611312,
+    "metadata_boost": 0.14,
+    "metadata_reasons": [
+      "stressors+0.10",
+      "direct_study+0.04"
+    ]
+  },
+  {
+    "id": "climatekg_shared_corpus/R2_P000001#1",
+    "section": "climatekg_shared_corpus",
+    "paper": "R2_P000001",
+    "heading": "ABSTRACT",
+    "pages": "19",
+    "markdown": "E:\\Atharv\\lulc_suggestor_poc\\19_aug_final\\climatekg\\runtime\\outputs\\baseline_comparison_20260830_v2\\corpus\\markdown\\R2_P000001.md",
+    "chunk_index": 1,
+    "text": "## ABSTRACT ABSTRACT Idealized large-eddy simulations (LESs) with prescribed heterogeneous land surface heat fluxes are performed to study the impact of the heterogeneity length scale and background wind speed on the development of shallow cumulus and the subsequent transition to congestus/deep convection. We study the impact of land surface heterogeneity in an atmosphere that favors shallow convection but is also conditionally unstable with respect to deeper convection. We find that before the convection transition, larger and thicker shallow cumulus clouds are attached to moisture pools near the PBL top over patches with low evaporative fraction (referred to as \u2018\u2018DRY\u2019\u2019). This feature is attributable to a surface-induced secondary circulation whose development depends on the heterogeneity size and the background wind speed. With large patches (\\(\\ge\\)5 km) under zero ambient wind, the secondary mesoscale circulation promotes the vertical transport of moisture forming a moisture pool over DRY patches, while with smaller patches, no such circulation develops. The influence of the background wind on the secondary circulation is strong such that any wind stronger than 2 ms -1 effectively eliminates the impact of surface heterogeneity on the PBL and brings no secondary circulation. This is because the triggered secondary circulation is not strong enough to withstand the imposed background wind. Based on these, we propose two criteria for the convection transition, namely, that the heterogeneity length scale is greater than 5 km and that the background wind speed is less than Uc0, where Uc0 is the near-surface cross-patch wind speed of the secondary circulation under zero background wind for a given patch size and is about 1.5 ms -1 in our cases.",
+    "koppen_category": "",
+    "koppen_confidence": "",
+    "koppen_rationale": "",
+    "climate_groups": [],
+    "koppen_codes": [],
+    "interventions": [],
+    "stressors": [
+      "dust_wind"
+    ],
+    "mechanisms": [
+      "convection"
+    ],
+    "regions": [],
+    "evidence_role": "direct_study",
+    "norm": 1.0000002645715922,
+    "score": 0.7501204601694741,
+    "vector_score": 0.710120460169474,
+    "metadata_boost": 0.04,
+    "metadata_reasons": [
+      "direct_study+0.04"
+    ]
+  },
+  {
+    "id": "climatekg_shared_corpus/R1_P000019#12",
+    "section": "climatekg_shared_corpus",
+    "paper": "R1_P000019",
+    "heading": "b. Rainy season",
+    "pages": "19",
+    "markdown": "E:\\Atharv\\lulc_suggestor_poc\\19_aug_final\\climatekg\\runtime\\outputs\\baseline_comparison_20260830_v2\\corpus\\markdown\\R1_P000019.md",
+    "chunk_index": 12,
+    "text": "cloudiness and rainfall bear no similarity to the patterns of land cover. Thus the land surface played little role in shaping the distribution of clouds and rainfall. Although the rainfall distributions of the control run and the deforestation run are not identical, they do share some common basic features. The rainfall covered a small area of the domain in both simulations. The precipitation occurred at the same locations, except for the additional rain cell in the control run. The peak intensity of rainfall was comparable. Above all, there was no correlation between the pattern of rainfall and that of land cover in either run. The land surface processes apparently were irrelevant to the convection processes over this period of time. It would be safe to conclude that mesoscale circu- lations did not develop over this period of time, because the mesoscale heat flux was essentially zero (Fig. 16b) under the condition of reduced synoptic wind. The heat flux for the case of the original synoptic wind condition given in Fig. 16a, on the other hand, needs to be scrutinized more carefully. It behaves very differently from the knowledge of mesoscale heat flux described at the beginning of this section. The mesoscale heat flux should decay upward from the level of its maximum near 1 km or 900 hPa, but Fig. 16a shows a periodicity with height. It should be positive near the surface, but negative values were seen throughout the afternoon of 4 January in Fig. 16a. In addition, it has been shown that the magnitude of mesoscale heat flux decreases with synoptic wind, but Fig. 16 shows the opposite. We argue that what is shown in Fig. 16a is not a signal of mesoscale heat flux but is an artifact resulting from departures from the idealized synoptic conditions (i.e., horizontally invariant temperature and zero large-scale vertical velocity) used in the definition and the calculation of mesoscale heat flux (see the appendix).",
+    "koppen_category": "",
+    "koppen_confidence": "",
+    "koppen_rationale": "",
+    "climate_groups": [],
+    "koppen_codes": [],
+    "interventions": [
+      "afforestation",
+      "deforestation"
+    ],
+    "stressors": [
+      "rainfall_shift"
+    ],
+    "mechanisms": [
+      "cloud_cover",
+      "convection"
+    ],
+    "regions": [],
+    "evidence_role": "direct_study",
+    "norm": 0.9999997939657416,
+    "score": 0.7386526884915431,
+    "vector_score": 0.5986526884915431,
+    "metadata_boost": 0.14,
+    "metadata_reasons": [
+      "stressors+0.10",
+      "direct_study+0.04"
+    ]
+  },
+  {
+    "id": "climatekg_shared_corpus/R2_P000001#5",
+    "section": "climatekg_shared_corpus",
+    "paper": "R2_P000001",
+    "heading": "b. Simulation setup",
+    "pages": "19",
+    "markdown": "E:\\Atharv\\lulc_suggestor_poc\\19_aug_final\\climatekg\\runtime\\outputs\\baseline_comparison_20260830_v2\\corpus\\markdown\\R2_P000001.md",
+    "chunk_index": 5,
+    "text": "## b. Simulation setup Our case setup closely follows the new composite case study of CASS (Zhang et al. 2017), which is based on long-term observations at the Atmospheric Radiation Measurement (ARM) Southern Great Plains (SGP) site. This case represents a typical daytime evolution from sunrise to sunset on the days observed to have fair weather nonprecipitating surface-forced shallow cumulus at the SGP site. The detailed case setup with the initial sounding, surface heat fluxes, and large-scale forcing are available at the CASS website (http://portal. nersc.gov/project/capt/CASS). The surface roughness length is set to 0.035m following the CASS setup. To the CASS setup, we add heterogeneity in the prescribed surface heat fluxes and modify the background wind. Cloud droplet number concentration is prescribed to be 100cm -3 in the microphysics scheme. The horizontal domain size of our LES is 28.8km \u00d7 28.8km with periodic boundary conditions. The horizontal resolution is 50m in both the x and y directions. Beneath 4km, the vertical resolution is 20m with stretching grids up to 16km. A 1-s time step is used. The land surface heat fluxes are prescribed with a chessboard pattern (Fig. 1). We refer to the patches with greater latent heat flux (LHF) as \u201cWET\u201d and the other patch type with lesser latent heat flux as \u201cDRY.\u201d All other properties of the surface including surface albedo and roughness length are homogeneous throughout the domain and do not vary with the patch type. The wet and cool patches alternate with dry and warm patches, but the sum of latent plus sensible heat fluxes (SHFs) at every grid point is constant throughout the domain. Simulations are performed with patch sizes of 1.2 (HET1), 2.4 (HET2), 4.8 (HET5), 7.2 (HET7), and 14.4km (HET14). The contrast of surface heat fluxes between patches is maintained at 60% of domain-averaged sensible heat flux at any time (Fig. 2). For WET (DRY) patch, 30% of domain-mean sensible heat flux is subtracted from the sensible (latent) heat flux and is added to the latent (sensible) heat flux. This prescribed patch contrast roughly represents the difference in the surface heat fluxes between grassland and crop fields measured by energy balance Bowen ratio (EBBR) stations and eddy correlation (ECOR) flux measurement sites at SGP, respectively (Zhang et al. 2017). The evaporative fraction for DRY and WET patch at noon local standard time (LST) is about 0.75 and 0.45, respectively, in comparison to 0.6 for the CASS case (Fig. 2c). The diurnal cycle of the domain-averaged surface sensible and latent heat fluxes is the same as in CASS. In comparison to the HET cases, an additional case with a homogeneous surface (HOM) is simulated using the domain-mean values for the surface heat forcing. To separate the local surface buoyancy forcing on the vertical velocity in the PBL, we provide separate additional simulations where we prescribed a homogeneous land surface with the same surface sensible and latent heat fluxes that were used for the DRY and WET patches, denoted as HOMU0_DRY and HOMU0_WET. To examine the impact of the background wind speed, we set the initial horizontal winds U b (0ms -1 ) to be purely zonal and vertically constant. Simulations are performed with U b of 0, 1, 2, 3, to 10ms -1 (U0, U1, U2, U3, and U10). The wind field is relaxed to its initial state with a 1-h time-scale at all levels.",
+    "koppen_category": "",
+    "koppen_confidence": "",
+    "koppen_rationale": "",
+    "climate_groups": [],
+    "koppen_codes": [],
+    "interventions": [],
+    "stressors": [
+      "dust_wind"
+    ],
+    "mechanisms": [
+      "albedo",
+      "convection",
+      "evapotranspiration",
+      "leaf_area",
+      "roughness"
+    ],
+    "regions": [],
+    "evidence_role": "direct_study",
+    "norm": 0.9999997648637555,
+    "score": 0.7374979557361309,
+    "vector_score": 0.6974979557361308,
+    "metadata_boost": 0.04,
+    "metadata_reasons": [
+      "direct_study+0.04"
+    ]
+  },
+  {
+    "id": "climatekg_shared_corpus/R1_P000019#1",
+    "section": "climatekg_shared_corpus",
+    "paper": "R1_P000019",
+    "heading": "ABSTRACT",
+    "pages": "19",
+    "markdown": "E:\\Atharv\\lulc_suggestor_poc\\19_aug_final\\climatekg\\runtime\\outputs\\baseline_comparison_20260830_v2\\corpus\\markdown\\R1_P000019.md",
+    "chunk_index": 1,
+    "text": "## ABSTRACT ABSTRACT A numerical mesoscale model has been used to investigate the impact of mesoscale circulations on the distribution of precipitation and cloudiness over a deforested area in Amazonia. Observed patterns of deforestation in Rond\u00f4nia, Amazonia, with scales on the order of 10 km were used in this study to describe land surface conditions. Various simulations have been performed to identify the conditions under which the mesoscale circulations induced by the heterogeneous land surface could enhance cloudiness and local rainfall. The simulation results suggest that the synoptic forcing, in terms of atmospheric stability and background horizontal wind, dominates during the rainy season; synoptic conditions were so favorable to moist convection that the added effect of surface heterogeneity was negligible. During the dry season, a noticeable impact of mesoscale circulations resulting in enhancement of shallow clouds was simulated; the mesoscale circulations also triggered scattered deep convection that altered the spatial distribution of precipitation. During the break period, the transition from the rainy season to the dry season, the impact of mesoscale circulations on low-level clouds was evident only after reducing the magnitude of the background wind.",
+    "koppen_category": "",
+    "koppen_confidence": "",
+    "koppen_rationale": "",
+    "climate_groups": [],
+    "koppen_codes": [],
+    "interventions": [
+      "afforestation",
+      "deforestation"
+    ],
+    "stressors": [
+      "rainfall_shift"
+    ],
+    "mechanisms": [
+      "cloud_cover",
+      "convection"
+    ],
+    "regions": [
+      "amazon"
+    ],
+    "evidence_role": "direct_study",
+    "norm": 1.0000008402539253,
+    "score": 0.7330050491632609,
+    "vector_score": 0.5930050491632609,
+    "metadata_boost": 0.14,
+    "metadata_reasons": [
+      "stressors+0.10",
+      "direct_study+0.04"
+    ]
+  },
+  {
+    "id": "climatekg_shared_corpus/R1_P000006#1",
+    "section": "climatekg_shared_corpus",
+    "paper": "R1_P000006",
+    "heading": "Afternoon rain more likely over drier soils",
+    "pages": "4",
+    "markdown": "E:\\Atharv\\lulc_suggestor_poc\\19_aug_final\\climatekg\\runtime\\outputs\\baseline_comparison_20260830_v2\\corpus\\markdown\\R1_P000006.md",
+    "chunk_index": 1,
+    "text": "# Afternoon rain more likely over drier soils Afternoon rain more likely over drier soils Christopher M. Taylor 1 , Richard A. M. de Jeu 2 , Fran\u00e7oise Guichard 3 , Phil P. Harris 1 & Wouter A. Dorigo 4 Land surface properties, such as vegetation cover and soil moisture, influence the partitioning of radiative energy between latent and sensible heat fluxes in daytime hours. During dry periods, soil-water deficit can limit evapotranspiration, leading to warmer and drier conditions in the lower atmosphere 1,2 . Soil moisture can influence the development of convective storms through such modifications of low-level atmospheric temperature and humidity 1,3 , which in turn feeds back on soil moisture. Yet there is considerable uncertainty in how soil moisture affects convective storms across the world, owing to a lack of observational evidence and uncertainty in large-scale models 4 . Here we present a global-scale observational analysis of the coupling between soil moisture and precipitation. We show that across all six continents studied, afternoon rain falls preferentially over soils that are relatively dry compared to the surrounding area. The signal emerges most clearly in the observations over semi-arid regions, where surface fluxes are sensitive to soil moisture, and convective events are frequent. Mechanistically, our results are consistent with enhanced afternoon moist convection driven by increased sensible heat flux over drier soils, and/or mesoscale variability in soil moisture. We find no evidence in our analysis of a positive feedback--that is, a preference for rain over wetter soils--at the spatial scale (50\u2013100 kilometres) studied. In contrast, we find that a positive feedback of soil moisture on simulated precipitation does dominate in six state-of-the-art global weather and climate models-- a difference that may contribute to excessive simulated droughts in large-scale models. Soil moisture influences precipitation across a range of scales in time and space 5 . In drought-affected continental regions, weak evapotranspiration leads to reduced atmospheric moisture content over a period of days, potentially suppressing subsequent precipitation 6 . When soil moisture anomalies are extensive, surface-induced perturbations to the atmospheric heat budget may modify synoptic-scale circulations 2 , in turn affecting moisture advection from the oceans 7 . On smaller scales, the development of convective clouds and precipitation can be influenced by local surface fluxes over the course of the day 1,3 . Theoretical considerations 8,9 suggest that, in an undisturbed atmosphere, the likelihood and sign of a surface feedback will be determined by the atmospheric profiles of temperature and humidity. Thus, one might expect regional variations in the strength and sign of convective sensitivity to soil moisture 10,11 . Mesoscale variability in soil moisture can also influence the feedback through the development of daytime circulations 12 , which provide additional convergence to trigger convection 13,14 . Several studies have examined the impact of the land surface on observed rainfall in different regions of the world. Analyses in Illinois 15 and West Africa 16 have indicated positive correlations between antecedent soil moisture and precipitation, consistent with a positive soil moisture feedback. A recent study 17 based on observationally constrained reanalysis data showed an increasing frequency of convective rainfall when evapotranspiration was higher across much of North America. On the other hand, examination of satellite cloud data has indicated locally enhanced afternoon precipitation frequency over surfaces with increased sensible heat fluxes, as a result of mesoscale circulations due either to soil moisture 18 or vegetation cover 19,20 . At the regional scale, climate models tend to agree on where feedbacks occur, these being constrained largely by where soil moisture limits evapotranspiration in the presence of convective activity 4 . But the spread in simulated feedback strength is large, highlighting both the uncertainty in surface flux sensitivity to soil moisture and the response of the planetary boundary layer and convection to surface fluxes 21,22 . Indeed, the feedback sign can change depending on model spatial resolution, with a strong influence of the convective parameterization likely to be responsible 23 .",
+    "koppen_category": "",
+    "koppen_confidence": "",
+    "koppen_rationale": "",
+    "climate_groups": [],
+    "koppen_codes": [],
+    "interventions": [],
+    "stressors": [
+      "agricultural_drought",
+      "rainfall_shift"
+    ],
+    "mechanisms": [
+      "albedo",
+      "convection",
+      "evapotranspiration",
+      "moisture_recycling",
+      "soil_moisture"
+    ],
+    "regions": [
+      "sahel"
+    ],
+    "evidence_role": "direct_study",
+    "norm": 1.0000006210101042,
+    "score": 0.6866827941680979,
+    "vector_score": 0.5466827941680978,
+    "metadata_boost": 0.14,
+    "metadata_reasons": [
+      "stressors+0.10",
+      "direct_study+0.04"
+    ]
+  },
+  {
+    "id": "climatekg_shared_corpus/R1_P000005#1",
+    "section": "climatekg_shared_corpus",
+    "paper": "R1_P000005",
+    "heading": "Impact of mesoscale vegetation heterogeneities on the dynamical and thermodynamic properties of the planetary boundary layer",
+    "pages": "11",
+    "markdown": "E:\\Atharv\\lulc_suggestor_poc\\19_aug_final\\climatekg\\runtime\\outputs\\baseline_comparison_20260830_v2\\corpus\\markdown\\R1_P000005.md",
+    "chunk_index": 1,
+    "text": "# Impact of mesoscale vegetation heterogeneities on the dynamical and thermodynamic properties of the planetary boundary layer Luis Garcia-Carreras, 1 Douglas J. Parker, 1 Christopher M. Taylor, 2 Claire E. Reeves, 3 and Jennifer G. Murphy 4 Received 9 July 2009; revised 24 September 2009; accepted 2 October 2009; published 3 February 2010. [1] This study uses aircraft observations over the Republic of Benin from the African Monsoon Multidisciplinary Analyses (AMMA) campaign to investigate the impact of vegetation heterogeneities on the dynamics within the planetary boundary layer, such as convection, transport, and mixing. Isoprene, a biogenic volatile organic compound emitted primarily by woody vegetation, was used as a tracer for transport to link the land surface to the boundary layer properties. Associated to planetary boundary layer (PBL) temperature gradients at vegetation boundaries, a persistent mesoscale organization of the winds which controlled patterns in the formation of cumulus congestus clouds was observed. A strong relationship among PBL temperatures, meridional wind velocity, isoprene concentrations, and fraction of forest or shrub cover was found, corroborating the land surface forcing of the observed dynamics. The observations show that the convergence zones tended to occur on the southern edge of warm surface and atmospheric anomalies. The northerly synoptic wind appears to have increased the coherency of the southerly part of the mesoscale flow and displaced the convergence zones southward. The relationships between the PBL potential temperatures and the meridional wind and isoprene concentrations were spatially coherent down to wavelengths of 10 and 8 km, respectively. A seasonal climatology of visible satellite data shows enhanced cloud cover in the afternoon over cropland, suggesting that the results presented are not limited to this case study but are of climatological significance in the region. **Citation:** Garcia-Carreras, L., D. J. Parker, C. M. Taylor, C. E. Reeves, and J. G. Murphy (2010), Impact of mesoscale vegetation heterogeneities on the dynamical and thermodynamic properties of the planetary boundary layer, _J. Geophys. Res., 115_, D03102, doi:10.1029/2009JD012811.",
+    "koppen_category": "",
+    "koppen_confidence": "",
+    "koppen_rationale": "",
+    "climate_groups": [],
+    "koppen_codes": [],
+    "interventions": [],
+    "stressors": [
+      "rainfall_shift"
+    ],
+    "mechanisms": [
+      "cloud_cover",
+      "convection",
+      "leaf_area"
+    ],
+    "regions": [],
+    "evidence_role": "direct_study",
+    "norm": 0.9999997519976739,
+    "score": 0.6857757162450675,
+    "vector_score": 0.5457757162450675,
+    "metadata_boost": 0.14,
+    "metadata_reasons": [
+      "stressors+0.10",
+      "direct_study+0.04"
+    ]
+  }
+]
+========================================================================================
+EXACT PROMPT SENT TO QWEN
+========================================================================================
+
+TASK
+
+Answer the scientific question using only the supplied passages. Cite every substantive statement with [S1], [S2], and so on. Preserve conditions, contradictions, null findings, and uncertainty. Do not turn transferable evidence into a local recommendation.
+
+QUESTION
+
+Under zero background wind over a heterogeneous chessboard surface with 14.4 km dry and wet patches, how does surface heat-flux heterogeneity affect local cloud development and precipitation?
+
+PASSAGES
+
+[S1] paper=R2_P000001 heading=c. Scale-dependent contributions to PBL turbulence
+## c. Scale-dependent contributions to PBL turbulence We have shown that the simulations can be divided into those that transition into cumulus congestus or deep FIG. 4. Diagram of all simulations performed as a function of patch size and background wind speed. Different markers represent the occurrence of congestus cumulus/deep convection (DC) and hence the precipitation. For DC cases, color indicates the time (LST) when the convection transition occurs. FIG. 5. Daytime evolution of (a) projected cloud fraction at the surface, (b) fraction of clouds with depth deeper than 300 m, (c) in-cloud condensate water path, (d) shortwave cloud radiative forcing at surface, (e) longwave cloud radiative forcing at surface, (f) surface precipitation, (g) cloud-base height, and (h) maximum cloud-top height. In-cloud condensate water path is defined as the domain- averaged cloud condensate water path divided by the cloud fraction. The cloud radiative forcing is defined as the net whole-sky radiation minus the net clear-sky radiation at the surface. Thus, negative (positive) radiation forcing means the net surface cooling (warming) under the presence of clouds. In (a)–(e), all the transition cases (DC) are enclosed in the red-shaded area, and all nontransition cases (no DC) are represented in the green-shaded area. The HOMU0 case is marked with a black solid line. In (f), each line color corresponds to transition cases that produces significant rainfall during the day. In (g) and (h), colored lines represent the transition cases denoted in (f), while the black line and green-shaded area represent HOMU0 and no DC, respectively. Except for (c) and (h), all fields are domain averaged. convection and those that remain with shallow cumulus depending on the surface heterogeneity length scale and background wind speed (Fig. 4). The influence of the surface heterogeneity on the PBL flow dynamics has been reported in several LES studies (Hadfield et al. 1991; Avissar and Schmidt 1998; Patton et al. 2005). The common finding is that the turbulence structure differs greatly from the commonly known mixed-layer scaling with an additional secondary circulation triggered by variations in surface heating. Increased horizontal wind variance near the surface and the top of the PBL develops corresponding to the convergence (divergence) at the bottom (top) branch of the triggered secondary circulation. This phenomenon is most pronounced when the heterogeneity length scale lies within the mesoscale range. In this section, we examine the influence of the heterogeneous land surface and background wind on the dynamics and thermodynamics of the turbulent flow in the PBL with an emphasis on the horizontal scale of the involved processes. Figure 7 shows the time-averaged vertical profiles of zonal wind variance, vertical wind variance, vertical moisture flux, and buoyancy flux along with their scale-dependent contributions during the shallow cu- mulus stage. We apply the scale decomposition method FIG. 6. Time-averaged horizontal size distribution of (a) clouds, (b) cloud cores, (c) subcloud thermals, and (d) thermal cores. The x axis is the size (km), and the y axis is the probability for the given size. Colors for the shaded area and solid line follow Figs. 5a–e. (e)–(h) Scalability of the cloud and thermal size with the heterogeneity length scale for the cases with the zero background wind speed. The x axis represents the patch size including the homogeneous case denoted as “HOM.” The yellow line corresponds to the size for a given probability [yellow horizontal line that transects across the size in the corresponding figure in (a)–(c)], and the purple line represents the probability for a given size [the size corresponds to the purple line that vertically transects in (a)–(c)]. following Kang and Ryu (2016) to verify if the given surface heterogeneity condition develops any mesoscale processes strong enough to influence the PBL characteristics. By adopting a cutoff wavelength of 4 km, any signals larger than the cutoff are labeled mesoscale, while any signals shorter than the cutoff are labeled turbulent scale (Mahrt and Gibson 1992; Kang et al. 2007; LeMone et al. 2007; Kang 2009; Moeng et al. 2010; Kang and Ryu 2016). Most of the heterogeneous land surface cases show increased variability in the zonal wind throughout the PBL, which is attributable to the increased mesoscale component (Fig. 7a). HET14U0 and HET14U1 (both are transition cases) show the largest zonal wind variability near the surface and the top of the PBL, indicating the strengthening of the mesoscale secondary circulation.
+
+[S2] paper=R2_P000001 heading=a. Daytime evolution of cloud properties and cloud radiative forcing
+## a. Daytime evolution of cloud properties and cloud radiative forcing Figure 5 presents the daytime variation in cloud macrophophysical properties and cloud radiative forcing at the surface. All the simulated cloud properties show the peak around noon coinciding with the maximum time of the surface heat fluxes. The shallow cumulus clouds simulated over the homogenous land surface fluxes fall generally within the range of the nontransition case over the heterogeneous land surface. Before 1200 LST when all cases are still in the shallow cumulus stage, transition cases are marked with the lower cloud fraction but with higher domain-mean cloud water (liquid plus ice) path compared to the nontransition cases. It is consistent that the clouds in the transition cases grow deeper while convection aggregates into a narrower region. It is worth noting that the cases that produce precipitation already have deeper clouds from cloud onset. The sharp re- duction in the cloud water path in the afternoon in the transition cases represents the reduction of cloud water content by precipitation. The reduction is the largest in the HET14U0 corresponding to the strong precipitation. Figures 5d and 5e show that before noon, the net surface shortwave radiative cooling remains similar because the effects from the lower cloud fraction and the higher liquid water path in transition cases cancel out each other; however, the net surface longwave warming is reduced in transition cases because of the decrease in cloud fraction. In the afternoon, all the transition cases produce the surface precipitation with multiple peaks as shown in Fig. 5f. The peaks that follow the first pre- cipitation maximum reflect the convection developing over the cold pools that spread from the first pre- cipitation event. The precipitation rate tends to increase with the patch size for zero-background-wind cases similar FIG. 2. The daytime variation of the prescribed surface (left) SHF, (center) LHF, and (right) evaporative fraction for dry (red) and wet (blue) patches and the domain mean (black). FIG. 3. Spatial distribution of clouds and precipitation at midday for (top) HET14U0, HET5U0, and HET2U0 and for (left) HET14U0, HET14U1, and HET14U2. Grid points with clouds (anywhere in the vertical column) are shaded gray, and white–green color scale represents surface precipitation rate. DRY (WET) patches are the red (blue) squares. Arrows in the HET14U1 and HET14U2 panels represent the direction and relative speed of the background wind. HOMOU0 and HOMOU0_DRY cases are also shown as a reference. to Rieck et al. (2014). The time evolution of cloud-base height is about the same in all cases, while the cloud tops show the clear separation between the transition and nontransition cases (Figs. 5g,h). In the afternoon, all transition cases have cloud tops reaching 6km and above, while all nontransition cases reach up to 4–5km. Cloud depth tends to gradually increase with the patch size but not in a linear way. However, as seen in HET14U1, even 1ms -1 background wind strongly influences the intensity of precipitation and cloud depth. As an aside, we note that cloud properties in Fig. 5 show an early morning peak around 0930 LST. The residual layer is responsible for the early peak in cloud fraction but does not change whether a convection transition occurs.
+
+[S3] paper=R2_P000001 heading=ABSTRACT
+## ABSTRACT ABSTRACT Idealized large-eddy simulations (LESs) with prescribed heterogeneous land surface heat fluxes are performed to study the impact of the heterogeneity length scale and background wind speed on the development of shallow cumulus and the subsequent transition to congestus/deep convection. We study the impact of land surface heterogeneity in an atmosphere that favors shallow convection but is also conditionally unstable with respect to deeper convection. We find that before the convection transition, larger and thicker shallow cumulus clouds are attached to moisture pools near the PBL top over patches with low evaporative fraction (referred to as ‘‘DRY’’). This feature is attributable to a surface-induced secondary circulation whose development depends on the heterogeneity size and the background wind speed. With large patches (\(\ge\)5 km) under zero ambient wind, the secondary mesoscale circulation promotes the vertical transport of moisture forming a moisture pool over DRY patches, while with smaller patches, no such circulation develops. The influence of the background wind on the secondary circulation is strong such that any wind stronger than 2 ms -1 effectively eliminates the impact of surface heterogeneity on the PBL and brings no secondary circulation. This is because the triggered secondary circulation is not strong enough to withstand the imposed background wind. Based on these, we propose two criteria for the convection transition, namely, that the heterogeneity length scale is greater than 5 km and that the background wind speed is less than Uc0, where Uc0 is the near-surface cross-patch wind speed of the secondary circulation under zero background wind for a given patch size and is about 1.5 ms -1 in our cases.
+
+[S4] paper=R1_P000019 heading=b. Rainy season
+cloudiness and rainfall bear no similarity to the patterns of land cover. Thus the land surface played little role in shaping the distribution of clouds and rainfall. Although the rainfall distributions of the control run and the deforestation run are not identical, they do share some common basic features. The rainfall covered a small area of the domain in both simulations. The precipitation occurred at the same locations, except for the additional rain cell in the control run. The peak intensity of rainfall was comparable. Above all, there was no correlation between the pattern of rainfall and that of land cover in either run. The land surface processes apparently were irrelevant to the convection processes over this period of time. It would be safe to conclude that mesoscale circu- lations did not develop over this period of time, because the mesoscale heat flux was essentially zero (Fig. 16b) under the condition of reduced synoptic wind. The heat flux for the case of the original synoptic wind condition given in Fig. 16a, on the other hand, needs to be scrutinized more carefully. It behaves very differently from the knowledge of mesoscale heat flux described at the beginning of this section. The mesoscale heat flux should decay upward from the level of its maximum near 1 km or 900 hPa, but Fig. 16a shows a periodicity with height. It should be positive near the surface, but negative values were seen throughout the afternoon of 4 January in Fig. 16a. In addition, it has been shown that the magnitude of mesoscale heat flux decreases with synoptic wind, but Fig. 16 shows the opposite. We argue that what is shown in Fig. 16a is not a signal of mesoscale heat flux but is an artifact resulting from departures from the idealized synoptic conditions (i.e., horizontally invariant temperature and zero large-scale vertical velocity) used in the definition and the calculation of mesoscale heat flux (see the appendix).
+
+[S5] paper=R2_P000001 heading=b. Simulation setup
+## b. Simulation setup Our case setup closely follows the new composite case study of CASS (Zhang et al. 2017), which is based on long-term observations at the Atmospheric Radiation Measurement (ARM) Southern Great Plains (SGP) site. This case represents a typical daytime evolution from sunrise to sunset on the days observed to have fair weather nonprecipitating surface-forced shallow cumulus at the SGP site. The detailed case setup with the initial sounding, surface heat fluxes, and large-scale forcing are available at the CASS website (http://portal. nersc.gov/project/capt/CASS). The surface roughness length is set to 0.035m following the CASS setup. To the CASS setup, we add heterogeneity in the prescribed surface heat fluxes and modify the background wind. Cloud droplet number concentration is prescribed to be 100cm -3 in the microphysics scheme. The horizontal domain size of our LES is 28.8km × 28.8km with periodic boundary conditions. The horizontal resolution is 50m in both the x and y directions. Beneath 4km, the vertical resolution is 20m with stretching grids up to 16km. A 1-s time step is used. The land surface heat fluxes are prescribed with a chessboard pattern (Fig. 1). We refer to the patches with greater latent heat flux (LHF) as “WET” and the other patch type with lesser latent heat flux as “DRY.” All other properties of the surface including surface albedo and roughness length are homogeneous throughout the domain and do not vary with the patch type. The wet and cool patches alternate with dry and warm patches, but the sum of latent plus sensible heat fluxes (SHFs) at every grid point is constant throughout the domain. Simulations are performed with patch sizes of 1.2 (HET1), 2.4 (HET2), 4.8 (HET5), 7.2 (HET7), and 14.4km (HET14). The contrast of surface heat fluxes between patches is maintained at 60% of domain-averaged sensible heat flux at any time (Fig. 2). For WET (DRY) patch, 30% of domain-mean sensible heat flux is subtracted from the sensible (latent) heat flux and is added to the latent (sensible) heat flux. This prescribed patch contrast roughly represents the difference in the surface heat fluxes between grassland and crop fields measured by energy balance Bowen ratio (EBBR) stations and eddy correlation (ECOR) flux measurement sites at SGP, respectively (Zhang et al. 2017). The evaporative fraction for DRY and WET patch at noon local standard time (LST) is about 0.75 and 0.45, respectively, in comparison to 0.6 for the CASS case (Fig. 2c). The diurnal cycle of the domain-averaged surface sensible and latent heat fluxes is the same as in CASS. In comparison to the HET cases, an additional case with a homogeneous surface (HOM) is simulated using the domain-mean values for the surface heat forcing. To separate the local surface buoyancy forcing on the vertical velocity in the PBL, we provide separate additional simulations where we prescribed a homogeneous land surface with the same surface sensible and latent heat fluxes that were used for the DRY and WET patches, denoted as HOMU0_DRY and HOMU0_WET. To examine the impact of the background wind speed, we set the initial horizontal winds U b (0ms -1 ) to be purely zonal and vertically constant. Simulations are performed with U b of 0, 1, 2, 3, to 10ms -1 (U0, U1, U2, U3, and U10). The wind field is relaxed to its initial state with a 1-h time-scale at all levels.
+
+[S6] paper=R1_P000019 heading=ABSTRACT
+## ABSTRACT ABSTRACT A numerical mesoscale model has been used to investigate the impact of mesoscale circulations on the distribution of precipitation and cloudiness over a deforested area in Amazonia. Observed patterns of deforestation in Rondônia, Amazonia, with scales on the order of 10 km were used in this study to describe land surface conditions. Various simulations have been performed to identify the conditions under which the mesoscale circulations induced by the heterogeneous land surface could enhance cloudiness and local rainfall. The simulation results suggest that the synoptic forcing, in terms of atmospheric stability and background horizontal wind, dominates during the rainy season; synoptic conditions were so favorable to moist convection that the added effect of surface heterogeneity was negligible. During the dry season, a noticeable impact of mesoscale circulations resulting in enhancement of shallow clouds was simulated; the mesoscale circulations also triggered scattered deep convection that altered the spatial distribution of precipitation. During the break period, the transition from the rainy season to the dry season, the impact of mesoscale circulations on low-level clouds was evident only after reducing the magnitude of the background wind.
+
+[S7] paper=R1_P000006 heading=Afternoon rain more likely over drier soils
+# Afternoon rain more likely over drier soils Afternoon rain more likely over drier soils Christopher M. Taylor 1 , Richard A. M. de Jeu 2 , Françoise Guichard 3 , Phil P. Harris 1 & Wouter A. Dorigo 4 Land surface properties, such as vegetation cover and soil moisture, influence the partitioning of radiative energy between latent and sensible heat fluxes in daytime hours. During dry periods, soil-water deficit can limit evapotranspiration, leading to warmer and drier conditions in the lower atmosphere 1,2 . Soil moisture can influence the development of convective storms through such modifications of low-level atmospheric temperature and humidity 1,3 , which in turn feeds back on soil moisture. Yet there is considerable uncertainty in how soil moisture affects convective storms across the world, owing to a lack of observational evidence and uncertainty in large-scale models 4 . Here we present a global-scale observational analysis of the coupling between soil moisture and precipitation. We show that across all six continents studied, afternoon rain falls preferentially over soils that are relatively dry compared to the surrounding area. The signal emerges most clearly in the observations over semi-arid regions, where surface fluxes are sensitive to soil moisture, and convective events are frequent. Mechanistically, our results are consistent with enhanced afternoon moist convection driven by increased sensible heat flux over drier soils, and/or mesoscale variability in soil moisture. We find no evidence in our analysis of a positive feedback--that is, a preference for rain over wetter soils--at the spatial scale (50–100 kilometres) studied. In contrast, we find that a positive feedback of soil moisture on simulated precipitation does dominate in six state-of-the-art global weather and climate models-- a difference that may contribute to excessive simulated droughts in large-scale models. Soil moisture influences precipitation across a range of scales in time and space 5 . In drought-affected continental regions, weak evapotranspiration leads to reduced atmospheric moisture content over a period of days, potentially suppressing subsequent precipitation 6 . When soil moisture anomalies are extensive, surface-induced perturbations to the atmospheric heat budget may modify synoptic-scale circulations 2 , in turn affecting moisture advection from the oceans 7 . On smaller scales, the development of convective clouds and precipitation can be influenced by local surface fluxes over the course of the day 1,3 . Theoretical considerations 8,9 suggest that, in an undisturbed atmosphere, the likelihood and sign of a surface feedback will be determined by the atmospheric profiles of temperature and humidity. Thus, one might expect regional variations in the strength and sign of convective sensitivity to soil moisture 10,11 . Mesoscale variability in soil moisture can also influence the feedback through the development of daytime circulations 12 , which provide additional convergence to trigger convection 13,14 . Several studies have examined the impact of the land surface on observed rainfall in different regions of the world. Analyses in Illinois 15 and West Africa 16 have indicated positive correlations between antecedent soil moisture and precipitation, consistent with a positive soil moisture feedback. A recent study 17 based on observationally constrained reanalysis data showed an increasing frequency of convective rainfall when evapotranspiration was higher across much of North America. On the other hand, examination of satellite cloud data has indicated locally enhanced afternoon precipitation frequency over surfaces with increased sensible heat fluxes, as a result of mesoscale circulations due either to soil moisture 18 or vegetation cover 19,20 . At the regional scale, climate models tend to agree on where feedbacks occur, these being constrained largely by where soil moisture limits evapotranspiration in the presence of convective activity 4 . But the spread in simulated feedback strength is large, highlighting both the uncertainty in surface flux sensitivity to soil moisture and the response of the planetary boundary layer and convection to surface fluxes 21,22 . Indeed, the feedback sign can change depending on model spatial resolution, with a strong influence of the convective parameterization likely to be responsible 23 .
+
+[S8] paper=R1_P000005 heading=Impact of mesoscale vegetation heterogeneities on the dynamical and thermodynamic properties of the planetary boundary layer
+# Impact of mesoscale vegetation heterogeneities on the dynamical and thermodynamic properties of the planetary boundary layer Luis Garcia-Carreras, 1 Douglas J. Parker, 1 Christopher M. Taylor, 2 Claire E. Reeves, 3 and Jennifer G. Murphy 4 Received 9 July 2009; revised 24 September 2009; accepted 2 October 2009; published 3 February 2010. [1] This study uses aircraft observations over the Republic of Benin from the African Monsoon Multidisciplinary Analyses (AMMA) campaign to investigate the impact of vegetation heterogeneities on the dynamics within the planetary boundary layer, such as convection, transport, and mixing. Isoprene, a biogenic volatile organic compound emitted primarily by woody vegetation, was used as a tracer for transport to link the land surface to the boundary layer properties. Associated to planetary boundary layer (PBL) temperature gradients at vegetation boundaries, a persistent mesoscale organization of the winds which controlled patterns in the formation of cumulus congestus clouds was observed. A strong relationship among PBL temperatures, meridional wind velocity, isoprene concentrations, and fraction of forest or shrub cover was found, corroborating the land surface forcing of the observed dynamics. The observations show that the convergence zones tended to occur on the southern edge of warm surface and atmospheric anomalies. The northerly synoptic wind appears to have increased the coherency of the southerly part of the mesoscale flow and displaced the convergence zones southward. The relationships between the PBL potential temperatures and the meridional wind and isoprene concentrations were spatially coherent down to wavelengths of 10 and 8 km, respectively. A seasonal climatology of visible satellite data shows enhanced cloud cover in the afternoon over cropland, suggesting that the results presented are not limited to this case study but are of climatological significance in the region. **Citation:** Garcia-Carreras, L., D. J. Parker, C. M. Taylor, C. E. Reeves, and J. G. Murphy (2010), Impact of mesoscale vegetation heterogeneities on the dynamical and thermodynamic properties of the planetary boundary layer, _J. Geophys. Res., 115_, D03102, doi:10.1029/2009JD012811.
+========================================================================================
+FULL QWEN THINKING FIELD
+========================================================================================
+
+Here's a thinking process:
+
+1.  **Analyze User Input:**
+   - **Question:** Under zero background wind over a heterogeneous chessboard surface with 14.4 km dry and wet patches, how does surface heat-flux heterogeneity affect local cloud development and precipitation?
+   - **Constraints:** Use only supplied passages. Cite every substantive statement with [S1], [S2], etc. Preserve conditions, contradictions, null findings, uncertainty. Do not turn transferable evidence into a local recommendation.
+   - **Key Parameters in Question:** Zero background wind, heterogeneous chessboard surface, 14.4 km dry and wet patches, effect on local cloud development and precipitation.
+
+2.  **Scan Passages for Keywords/Concepts:**
+   - "zero background wind" -> U0, HET14U0
+   - "14.4 km" / "HET14" -> patch size
+   - "dry and wet patches" / chessboard pattern -> S5 describes setup: dry (low LHF/high SHF) and wet (high LHF/low SHF), chessboard pattern, 14.4km patches (HET14).
+   - Cloud development & precipitation -> Look for transitions to congestus/deep convection, cloud depth, cloud water path, precipitation rates, secondary circulation, moisture pools.
+
+3.  **Extract Relevant Information from Passages:**
+   - [S1]: Mentions simulations divided into those transitioning to cumulus congestus/deep convection vs shallow cumulus depending on heterogeneity length scale and background wind. HET14U0 is a transition case with largest zonal wind variability near surface/top of PBL, indicating strengthening mesoscale secondary circulation. Secondary circulation triggered by surface heating variations increases horizontal wind variance.
+   - [S2]: Before 1200 LST (shallow cumulus stage), transition cases have lower cloud fraction but higher domain-mean cloud water path. Clouds in transition cases grow deeper while convection aggregates into a narrower region. Precipitation occurs in the afternoon with multiple peaks. Peaks follow first precipitation max reflect convection over cold pools. Reduction in cloud water path in afternoon represents reduction by precipitation; largest in HET14U0 corresponding to strong precipitation. In afternoon, transition cases have cloud tops reaching 6km+, nontransition 4-5km. Cloud depth increases with patch size. Precipitation rate tends to increase with patch size for zero-background-wind cases.
+   - [S3]: Abstract directly addresses the question. With large patches (≥5 km) under zero ambient wind, secondary mesoscale circulation promotes vertical moisture transport forming a moisture pool over DRY patches (low evaporative fraction). This leads to larger/thicker shallow cumulus clouds attached to moisture pools near PBL top over DRY patches. Convection transition occurs. Criteria: heterogeneity > 5km, background wind < Uc0 (~1.5 m/s). So for 14.4km & zero wind, transition to congestus/deep convection happens, driven by secondary circulation over dry patches.
+   - [S5]: Describes setup. Chessboard pattern, 14.4km patches (HET14). DRY = low LHF/high SHF, WET = high LHF/low SHF. U0 = zero background wind.
+   - Other passages ([S4], [S6], [S7], [S8]) discuss different regions/models/general concepts, not specific to the 14.4km chessboard zero-wind LES setup described in S1-S3, S5. I will focus on S1, S2, S3, S5 as they directly model this exact scenario.
+
+4.  **Synthesize Answer (Mental Draft):**
+   Under zero background wind with 14.4 km dry and wet chessboard patches, surface heat-flux heterogeneity triggers a strong mesoscale secondary circulation driven by temperature contrasts between the patches [S1][S3]. This secondary circulation enhances vertical moisture transport, concentrating it into moisture pools near the top of the planetary boundary layer (PBL) specifically over the drier (low evaporative fraction) patches [S3]. Consequently, larger and thicker shallow cumulus clouds initially form and attach to these moisture pools over the dry patches [S3]. The heterogeneity promotes a transition from shallow cumulus to deeper congestus and deep convection [S1][S2][S3]. During this transition, cloud fraction decreases while the domain-mean cloud water path increases, and convection aggregates into narrower regions with cloud tops reaching 6 km or more in the afternoon, compared to 4–5 km for non-transition cases [S2]. The strong secondary circulation is most pronounced at this mesoscale length scale, significantly increasing zonal wind variance near the surface and PBL top [S1]. This aggregated, deepened convection leads to significant afternoon precipitation, which exhibits multiple peaks as new convective cells develop over cold pools spreading from earlier rainfall events [S2]. The precipitation intensity is notably strong in this 14.4 km zero-wind configuration, with the afternoon reduction in cloud water path being the largest among simulated cases due to heavy rainout [S2]. Overall, the heterogeneity length scale exceeds the critical threshold (>5 km), and the absence of background wind allows the surface-induced secondary circulation to persist, directly driving cloud deepening, aggregation over dry patches, and enhanced precipitation [S1][S3].
+
+5.  **Check Constraints:**
+   - *Answer using only supplied passages?* Yes.
+   - *Cite every substantive statement?* Need to ensure each claim has a bracketed citation.
+   - *Preserve conditions, contradictions, null findings, uncertainty?* The text is fairly definitive for this specific simulation case. I'll make sure to note it's based on the LES simulations described. No contradictions found in the relevant passages for this specific setup.
+   - *Do not turn transferable evidence into a local recommendation?* It's a scientific description, not a recommendation. I'll keep it descriptive.
+   - *Check citations mapping:*
+     - Chessboard 14.4km dry/wet patches & zero wind setup: [S5]
+     - Secondary circulation triggered by heating variations: [S1][S3]
+     - Moisture pool over dry patches, larger/thicker clouds attached to it: [S3]
+     - Transition to congestus/deep convection: [S1][S2][S3]
+     - Lower cloud fraction, higher cloud water path, aggregation, deeper tops (6km+): [S2]
+     - Strong precipitation, largest reduction in water path due to rainout: [S2]
+     - Multiple peaks from cold pool development: [S2]
+     - Mesoscale threshold (>5km) and wind condition (<Uc0 ~1.5 m/s) met: [S3]
+     - Increased zonal wind variance at surface/PBL top: [S1]
+   - All citations align. I will carefully weave them into the response, ensuring every factual claim is cited.
+
+   Structure:
+   - Setup/Conditions (chessboard, 14.4km, zero wind)
+   - Secondary circulation & moisture transport
+   - Cloud development (transition, depth, aggregation, location)
+   - Precipitation characteristics (timing, intensity, cold pools)
+   - Thresholds/Criteria met
+   - Ensure strict citation format.
+
+   Draft refinement:
+   Under the specified conditions of a 14.4 km chessboard pattern with alternating dry and wet patches and zero background wind, surface heat-flux heterogeneity fundamentally alters planetary boundary layer (PBL) dynamics and drives a transition from shallow cumulus to deeper convection and precipitation [S2][S3]. The contrasting surface heating between the dry (high sensible heat flux) and wet (high latent heat flux) patches triggers a strong mesoscale secondary circulation [S1][S3]. Because the 14.4 km patch size exceeds the critical threshold of 5 km and the background wind is zero, this secondary circulation remains intact and dominates PBL flow dynamics [S1][S3]. 
+
+   This circulation enhances vertical moisture transport, forming concentrated moisture pools near the top of the PBL specifically over the drier patches [S3]. Consequently, larger and thicker shallow cumulus clouds initially develop and remain attached to these moisture pools over the dry regions before noon [S2][S3]. As the day progresses, the heterogeneity promotes a transition to congestus and deep convection [S1][S3]. During this transition, the domain-mean cloud fraction decreases while the mean cloud water path increases, and convection aggregates into narrower spatial regions [S2]. Cloud tops in these transition cases reach 6 km or higher in the afternoon, significantly deeper than the 4–5 km tops observed in non-transition scenarios [S2]. The mesoscale secondary circulation associated with this configuration produces the largest increase in zonal wind variance near both the surface and the PBL top among the simulated cases [S1].
+
+   The aggregated and deepened convection results in significant afternoon precipitation characterized by multiple peaks [S2]. These subsequent precipitation peaks occur as new convective cells develop over cold pools that spread outward from the initial rainfall event [S2]. The 14.4 km zero-wind case (HET14U0) exhibits particularly strong precipitation, evidenced by the largest afternoon reduction in cloud water path due to heavy rainout [S2]. Overall, meeting the criteria of a heterogeneity length scale greater than 5 km and a background wind speed below the secondary circulation's cross-patch threshold allows the surface-induced circulations to directly force cloud deepening, spatial aggregation over dry patches, and enhanced local precipitation [S3].
+
+   Check against constraints:
+   - Every substantive statement cited? Yes.
+   - Preserves conditions/uncertainty? The text is from LES studies, so I'll frame it as simulation findings. The prompt asks "how does... affect", so stating the simulation results directly answers it. I'll add a note that these findings are derived from idealized large-eddy simulations under conditionally unstable atmospheric conditions [S3].
+   - No transferable evidence turned into recommendation? It's purely descriptive of the physical mechanisms in the model.
+   - Citations format: [S1], [S2], etc. Used correctly.
+   - All good. I will produce the final response.✅
+   One minor check: S3 says "larger and thicker shallow cumulus clouds are attached to moisture pools near the PBL top over patches with low evaporative fraction (referred to as ‘‘DRY’’)." I captured that.
+   S2 says "precipitation rate tends to increase with the patch size for zero-background-wind cases". I'll add that.
+   S5 defines dry/wet patches clearly.
+   All aligned. Output matches draft. 
+   Proceed. 
+   Self-Correction/Verification during thought:
+   - Check citation placement: Ensure every sentence or clause making a factual claim has a citation.
+   - "Under the specified conditions..." -> [S5]
+   - "...alters PBL dynamics and drives transition..." -> [S2][S3]
+   - "...triggers mesoscale secondary circulation" -> [S1][S3]
+   - "...exceeds critical threshold... remains intact" -> [S3]
+   - "...enhances vertical moisture transport, forming pools over dry patches" -> [S3]
+   - "...larger/thicker clouds attached to pools before noon" -> [S2][S3]
+   - "...transition to congestus/deep convection" -> [S1][S2][S3]
+   - "...lower cloud fraction, higher water path, aggregation" -> [S2]
+   - "...cloud tops reach 6km+, deeper than 4-5km non-transition" -> [S2]
+   - "...largest zonal wind variance near surface/PBL top" -> [S1]
+   - "...significant afternoon precipitation with multiple peaks" -> [S2]
+   - "...peaks from cold pools" -> [S2]
+   - "...strongest precipitation, largest water path reduction due to rainout" -> [S2]
+   - "...precipitation rate increases with patch size at zero wind" -> [S2]
+   - "...criteria met (scale >5km, wind < Uc0)" -> [S3]
+   All claims are tightly bound to citations. I will generate the response now. 
+   Output matches the refined draft.✅
+   Note: I'll make sure the tone is strictly scientific and adheres to "preserve conditions... do not turn into recommendation". The prompt's condition is already specified, so I just answer it. All good. 
+   Proceeds. 
+   [Output Generation] -> *See response.* 
+   Self-Correction/Note during generation prep: I should explicitly mention that these findings come from the idealized large-eddy simulations described in the passages to preserve the conditional nature of the evidence. I'll add that context briefly if needed, but the prompt just asks "how does it affect". I'll stick closely to the synthesized text. All citations are correctly mapped. Ready. 
+   Output Generation. 
+   [Output] -> *Proceeds.*
+========================================================================================
+FINAL QWEN RESPONSE
+========================================================================================
+
+Based on the provided idealized large-eddy simulations, surface heat-flux heterogeneity under zero background wind with 14.4 km dry and wet chessboard patches fundamentally reorganizes planetary boundary layer (PBL) dynamics, driving a transition from shallow cumulus to deeper convection and precipitation [S2][S3]. The contrasting sensible and latent heat fluxes between the dry and wet patches trigger a strong mesoscale secondary circulation [S1][S3]. Because the 14.4 km patch size exceeds the identified critical threshold of 5 km and the background wind is zero, this surface-induced circulation remains intact and dominates PBL flow without being disrupted by synoptic winds [S3]. 
+
+This secondary circulation enhances vertical moisture transport, concentrating it into distinct moisture pools near the top of the PBL specifically over the drier (low evaporative fraction) patches [S3]. Consequently, larger and thicker shallow cumulus clouds initially form and remain attached to these moisture pools over the dry regions before midday [S2][S3]. As diurnal heating progresses, the heterogeneity forces a transition from shallow cumulus to congestus and deep convection [S1][S3]. During this transition phase, the domain-mean cloud fraction decreases while the mean cloud water path increases, and convective activity aggregates into narrower spatial regions [S2]. Cloud tops in these transition cases reach 6 km or higher in the afternoon, significantly deeper than the 4–5 km maximums observed in non-transition scenarios [S2]. The mesoscale secondary circulation associated with this configuration produces the largest increase in zonal wind variance near both the surface and the PBL top among the simulated cases [S1].
+
+The aggregated and deepened convection results in significant afternoon precipitation characterized by multiple intensity peaks [S2]. These subsequent peaks develop as new convective cells form over cold pools that spread outward from earlier rainfall events [S2]. The 14.4 km zero-wind case exhibits particularly intense precipitation, evidenced by the largest afternoon reduction in cloud water path due to heavy rainout [S2]. Furthermore, for zero-background-wind conditions, precipitation intensity tends to increase with larger patch sizes [S2]. Meeting the proposed transition criteria of a heterogeneity length scale greater than 5 km and a background wind speed below the secondary circulation's cross-patch threshold (~1.5 m s⁻¹) allows the surface-induced circulations to directly force cloud deepening, spatial aggregation over dry patches, and enhanced local precipitation [S3].
+========================================================================================
+TIMING AND GENERATION METRICS
+========================================================================================
+
+{
+  "timings": {
+    "total_seconds": 163.996
+  },
+  "generation": {
+    "prompt_eval_count": 5314,
+    "eval_count": 3346,
+    "prompt_eval_duration": 5434183000,
+    "eval_duration": 112415981000,
+    "total_duration": 128832304000,
+    "load_duration": 10947753500
+  }
+}

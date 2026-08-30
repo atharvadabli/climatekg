@@ -1,0 +1,4769 @@
+========================================================================================
+SYSTEM
+========================================================================================
+
+climatekg
+========================================================================================
+QUESTION
+========================================================================================
+
+For 14.4 km heterogeneous dry and wet patches, how does increasing background wind from zero to 1 m/s change the secondary circulation, convergence location, cloud movement, and transition to deep convection?
+========================================================================================
+QUERY SPECIFICATION
+========================================================================================
+
+{
+  "query_id": "Q02_HET_ONE_MS",
+  "mode": "forward",
+  "context": {
+    "spatial_support": null,
+    "facets": [
+      {
+        "id": "Q02_HET_ONE_MS_F001",
+        "domain": "spatial_configuration",
+        "notion": "heterogeneous patch size",
+        "description": "14.4 km heterogeneous dry and wet patches",
+        "origin": "user",
+        "source": null,
+        "supporting_text_span": "14.4 km heterogeneous dry and wet patches"
+      },
+      {
+        "id": "Q02_HET_ONE_MS_F002",
+        "domain": "land_surface",
+        "notion": "dry and wet patches",
+        "description": "heterogeneous dry and wet patches",
+        "origin": "user",
+        "source": null,
+        "supporting_text_span": "heterogeneous dry and wet patches"
+      }
+    ]
+  },
+  "source": {
+    "concept": "background wind",
+    "state": "zero"
+  },
+  "target": null,
+  "intervention_description": "increasing background wind from zero to 1 m/s for 14.4 km heterogeneous dry and wet patches, changing secondary circulation, convergence location, cloud movement, and transition to deep convection",
+  "user_question": "For 14.4 km heterogeneous dry and wet patches, how does increasing background wind from zero to 1 m/s change the secondary circulation, convergence location, cloud movement, and transition to deep convection?",
+  "ambiguities": []
+}
+========================================================================================
+CONTEXT COMPARISONS
+========================================================================================
+
+[]
+========================================================================================
+CLAIM CANDIDATES
+========================================================================================
+
+[
+  {
+    "claim_id": "R2_P000001:P000001_CL017",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.5798747260590885,
+    "A_claim": 0.6592408793307085,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.7978293191653892,
+    "S_transition": 0.8243364435146121,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R2_P000001:P000001_C013"
+  },
+  {
+    "claim_id": "R2_P000001:P000001_CL016",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.5688898482318554,
+    "A_claim": 0.6592408793307085,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.7429049300292236,
+    "S_transition": 0.8243364435146121,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R2_P000001:P000001_C013"
+  },
+  {
+    "claim_id": "R2_P000001:P000001_CL015",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.567579273790193,
+    "A_claim": 0.6592408793307085,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.7363520578209115,
+    "S_transition": 0.8243364435146121,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R2_P000001:P000001_C013"
+  },
+  {
+    "claim_id": "R2_P000001:P000001_CL013",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.5656530497800057,
+    "A_claim": 0.6592408793307085,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.7267209377699753,
+    "S_transition": 0.8243364435146121,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R2_P000001:P000001_C013"
+  },
+  {
+    "claim_id": "R2_P000001:P000001_CL014",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.5638073421757741,
+    "A_claim": 0.6592408793307085,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.7174923997488171,
+    "S_transition": 0.8243364435146121,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R2_P000001:P000001_C013"
+  },
+  {
+    "claim_id": "R2_P000001:P000001_CL010",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.5400639443110528,
+    "A_claim": 0.656713874622872,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.6857450812017488,
+    "S_transition": 0.7159578966027369,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R2_P000001:P000001_C025"
+  },
+  {
+    "claim_id": "R2_P000001:P000001_CL008",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.5378616787707187,
+    "A_claim": 0.656713874622872,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.6747337535000784,
+    "S_transition": 0.7159578966027369,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R2_P000001:P000001_C025"
+  },
+  {
+    "claim_id": "R2_P000001:P000001_CL007",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.5285716415806676,
+    "A_claim": 0.656713874622872,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.6282835675498235,
+    "S_transition": 0.7159578966027369,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R2_P000001:P000001_C025"
+  },
+  {
+    "claim_id": "R2_P000001:P000001_CL012",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.5276515576783822,
+    "A_claim": 0.656713874622872,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.6236831480383964,
+    "S_transition": 0.7159578966027369,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R2_P000001:P000001_C025"
+  },
+  {
+    "claim_id": "R2_P000001:P000001_CL009",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.5274824962847413,
+    "A_claim": 0.656713874622872,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.622837841070192,
+    "S_transition": 0.7159578966027369,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R2_P000001:P000001_C025"
+  },
+  {
+    "claim_id": "R2_P000001:P000001_CL006",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.5272321241000713,
+    "A_claim": 0.656713874622872,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.6215859801468414,
+    "S_transition": 0.7159578966027369,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R2_P000001:P000001_C025"
+  },
+  {
+    "claim_id": "R2_P000001:P000001_CL011",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.5182430057773152,
+    "A_claim": 0.656713874622872,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.5766403885330612,
+    "S_transition": 0.7159578966027369,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R2_P000001:P000001_C025"
+  },
+  {
+    "claim_id": "R2_P000001:P000001_CL005",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.5170695683208117,
+    "A_claim": 0.656713874622872,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.5707732012505438,
+    "S_transition": 0.7159578966027369,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R2_P000001:P000001_C025"
+  },
+  {
+    "claim_id": "R2_P000001:P000001_CL018",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.46765913782246754,
+    "A_claim": 0.547603521041628,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.6092856001122002,
+    "S_transition": 0.6625362222086326,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R2_P000001:P000001_C005"
+  },
+  {
+    "claim_id": "R2_P000001:P000001_CL004",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.46590200260091713,
+    "A_claim": 0.547603521041628,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.608386680080214,
+    "S_transition": 0.652020547440945,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R2_P000001:P000001_C004"
+  },
+  {
+    "claim_id": "R2_P000001:P000001_CL002",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.4635995919124931,
+    "A_claim": 0.547603521041628,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.5968746266380938,
+    "S_transition": 0.652020547440945,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R2_P000001:P000001_C004"
+  },
+  {
+    "claim_id": "R2_P000001:P000001_CL003",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.4630226357224137,
+    "A_claim": 0.547603521041628,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.5939898456876969,
+    "S_transition": 0.652020547440945,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R2_P000001:P000001_C004"
+  },
+  {
+    "claim_id": "R2_P000001:P000001_CL001",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.4609621809277375,
+    "A_claim": 0.547603521041628,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.5836875717143157,
+    "S_transition": 0.652020547440945,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R2_P000001:P000001_C004"
+  },
+  {
+    "claim_id": "R1_P000014:P000014_CL009",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.4109286849824648,
+    "A_claim": 0.5043718285643095,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.5695343128207059,
+    "S_transition": 0.46702999709589565,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000014:P000014_C008"
+  },
+  {
+    "claim_id": "R1_P000014:P000014_CL010",
+    "channels": [
+      "claim_ann",
+      "context_scope",
+      "transition_ann"
+    ],
+    "R_claim": 0.40271554239566576,
+    "A_claim": 0.5043718285643095,
+    "applicability_known": true,
+    "context_coverage": 1.0,
+    "S_claim_semantic": 0.5284685998867107,
+    "S_transition": 0.46702999709589565,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000014:P000014_C008"
+  },
+  {
+    "claim_id": "R1_P000005:P000005_CL009",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.39918002657377466,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6532096995474915,
+    "S_transition": 0.5927138313738518,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000005:P000005_C005"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL023",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3908728669362563,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6350305608765654,
+    "S_transition": 0.5864930975975194,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.4353116718546355,
+      "known_coverage": 0.5,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F002",
+          "candidate_facet_id": "R1_P000019:P000019_F034",
+          "domain": "land_surface",
+          "notion_similarity": 0.5231892365885609,
+          "content_similarity": 0.38799298315175257,
+          "pair_score": 0.4353116718546355
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000019:P000019_C011"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL021",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.38755237398312486,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.625899205255454,
+    "S_transition": 0.5864930975975194,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.4353116718546355,
+      "known_coverage": 0.5,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F002",
+          "candidate_facet_id": "R1_P000019:P000019_F034",
+          "domain": "land_surface",
+          "notion_similarity": 0.5231892365885609,
+          "content_similarity": 0.38799298315175257,
+          "pair_score": 0.4353116718546355
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000019:P000019_C011"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL022",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3871681334314488,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6248425437383447,
+    "S_transition": 0.5864930975975194,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.4353116718546355,
+      "known_coverage": 0.5,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F002",
+          "candidate_facet_id": "R1_P000019:P000019_F034",
+          "domain": "land_surface",
+          "notion_similarity": 0.5231892365885609,
+          "content_similarity": 0.38799298315175257,
+          "pair_score": 0.4353116718546355
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000019:P000019_C011"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL020",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.38399923632426197,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6161280766935809,
+    "S_transition": 0.5864930975975194,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.4353116718546355,
+      "known_coverage": 0.5,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F002",
+          "candidate_facet_id": "R1_P000019:P000019_F034",
+          "domain": "land_surface",
+          "notion_similarity": 0.5231892365885609,
+          "content_similarity": 0.38799298315175257,
+          "pair_score": 0.4353116718546355
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000019:P000019_C011"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL012",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.38249272448137195,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6338920543227721,
+    "S_transition": 0.5572839173346679,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C017"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL028",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3810262390167809,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6384373844059896,
+    "S_transition": 0.5458463638535438,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C016"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL026",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.37891661862361264,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.632635928324777,
+    "S_transition": 0.5458463638535438,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C016"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL024",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3767468202634721,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6266689828343904,
+    "S_transition": 0.5458463638535438,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C016"
+  },
+  {
+    "claim_id": "R1_P000001:P000001_CL007",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.37575568572428736,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6423912028872631,
+    "S_transition": 0.5212492438060362,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000001:P000001_C007"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL002",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.37537580634068474,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6614154405611692,
+    "S_transition": 0.4944907025009519,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.43191498456206256,
+      "known_coverage": 0.5,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F002",
+          "candidate_facet_id": "R1_P000019:P000019_F029",
+          "domain": "land_surface",
+          "notion_similarity": 0.5065677491228032,
+          "content_similarity": 0.39171734210627907,
+          "pair_score": 0.43191498456206256
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000019:P000019_C010"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL014",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3741375897338058,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6109154337669651,
+    "S_transition": 0.5572839173346679,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C017"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL013",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3728104228147247,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6072657247394921,
+    "S_transition": 0.5572839173346679,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C017"
+  },
+  {
+    "claim_id": "R1_P000001:P000001_CL005",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3694680025709742,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6251000742156518,
+    "S_transition": 0.5212492438060362,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000001:P000001_C007"
+  },
+  {
+    "claim_id": "R1_P000001:P000001_CL006",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.36942693895474116,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6249871492710111,
+    "S_transition": 0.5212492438060362,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000001:P000001_C007"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL007",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.36935095363681664,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6190996228537264,
+    "S_transition": 0.5288206661966924,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C012"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL027",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.36927610707224257,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6061245215585093,
+    "S_transition": 0.5458463638535438,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C016"
+  },
+  {
+    "claim_id": "R1_P000005:P000005_CL012",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3675099857064627,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5661170871623836,
+    "S_transition": 0.5927138313738518,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000005:P000005_C005"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL004",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.36735469247458125,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.613609904657579,
+    "S_transition": 0.5288206661966924,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C012"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL009",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3635905011469063,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6118109808148173,
+    "S_transition": 0.5174171964522333,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.4809941108747172,
+      "known_coverage": 0.6666666666666666,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F002",
+          "candidate_facet_id": "R1_P000019:P000019_F038",
+          "domain": "land_surface",
+          "notion_similarity": 0.49529320770892066,
+          "content_similarity": 0.4596603936800027,
+          "pair_score": 0.47213187859012395
+        },
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F002",
+          "candidate_facet_id": "R1_P000019:P000019_F039",
+          "domain": "land_surface",
+          "notion_similarity": 0.5199180850787846,
+          "content_similarity": 0.4736692513565169,
+          "pair_score": 0.48985634315931054
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000019:P000019_C015"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL008",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3605193105378712,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.603365206639971,
+    "S_transition": 0.5174171964522333,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.4809941108747172,
+      "known_coverage": 0.6666666666666666,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F002",
+          "candidate_facet_id": "R1_P000019:P000019_F038",
+          "domain": "land_surface",
+          "notion_similarity": 0.49529320770892066,
+          "content_similarity": 0.4596603936800027,
+          "pair_score": 0.47213187859012395
+        },
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F002",
+          "candidate_facet_id": "R1_P000019:P000019_F039",
+          "domain": "land_surface",
+          "notion_similarity": 0.5199180850787846,
+          "content_similarity": 0.4736692513565169,
+          "pair_score": 0.48985634315931054
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000019:P000019_C015"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL030",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.360415721777227,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5703625974227318,
+    "S_transition": 0.561040849952857,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.45624329680780096,
+      "known_coverage": 0.5,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F001",
+          "candidate_facet_id": "R1_P000019:P000019_F037",
+          "domain": "spatial_configuration",
+          "notion_similarity": 0.49510476027668887,
+          "content_similarity": 0.4353178934014767,
+          "pair_score": 0.45624329680780096
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000019:P000019_C013"
+  },
+  {
+    "claim_id": "R1_P000005:P000005_CL011",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3598702702563605,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5451078696746026,
+    "S_transition": 0.5927138313738518,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000005:P000005_C005"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL031",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3590280665589871,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5665465455725718,
+    "S_transition": 0.561040849952857,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.45624329680780096,
+      "known_coverage": 0.5,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F001",
+          "candidate_facet_id": "R1_P000019:P000019_F037",
+          "domain": "spatial_configuration",
+          "notion_similarity": 0.49510476027668887,
+          "content_similarity": 0.4353178934014767,
+          "pair_score": 0.45624329680780096
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000019:P000019_C013"
+  },
+  {
+    "claim_id": "R1_P000001:P000001_CL010",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3586700442118198,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5954056887279774,
+    "S_transition": 0.5212492438060362,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000001:P000001_C007"
+  },
+  {
+    "claim_id": "R1_P000010:P000010_CL010",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.35833303969439395,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6104145619728409,
+    "S_transition": 0.5000017295823233,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000010:P000010_C002"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL015",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.35817227122014555,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5979105292327567,
+    "S_transition": 0.5160842888301916,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C019"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL011",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.35801377430426923,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5665749413357396,
+    "S_transition": 0.5572839173346679,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C017"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL001",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3564106918227021,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6092613756367168,
+    "S_transition": 0.4944907025009519,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.43191498456206256,
+      "known_coverage": 0.5,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F002",
+          "candidate_facet_id": "R1_P000019:P000019_F029",
+          "domain": "land_surface",
+          "notion_similarity": 0.5065677491228032,
+          "content_similarity": 0.39171734210627907,
+          "pair_score": 0.43191498456206256
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000019:P000019_C010"
+  },
+  {
+    "claim_id": "R1_P000005:P000005_CL010",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.35502320850863445,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.531778449868356,
+    "S_transition": 0.5927138313738518,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000005:P000005_C005"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL033",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3528868816728549,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5496582871357084,
+    "S_transition": 0.561040849952857,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.45624329680780096,
+      "known_coverage": 0.5,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F001",
+          "candidate_facet_id": "R1_P000019:P000019_F037",
+          "domain": "spatial_configuration",
+          "notion_similarity": 0.49510476027668887,
+          "content_similarity": 0.4353178934014767,
+          "pair_score": 0.45624329680780096
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000019:P000019_C013"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL032",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3511565696918874,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5448999291880476,
+    "S_transition": 0.561040849952857,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.45624329680780096,
+      "known_coverage": 0.5,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F001",
+          "candidate_facet_id": "R1_P000019:P000019_F037",
+          "domain": "spatial_configuration",
+          "notion_similarity": 0.49510476027668887,
+          "content_similarity": 0.4353178934014767,
+          "pair_score": 0.45624329680780096
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000019:P000019_C013"
+  },
+  {
+    "claim_id": "R1_P000001:P000001_CL009",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3509447019545256,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5741609975204183,
+    "S_transition": 0.5212492438060362,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000001:P000001_C007"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL029",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3502288573549194,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5537445848358705,
+    "S_transition": 0.5458463638535438,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C016"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL016",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3501949314589408,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5759728448894434,
+    "S_transition": 0.5160842888301916,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C019"
+  },
+  {
+    "claim_id": "R1_P000010:P000010_CL002",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3499951028799964,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5874852357332478,
+    "S_transition": 0.5000017295823233,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000010:P000010_C002"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL017",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3499695631019446,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5753530819077041,
+    "S_transition": 0.5160842888301916,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C019"
+  },
+  {
+    "claim_id": "R1_P000010:P000010_CL014",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.34954161205066314,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6442056037429892,
+    "S_transition": 0.42271177252844583,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000010:P000010_C002"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL010",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.34906629726571586,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5718694201415437,
+    "S_transition": 0.5174171964522333,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C015"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL019",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3489190158779742,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5724640770417855,
+    "S_transition": 0.5160842888301916,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C019"
+  },
+  {
+    "claim_id": "R1_P000014:P000014_CL008",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3488479022096515,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.6158653264671489,
+    "S_transition": 0.4579552061458573,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000014:P000014_C007"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL018",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3488015393032814,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5721410164613803,
+    "S_transition": 0.5160842888301916,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C019"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL006",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.34792369512947624,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5601746619585405,
+    "S_transition": 0.5288206661966924,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C012"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL025",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.34708917881963436,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5451104688638366,
+    "S_transition": 0.5458463638535438,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C016"
+  },
+  {
+    "claim_id": "R1_P000014:P000014_CL003",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.34670258081176414,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5893982449053807,
+    "S_transition": 0.4853784697692942,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000014:P000014_C005"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL005",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.346341216707488,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5558228462980727,
+    "S_transition": 0.5288206661966924,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000019:P000019_C012"
+  },
+  {
+    "claim_id": "R1_P000005:P000005_CL005",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.34450575832511754,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5798554913170051,
+    "S_transition": 0.49004712543609097,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000005:P000005_C006"
+  },
+  {
+    "claim_id": "R1_P000005:P000005_CL004",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3440656936234837,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.578645313387512,
+    "S_transition": 0.49004712543609097,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000005:P000005_C006"
+  },
+  {
+    "claim_id": "R1_P000010:P000010_CL003",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.34246093670934924,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5667662787639679,
+    "S_transition": 0.5000017295823233,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000010:P000010_C002"
+  },
+  {
+    "claim_id": "R1_P000010:P000010_CL005",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.33866941884003265,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5563396046233473,
+    "S_transition": 0.5000017295823233,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000010:P000010_C002"
+  },
+  {
+    "claim_id": "R1_P000010:P000010_CL016",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.33832983804996036,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5753509451372311,
+    "S_transition": 0.47340814600021336,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000010:P000010_C002"
+  },
+  {
+    "claim_id": "R1_P000001:P000001_CL002",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.33722740509554666,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5393905386394413,
+    "S_transition": 0.5173131004977495,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000001:P000001_C005"
+  },
+  {
+    "claim_id": "R1_P000005:P000005_CL007",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3343661761322978,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5337065726149823,
+    "S_transition": 0.514400548998449,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000005:P000005_C009"
+  },
+  {
+    "claim_id": "R1_P000004:P000004_CL007",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3332062308780714,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5472391796704729,
+    "S_transition": 0.49210394032563126,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000004:P000004_C002"
+  },
+  {
+    "claim_id": "R1_P000001:P000001_CL003",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.332804418842729,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5242752189629776,
+    "S_transition": 0.5212492438060362,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000001:P000001_C007"
+  },
+  {
+    "claim_id": "R1_P000010:P000010_CL009",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.331625157469307,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5369678858538519,
+    "S_transition": 0.5000017295823233,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000010:P000010_C002"
+  },
+  {
+    "claim_id": "R1_P000001:P000001_CL001",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.33113729196913977,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5226427275418224,
+    "S_transition": 0.5173131004977495,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000001:P000001_C005"
+  },
+  {
+    "claim_id": "R1_P000001:P000001_CL004",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.32975200683663014,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5158810859462057,
+    "S_transition": 0.5212492438060362,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000001:P000001_C007"
+  },
+  {
+    "claim_id": "R1_P000019:P000019_CL003",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.32907320133844115,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5340832768049992,
+    "S_transition": 0.4944907025009519,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.43191498456206256,
+      "known_coverage": 0.5,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F002",
+          "candidate_facet_id": "R1_P000019:P000019_F029",
+          "domain": "land_surface",
+          "notion_similarity": 0.5065677491228032,
+          "content_similarity": 0.39171734210627907,
+          "pair_score": 0.43191498456206256
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000019:P000019_C010"
+  },
+  {
+    "claim_id": "R1_P000010:P000010_CL004",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.32879574065314615,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5291869896094096,
+    "S_transition": 0.5000017295823233,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000010:P000010_C002"
+  },
+  {
+    "claim_id": "R1_P000001:P000001_CL008",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.32721399853661565,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5089015631211659,
+    "S_transition": 0.5212492438060362,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000001:P000001_C007"
+  },
+  {
+    "claim_id": "R1_P000005:P000005_CL006",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3262735412109697,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5114518265813299,
+    "S_transition": 0.514400548998449,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000005:P000005_C009"
+  },
+  {
+    "claim_id": "R1_P000014:P000014_CL001",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.32524346022378037,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5303856632884254,
+    "S_transition": 0.4853784697692942,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000014:P000014_C005"
+  },
+  {
+    "claim_id": "R1_P000010:P000010_CL007",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3247532394817443,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5180701113880544,
+    "S_transition": 0.5000017295823233,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000010:P000010_C002"
+  },
+  {
+    "claim_id": "R1_P000010:P000010_CL001",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.32463131686350083,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5177348241878849,
+    "S_transition": 0.5000017295823233,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000010:P000010_C002"
+  },
+  {
+    "claim_id": "R1_P000002:P000002_CL007",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3241765032181945,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5421163072886215,
+    "S_transition": 0.46582543541521804,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000002:P000002_C002"
+  },
+  {
+    "claim_id": "R1_P000010:P000010_CL018",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.32368250222986134,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5350707716319587,
+    "S_transition": 0.47340814600021336,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000010:P000010_C002"
+  },
+  {
+    "claim_id": "R1_P000014:P000014_CL004",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3228473825873291,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5237964497881844,
+    "S_transition": 0.4853784697692942,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000014:P000014_C005"
+  },
+  {
+    "claim_id": "R1_P000010:P000010_CL012",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.32247659207400514,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5697767988071798,
+    "S_transition": 0.42271177252844583,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000010:P000010_C002"
+  },
+  {
+    "claim_id": "R1_P000010:P000010_CL008",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.321417025040826,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.508895521675529,
+    "S_transition": 0.5000017295823233,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000010:P000010_C002"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL019",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.32048697162556594,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4792169155642048,
+    "S_transition": 0.5361630085414688,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000003:P000003_C008"
+  },
+  {
+    "claim_id": "R1_P000010:P000010_CL006",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.320428284565491,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5061764853683579,
+    "S_transition": 0.5000017295823233,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000010:P000010_C002"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL005",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.31926122097082754,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4808452415149436,
+    "S_transition": 0.5294974882064428,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000003:P000003_C004"
+  },
+  {
+    "claim_id": "R1_P000002:P000002_CL003",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.31857347397302127,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5366701910939757,
+    "S_transition": 0.45254248310911055,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000002:P000002_C002"
+  },
+  {
+    "claim_id": "R1_P000011:P000011_CL005",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.31832491677978114,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5319005044357236,
+    "S_transition": 0.45799068894489947,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000011:P000011_C004"
+  },
+  {
+    "claim_id": "R1_P000013:P000013_CL007",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.31765186433788384,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5088251969493722,
+    "S_transition": 0.4862899066397444,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000013:P000013_C002"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL007",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3173099035554181,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.47547911862256775,
+    "S_transition": 0.5294974882064428,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000003:P000003_C004"
+  },
+  {
+    "claim_id": "R1_P000013:P000013_CL008",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3170483045409424,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5071654075077834,
+    "S_transition": 0.4862899066397444,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000013:P000013_C002"
+  },
+  {
+    "claim_id": "R1_P000011:P000011_CL004",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.31590045619555945,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.525233237829114,
+    "S_transition": 0.45799068894489947,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000011:P000011_C004"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL011",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3158846611469862,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.47155970199938,
+    "S_transition": 0.5294974882064428,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000003:P000003_C004"
+  },
+  {
+    "claim_id": "R1_P000010:P000010_CL013",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3152675406069773,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5499519072728534,
+    "S_transition": 0.42271177252844583,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000010:P000010_C002"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL020",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.31452120169731856,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.46281104826152447,
+    "S_transition": 0.5361630085414688,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000003:P000003_C008"
+  },
+  {
+    "claim_id": "R1_P000010:P000010_CL015",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3143377756674901,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5473950536892634,
+    "S_transition": 0.42271177252844583,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000010:P000010_C002"
+  },
+  {
+    "claim_id": "R1_P000014:P000014_CL006",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3138709435052755,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5196786900301147,
+    "S_transition": 0.4579552061458573,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000014:P000014_C007"
+  },
+  {
+    "claim_id": "R1_P000002:P000002_CL002",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3130548700974727,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.521494030436217,
+    "S_transition": 0.45254248310911055,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000002:P000002_C002"
+  },
+  {
+    "claim_id": "R1_P000004:P000004_CL010",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.31300317403730604,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.49168077335836824,
+    "S_transition": 0.49210394032563126,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000004:P000004_C002"
+  },
+  {
+    "claim_id": "R1_P000004:P000004_CL005",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3121621766301745,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4893680304887564,
+    "S_transition": 0.49210394032563126,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000004:P000004_C002"
+  },
+  {
+    "claim_id": "R1_P000004:P000004_CL012",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.31014998598097093,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5000639286599501,
+    "S_transition": 0.47046471038362675,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000004:P000004_C005"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL002",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3099641960816396,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4552784230696768,
+    "S_transition": 0.5294974882064428,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000003:P000003_C004"
+  },
+  {
+    "claim_id": "R1_P000002:P000002_CL001",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3097477926436205,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5123995674381235,
+    "S_transition": 0.45254248310911055,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000002:P000002_C002"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL004",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.30955636514046503,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.45415688798144666,
+    "S_transition": 0.5294974882064428,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000003:P000003_C004"
+  },
+  {
+    "claim_id": "R1_P000004:P000004_CL011",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3094419268279486,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4818873435326351,
+    "S_transition": 0.49210394032563126,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000004:P000004_C002"
+  },
+  {
+    "claim_id": "R1_P000004:P000004_CL013",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.309183866026253,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.49740709878447553,
+    "S_transition": 0.47046471038362675,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000004:P000004_C005"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL014",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3085744371855072,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5068061262959854,
+    "S_transition": 0.45569810128554605,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C002"
+  },
+  {
+    "claim_id": "R1_P000014:P000014_CL005",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3084024878231995,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5046404369044059,
+    "S_transition": 0.4579552061458573,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.39862878598418217,
+      "known_coverage": 0.5,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F002",
+          "candidate_facet_id": "R1_P000014:P000014_F012",
+          "domain": "land_surface",
+          "notion_similarity": 0.5165433951921105,
+          "content_similarity": 0.33513630410299,
+          "pair_score": 0.39862878598418217
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000014:P000014_C007"
+  },
+  {
+    "claim_id": "R1_P000004:P000004_CL001",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.30839131639972617,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.47899816485502356,
+    "S_transition": 0.49210394032563126,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000004:P000004_C002"
+  },
+  {
+    "claim_id": "R1_P000006:P000006_CL003",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.30767008629551146,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5226635853753765,
+    "S_transition": 0.4312388692497067,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000006:P000006_C002"
+  },
+  {
+    "claim_id": "R1_P000004:P000004_CL002",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3075755175133652,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4767547179175309,
+    "S_transition": 0.49210394032563126,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000004:P000004_C002"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL001",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3072852000879612,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4479111840870611,
+    "S_transition": 0.5294974882064428,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000003:P000003_C004"
+  },
+  {
+    "claim_id": "R1_P000013:P000013_CL004",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3070547296953792,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4796830766824846,
+    "S_transition": 0.4862899066397444,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000013:P000013_C002"
+  },
+  {
+    "claim_id": "R1_P000005:P000005_CL003",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3067910669979024,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.47614009016716324,
+    "S_transition": 0.49004712543609097,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000005:P000005_C006"
+  },
+  {
+    "claim_id": "R1_P000007:P000007_CL010",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.306465371994728,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.503775020924807,
+    "S_transition": 0.45200633608092694,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000007:P000007_C007"
+  },
+  {
+    "claim_id": "R1_P000011:P000011_CL007",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3060453169202119,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5431328682530653,
+    "S_transition": 0.39798900437002344,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.48578442584826226,
+      "known_coverage": 1.0,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F001",
+          "candidate_facet_id": "R1_P000011:P000011_F025",
+          "domain": "spatial_configuration",
+          "notion_similarity": 0.47756592664361347,
+          "content_similarity": 0.39916147040124317,
+          "pair_score": 0.4266030300860728
+        },
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F001",
+          "candidate_facet_id": "R1_P000011:P000011_F026",
+          "domain": "spatial_configuration",
+          "notion_similarity": 0.5506226827436663,
+          "content_similarity": 0.49534123215977965,
+          "pair_score": 0.51468973986414
+        },
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F001",
+          "candidate_facet_id": "R1_P000011:P000011_F027",
+          "domain": "spatial_configuration",
+          "notion_similarity": 0.5465619538767388,
+          "content_similarity": 0.4996366519041776,
+          "pair_score": 0.516060507594574
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000011:P000011_C001"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL010",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3058692839359034,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.44401741466890227,
+    "S_transition": 0.5294974882064428,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000003:P000003_C004"
+  },
+  {
+    "claim_id": "R1_P000004:P000004_CL008",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.30581913113657677,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.47192465538136275,
+    "S_transition": 0.49210394032563126,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000004:P000004_C002"
+  },
+  {
+    "claim_id": "R1_P000010:P000010_CL017",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3057695803439764,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4858102364457751,
+    "S_transition": 0.47340814600021336,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000010:P000010_C002"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL004",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3054948645031469,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.48336048223490174,
+    "S_transition": 0.47566719353166964,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C002"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL003",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3054499451921563,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.44286423312359763,
+    "S_transition": 0.5294974882064428,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000003:P000003_C004"
+  },
+  {
+    "claim_id": "R1_P000006:P000006_CL002",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.30466183631595467,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5143908979315953,
+    "S_transition": 0.4312388692497067,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.48188094566940476,
+      "known_coverage": 0.5,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F001",
+          "candidate_facet_id": "R1_P000006:P000006_F011",
+          "domain": "spatial_configuration",
+          "notion_similarity": 0.5091379279738659,
+          "content_similarity": 0.46720410904392573,
+          "pair_score": 0.48188094566940476
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000006:P000006_C002"
+  },
+  {
+    "claim_id": "R1_P000004:P000004_CL009",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.30457766921246915,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.46851063509006685,
+    "S_transition": 0.49210394032563126,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000004:P000004_C002"
+  },
+  {
+    "claim_id": "R1_P000006:P000006_CL001",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.30429615479682487,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5133852737539883,
+    "S_transition": 0.4312388692497067,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.4767668932707821,
+      "known_coverage": 0.5,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F001",
+          "candidate_facet_id": "R1_P000006:P000006_F007",
+          "domain": "spatial_configuration",
+          "notion_similarity": 0.4812766918335876,
+          "content_similarity": 0.4743385401985022,
+          "pair_score": 0.4767668932707821
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000006:P000006_C002"
+  },
+  {
+    "claim_id": "R1_P000011:P000011_CL003",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.3026517273684362,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5442392925094126,
+    "S_transition": 0.38407061033838275,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000011:P000011_C002"
+  },
+  {
+    "claim_id": "R1_P000005:P000005_CL008",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3023436171549286,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4456445354272169,
+    "S_transition": 0.514400548998449,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000005:P000005_C009"
+  },
+  {
+    "claim_id": "R1_P000013:P000013_CL003",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3022462689624146,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4664598096668318,
+    "S_transition": 0.4862899066397444,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000013:P000013_C002"
+  },
+  {
+    "claim_id": "R1_P000007:P000007_CL011",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3020558732046499,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.49164889925209204,
+    "S_transition": 0.45200633608092694,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000007:P000007_C007"
+  },
+  {
+    "claim_id": "R1_P000004:P000004_CL014",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.3010683888495795,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.47508953654862346,
+    "S_transition": 0.47046471038362675,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000004:P000004_C005"
+  },
+  {
+    "claim_id": "R1_P000004:P000004_CL015",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.30056038008040986,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4736925124334072,
+    "S_transition": 0.47046471038362675,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.4900544576537037,
+      "known_coverage": 1.0,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F001",
+          "candidate_facet_id": "R1_P000004:P000004_F015",
+          "domain": "spatial_configuration",
+          "notion_similarity": 0.5385186790344718,
+          "content_similarity": 0.46395833844867473,
+          "pair_score": 0.4900544576537037
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000004:P000004_C005"
+  },
+  {
+    "claim_id": "R1_P000002:P000002_CL005",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.29986081086972305,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.47524815333032494,
+    "S_transition": 0.46582543541521804,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000002:P000002_C002"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL008",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.29984283178609744,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4274446712569359,
+    "S_transition": 0.5294974882064428,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000003:P000003_C004"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL016",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2994660985954372,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5088474441571952,
+    "S_transition": 0.41957910264034287,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000003:P000003_C008"
+  },
+  {
+    "claim_id": "R1_P000004:P000004_CL004",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.29818798051678086,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4509389911769238,
+    "S_transition": 0.49210394032563126,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000004:P000004_C002"
+  },
+  {
+    "claim_id": "R1_P000005:P000005_CL002",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2979750388010109,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4518960126257117,
+    "S_transition": 0.49004712543609097,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000005:P000005_C006"
+  },
+  {
+    "claim_id": "R1_P000014:P000014_CL002",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2977834034326765,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.45487050711288973,
+    "S_transition": 0.4853784697692942,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000014:P000014_C005"
+  },
+  {
+    "claim_id": "R1_P000013:P000013_CL006",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.29682035844705157,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.45153855574958357,
+    "S_transition": 0.4862899066397444,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000013:P000013_C002"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL017",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.29663955381146356,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.491708843698581,
+    "S_transition": 0.4320665723772587,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000003:P000003_C008"
+  },
+  {
+    "claim_id": "R1_P000002:P000002_CL006",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2966016923888231,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.46628557750784994,
+    "S_transition": 0.46582543541521804,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000002:P000002_C002"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL007",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.296263076631441,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.45797306558771067,
+    "S_transition": 0.47566719353166964,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C002"
+  },
+  {
+    "claim_id": "R1_P000004:P000004_CL006",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2961216418394,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4452565598141266,
+    "S_transition": 0.49210394032563126,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000004:P000004_C002"
+  },
+  {
+    "claim_id": "R1_P000013:P000013_CL005",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2960654001005692,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.449462420296757,
+    "S_transition": 0.4862899066397444,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000013:P000013_C002"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL011",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.29505382742114433,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4696244494439874,
+    "S_transition": 0.45569810128554605,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C002"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL015",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.29489779835311275,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.46919536950690066,
+    "S_transition": 0.45569810128554605,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C002"
+  },
+  {
+    "claim_id": "R1_P000011:P000011_CL008",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.29479763895523725,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5122017538493849,
+    "S_transition": 0.39798900437002344,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.515375123729357,
+      "known_coverage": 1.0,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F001",
+          "candidate_facet_id": "R1_P000011:P000011_F026",
+          "domain": "spatial_configuration",
+          "notion_similarity": 0.5506226827436663,
+          "content_similarity": 0.49534123215977965,
+          "pair_score": 0.51468973986414
+        },
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F001",
+          "candidate_facet_id": "R1_P000011:P000011_F027",
+          "domain": "spatial_configuration",
+          "notion_similarity": 0.5465619538767388,
+          "content_similarity": 0.4996366519041776,
+          "pair_score": 0.516060507594574
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000011:P000011_C001"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL006",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.29289092045724363,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.40832691510258795,
+    "S_transition": 0.5294974882064428,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000003:P000003_C004"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL006",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2926899848571384,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.44814706320837827,
+    "S_transition": 0.47566719353166964,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C002"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL013",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2923340450249995,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4546185453433847,
+    "S_transition": 0.4657334379671521,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.47821144941634836,
+      "known_coverage": 1.0,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F002",
+          "candidate_facet_id": "R1_P000003:P000003_F023",
+          "domain": "land_surface",
+          "notion_similarity": 0.5236366117287076,
+          "content_similarity": 0.46683605180096377,
+          "pair_score": 0.4867162477756741
+        },
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F001",
+          "candidate_facet_id": "R1_P000003:P000003_F024",
+          "domain": "spatial_configuration",
+          "notion_similarity": 0.5149699762457932,
+          "content_similarity": 0.44533409133999224,
+          "pair_score": 0.4697066510570226
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000003:P000003_C008"
+  },
+  {
+    "claim_id": "R1_P000020:P000020_CL014",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.29113840583457923,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5268214325225887,
+    "S_transition": 0.36507891136333903,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000020:P000020_C004"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL012",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.29104725729861114,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.45107987909581665,
+    "S_transition": 0.4657334379671521,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.47821144941634836,
+      "known_coverage": 1.0,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F002",
+          "candidate_facet_id": "R1_P000003:P000003_F023",
+          "domain": "land_surface",
+          "notion_similarity": 0.5236366117287076,
+          "content_similarity": 0.46683605180096377,
+          "pair_score": 0.4867162477756741
+        },
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F001",
+          "candidate_facet_id": "R1_P000003:P000003_F024",
+          "domain": "spatial_configuration",
+          "notion_similarity": 0.5149699762457932,
+          "content_similarity": 0.44533409133999224,
+          "pair_score": 0.4697066510570226
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000003:P000003_C008"
+  },
+  {
+    "claim_id": "R1_P000020:P000020_CL013",
+    "channels": [
+      "claim_ann",
+      "transition_ann"
+    ],
+    "R_claim": 0.2902610364054459,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5244086665924722,
+    "S_transition": 0.36507891136333903,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000020:P000020_C004"
+  },
+  {
+    "claim_id": "R1_P000002:P000002_CL004",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.29002450777750005,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.44819831982671166,
+    "S_transition": 0.46582543541521804,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.48143876098281646,
+      "known_coverage": 1.0,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F001",
+          "candidate_facet_id": "R1_P000002:P000002_F001",
+          "domain": "spatial_configuration",
+          "notion_similarity": 0.5743014747533116,
+          "content_similarity": 0.43143576126024213,
+          "pair_score": 0.48143876098281646
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000002:P000002_C002"
+  },
+  {
+    "claim_id": "R1_P000004:P000004_CL003",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2893346242204028,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4265922613618843,
+    "S_transition": 0.49210394032563126,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000004:P000004_C002"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL005",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2890446673315664,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.43812244001305545,
+    "S_transition": 0.47566719353166964,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C002"
+  },
+  {
+    "claim_id": "R1_P000013:P000013_CL002",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.28870080195658254,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4292097754007938,
+    "S_transition": 0.4862899066397444,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000013:P000013_C002"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL009",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2875625582458294,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4490234592118713,
+    "S_transition": 0.45569810128554605,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C002"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL002",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.28713014381850244,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.43285750035212944,
+    "S_transition": 0.47566719353166964,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C002"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL009",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2862263178660075,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.38999925797668855,
+    "S_transition": 0.5294974882064428,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000003:P000003_C004"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL010",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2861675169317741,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4451870955982194,
+    "S_transition": 0.45569810128554605,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C002"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL008",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2845502049178929,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.44073948756004605,
+    "S_transition": 0.45569810128554605,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C002"
+  },
+  {
+    "claim_id": "R1_P000014:P000014_CL007",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.28335816872171987,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.43576855937533676,
+    "S_transition": 0.4579552061458573,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000014:P000014_C007"
+  },
+  {
+    "claim_id": "R1_P000020:P000020_CL012",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.28214103365584636,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5020786590310732,
+    "S_transition": 0.36507891136333903,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000020:P000020_C004"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL014",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2821115475878763,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4611224288864028,
+    "S_transition": 0.41957910264034287,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000003:P000003_C008"
+  },
+  {
+    "claim_id": "R1_P000005:P000005_CL001",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.28189646388965534,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.407679931619484,
+    "S_transition": 0.49004712543609097,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000005:P000005_C006"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL001",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2814621182067727,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4172704299198727,
+    "S_transition": 0.47566719353166964,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C002"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL020",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.28045243483337295,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5010903732096275,
+    "S_transition": 0.3602050967761975,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C010"
+  },
+  {
+    "claim_id": "R1_P000011:P000011_CL001",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.28009590617447233,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4822107842260119,
+    "S_transition": 0.38407061033838275,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000011:P000011_C002"
+  },
+  {
+    "claim_id": "R1_P000013:P000013_CL001",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.28002349709921487,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.40534718704303263,
+    "S_transition": 0.4862899066397444,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000013:P000013_C002"
+  },
+  {
+    "claim_id": "R1_P000011:P000011_CL002",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2799981211906614,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4819418755205319,
+    "S_transition": 0.38407061033838275,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000011:P000011_C002"
+  },
+  {
+    "claim_id": "R1_P000002:P000002_CL009",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2790814781903285,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4505831487128705,
+    "S_transition": 0.42252122174737744,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000002:P000002_C002"
+  },
+  {
+    "claim_id": "R1_P000020:P000020_CL011",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.27866281911773494,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.49251356905126686,
+    "S_transition": 0.36507891136333903,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000020:P000020_C004"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL018",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.278615102540617,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4421416027037528,
+    "S_transition": 0.4320665723772587,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000003:P000003_C008"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL003",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.27834988426942386,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.40871178659216356,
+    "S_transition": 0.47566719353166964,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C002"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL023",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2774905183472061,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4929451028726688,
+    "S_transition": 0.3602050967761975,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C010"
+  },
+  {
+    "claim_id": "R1_P000007:P000007_CL009",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.27712575927538874,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.42309108594662387,
+    "S_transition": 0.45200633608092694,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": 0.0,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000007:P000007_C007"
+  },
+  {
+    "claim_id": "R1_P000020:P000020_CL009",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2765826251872425,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4867930357424128,
+    "S_transition": 0.36507891136333903,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000020:P000020_C004"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL048",
+    "channels": [
+      "claim_ann"
+    ],
+    "R_claim": 0.2765771261537922,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5531542523075844,
+    "S_transition": null,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C018"
+  },
+  {
+    "claim_id": "R1_P000003:P000003_CL015",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2748505251187877,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4411546170964091,
+    "S_transition": 0.41957910264034287,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000003:P000003_C008"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL017",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2730216609898608,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4806557451399691,
+    "S_transition": 0.3602050967761975,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C010"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL018",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.27130538462289855,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4759359851308229,
+    "S_transition": 0.3602050967761975,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C010"
+  },
+  {
+    "claim_id": "R1_P000020:P000020_CL010",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.27078126133504676,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4708392851488744,
+    "S_transition": 0.36507891136333903,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000020:P000020_C004"
+  },
+  {
+    "claim_id": "R1_P000007:P000007_CL005",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.27046897798116126,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.44776158975992086,
+    "S_transition": 0.39470413291769685,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.3895407007488831,
+      "known_coverage": 0.5,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F002",
+          "candidate_facet_id": "R1_P000007:P000007_F011",
+          "domain": "land_surface",
+          "notion_similarity": 0.4959915782231359,
+          "content_similarity": 0.3322209974935162,
+          "pair_score": 0.3895407007488831
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000007:P000007_C001"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL024",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.26984737022212646,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4719264455286996,
+    "S_transition": 0.3602050967761975,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C010"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL019",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2696665373452797,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4714291551173711,
+    "S_transition": 0.3602050967761975,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C010"
+  },
+  {
+    "claim_id": "R1_P000012:P000012_CL004",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.268802763493557,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.41811720770956134,
+    "S_transition": 0.4281205225302938,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000012:P000012_C009"
+  },
+  {
+    "claim_id": "R1_P000012:P000012_CL008",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2685301600683362,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.47238493611545834,
+    "S_transition": 0.35476400542995495,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.4676694193906063,
+      "known_coverage": 0.6666666666666666,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F001",
+          "candidate_facet_id": "R1_P000012:P000012_F016",
+          "domain": "spatial_configuration",
+          "notion_similarity": 0.489543960690946,
+          "content_similarity": 0.48708522779883145,
+          "pair_score": 0.4879457843110715
+        },
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F002",
+          "candidate_facet_id": "R1_P000012:P000012_F017",
+          "domain": "land_surface",
+          "notion_similarity": 0.5136506531767497,
+          "content_similarity": 0.41171588593581343,
+          "pair_score": 0.4473930544701411
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000012:P000012_C002"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL016",
+    "channels": [
+      "claim_ann"
+    ],
+    "R_claim": 0.26772063240105604,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5354412648021121,
+    "S_transition": null,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C004"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL050",
+    "channels": [
+      "claim_ann"
+    ],
+    "R_claim": 0.26720593284852273,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.5344118656970455,
+    "S_transition": null,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C018"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL022",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2662167996390108,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4619423764251315,
+    "S_transition": 0.3602050967761975,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C010"
+  },
+  {
+    "claim_id": "R1_P000015:P000015_CL021",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2655056687962875,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.45998676660764254,
+    "S_transition": 0.3602050967761975,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000015:P000015_C010"
+  },
+  {
+    "claim_id": "R1_P000007:P000007_CL002",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.26531863809533757,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4698080532442003,
+    "S_transition": 0.3464242686906373,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": 0.37826445960137806,
+      "known_coverage": 0.5,
+      "matches": [
+        {
+          "query_facet_id": "Q02_HET_ONE_MS_F002",
+          "candidate_facet_id": "R1_P000007:P000007_F007",
+          "domain": "land_surface",
+          "notion_similarity": 0.48129210085688423,
+          "content_similarity": 0.3227880373868747,
+          "pair_score": 0.37826445960137806
+        }
+      ]
+    },
+    "scope_context_id": "R1_P000007:P000007_C001"
+  },
+  {
+    "claim_id": "R1_P000012:P000012_CL003",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.2644312125805279,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.4060954426987313,
+    "S_transition": 0.4281205225302938,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000012:P000012_C009"
+  },
+  {
+    "claim_id": "R1_P000013:P000013_CL010",
+    "channels": [
+      "transition_ann"
+    ],
+    "R_claim": 0.26334482053219765,
+    "A_claim": null,
+    "applicability_known": false,
+    "context_coverage": 0.0,
+    "S_claim_semantic": 0.3594808264837353,
+    "S_transition": 0.4862899066397444,
+    "S_endpoint": 0.0,
+    "conditioning_match": {
+      "score": null,
+      "known_coverage": null,
+      "matches": []
+    },
+    "scope_context_id": "R1_P000013:P000013_C002"
+  }
+]
+========================================================================================
+DIRECT EVIDENCE PATHS
+========================================================================================
+
+[
+  {
+    "claim_ids": [
+      "R2_P000001:P000001_CL017"
+    ],
+    "state_ids": [
+      "state::background_wind_speed::increases_from_0_to_1_m_s",
+      "state::convection_transition_occurrence::maintained"
+    ],
+    "evidence_lane": "direct",
+    "A_path": 0.6592408793307085,
+    "C_path": 1.0,
+    "M_path": 0.5798747260590885,
+    "length_factor": 1.0,
+    "R_path": 0.38227712430884725,
+    "context_unknown": false,
+    "coherence_unknown": false
+  },
+  {
+    "claim_ids": [
+      "R2_P000001:P000001_CL016"
+    ],
+    "state_ids": [
+      "state::background_wind_speed::increases_from_0_to_1_m_s",
+      "state::cloud_horizontal_advection::enhanced_downwind_movement"
+    ],
+    "evidence_lane": "direct",
+    "A_path": 0.6592408793307085,
+    "C_path": 1.0,
+    "M_path": 0.5688898482318554,
+    "length_factor": 1.0,
+    "R_path": 0.37503544379068166,
+    "context_unknown": false,
+    "coherence_unknown": false
+  },
+  {
+    "claim_ids": [
+      "R2_P000001:P000001_CL015"
+    ],
+    "state_ids": [
+      "state::background_wind_speed::increases_from_0_to_1_m_s",
+      "state::moisture_variability_beneath_500_m::increases"
+    ],
+    "evidence_lane": "direct",
+    "A_path": 0.6592408793307085,
+    "C_path": 1.0,
+    "M_path": 0.567579273790193,
+    "length_factor": 1.0,
+    "R_path": 0.3741714595433318,
+    "context_unknown": false,
+    "coherence_unknown": false
+  },
+  {
+    "claim_ids": [
+      "R2_P000001:P000001_CL013"
+    ],
+    "state_ids": [
+      "state::background_wind_speed::increases_from_0_to_1_m_s",
+      "state::secondary_circulation_front_symmetry::destroyed"
+    ],
+    "evidence_lane": "direct",
+    "A_path": 0.6592408793307085,
+    "C_path": 1.0,
+    "M_path": 0.5656530497800057,
+    "length_factor": 1.0,
+    "R_path": 0.37290161393306803,
+    "context_unknown": false,
+    "coherence_unknown": false
+  },
+  {
+    "claim_ids": [
+      "R2_P000001:P000001_CL014"
+    ],
+    "state_ids": [
+      "state::background_wind_speed::increases_from_0_to_1_m_s",
+      "state::near_surface_convergence_zone_location::shifts_downwind_to_eastern_dry_patch_edge"
+    ],
+    "evidence_lane": "direct",
+    "A_path": 0.6592408793307085,
+    "C_path": 1.0,
+    "M_path": 0.5638073421757741,
+    "length_factor": 1.0,
+    "R_path": 0.371684848029067,
+    "context_unknown": false,
+    "coherence_unknown": false
+  },
+  {
+    "claim_ids": [
+      "R2_P000001:P000001_CL010"
+    ],
+    "state_ids": [
+      "state::heterogeneous_patch_size::smaller_than_mesoscale_threshold",
+      "state::vertical_velocity_updraft_intensity_in_planetary_boundary_layer::intensification_over_dry_patches"
+    ],
+    "evidence_lane": "direct",
+    "A_path": 0.656713874622872,
+    "C_path": 1.0,
+    "M_path": 0.5400639443110528,
+    "length_factor": 1.0,
+    "R_path": 0.35466748541262244,
+    "context_unknown": false,
+    "coherence_unknown": false
+  },
+  {
+    "claim_ids": [
+      "R2_P000001:P000001_CL008"
+    ],
+    "state_ids": [
+      "state::heterogeneous_patch_size::exceeding_5_km_threshold",
+      "state::moisture_pool_formation_near_planetary_boundary_layer_top::concentrated_accumulation"
+    ],
+    "evidence_lane": "direct",
+    "A_path": 0.656713874622872,
+    "C_path": 1.0,
+    "M_path": 0.5378616787707187,
+    "length_factor": 1.0,
+    "R_path": 0.3532212270766812,
+    "context_unknown": false,
+    "coherence_unknown": false
+  },
+  {
+    "claim_ids": [
+      "R2_P000001:P000001_CL007"
+    ],
+    "state_ids": [
+      "state::mesoscale_secondary_circulation::moisture_transport_from_wet_to_dry_patches",
+      "state::water_vapor_specific_humidity_anomaly_near_planetary_boundary_layer_top::positive_over_dry_and_negative_over_wet_patches"
+    ],
+    "evidence_lane": "direct",
+    "A_path": 0.656713874622872,
+    "C_path": 1.0,
+    "M_path": 0.5285716415806676,
+    "length_factor": 1.0,
+    "R_path": 0.3471203307582122,
+    "context_unknown": false,
+    "coherence_unknown": false
+  }
+]
+========================================================================================
+GRAPH PATHS
+========================================================================================
+
+[]
+========================================================================================
+QUERY-PARSE REQUEST SENT TO QWEN
+========================================================================================
+
+{
+  "model": "qwen3.6:27b",
+  "stream": false,
+  "format": {
+    "$defs": {
+      "ParsedEndpoint": {
+        "additionalProperties": false,
+        "properties": {
+          "concept": {
+            "title": "Concept",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "supporting_text_span": {
+            "title": "Supporting Text Span",
+            "type": "string"
+          }
+        },
+        "required": [
+          "concept",
+          "state",
+          "supporting_text_span"
+        ],
+        "title": "ParsedEndpoint",
+        "type": "object"
+      },
+      "ParsedQueryFacet": {
+        "additionalProperties": false,
+        "properties": {
+          "domain": {
+            "enum": [
+              "spatial_configuration",
+              "land_surface",
+              "hydrology",
+              "atmosphere",
+              "climate",
+              "substrate_terrain",
+              "other"
+            ],
+            "title": "Domain",
+            "type": "string"
+          },
+          "notion": {
+            "title": "Notion",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "supporting_text_span": {
+            "title": "Supporting Text Span",
+            "type": "string"
+          }
+        },
+        "required": [
+          "domain",
+          "notion",
+          "description",
+          "supporting_text_span"
+        ],
+        "title": "ParsedQueryFacet",
+        "type": "object"
+      },
+      "SpatialReference": {
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "kind_hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Kind Hint"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "SpatialReference",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "source": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/ParsedEndpoint"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "target": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/ParsedEndpoint"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "intervention_description": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Intervention Description"
+      },
+      "explicit_context_facets": {
+        "items": {
+          "$ref": "#/$defs/ParsedQueryFacet"
+        },
+        "title": "Explicit Context Facets",
+        "type": "array"
+      },
+      "spatial_reference": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/SpatialReference"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "global_requested": {
+        "default": false,
+        "title": "Global Requested",
+        "type": "boolean"
+      },
+      "ambiguities": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Ambiguities",
+        "type": "array"
+      }
+    },
+    "title": "ParsedQuery",
+    "type": "object"
+  },
+  "messages": [
+    {
+      "role": "system",
+      "content": "TASK\n\nConvert one user's land-atmosphere question into a structured search request. Record only information stated by the user.\n\nINPUT\n\nYou will receive one natural-language question. It may contain:\n- a land-use condition or change;\n- an atmospheric, weather, or climate outcome;\n- environmental conditions such as season, soil moisture, land cover, wind, terrain, or time of day;\n- a place name or spatial identifier;\n- a request for results across all indexed studies.\n\nOUTPUT\n\nReturn valid JSON only. The JSON Schema supplied with this request is authoritative.\n\n- `source`: The starting land state, intervention, or process when the question states one. Otherwise `null`.\n  - `concept`: Compact scientific noun phrase, usually 1-8 words.\n  - `state`: Compact directional or categorical state, usually 1-5 words. Use an empty string when the user states the concept but no direction or category.\n  - `supporting_text_span`: Copy the exact words from the question that support this endpoint.\n\n- `target`: The requested outcome when the question states a specific outcome. Otherwise `null`. Use the same `concept`, `state`, and exact `supporting_text_span` fields as `source`.\n\n- `intervention_description`: A concise phrase preserving the user's stated change, comparison, magnitude, replacement, spatial arrangement, direction, timing, and location. Usually 10-60 words when detailed. Use `null` when no intervention or comparison is stated.\n\n- `explicit_context_facets`: Environmental conditions explicitly stated in the question. Each item contains:\n  - `domain`: Exactly one of `spatial_configuration`, `land_surface`, `hydrology`, `atmosphere`, `climate`, `substrate_terrain`, or `other`.\n  - `notion`: Concise 2-8 word name for the condition.\n  - `description`: Faithful phrase or sentence describing the stated condition.\n  - `supporting_text_span`: Exact copied words from the question.\n\n  Create a `spatial_configuration` item whenever the question states a land-pattern size, spacing, shape, orientation, edge position, interior position, or arrangement such as alternating patches or a mosaic. Preserve numerical values and units in both `description` and `supporting_text_span`. The same phrase may also appear in `source` or `intervention_description`; these fields record different parts of the request.\n\n- `spatial_reference`: A named place or supplied spatial identifier, or `null`.\n  - `text`: Copy the complete location text.\n  - `kind_hint`: A short type such as `region`, `watershed`, `coordinates`, or `administrative_area` when the wording states or strongly identifies the type. Otherwise `null`.\n\n- `global_requested`: `true` only when the user explicitly asks for a global, corpus-wide, across-literature, or non-location-conditioned synthesis. Otherwise `false`.\n\n- `ambiguities`: Short descriptions of genuine ambiguity in how to structure the question. Use an empty list when none exists.\n\nHOW TO HANDLE COMMON QUESTIONS\n\n- Environmental phrases introduced by words such as `in`, `under`, `during`, or `with` normally become explicit condition records.\n- A numerical patch size or other land-pattern geometry is an explicit `spatial_configuration` condition even when it appears inside the proposed intervention.\n- A pure place name belongs in `spatial_reference`. Do not duplicate the same pure place text as a spatial condition record.\n- Words such as `effect`, `impact`, `affect`, and `reported` describe the question, not a scientific endpoint state.\n- A comparison such as `drier or wetter` contains two alternatives. Preserve the comparison in `intervention_description` and leave endpoints unspecified when choosing one endpoint would discard an alternative.\n- When the question asks how one source changes two or more outcomes joined by `and`, preserve the requested outcomes in `intervention_description` and return `target` as `null`. A target represents one scientific endpoint; leaving this combined target open allows retrieval of each stated outcome.\n- In a `where` question, preserve edge, interior, patch, distance, windward, or directional wording as spatial information rather than turning location into an outcome state.\n\nUse no environmental or geographic facts beyond the user's words. Do not answer the scientific question in this task."
+    },
+    {
+      "role": "user",
+      "content": "USER QUESTION\nFor 14.4 km heterogeneous dry and wet patches, how does increasing background wind from zero to 1 m/s change the secondary circulation, convergence location, cloud movement, and transition to deep convection?"
+    }
+  ],
+  "options": {
+    "temperature": 0.0,
+    "num_ctx": 32768
+  },
+  "think": false
+}
+========================================================================================
+QUERY-PARSE RESPONSE AND THINKING
+========================================================================================
+
+{
+  "model": "qwen3.6:27b",
+  "created_at": "2026-08-30T08:03:33.0340241Z",
+  "message": {
+    "role": "assistant",
+    "content": "{\n  \"source\": {\n    \"concept\": \"background wind\",\n    \"state\": \"zero\",\n    \"supporting_text_span\": \"background wind from zero\"\n  },\n  \"target\": null,\n  \"intervention_description\": \"increasing background wind from zero to 1 m/s for 14.4 km heterogeneous dry and wet patches, changing secondary circulation, convergence location, cloud movement, and transition to deep convection\",\n  \"explicit_context_facets\": [\n    {\n      \"domain\": \"spatial_configuration\",\n      \"notion\": \"heterogeneous patch size\",\n      \"description\": \"14.4 km heterogeneous dry and wet patches\",\n      \"supporting_text_span\": \"14.4 km heterogeneous dry and wet patches\"\n    },\n    {\n      \"domain\": \"land_surface\",\n      \"notion\": \"dry and wet patches\",\n      \"description\": \"heterogeneous dry and wet patches\",\n      \"supporting_text_span\": \"heterogeneous dry and wet patches\"\n    }\n  ],\n  \"spatial_reference\": null,\n  \"global_requested\": false,\n  \"ambiguities\": []\n}"
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 68665585400,
+  "load_duration": 436280700,
+  "prompt_eval_count": 982,
+  "prompt_eval_duration": 1103772000,
+  "eval_count": 257,
+  "eval_duration": 8211781999
+}
+========================================================================================
+SYNTHESIS REQUEST SENT TO QWEN
+========================================================================================
+
+{
+  "model": "qwen3.6:27b",
+  "stream": false,
+  "format": {
+    "$defs": {
+      "SynthesisItem": {
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "support_claim_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Support Claim Ids",
+            "type": "array"
+          },
+          "support_query_facet_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Support Query Facet Ids",
+            "type": "array"
+          },
+          "kind": {
+            "enum": [
+              "direct_finding",
+              "transfer_inference",
+              "mechanism",
+              "spatial_guidance",
+              "limitation"
+            ],
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "support_claim_ids",
+          "support_query_facet_ids",
+          "kind"
+        ],
+        "title": "SynthesisItem",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "direct_answer": {
+        "items": {
+          "$ref": "#/$defs/SynthesisItem"
+        },
+        "title": "Direct Answer",
+        "type": "array"
+      },
+      "mechanisms": {
+        "items": {
+          "$ref": "#/$defs/SynthesisItem"
+        },
+        "title": "Mechanisms",
+        "type": "array"
+      },
+      "spatial_guidance": {
+        "items": {
+          "$ref": "#/$defs/SynthesisItem"
+        },
+        "title": "Spatial Guidance",
+        "type": "array"
+      },
+      "conditions_and_limitations": {
+        "items": {
+          "$ref": "#/$defs/SynthesisItem"
+        },
+        "title": "Conditions And Limitations",
+        "type": "array"
+      },
+      "contradictory_evidence": {
+        "items": {
+          "$ref": "#/$defs/SynthesisItem"
+        },
+        "title": "Contradictory Evidence",
+        "type": "array"
+      }
+    },
+    "required": [
+      "direct_answer",
+      "mechanisms",
+      "spatial_guidance",
+      "conditions_and_limitations",
+      "contradictory_evidence"
+    ],
+    "title": "SynthesisOutput",
+    "type": "object"
+  },
+  "messages": [
+    {
+      "role": "system",
+      "content": "TASK\n\nWrite a scientifically careful answer to one land-atmosphere question using only the supplied evidence package.\n\nINPUT\n\nYou will receive:\n- the user's question;\n- a structured version of that question;\n- environmental conditions stated by the user;\n- selected evidence paths. Each path contains one or more scientific relationship records identified by Claim IDs;\n- contradictory or alternative relationship records;\n- source-passage references containing SourceBlock IDs, pages, sections, and block types. The full passages are retained by the application for provenance but are not scientific input to this writing task.\n\nA Claim is one evidence-backed relationship from a source scientific state to an outcome state. A Query Facet is one environmental condition copied from the user's question. A path is an allowed sequence of Claims whose endpoints connect. SourceBlock references identify the passages supporting each Claim.\n\nHOW TO WRITE THE ANSWER\n\n- Base every scientific statement on one or more supplied Claim IDs.\n- Treat each supplied Claim's relationship and description as the complete allowed scientific content.\n- Before returning an item, check every clause against its listed Claims. Remove a clause when those Claims do not directly support it, or place it in a separate item with the Claim that does.\n- Preserve the evidence's exact comparison, range, and qualifier. Evidence for a change from one stated forcing value to another supports only that stated change, not every increase in the forcing.\n- Base every statement about the user's stated environment on one or more supplied Query Facet IDs.\n- Describe a multi-step mechanism only when that exact Claim sequence appears in a supplied path.\n- Distinguish direct paper findings from transfer to the user's setting.\n- State important missing information, contextual mismatch, uncertainty, and contradictory evidence.\n- Treat retrieval and applicability scores as ranking information, not as confidence that a finding is true.\n- Give directional or geographic guidance only when the evidence package explicitly allows spatial translation and supplies the required local geometry or environmental data.\n\nOUTPUT\n\nReturn valid JSON only. The JSON Schema supplied with this request is authoritative.\n\nEvery output field is a list of answer items:\n- `direct_answer`: Statements that directly answer the user's question.\n- `mechanisms`: Supported explanatory steps from supplied paths.\n- `spatial_guidance`: Supported statements about location, direction, distance, edge, patch, source region, or sink region.\n- `conditions_and_limitations`: Applicability conditions, missing information, mismatches, and uncertainty.\n- `contradictory_evidence`: Supported findings that disagree with or materially qualify the main answer.\n\nFor every item in any list, return:\n- `text`: One clear scientific statement or short paragraph.\n- `support_claim_ids`: The smallest set of supplied Claim IDs supporting the statement.\n- `support_query_facet_ids`: Query Facet IDs supporting statements about the user's environment. Use an empty list when the item makes no query-area statement.\n- `kind`: Exactly one of `direct_finding`, `transfer_inference`, `mechanism`, `spatial_guidance`, or `limitation`.\n\nUse empty lists for sections with no supported content. Do not place citation prose inside `text`; the application renders paper and page citations from the returned IDs."
+    },
+    {
+      "role": "user",
+      "content": "USER QUESTION\nFor 14.4 km heterogeneous dry and wet patches, how does increasing background wind from zero to 1 m/s change the secondary circulation, convergence location, cloud movement, and transition to deep convection?\n\nSTRUCTURED QUESTION\n{\"query_id\": \"Q02_HET_ONE_MS\", \"mode\": \"forward\", \"context\": {\"spatial_support\": null, \"facets\": [{\"id\": \"Q02_HET_ONE_MS_F001\", \"domain\": \"spatial_configuration\", \"notion\": \"heterogeneous patch size\", \"description\": \"14.4 km heterogeneous dry and wet patches\", \"origin\": \"user\", \"source\": null, \"supporting_text_span\": \"14.4 km heterogeneous dry and wet patches\"}, {\"id\": \"Q02_HET_ONE_MS_F002\", \"domain\": \"land_surface\", \"notion\": \"dry and wet patches\", \"description\": \"heterogeneous dry and wet patches\", \"origin\": \"user\", \"source\": null, \"supporting_text_span\": \"heterogeneous dry and wet patches\"}]}, \"source\": {\"concept\": \"background wind\", \"state\": \"zero\"}, \"target\": null, \"intervention_description\": \"increasing background wind from zero to 1 m/s for 14.4 km heterogeneous dry and wet patches, changing secondary circulation, convergence location, cloud movement, and transition to deep convection\", \"user_question\": \"For 14.4 km heterogeneous dry and wet patches, how does increasing background wind from zero to 1 m/s change the secondary circulation, convergence location, cloud movement, and transition to deep convection?\", \"ambiguities\": []}\n\nUSER-STATED ENVIRONMENTAL CONDITIONS\n{\"spatial_support\": null, \"facets\": [{\"id\": \"Q02_HET_ONE_MS_F001\", \"domain\": \"spatial_configuration\", \"notion\": \"heterogeneous patch size\", \"description\": \"14.4 km heterogeneous dry and wet patches\", \"origin\": \"user\", \"source\": null, \"supporting_text_span\": \"14.4 km heterogeneous dry and wet patches\"}, {\"id\": \"Q02_HET_ONE_MS_F002\", \"domain\": \"land_surface\", \"notion\": \"dry and wet patches\", \"description\": \"heterogeneous dry and wet patches\", \"origin\": \"user\", \"source\": null, \"supporting_text_span\": \"heterogeneous dry and wet patches\"}]}\n\nSELECTED EVIDENCE PATHS AND CLAIMS\n[{\"claim_ids\": [\"R2_P000001:P000001_CL017\"], \"state_ids\": [\"state::background_wind_speed::increases_from_0_to_1_m_s\", \"state::convection_transition_occurrence::maintained\"], \"evidence_lane\": \"direct\", \"A_path\": 0.6592408793307085, \"C_path\": 1.0, \"M_path\": 0.5798747260590885, \"length_factor\": 1.0, \"R_path\": 0.38227712430884725, \"context_unknown\": false, \"coherence_unknown\": false, \"claims\": [{\"claim\": {\"id\": \"R2_P000001:P000001_CL017\", \"paper_id\": \"R2_P000001\", \"scope_type\": \"transition\", \"scope_id\": \"R2_P000001:P000001_T003\", \"from\": {\"concept\": \"background wind speed\", \"state\": \"increases from 0 to 1 m/s\"}, \"to\": {\"concept\": \"convection transition occurrence\", \"state\": \"maintained\"}, \"relation\": \"causal\", \"description\": \"For 14.4 km patches, a background wind of 1 m/s does not inhibit the transition to congestus or deep convection because the potential secondary circulation strength of approximately 1.5 m/s exceeds the imposed wind speed.\", \"evidence_role\": \"OWN_RESULT\", \"conditioning_facet_ids\": [], \"evidence_block_ids\": [\"R2_P000001:P000001:S11:P0099\", \"R2_P000001:P000001:S12:P0122\"]}, \"scores\": {\"claim_id\": \"R2_P000001:P000001_CL017\", \"channels\": [\"claim_ann\", \"context_scope\", \"transition_ann\"], \"R_claim\": 0.5798747260590885, \"A_claim\": 0.6592408793307085, \"applicability_known\": true, \"context_coverage\": 1.0, \"S_claim_semantic\": 0.7978293191653892, \"S_transition\": 0.8243364435146121, \"S_endpoint\": 0.0, \"conditioning_match\": {\"score\": null, \"known_coverage\": null, \"matches\": []}, \"scope_context_id\": \"R2_P000001:P000001_C013\"}, \"spatial_transfer\": {\"families\": [\"patch_gradient_edge\"], \"allowed\": false, \"method\": null, \"matched_phrases\": {\"patch_gradient_edge\": [\"patch\"]}, \"parsed_scales\": [], \"blocking_reasons\": [\"query spatial data insufficient for relation-family translation\"]}}]}, {\"claim_ids\": [\"R2_P000001:P000001_CL016\"], \"state_ids\": [\"state::background_wind_speed::increases_from_0_to_1_m_s\", \"state::cloud_horizontal_advection::enhanced_downwind_movement\"], \"evidence_lane\": \"direct\", \"A_path\": 0.6592408793307085, \"C_path\": 1.0, \"M_path\": 0.5688898482318554, \"length_factor\": 1.0, \"R_path\": 0.37503544379068166, \"context_unknown\": false, \"coherence_unknown\": false, \"claims\": [{\"claim\": {\"id\": \"R2_P000001:P000001_CL016\", \"paper_id\": \"R2_P000001\", \"scope_type\": \"transition\", \"scope_id\": \"R2_P000001:P000001_T003\", \"from\": {\"concept\": \"background wind speed\", \"state\": \"increases from 0 to 1 m/s\"}, \"to\": {\"concept\": \"cloud horizontal advection\", \"state\": \"enhanced downwind movement\"}, \"relation\": \"causal\", \"description\": \"Clouds initially developing over the DRY patch updraft branch subsequently advect downwind following high-MSE air over the WET patch under 1 m/s wind, contrasting with stationary development at zero wind.\", \"evidence_role\": \"OWN_RESULT\", \"conditioning_facet_ids\": [], \"evidence_block_ids\": [\"R2_P000001:P000001:S11:P0098\"]}, \"scores\": {\"claim_id\": \"R2_P000001:P000001_CL016\", \"channels\": [\"claim_ann\", \"context_scope\", \"transition_ann\"], \"R_claim\": 0.5688898482318554, \"A_claim\": 0.6592408793307085, \"applicability_known\": true, \"context_coverage\": 1.0, \"S_claim_semantic\": 0.7429049300292236, \"S_transition\": 0.8243364435146121, \"S_endpoint\": 0.0, \"conditioning_match\": {\"score\": null, \"known_coverage\": null, \"matches\": []}, \"scope_context_id\": \"R2_P000001:P000001_C013\"}, \"spatial_transfer\": {\"families\": [\"patch_gradient_edge\"], \"allowed\": false, \"method\": null, \"matched_phrases\": {\"patch_gradient_edge\": [\"patch\", \"dry patch\", \"wet patch\"]}, \"parsed_scales\": [], \"blocking_reasons\": [\"query spatial data insufficient for relation-family translation\"]}}]}, {\"claim_ids\": [\"R2_P000001:P000001_CL015\"], \"state_ids\": [\"state::background_wind_speed::increases_from_0_to_1_m_s\", \"state::moisture_variability_beneath_500_m::increases\"], \"evidence_lane\": \"direct\", \"A_path\": 0.6592408793307085, \"C_path\": 1.0, \"M_path\": 0.567579273790193, \"length_factor\": 1.0, \"R_path\": 0.3741714595433318, \"context_unknown\": false, \"coherence_unknown\": false, \"claims\": [{\"claim\": {\"id\": \"R2_P000001:P000001_CL015\", \"paper_id\": \"R2_P000001\", \"scope_type\": \"transition\", \"scope_id\": \"R2_P000001:P000001_T003\", \"from\": {\"concept\": \"background wind speed\", \"state\": \"increases from 0 to 1 m/s\"}, \"to\": {\"concept\": \"moisture variability beneath 500 m\", \"state\": \"increases\"}, \"relation\": \"causal\", \"description\": \"The downwind-shifted convergence zone isolates high-MSE air over WET patches from lower-MSE air over DRY patches, increasing moisture variability beneath 500 m relative to the zero-wind case.\", \"evidence_role\": \"OWN_RESULT\", \"conditioning_facet_ids\": [], \"evidence_block_ids\": [\"R2_P000001:P000001:S11:P0097\", \"R2_P000001:P000001:S11:P0098\"]}, \"scores\": {\"claim_id\": \"R2_P000001:P000001_CL015\", \"channels\": [\"claim_ann\", \"context_scope\", \"transition_ann\"], \"R_claim\": 0.567579273790193, \"A_claim\": 0.6592408793307085, \"applicability_known\": true, \"context_coverage\": 1.0, \"S_claim_semantic\": 0.7363520578209115, \"S_transition\": 0.8243364435146121, \"S_endpoint\": 0.0, \"conditioning_match\": {\"score\": null, \"known_coverage\": null, \"matches\": []}, \"scope_context_id\": \"R2_P000001:P000001_C013\"}, \"spatial_transfer\": {\"families\": [\"patch_gradient_edge\"], \"allowed\": false, \"method\": null, \"matched_phrases\": {\"patch_gradient_edge\": [\"patch\", \"dry patch\", \"wet patch\"]}, \"parsed_scales\": [], \"blocking_reasons\": [\"query spatial data insufficient for relation-family translation\"]}}]}, {\"claim_ids\": [\"R2_P000001:P000001_CL013\"], \"state_ids\": [\"state::background_wind_speed::increases_from_0_to_1_m_s\", \"state::secondary_circulation_front_symmetry::destroyed\"], \"evidence_lane\": \"direct\", \"A_path\": 0.6592408793307085, \"C_path\": 1.0, \"M_path\": 0.5656530497800057, \"length_factor\": 1.0, \"R_path\": 0.37290161393306803, \"context_unknown\": false, \"coherence_unknown\": false, \"claims\": [{\"claim\": {\"id\": \"R2_P000001:P000001_CL013\", \"paper_id\": \"R2_P000001\", \"scope_type\": \"transition\", \"scope_id\": \"R2_P000001:P000001_T003\", \"from\": {\"concept\": \"background wind speed\", \"state\": \"increases from 0 to 1 m/s\"}, \"to\": {\"concept\": \"secondary circulation front symmetry\", \"state\": \"destroyed\"}, \"relation\": \"causal\", \"description\": \"A background wind of 1 m/s destroys the symmetry of secondary circulation fronts by enhancing eastward motion and deterring westward motion compared to the zero-wind case.\", \"evidence_role\": \"OWN_RESULT\", \"conditioning_facet_ids\": [], \"evidence_block_ids\": [\"R2_P000001:P000001:S11:P0097\"]}, \"scores\": {\"claim_id\": \"R2_P000001:P000001_CL013\", \"channels\": [\"claim_ann\", \"context_scope\", \"transition_ann\"], \"R_claim\": 0.5656530497800057, \"A_claim\": 0.6592408793307085, \"applicability_known\": true, \"context_coverage\": 1.0, \"S_claim_semantic\": 0.7267209377699753, \"S_transition\": 0.8243364435146121, \"S_endpoint\": 0.0, \"conditioning_match\": {\"score\": null, \"known_coverage\": null, \"matches\": []}, \"scope_context_id\": \"R2_P000001:P000001_C013\"}, \"spatial_transfer\": {\"families\": [\"unknown\"], \"allowed\": false, \"method\": null, \"matched_phrases\": {}, \"parsed_scales\": [], \"blocking_reasons\": [\"query spatial data insufficient for relation-family translation\"]}}]}, {\"claim_ids\": [\"R2_P000001:P000001_CL014\"], \"state_ids\": [\"state::background_wind_speed::increases_from_0_to_1_m_s\", \"state::near_surface_convergence_zone_location::shifts_downwind_to_eastern_dry_patch_edge\"], \"evidence_lane\": \"direct\", \"A_path\": 0.6592408793307085, \"C_path\": 1.0, \"M_path\": 0.5638073421757741, \"length_factor\": 1.0, \"R_path\": 0.371684848029067, \"context_unknown\": false, \"coherence_unknown\": false, \"claims\": [{\"claim\": {\"id\": \"R2_P000001:P000001_CL014\", \"paper_id\": \"R2_P000001\", \"scope_type\": \"transition\", \"scope_id\": \"R2_P000001:P000001_T003\", \"from\": {\"concept\": \"background wind speed\", \"state\": \"increases from 0 to 1 m/s\"}, \"to\": {\"concept\": \"near-surface convergence zone location\", \"state\": \"shifts downwind to eastern dry patch edge\"}, \"relation\": \"causal\", \"description\": \"The asymmetric fronts shift the near-surface convergence zone from the center of the DRY patch at zero wind to the downwind eastern edge under 1 m/s wind.\", \"evidence_role\": \"OWN_RESULT\", \"conditioning_facet_ids\": [], \"evidence_block_ids\": [\"R2_P000001:P000001:S11:P0097\", \"R2_P000001:P000001:S12:P0122\"]}, \"scores\": {\"claim_id\": \"R2_P000001:P000001_CL014\", \"channels\": [\"claim_ann\", \"context_scope\", \"transition_ann\"], \"R_claim\": 0.5638073421757741, \"A_claim\": 0.6592408793307085, \"applicability_known\": true, \"context_coverage\": 1.0, \"S_claim_semantic\": 0.7174923997488171, \"S_transition\": 0.8243364435146121, \"S_endpoint\": 0.0, \"conditioning_match\": {\"score\": null, \"known_coverage\": null, \"matches\": []}, \"scope_context_id\": \"R2_P000001:P000001_C013\"}, \"spatial_transfer\": {\"families\": [\"patch_gradient_edge\"], \"allowed\": false, \"method\": null, \"matched_phrases\": {\"patch_gradient_edge\": [\"patch\", \"edge\", \"dry patch\"]}, \"parsed_scales\": [], \"blocking_reasons\": [\"query spatial data insufficient for relation-family translation\"]}}]}, {\"claim_ids\": [\"R2_P000001:P000001_CL010\"], \"state_ids\": [\"state::heterogeneous_patch_size::smaller_than_mesoscale_threshold\", \"state::vertical_velocity_updraft_intensity_in_planetary_boundary_layer::intensification_over_dry_patches\"], \"evidence_lane\": \"direct\", \"A_path\": 0.656713874622872, \"C_path\": 1.0, \"M_path\": 0.5400639443110528, \"length_factor\": 1.0, \"R_path\": 0.35466748541262244, \"context_unknown\": false, \"coherence_unknown\": false, \"claims\": [{\"claim\": {\"id\": \"R2_P000001:P000001_CL010\", \"paper_id\": \"R2_P000001\", \"scope_type\": \"transition\", \"scope_id\": \"R2_P000001:P000001_T002\", \"from\": {\"concept\": \"heterogeneous patch size\", \"state\": \"smaller than mesoscale threshold\"}, \"to\": {\"concept\": \"vertical velocity updraft intensity in planetary boundary layer\", \"state\": \"intensification over dry patches\"}, \"relation\": \"causal\", \"description\": \"Even when patch sizes are too small to trigger convection transition, the induced secondary circulation intensifies PBL thermals and produces stronger updrafts over DRY patches compared to homogeneous surface conditions.\", \"evidence_role\": \"OWN_RESULT\", \"conditioning_facet_ids\": [], \"evidence_block_ids\": [\"R2_P000001:P000001:S09:P0072\"]}, \"scores\": {\"claim_id\": \"R2_P000001:P000001_CL010\", \"channels\": [\"claim_ann\", \"context_scope\", \"transition_ann\"], \"R_claim\": 0.5400639443110528, \"A_claim\": 0.656713874622872, \"applicability_known\": true, \"context_coverage\": 1.0, \"S_claim_semantic\": 0.6857450812017488, \"S_transition\": 0.7159578966027369, \"S_endpoint\": 0.0, \"conditioning_match\": {\"score\": null, \"known_coverage\": null, \"matches\": []}, \"scope_context_id\": \"R2_P000001:P000001_C025\"}, \"spatial_transfer\": {\"families\": [\"patch_gradient_edge\"], \"allowed\": false, \"method\": null, \"matched_phrases\": {\"patch_gradient_edge\": [\"patch\", \"dry patch\", \"patch size\"]}, \"parsed_scales\": [], \"blocking_reasons\": [\"query spatial data insufficient for relation-family translation\"]}}]}, {\"claim_ids\": [\"R2_P000001:P000001_CL008\"], \"state_ids\": [\"state::heterogeneous_patch_size::exceeding_5_km_threshold\", \"state::moisture_pool_formation_near_planetary_boundary_layer_top::concentrated_accumulation\"], \"evidence_lane\": \"direct\", \"A_path\": 0.656713874622872, \"C_path\": 1.0, \"M_path\": 0.5378616787707187, \"length_factor\": 1.0, \"R_path\": 0.3532212270766812, \"context_unknown\": false, \"coherence_unknown\": false, \"claims\": [{\"claim\": {\"id\": \"R2_P000001:P000001_CL008\", \"paper_id\": \"R2_P000001\", \"scope_type\": \"transition\", \"scope_id\": \"R2_P000001:P000001_T002\", \"from\": {\"concept\": \"heterogeneous patch size\", \"state\": \"exceeding 5 km threshold\"}, \"to\": {\"concept\": \"moisture pool formation near planetary boundary layer top\", \"state\": \"concentrated accumulation\"}, \"relation\": \"causal\", \"description\": \"When patch sizes exceed approximately 5 km under zero background wind, the secondary circulation isolates DRY patches sufficiently to form a concentrated moisture pool near the PBL top, whereas smaller patches mix the entire PBL and prevent organized pooling.\", \"evidence_role\": \"OWN_RESULT\", \"conditioning_facet_ids\": [], \"evidence_block_ids\": [\"R2_P000001:P000001:S12:P0120\", \"R2_P000001:P000001:S12:P0121\"]}, \"scores\": {\"claim_id\": \"R2_P000001:P000001_CL008\", \"channels\": [\"claim_ann\", \"context_scope\", \"transition_ann\"], \"R_claim\": 0.5378616787707187, \"A_claim\": 0.656713874622872, \"applicability_known\": true, \"context_coverage\": 1.0, \"S_claim_semantic\": 0.6747337535000784, \"S_transition\": 0.7159578966027369, \"S_endpoint\": 0.0, \"conditioning_match\": {\"score\": null, \"known_coverage\": null, \"matches\": []}, \"scope_context_id\": \"R2_P000001:P000001_C025\"}, \"spatial_transfer\": {\"families\": [\"patch_gradient_edge\"], \"allowed\": false, \"method\": null, \"matched_phrases\": {\"patch_gradient_edge\": [\"patch\", \"dry patch\", \"patch size\"]}, \"parsed_scales\": [], \"blocking_reasons\": [\"query spatial data insufficient for relation-family translation\"]}}]}, {\"claim_ids\": [\"R2_P000001:P000001_CL007\"], \"state_ids\": [\"state::mesoscale_secondary_circulation::moisture_transport_from_wet_to_dry_patches\", \"state::water_vapor_specific_humidity_anomaly_near_planetary_boundary_layer_top::positive_over_dry_and_negative_over_wet_patches\"], \"evidence_lane\": \"direct\", \"A_path\": 0.656713874622872, \"C_path\": 1.0, \"M_path\": 0.5285716415806676, \"length_factor\": 1.0, \"R_path\": 0.3471203307582122, \"context_unknown\": false, \"coherence_unknown\": false, \"claims\": [{\"claim\": {\"id\": \"R2_P000001:P000001_CL007\", \"paper_id\": \"R2_P000001\", \"scope_type\": \"transition\", \"scope_id\": \"R2_P000001:P000001_T002\", \"from\": {\"concept\": \"mesoscale secondary circulation\", \"state\": \"moisture transport from wet to dry patches\"}, \"to\": {\"concept\": \"water vapor specific humidity anomaly near planetary boundary layer top\", \"state\": \"positive over dry and negative over wet patches\"}, \"relation\": \"causal\", \"description\": \"The secondary circulation transports moisture from WET to DRY patches, creating a large positive moisture anomaly over DRY areas and a negative anomaly over WET areas near the PBL top in transition cases.\", \"evidence_role\": \"OWN_RESULT\", \"conditioning_facet_ids\": [], \"evidence_block_ids\": [\"R2_P000001:P000001:S10:P0077\", \"R2_P000001:P000001:S10:P0092\"]}, \"scores\": {\"claim_id\": \"R2_P000001:P000001_CL007\", \"channels\": [\"claim_ann\", \"context_scope\", \"transition_ann\"], \"R_claim\": 0.5285716415806676, \"A_claim\": 0.656713874622872, \"applicability_known\": true, \"context_coverage\": 1.0, \"S_claim_semantic\": 0.6282835675498235, \"S_transition\": 0.7159578966027369, \"S_endpoint\": 0.0, \"conditioning_match\": {\"score\": null, \"known_coverage\": null, \"matches\": []}, \"scope_context_id\": \"R2_P000001:P000001_C025\"}, \"spatial_transfer\": {\"families\": [\"patch_gradient_edge\"], \"allowed\": false, \"method\": null, \"matched_phrases\": {\"patch_gradient_edge\": [\"patch\", \"dry patch\"]}, \"parsed_scales\": [], \"blocking_reasons\": [\"query spatial data insufficient for relation-family translation\"]}}]}]\n\nCONTRADICTORY OR ALTERNATIVE EVIDENCE\n[]\n\nSOURCE PASSAGE REFERENCES FOR PROVENANCE\n{\"R2_P000001:P000001_CL017\": [{\"id\": \"R2_P000001:P000001:S11:P0099\", \"page\": 13, \"section_path\": [\"## 5. Impact of the background wind speed and a criterion for convection transition\"], \"block_type\": \"paragraph\"}, {\"id\": \"R2_P000001:P000001:S12:P0122\", \"page\": 18, \"section_path\": [\"## 6. Summary\"], \"block_type\": \"paragraph\"}], \"R2_P000001:P000001_CL016\": [{\"id\": \"R2_P000001:P000001:S11:P0098\", \"page\": 13, \"section_path\": [\"## 5. Impact of the background wind speed and a criterion for convection transition\"], \"block_type\": \"paragraph\"}], \"R2_P000001:P000001_CL015\": [{\"id\": \"R2_P000001:P000001:S11:P0097\", \"page\": 13, \"section_path\": [\"## 5. Impact of the background wind speed and a criterion for convection transition\"], \"block_type\": \"paragraph\"}, {\"id\": \"R2_P000001:P000001:S11:P0098\", \"page\": 13, \"section_path\": [\"## 5. Impact of the background wind speed and a criterion for convection transition\"], \"block_type\": \"paragraph\"}], \"R2_P000001:P000001_CL013\": [{\"id\": \"R2_P000001:P000001:S11:P0097\", \"page\": 13, \"section_path\": [\"## 5. Impact of the background wind speed and a criterion for convection transition\"], \"block_type\": \"paragraph\"}], \"R2_P000001:P000001_CL014\": [{\"id\": \"R2_P000001:P000001:S11:P0097\", \"page\": 13, \"section_path\": [\"## 5. Impact of the background wind speed and a criterion for convection transition\"], \"block_type\": \"paragraph\"}, {\"id\": \"R2_P000001:P000001:S12:P0122\", \"page\": 18, \"section_path\": [\"## 6. Summary\"], \"block_type\": \"paragraph\"}], \"R2_P000001:P000001_CL010\": [{\"id\": \"R2_P000001:P000001:S09:P0072\", \"page\": 9, \"section_path\": [\"## c. Scale-dependent contributions to PBL turbulence\"], \"block_type\": \"paragraph\"}], \"R2_P000001:P000001_CL008\": [{\"id\": \"R2_P000001:P000001:S12:P0121\", \"page\": 18, \"section_path\": [\"## 6. Summary\"], \"block_type\": \"paragraph\"}, {\"id\": \"R2_P000001:P000001:S12:P0120\", \"page\": 17, \"section_path\": [\"## 6. Summary\"], \"block_type\": \"paragraph\"}], \"R2_P000001:P000001_CL007\": [{\"id\": \"R2_P000001:P000001:S10:P0092\", \"page\": 12, \"section_path\": [\"## 4. Moisture and the secondary circulation\"], \"block_type\": \"paragraph\"}, {\"id\": \"R2_P000001:P000001:S10:P0077\", \"page\": 10, \"section_path\": [\"## 4. Moisture and the secondary circulation\"], \"block_type\": \"paragraph\"}]}\n"
+    }
+  ],
+  "options": {
+    "temperature": 0.0,
+    "num_ctx": 32768
+  },
+  "think": "medium"
+}
+========================================================================================
+SYNTHESIS RESPONSE AND THINKING
+========================================================================================
+
+{
+  "model": "qwen3.6:27b",
+  "created_at": "2026-08-30T08:13:25.4607962Z",
+  "message": {
+    "role": "assistant",
+    "content": "{\n  \"direct_answer\": [\n    {\n      \"text\": \"Increasing background wind from zero to 1 m/s destroys the symmetry of secondary circulation fronts by enhancing eastward motion and deterring westward motion compared to the zero-wind case.\",\n      \"support_claim_ids\": [\"R2_P000001:P000001_CL013\"],\n      \"support_query_facet_ids\": [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"],\n      \"kind\": \"direct_finding\"\n    },\n    {\n      \"text\": \"The resulting asymmetric fronts shift the near-surface convergence zone from the center of the dry patch at zero wind to the downwind eastern edge under 1 m/s wind.\",\n      \"support_claim_ids\": [\"R2_P000001:P000001_CL014\"],\n      \"support_query_facet_ids\": [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"],\n      \"kind\": \"direct_finding\"\n    },\n    {\n      \"text\": \"Clouds initially developing over the dry patch updraft branch subsequently advect downwind following high-MSE air over the wet patch under 1 m/s wind, contrasting with stationary development at zero wind.\",\n      \"support_claim_ids\": [\"R2_P000001:P000001_CL016\"],\n      \"support_query_facet_ids\": [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"],\n      \"kind\": \"direct_finding\"\n    },\n    {\n      \"text\": \"For 14.4 km patches, a background wind of 1 m/s does not inhibit the transition to congestus or deep convection because the potential secondary circulation strength of approximately 1.5 m/s exceeds the imposed wind speed.\",\n      \"support_claim_ids\": [\"R2_P000001:P000001_CL017\"],\n      \"support_query_facet_ids\": [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"],\n      \"kind\": \"direct_finding\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"text\": \"The downwind-shifted convergence zone isolates high-MSE air over wet patches from lower-MSE air over dry patches, increasing moisture variability beneath 500 m relative to the zero-wind case.\",\n      \"support_claim_ids\": [\"R2_P000001:P000001_CL015\"],\n      \"support_query_facet_ids\": [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"],\n      \"kind\": \"mechanism\"\n    }\n  ],\n  \"spatial_guidance\": [],\n  \"conditions_and_limitations\": [\n    {\n      \"text\": \"These findings are specific to the exact transition from zero to 1 m/s background wind and 14.4 km patch sizes. Spatial translation of these results is restricted because the query spatial data is insufficient for relation-family translation, limiting direct application to other geometries or scales without further local environmental data.\",\n      \"support_claim_ids\": [\"R2_P000001:P000001_CL013\", \"R2_P000001:P000001_CL014\", \"R2_P000001:P000001_CL015\", \"R2_P000001:P000001_CL016\", \"R2_P000001:P000001_CL017\"],\n      \"support_query_facet_ids\": [],\n      \"kind\": \"limitation\"\n    }\n  ],\n  \"contradictory_evidence\": []\n}",
+    "thinking": "The user wants to know how increasing background wind from zero to 1 m/s affects:\n1. Secondary circulation\n2. Convergence location\n3. Cloud movement\n4. Transition to deep convection\nfor 14.4 km heterogeneous dry and wet patches.\n\nLet's check the evidence paths for claims matching these aspects.\nPath 1: `R2_P000001:P000001_CL017` -> background wind increases from 0 to 1 m/s -> convection transition occurrence maintained. Description: \"For 14.4 km patches, a background wind of 1 m/s does not inhibit the transition to congestus or deep convection because the potential secondary circulation strength of approximately 1.5 m/s exceeds the imposed wind speed.\"\nPath 2: `R2_P000001:P000001_CL016` -> background wind increases from 0 to 1 m/s -> cloud horizontal advection enhanced downwind movement. Description: \"Clouds initially developing over the DRY patch updraft branch subsequently advect downwind following high-MSE air over the WET patch under 1 m/s wind, contrasting with stationary development at zero wind.\"\nPath 3: `R2_P000001:P000001_CL015` -> background wind increases from 0 to 1 m/s -> moisture variability beneath 500 m increases. Description: \"The downwind-shifted convergence zone isolates high-MSE air over WET patches from lower-MSE air over DRY patches, increasing moisture variability beneath 500 m relative to the zero-wind case.\"\nPath 4: `R2_P000001:P000001_CL013` -> background wind increases from 0 to 1 m/s -> secondary circulation front symmetry destroyed. Description: \"A background wind of 1 m/s destroys the symmetry of secondary circulation fronts by enhancing eastward motion and deterring westward motion compared to the zero-wind case.\"\nPath 5: `R2_P000001:P000001_CL014` -> background wind increases from 0 to 1 m/s -> near-surface convergence zone location shifts downwind to eastern dry patch edge. Description: \"The asymmetric fronts shift the near-surface convergence zone from the center of the DRY patch at zero wind to the downwind eastern edge under 1 m/s wind.\"\n\nAll these claims directly address the user's question for 14.4 km patches and the transition from 0 to 1 m/s wind.\nI will structure the answer into `direct_answer`, `mechanisms`, `spatial_guidance`, `conditions_and_limitations`, and `contradictory_evidence`.\n\nDirect answers:\n- Secondary circulation symmetry is destroyed (CL013).\n- Convergence location shifts downwind to the eastern edge of the dry patch (CL014).\n- Cloud movement changes from stationary to enhanced downwind advection over wet patches (CL016).\n- Transition to deep convection is maintained/not inhibited because secondary circulation strength (~1.5 m/s) exceeds the 1 m/s wind (CL017).\n\nMechanisms:\n- The asymmetric fronts shift the convergence zone, isolating high-MSE air over wet patches from lower-MSE air over dry patches, increasing moisture variability beneath 500 m (CL015).\n- The secondary circulation transports moisture from wet to dry patches, creating positive moisture anomalies over dry areas near the PBL top (CL007) - wait, CL007 is about mesoscale secondary circulation transporting moisture. It's a direct finding but maybe fits better in mechanisms or direct answer. I'll stick to the specific claims for the 0->1 m/s transition.\n- Actually, CL013, CL014, CL015, CL016, CL017 are all direct findings for the 0->1 m/s transition. I can put them in `direct_answer` or split into `mechanisms` if they explain steps. The prompt says \"Describe a multi-step mechanism only when that exact Claim sequence appears in a supplied path.\" The paths are single claims each. So I will put them in `direct_answer`.\n\nLet's draft the items carefully.\nItem 1 (Secondary circulation): A background wind of 1 m/s destroys the symmetry of secondary circulation fronts by enhancing eastward motion and deterring westward motion compared to zero wind. (CL013)\nItem 2 (Convergence location): The asymmetric fronts shift the near-surface convergence zone from the center of the dry patch at zero wind to the downwind eastern edge under 1 m/s wind. (CL014)\nItem 3 (Cloud movement): Clouds initially developing over the dry patch updraft branch subsequently advect downwind following high-MSE air over the wet patch under 1 m/s wind, contrasting with stationary development at zero wind. (CL016)\nItem 4 (Transition to deep convection): For 14.4 km patches, a background wind of 1 m/s does not inhibit the transition to congestus or deep convection because the potential secondary circulation strength of approximately 1.5 m/s exceeds the imposed wind speed. (CL017)\nItem 5 (Moisture variability mechanism): The downwind-shifted convergence zone isolates high-MSE air over wet patches from lower-MSE air over dry patches, increasing moisture variability beneath 500 m relative to the zero-wind case. (CL015)\n\nCheck query facets: Q02_HET_ONE_MS_F001 (14.4 km heterogeneous dry and wet patches), Q02_HET_ONE_MS_F002 (heterogeneous dry and wet patches).\nAll claims apply to this setting. I will attach the facet IDs to the direct answers.\n\nLet's verify the exact wording and constraints.\n\"Base every scientific statement on one or more supplied Claim IDs.\"\n\"Treat each supplied Claim's relationship and description as the complete allowed scientific content.\"\n\"Preserve the evidence's exact comparison, range, and qualifier.\"\n\"State important missing information, contextual mismatch, uncertainty, and contradictory evidence.\" -> I'll add a limitation about spatial transfer being blocked due to insufficient query spatial data for relation-family translation, as noted in `spatial_transfer` blocking reasons. Also, note that these findings are specific to the 14.4 km patch size and the exact 0 to 1 m/s wind increase.\n\nStructure:\ndirect_answer: 4 items covering secondary circulation, convergence location, cloud movement, transition to deep convection.\nmechanisms: 1 item covering moisture variability isolation (CL015).\nspatial_guidance: empty or maybe note the shift to eastern dry patch edge? The prompt says spatial guidance is for location/direction/etc. I'll put the convergence shift in direct answer as it directly answers \"convergence location\". I'll leave spatial_guidance empty unless there's a specific spatial claim. Actually, CL014 mentions \"eastern dry patch edge\", which is spatial. I can put it in direct_answer.\nconditions_and_limitations: 1 item noting that spatial translation is restricted because query spatial data is insufficient for relation-family translation, and findings are specific to the 14.4 km scale and exact wind change.\ncontradictory_evidence: empty list.\n\nLet's refine the items to match the schema exactly.\nEach item needs: `text`, `support_claim_ids`, `support_query_facet_ids`, `kind`.\n\nItem 1 (Secondary circulation):\ntext: Increasing background wind from zero to 1 m/s destroys the symmetry of secondary circulation fronts by enhancing eastward motion and deterring westward motion compared to the zero-wind case.\nsupport_claim_ids: [\"R2_P000001:P000001_CL013\"]\nsupport_query_facet_ids: [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"]\nkind: direct_finding\n\nItem 2 (Convergence location):\ntext: The resulting asymmetric fronts shift the near-surface convergence zone from the center of the dry patch at zero wind to the downwind eastern edge under 1 m/s wind.\nsupport_claim_ids: [\"R2_P000001:P000001_CL014\"]\nsupport_query_facet_ids: [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"]\nkind: direct_finding\n\nItem 3 (Cloud movement):\ntext: Clouds initially developing over the dry patch updraft branch subsequently advect downwind following high-MSE air over the wet patch under 1 m/s wind, contrasting with stationary development at zero wind.\nsupport_claim_ids: [\"R2_P000001:P000001_CL016\"]\nsupport_query_facet_ids: [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"]\nkind: direct_finding\n\nItem 4 (Transition to deep convection):\ntext: For 14.4 km patches, a background wind of 1 m/s does not inhibit the transition to congestus or deep convection because the potential secondary circulation strength of approximately 1.5 m/s exceeds the imposed wind speed.\nsupport_claim_ids: [\"R2_P000001:P000001_CL017\"]\nsupport_query_facet_ids: [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"]\nkind: direct_finding\n\nItem 5 (Mechanism - moisture variability):\ntext: The downwind-shifted convergence zone isolates high-MSE air over wet patches from lower-MSE air over dry patches, increasing moisture variability beneath 500 m relative to the zero-wind case.\nsupport_claim_ids: [\"R2_P000001:P000001_CL015\"]\nsupport_query_facet_ids: [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"]\nkind: mechanism\n\nItem 6 (Limitation):\ntext: These findings are specific to the exact transition from zero to 1 m/s background wind and 14.4 km patch sizes. Spatial translation of these results is restricted because the query spatial data is insufficient for relation-family translation, limiting direct application to other geometries or scales without further local environmental data.\nsupport_claim_ids: [] (or maybe reference the claims that have the blocking reason? The prompt says \"Base every scientific statement on one or more supplied Claim IDs.\" I'll leave it empty or reference the general context. Actually, limitations can just state the constraint. I'll use an empty list for claim IDs if it's purely about the evidence package constraints, or I can tie it to the claims that explicitly note the blocking reason. I'll just use [] for claim IDs in limitation, or maybe reference CL013-CL017. The prompt says \"Base every scientific statement on one or more supplied Claim IDs.\" I will attach the relevant claim IDs to be safe, or just leave it empty if it's about the retrieval system. I'll stick to [] for limitation as it describes the evidence package constraint.)\nWait, the prompt says: \"Base every scientific statement on one or more supplied Claim IDs.\" So I should probably link it to the claims that have the spatial_transfer blocking reason. All of them do. I'll just use []. It's fine.\n\nLet's double check the exact wording for CL015: \"The downwind-shifted convergence zone isolates high-MSE air over WET patches from lower-MSE air over DRY patches, increasing moisture variability beneath 500 m relative to the zero-wind case.\"\nThis fits well as a mechanism explaining how the shifted convergence affects moisture.\n\nCheck constraints:\n- \"Describe a multi-step mechanism only when that exact Claim sequence appears in a supplied path.\" -> The paths are single claims. So I won't describe multi-step mechanisms. I'll just list the direct findings and the single-step mechanism for moisture variability.\n- \"Distinguish direct paper findings from transfer to the user's setting.\" -> The claims already state \"For 14.4 km patches...\" so they are direct findings applicable to the user's setting. I will mark them as `direct_finding`.\n- \"State important missing information, contextual mismatch, uncertainty, and contradictory evidence.\" -> Added limitation about spatial translation and scale specificity.\n- \"Give directional or geographic guidance only when the evidence package explicitly allows spatial translation...\" -> The evidence says spatial transfer is not allowed. So I will not add spatial_guidance items.\n\nLet's assemble the JSON carefully.\nAll fields are lists of objects with `text`, `support_claim_ids`, `support_query_facet_ids`, `kind`.\nI will ensure the JSON matches the schema exactly.\n\nOne minor point: The prompt says \"For every item in any list, return: text, support_claim_ids, support_query_facet_ids, kind\".\nI will construct the JSON accordingly.\n\nCheck claim IDs:\nR2_P000001:P000001_CL013\nR2_P000001:P000001_CL014\nR2_P000001:P000001_CL016\nR2_P000001:P000001_CL017\nR2_P000001:P000001_CL015\n\nAll match.\nQuery facets: Q02_HET_ONE_MS_F001, Q02_HET_ONE_MS_F002.\nI will attach both to the direct findings since they describe the 14.4 km heterogeneous dry and wet patches.\n\nLet's draft the JSON.\n```json\n{\n  \"direct_answer\": [\n    {\n      \"text\": \"Increasing background wind from zero to 1 m/s destroys the symmetry of secondary circulation fronts by enhancing eastward motion and deterring westward motion compared to the zero-wind case.\",\n      \"support_claim_ids\": [\"R2_P000001:P000001_CL013\"],\n      \"support_query_facet_ids\": [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"],\n      \"kind\": \"direct_finding\"\n    },\n    {\n      \"text\": \"The resulting asymmetric fronts shift the near-surface convergence zone from the center of the dry patch at zero wind to the downwind eastern edge under 1 m/s wind.\",\n      \"support_claim_ids\": [\"R2_P000001:P000001_CL014\"],\n      \"support_query_facet_ids\": [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"],\n      \"kind\": \"direct_finding\"\n    },\n    {\n      \"text\": \"Clouds initially developing over the dry patch updraft branch subsequently advect downwind following high-MSE air over the wet patch under 1 m/s wind, contrasting with stationary development at zero wind.\",\n      \"support_claim_ids\": [\"R2_P000001:P000001_CL016\"],\n      \"support_query_facet_ids\": [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"],\n      \"kind\": \"direct_finding\"\n    },\n    {\n      \"text\": \"For 14.4 km patches, a background wind of 1 m/s does not inhibit the transition to congestus or deep convection because the potential secondary circulation strength of approximately 1.5 m/s exceeds the imposed wind speed.\",\n      \"support_claim_ids\": [\"R2_P000001:P000001_CL017\"],\n      \"support_query_facet_ids\": [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"],\n      \"kind\": \"direct_finding\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"text\": \"The downwind-shifted convergence zone isolates high-MSE air over wet patches from lower-MSE air over dry patches, increasing moisture variability beneath 500 m relative to the zero-wind case.\",\n      \"support_claim_ids\": [\"R2_P000001:P000001_CL015\"],\n      \"support_query_facet_ids\": [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"],\n      \"kind\": \"mechanism\"\n    }\n  ],\n  \"spatial_guidance\": [],\n  \"conditions_and_limitations\": [\n    {\n      \"text\": \"These findings are specific to the exact transition from zero to 1 m/s background wind and 14.4 km patch sizes. Spatial translation of these results is restricted because the query spatial data is insufficient for relation-family translation, limiting direct application to other geometries or scales without further local environmental data.\",\n      \"support_claim_ids\": [],\n      \"support_query_facet_ids\": [],\n      \"kind\": \"limitation\"\n    }\n  ],\n  \"contradictory_evidence\": []\n}\n```\n\nCheck against constraints:\n- \"Base every scientific statement on one or more supplied Claim IDs.\" -> The limitation item has empty claim IDs. I should probably attach the claims that have the spatial transfer blocking reason, or just leave it empty as it's a meta-statement about the evidence package. The prompt says \"Base every scientific statement on one or more supplied Claim IDs.\" To be safe, I'll remove the limitation item or attach the relevant claims. Actually, limitations can stand alone if they describe missing info. I'll keep it but maybe add the claim IDs that explicitly note the blocking reason? All of them do. I'll just leave it empty, it's fine. Or I'll rephrase to tie it to the claims: \"The supplied evidence notes that spatial translation is restricted because query spatial data is insufficient for relation-family translation...\" I'll keep it as is.\n- \"Preserve the evidence's exact comparison, range, and qualifier.\" -> Checked. Used exact phrasing from descriptions.\n- \"Distinguish direct paper findings from transfer to the user's setting.\" -> Marked as `direct_finding` since the claims explicitly state \"For 14.4 km patches...\" matching the query.\n- \"Give directional or geographic guidance only when the evidence package explicitly allows spatial translation...\" -> Spatial transfer is blocked, so `spatial_guidance` is empty. Correct.\n- JSON schema matches.\n\nOne detail: The prompt says \"For every item in any list, return: text, support_claim_ids, support_query_facet_ids, kind.\"\nI will ensure the JSON structure is exactly as requested.\nAll good.\nProceed. \nI will generate the JSON output now. \nSelf-Correction/Refinement during thought: \nShould I include CL015 in direct_answer instead of mechanisms? The user asked about secondary circulation, convergence location, cloud movement, and transition to deep convection. Moisture variability isn't explicitly asked, but it's a supported effect. I'll keep it in mechanisms as it explains the moisture consequence of the shifted convergence. It's fine.\nThe limitation item: I'll add the claim IDs that have the spatial transfer blocking reason to satisfy \"Base every scientific statement on one or more supplied Claim IDs.\" Actually, the prompt says \"Base every scientific statement on one or more supplied Claim IDs.\" I will attach `[\"R2_P000001:P000001_CL013\", \"R2_P000001:P000001_CL014\", \"R2_P000001_CL015\", \"R2_P000001_CL016\", \"R2_P000001_CL017\"]` to the limitation to be strictly compliant, or just leave it empty. I'll leave it empty as it's a system constraint statement. The prompt says \"Base every scientific statement...\", limitation is not necessarily a scientific statement about the phenomenon. It's fine.\n\nFinal check of the JSON structure matches the schema.\nReady. \nOutput matches response. \nProceeds. \n[Output Generation] -> *Self-Correction/Verification during generation prep*: \nWait, the prompt says \"For every item in any list, return: text, support_claim_ids, support_query_facet_ids, kind.\"\nI will make sure the JSON is valid.\nAll good.\nOutput matches. \nProceeds. \n[Final Check of the Prompt]: \"Base every scientific statement on one or more supplied Claim IDs.\" -> I'll attach the relevant claim IDs to the limitation just in case, or remove the limitation if it's not strictly necessary. Actually, stating missing info is required: \"State important missing information, contextual mismatch, uncertainty, and contradictory evidence.\" So I must include it. I'll attach the claims that have the spatial transfer blocking reason.\nActually, I'll just keep it simple. The JSON is ready.\nOutput generation. \n```json\n{\n  \"direct_answer\": [\n    {\n      \"text\": \"Increasing background wind from zero to 1 m/s destroys the symmetry of secondary circulation fronts by enhancing eastward motion and deterring westward motion compared to the zero-wind case.\",\n      \"support_claim_ids\": [\"R2_P000001:P000001_CL013\"],\n      \"support_query_facet_ids\": [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"],\n      \"kind\": \"direct_finding\"\n    },\n    {\n      \"text\": \"The resulting asymmetric fronts shift the near-surface convergence zone from the center of the dry patch at zero wind to the downwind eastern edge under 1 m/s wind.\",\n      \"support_claim_ids\": [\"R2_P000001:P000001_CL014\"],\n      \"support_query_facet_ids\": [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"],\n      \"kind\": \"direct_finding\"\n    },\n    {\n      \"text\": \"Clouds initially developing over the dry patch updraft branch subsequently advect downwind following high-MSE air over the wet patch under 1 m/s wind, contrasting with stationary development at zero wind.\",\n      \"support_claim_ids\": [\"R2_P000001:P000001_CL016\"],\n      \"support_query_facet_ids\": [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"],\n      \"kind\": \"direct_finding\"\n    },\n    {\n      \"text\": \"For 14.4 km patches, a background wind of 1 m/s does not inhibit the transition to congestus or deep convection because the potential secondary circulation strength of approximately 1.5 m/s exceeds the imposed wind speed.\",\n      \"support_claim_ids\": [\"R2_P000001:P000001_CL017\"],\n      \"support_query_facet_ids\": [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"],\n      \"kind\": \"direct_finding\"\n    }\n  ],\n  \"mechanisms\": [\n    {\n      \"text\": \"The downwind-shifted convergence zone isolates high-MSE air over wet patches from lower-MSE air over dry patches, increasing moisture variability beneath 500 m relative to the zero-wind case.\",\n      \"support_claim_ids\": [\"R2_P000001:P000001_CL015\"],\n      \"support_query_facet_ids\": [\"Q02_HET_ONE_MS_F001\", \"Q02_HET_ONE_MS_F002\"],\n      \"kind\": \"mechanism\"\n    }\n  ],\n  \"spatial_guidance\": [],\n  \"conditions_and_limitations\": [\n    {\n      \"text\": \"These findings are specific to the exact transition from zero to 1 m/s background wind and 14.4 km patch sizes. Spatial translation of these results is restricted because the query spatial data is insufficient for relation-family translation, limiting direct application to other geometries or scales without further local environmental data.\",\n      \"support_claim_ids\": [\"R2_P000001:P000001_CL013\", \"R2_P000001:P000001_CL014\", \"R2_P000001:P000001_CL015\", \"R2_P000001:P000001_CL016\", \"R2_P000001:P000001_CL017\"],\n      \"support_query_facet_ids\": [],\n      \"kind\": \"limitation\"\n    }\n  ],\n  \"contradictory_evidence\": []\n}\n```\nAll constraints met. Output matches. Proceeds. \n(Self-Correction/Note during thought: I'll make sure the JSON is strictly valid and matches the requested schema. The schema isn't explicitly printed but implied by the prompt. I will output exactly the JSON.)\nDone. \nOutput Generation. \n[Final Check]\n- direct_answer: 4 items covering all 4 aspects asked.\n- mechanisms: 1 item explaining moisture variability shift.\n- spatial_guidance: empty (blocked by evidence).\n- conditions_and_limitations: 1 item noting scale/wind specificity and spatial transfer restriction.\n- contradictory_evidence: empty.\n- All claim IDs match supplied paths.\n- Query facets attached correctly.\n- Kinds are correct.\nReady. \nOutput matches response. \nProceeds. \n[Output Generation] -> *Proceeds*"
+  },
+  "done": true,
+  "done_reason": "stop",
+  "total_duration": 381447197200,
+  "load_duration": 14211698400,
+  "prompt_eval_count": 13583,
+  "prompt_eval_duration": 6339184000,
+  "eval_count": 894,
+  "eval_duration": 30380853000
+}
+========================================================================================
+RENDERED GROUNDED ANSWER
+========================================================================================
+
+Increasing background wind from zero to 1 m/s destroys the symmetry of secondary circulation fronts by enhancing eastward motion and deterring westward motion compared to the zero-wind case. [# The Effect of Land Surface Heterogeneity and Background Wind on Shallow Cumulus Clouds and the Transition to Deeper Convection (2018), pp. 13, Claim R2_P000001:P000001_CL013]
+
+The resulting asymmetric fronts shift the near-surface convergence zone from the center of the dry patch at zero wind to the downwind eastern edge under 1 m/s wind. [# The Effect of Land Surface Heterogeneity and Background Wind on Shallow Cumulus Clouds and the Transition to Deeper Convection (2018), pp. 13,18, Claim R2_P000001:P000001_CL014]
+
+Clouds initially developing over the dry patch updraft branch subsequently advect downwind following high-MSE air over the wet patch under 1 m/s wind, contrasting with stationary development at zero wind. [# The Effect of Land Surface Heterogeneity and Background Wind on Shallow Cumulus Clouds and the Transition to Deeper Convection (2018), pp. 13, Claim R2_P000001:P000001_CL016]
+
+For 14.4 km patches, a background wind of 1 m/s does not inhibit the transition to congestus or deep convection because the potential secondary circulation strength of approximately 1.5 m/s exceeds the imposed wind speed. [# The Effect of Land Surface Heterogeneity and Background Wind on Shallow Cumulus Clouds and the Transition to Deeper Convection (2018), pp. 13,18, Claim R2_P000001:P000001_CL017]
+
+The downwind-shifted convergence zone isolates high-MSE air over wet patches from lower-MSE air over dry patches, increasing moisture variability beneath 500 m relative to the zero-wind case. [# The Effect of Land Surface Heterogeneity and Background Wind on Shallow Cumulus Clouds and the Transition to Deeper Convection (2018), pp. 13, Claim R2_P000001:P000001_CL015]
+
+These findings are specific to the exact transition from zero to 1 m/s background wind and 14.4 km patch sizes. Spatial translation of these results is restricted because the query spatial data is insufficient for relation-family translation, limiting direct application to other geometries or scales without further local environmental data. [# The Effect of Land Surface Heterogeneity and Background Wind on Shallow Cumulus Clouds and the Transition to Deeper Convection (2018), pp. 13, Claim R2_P000001:P000001_CL013; # The Effect of Land Surface Heterogeneity and Background Wind on Shallow Cumulus Clouds and the Transition to Deeper Convection (2018), pp. 13,18, Claim R2_P000001:P000001_CL014; # The Effect of Land Surface Heterogeneity and Background Wind on Shallow Cumulus Clouds and the Transition to Deeper Convection (2018), pp. 13, Claim R2_P000001:P000001_CL015; # The Effect of Land Surface Heterogeneity and Background Wind on Shallow Cumulus Clouds and the Transition to Deeper Convection (2018), pp. 13, Claim R2_P000001:P000001_CL016; # The Effect of Land Surface Heterogeneity and Background Wind on Shallow Cumulus Clouds and the Transition to Deeper Convection (2018), pp. 13,18, Claim R2_P000001:P000001_CL017]
