@@ -14,9 +14,19 @@ from typing import Any, Callable
 from urllib.parse import unquote, urlparse
 
 from climatekg.config import OUTPUT_ROOT, PIPELINE, QUERY_PIPELINE
+from climatekg.earth_engine import EarthEngineBackend
+from climatekg.enrichment import derive_facets
+from climatekg.models import SpatialSupport
 from climatekg.parquet_graph import ParquetGraph
 from climatekg.query import run_query
 from climatekg.utils import write_json
+from webapp.answer_systems import (
+    ANSWER_SYSTEMS,
+    DEFAULT_ANSWER_SYSTEM,
+    append_environmental_context,
+    readiness,
+    run_baseline,
+)
 
 
 WEBAPP_DIR = Path(__file__).resolve().parent
@@ -27,7 +37,6 @@ DEFAULT_GRAPH_ROOT = OUTPUT_ROOT / "three_system_benchmark" / "parquet_graph"
 WEBAPP_OUTPUT_ROOT = PROJECT_ROOT / "climatekg" / "runtime" / "webapp" / "queries"
 TIKTOKEN_CACHE_ROOT = PROJECT_ROOT / "climatekg" / "runtime" / "cache" / "tiktoken"
 os.environ.setdefault("TIKTOKEN_CACHE_DIR", str(TIKTOKEN_CACHE_ROOT))
-
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -69,6 +78,9 @@ class WatershedCatalog:
             "subbasin_code": properties.get("sbcode"),
         }
 
+    def feature(self, watershed_id: str) -> dict[str, Any]:
+        return self._load()[watershed_id]
+
     @property
     def count(self) -> int:
         return len(self._load())
@@ -86,6 +98,8 @@ class ClimateKGEngine:
         self.watershed_path = watershed_path.resolve()
         self.koppen_path = KOPPEN_PATH.resolve()
         self.model = QUERY_PIPELINE["ollama"]["model"]
+        self.ollama_url = QUERY_PIPELINE["ollama"]["base_url"]
+        self.embedding_model = QUERY_PIPELINE["embeddings"]["model"]
         self._papers = None
         self._indexes = None
         self._load_lock = threading.Lock()
@@ -99,9 +113,11 @@ class ClimateKGEngine:
         manifest_path = self.graph_root / "manifest.json"
         table_counts = read_json(manifest_path).get("tables", {}) if manifest_path.exists() else {}
         return {
-            "generation_models": [self.model],
-            "default_model": self.model,
+            "answer_systems": list(ANSWER_SYSTEMS),
+            "default_system": DEFAULT_ANSWER_SYSTEM,
+            "generation_model": self.model,
             "graph_ready": manifest_path.exists(),
+            **readiness(),
             "graph_root": str(self.graph_root),
             "corpus": table_counts,
             "koppen_ready": self.koppen_path.is_file(),
@@ -122,11 +138,23 @@ class ClimateKGEngine:
         self,
         question: str,
         query_id: str,
-        model: str,
+        system: str,
         stage_callback: Callable[[str, dict[str, Any]], None],
+        planning_feature: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        if model != self.model:
-            raise ValueError(f"unsupported model: {model}")
+        if system not in {item["id"] for item in ANSWER_SYSTEMS}:
+            raise ValueError(f"unsupported answer system: {system}")
+        artifact_dir = self.output_root / query_id
+        derived_facets: list[dict[str, Any]] = []
+        augmented_question = question
+        if planning_feature is not None and system != "climatekg":
+            derived_facets = self._enrich_planning_feature(planning_feature, artifact_dir, stage_callback)
+            augmented_question = append_environmental_context(question, derived_facets)
+        if system != "climatekg":
+            return run_baseline(
+                system, augmented_question, question, query_id, artifact_dir, derived_facets,
+                self.ollama_url, self.embedding_model, self.model, stage_callback,
+            )
         self._load_graph()
         report = run_query(
             question,
@@ -136,8 +164,36 @@ class ClimateKGEngine:
             stage_callback=stage_callback,
             indexes=self._indexes,
         )
-        return compact_report(report, self.output_root / query_id)
+        result = compact_report(report, artifact_dir)
+        result.update({"system": "climatekg", "system_label": "ClimateKG (context-aware)"})
+        return result
 
+    def _enrich_planning_feature(
+        self,
+        feature: dict[str, Any],
+        artifact_dir: Path,
+        stage_callback: Callable[[str, dict[str, Any]], None],
+    ) -> list[dict[str, Any]]:
+        properties = feature["properties"]
+        support = SpatialSupport(
+            kind="watershed",
+            name=str(properties["wsconc"]),
+            geometry=feature["geometry"],
+            resolution="exact",
+        )
+        config = PIPELINE["enrichment"]
+        backend = EarthEngineBackend(config["earth_engine_project"], config["datasets"], config["reference_period"])
+        facets, raw, warnings = derive_facets(support, backend, config)
+        serialized = [
+            {"id": f"{properties['wsconc']}_F{index:03d}", "origin": "derived", **item.__dict__, "source": item.source.model_dump()}
+            for index, item in enumerate(facets, 1)
+        ]
+        write_json(artifact_dir / "enrichment" / "enrichment.json", {
+            "status": "complete", "spatial_support": support.model_dump(), "raw": raw,
+            "derived_facets": serialized, "warnings": warnings,
+        })
+        stage_callback("watershed_enriched", {"facet_count": len(serialized), "warnings": warnings})
+        return serialized
 
 def compact_report(report: dict[str, Any], artifact_dir: Path) -> dict[str, Any]:
     spec = report.get("query_spec", {})
@@ -194,16 +250,20 @@ class JobManager:
 
     def submit(self, kind: str, payload: dict[str, Any]) -> Job:
         question = self._question(kind, payload)
-        model = str(payload.get("model", "")).strip() or self.engine.model
-        if model != self.engine.model:
-            raise ValueError(f"unsupported model: {model}")
+        system = str(payload.get("system", "")).strip() or DEFAULT_ANSWER_SYSTEM
+        if system not in {item["id"] for item in ANSWER_SYSTEMS}:
+            raise ValueError(f"unsupported answer system: {system}")
+        planning_feature = None
+        if kind == "planning":
+            watershed_id = str(payload.get("watershed_id", "")).strip().upper()
+            planning_feature = self.watersheds.feature(watershed_id)
         job = Job(id=uuid.uuid4().hex[:12], kind=kind)
         with self._jobs_lock:
             self.jobs[job.id] = job
             self._persist(job)
         threading.Thread(
             target=self._execute,
-            args=(job, question, model),
+            args=(job, question, system, planning_feature),
             daemon=True,
             name=f"climatekg-{job.id}",
         ).start()
@@ -235,7 +295,13 @@ class JobManager:
             question += f" Additional local information supplied by the user: {additional}"
         return question
 
-    def _execute(self, job: Job, question: str, model: str) -> None:
+    def _execute(
+        self,
+        job: Job,
+        question: str,
+        system: str,
+        planning_feature: dict[str, Any] | None,
+    ) -> None:
         def update(stage: str, details: dict[str, Any]) -> None:
             with self._jobs_lock:
                 job.stages.append({"name": stage, "details": details, "at": utc_now()})
@@ -249,7 +315,7 @@ class JobManager:
                 self._persist(job)
             with self._inference_lock:
                 query_id = f"WEB_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{job.id[:6]}"
-                result = self.engine.run(question, query_id, model, update)
+                result = self.engine.run(question, query_id, system, update, planning_feature)
             with self._jobs_lock:
                 job.result = result
                 job.status = "complete"

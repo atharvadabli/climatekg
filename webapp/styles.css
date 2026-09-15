@@ -64,7 +64,8 @@ textarea, input, select { width: 100%; max-width: 100%; min-width: 0; border: 1p
 textarea { resize: vertical; line-height: 1.5; }
 textarea:focus, input:focus, select:focus { border-color: var(--forest); box-shadow: 0 0 0 3px rgba(39, 95, 71, 0.12); }
 .form-actions { display: flex; justify-content: flex-end; align-items: end; gap: 14px; margin-top: 18px; }
-.model-field { width: min(240px, 100%); }
+.system-field { width: min(280px, 100%); }
+.system-field small { display: block; margin-top: 6px; color: var(--muted); font-size: 10px; }
 .primary-button { min-height: 42px; border: 0; border-radius: 4px; padding: 0 18px; background: var(--forest); color: white; font-weight: 750; }
 .primary-button:hover { background: var(--forest-dark); }
 .primary-button:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -164,7 +165,7 @@ details label { padding: 4px 0 16px; display: block; }
   h1 { font-size: 26px; overflow-wrap: anywhere; }
   .query-form { padding: 17px; }
   .form-actions, .map-toolbar { align-items: stretch; flex-direction: column; }
-  .model-field, .watershed-search { width: 100%; }
+  .system-field, .watershed-search { width: 100%; }
   .primary-button { width: 100%; }
   .trace-grid { grid-template-columns: 1fr; }
   .map-toolbar { padding: 15px 16px; }

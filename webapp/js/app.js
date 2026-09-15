@@ -33,13 +33,13 @@ function setWorkflow(name) {
   if (window.location.hash !== `#${name}`) history.replaceState(null, "", `#${name}`);
 }
 
-function populateModels(config) {
-  $$(".model-select").forEach((select) => {
-    select.replaceChildren(...config.generation_models.map((model) => {
+function populateSystems(config) {
+  $$(".system-select").forEach((select) => {
+    select.replaceChildren(...config.answer_systems.map((system) => {
       const option = document.createElement("option");
-      option.value = model;
-      option.textContent = model;
-      option.selected = model === config.default_model;
+      option.value = system.id;
+      option.textContent = system.label;
+      option.selected = system.id === config.default_system;
       return option;
     }));
   });
@@ -61,6 +61,11 @@ function stageLabel(name) {
     evidence_trimmed: "Prepared grounded evidence package",
     answer_synthesized: "Generated grounded answer",
     artifacts_written: "Saved complete trace",
+    watershed_enriched: "Derived watershed context",
+    graphrag_retrieval_started: "Searching GraphRAG communities",
+    graphrag_answer_synthesized: "Generated GraphRAG answer",
+    plain_rag_retrieval_started: "Searching source passages",
+    plain_rag_answer_synthesized: "Generated passage RAG answer",
   })[name] || name.replaceAll("_", " ");
 }
 
@@ -144,23 +149,46 @@ function showFacetDetails(item) {
   dialog.showModal();
 }
 
+function renderRetrievalTrace(result) {
+  if (result.system === "graphrag") {
+    const communities = result.communities || [];
+    const evidence = result.evidence || [];
+    return `<section class="result-section"><h3>GraphRAG retrieval trace</h3><div class="trace-grid">
+      <article><strong>${communities.length}</strong><span>communities searched</span>${communities.slice(0, 3).map((item) => `<p>${escapeHTML(item.id)} · ${score(item.score)}</p>`).join("")}</article>
+      <article><strong>${evidence.length}</strong><span>relationships supplied</span>${evidence.slice(0, 4).map((item) => `<p>${escapeHTML(item.evidence_id)} · ${score(item.score)}</p>`).join("")}</article>
+      <article><strong>${new Set(evidence.map((item) => item.paper)).size}</strong><span>papers represented</span><p>Community retrieval, then relationship ranking</p></article>
+    </div></section>
+    <section class="result-section"><h3>Retrieved relationship evidence</h3><div class="citation-list">${evidence.slice(0, 8).map((item) => `<article><strong>${escapeHTML(item.evidence_id)}</strong><p>${escapeHTML(item.description)}</p><span>${escapeHTML(item.paper_title)} · ${escapeHTML((item.blocks || []).map((block) => `${block.block_id}, p. ${block.page}`).join("; "))}</span></article>`).join("")}</div></section>`;
+  }
+  if (result.system === "plain_rag") {
+    const sources = result.sources || [];
+    return `<section class="result-section"><h3>Passage retrieval trace</h3><div class="trace-grid">
+      <article><strong>${sources.length}</strong><span>source chunks supplied</span>${sources.slice(0, 4).map((item, index) => `<p>S${index + 1} · ${score(item.score)}</p>`).join("")}</article>
+      <article><strong>${new Set(sources.map((item) => item.paper)).size}</strong><span>papers represented</span><p>Embedding similarity with metadata ranking</p></article>
+    </div></section>
+    <section class="result-section"><h3>Retrieved source passages</h3><div class="citation-list">${sources.map((item, index) => `<article><strong>S${index + 1}</strong><p>${escapeHTML(item.paper)} · ${escapeHTML(item.heading || item.section)}</p><span>${escapeHTML(item.text.slice(0, 360))}${item.text.length > 360 ? "…" : ""}</span></article>`).join("")}</div></section>`;
+  }
+  const contexts = result.contexts || [];
+  return `<section class="result-section"><h3>Evidence trace</h3><div class="trace-grid">
+    <article><strong>${contexts.length}</strong><span>top contexts shown</span>${contexts.slice(0, 3).map((item) => `<p>${escapeHTML(item.context_id)} · ${score(item.context_similarity?.overall_score)}</p>`).join("")}</article>
+    <article><strong>${result.claims?.length || 0}</strong><span>top claims shown</span>${(result.claims || []).slice(0, 4).map((item) => `<p>${escapeHTML(item.claim_id)} · ${score(item.R_claim)}</p>`).join("")}</article>
+    <article><strong>${result.paths?.length || 0}</strong><span>evidence paths shown</span><p>${escapeHTML(result.paths?.[0]?.claim_ids?.join(" → ") || "No mechanism path selected")}</p></article>
+  </div></section>`;
+}
+
 function renderResult(container, result) {
   const citations = Object.entries(result.provenance || {});
   const derived = result.derived_facets || [];
-  const contexts = result.contexts || [];
+  const climateKGCitations = result.system === "climatekg" ? `<section class="result-section"><h3>Cited sources</h3>${citations.length ? `<div class="citation-list">${citations.map(([claim, item]) => `<article><strong>${escapeHTML(claim)}</strong><p>${escapeHTML(item.title)} (${escapeHTML(item.year || "n.d.")})${item.pages?.length ? `, pages ${escapeHTML(item.pages.join(", "))}` : ""}</p><span>${escapeHTML(item.source_block_ids?.join(", ") || "")}</span></article>`).join("")}</div>` : `<p class="empty-copy">No cited Claim survived grounding validation.</p>`}</section>` : "";
   container.innerHTML = `
     <article class="answer-panel">
-      <header><div><p class="eyebrow">Grounded answer</p><h2>${escapeHTML(result.question || "Result")}</h2></div><span class="mode-badge">${escapeHTML(result.mode || "query")}</span></header>
+      <header><div><p class="eyebrow">${escapeHTML(result.system_label || "ClimateKG")} answer</p><h2>${escapeHTML(result.question || "Result")}</h2></div><span class="mode-badge">${escapeHTML(result.mode || "query")}</span></header>
       <div class="answer-text">${escapeHTML(result.answer).replaceAll("\n", "<br>")}</div>
     </article>
     ${derived.length ? `<section class="result-section"><h3>Watershed context used</h3><p class="section-note">Select a context value to see what it means, why it affects evidence matching, and where it came from.</p><div class="facet-grid">${derived.map((item, index) => `<button class="facet-card" type="button" data-facet-index="${index}"><span>${escapeHTML(item.domain)}</span><strong>${escapeHTML(item.notion)}</strong><p>${escapeHTML(item.description)}</p><small>View explanation</small></button>`).join("")}</div></section>` : ""}
-    <section class="result-section"><h3>Evidence trace</h3><div class="trace-grid">
-      <article><strong>${contexts.length}</strong><span>top contexts shown</span>${contexts.slice(0, 3).map((item) => `<p>${escapeHTML(item.context_id)} · ${score(item.context_similarity?.overall_score)}</p>`).join("")}</article>
-      <article><strong>${result.claims?.length || 0}</strong><span>top claims shown</span>${(result.claims || []).slice(0, 4).map((item) => `<p>${escapeHTML(item.claim_id)} · ${score(item.R_claim)}</p>`).join("")}</article>
-      <article><strong>${result.paths?.length || 0}</strong><span>evidence paths shown</span><p>${escapeHTML(result.paths?.[0]?.claim_ids?.join(" → ") || "No mechanism path selected")}</p></article>
-    </div></section>
-    <section class="result-section"><h3>Cited sources</h3>${citations.length ? `<div class="citation-list">${citations.map(([claim, item]) => `<article><strong>${escapeHTML(claim)}</strong><p>${escapeHTML(item.title)} (${escapeHTML(item.year || "n.d.")})${item.pages?.length ? `, pages ${escapeHTML(item.pages.join(", "))}` : ""}</p><span>${escapeHTML(item.source_block_ids?.join(", ") || "")}</span></article>`).join("")}</div>` : `<p class="empty-copy">No cited Claim survived grounding validation.</p>`}</section>
-    ${result.warnings?.length ? `<details class="warning-list"><summary>${result.warnings.length} pipeline notices</summary>${result.warnings.map((item) => `<p>${escapeHTML(item)}</p>`).join("")}</details>` : ""}
+    ${renderRetrievalTrace(result)}
+    ${climateKGCitations}
+    ${result.warnings?.length ? `<details class="warning-list"><summary>${result.warnings.length} method notices</summary>${result.warnings.map((item) => `<p>${escapeHTML(item)}</p>`).join("")}</details>` : ""}
     <p class="artifact-path">Full trace: ${escapeHTML(result.artifact_dir)}</p>`;
   container.querySelectorAll("[data-facet-index]").forEach((card) => {
     card.addEventListener("click", () => showFacetDetails(derived[Number(card.dataset.facetIndex)]));
@@ -255,8 +283,8 @@ function findWatershed() {
 async function initialize() {
   $$(".workflow-tab").forEach((button) => button.addEventListener("click", () => setWorkflow(button.dataset.view)));
   state.config = await request("/api/config");
-  populateModels(state.config);
-  const ready = state.config.graph_ready && state.config.koppen_ready && state.config.watersheds.ready;
+  populateSystems(state.config);
+  const ready = state.config.graph_ready && state.config.graphrag_ready && state.config.plain_rag_ready && state.config.koppen_ready && state.config.watersheds.ready;
   $("#system-dot").classList.toggle("ready", ready);
   $("#system-label").textContent = ready ? "Corpus and watershed data ready" : "Setup required";
   setWorkflow(window.location.hash === "#planning" ? "planning" : "process");
@@ -265,7 +293,7 @@ async function initialize() {
     event.preventDefault();
     submitJob("/api/process-query", {
       question: $("#process-question").value,
-      model: $("#process-model").value,
+      system: $("#process-system").value,
     }, $("#process-result"), event.submitter);
   });
   $("#planning-form").addEventListener("submit", (event) => {
@@ -274,7 +302,7 @@ async function initialize() {
       watershed_id: state.selected,
       objective: $("#planning-objective").value,
       additional_information: $("#additional-information").value,
-      model: $("#planning-model").value,
+      system: $("#planning-system").value,
     }, $("#planning-result"), event.submitter);
   });
   $("#watershed-find").addEventListener("click", findWatershed);

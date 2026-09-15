@@ -33,7 +33,7 @@
           <textarea id="process-question" rows="4" required placeholder="How does surface heterogeneity affect local clouds and precipitation under weak background wind?"></textarea>
         </label>
         <div class="form-actions">
-          <label class="model-field"><span>Model</span><select class="model-select" id="process-model"></select></label>
+          <label class="system-field"><span>Answer system</span><select class="system-select" id="process-system"></select><small>All systems use the local Qwen model.</small></label>
           <button class="primary-button" type="submit">Run query</button>
         </div>
       </form>
@@ -72,7 +72,7 @@
                 <textarea id="additional-information" rows="5" placeholder="Example: Mostly rainfed cropland; water is limited; prioritize the pre-monsoon hot season."></textarea>
               </label>
             </details>
-            <label class="model-field"><span>Model</span><select class="model-select" id="planning-model"></select></label>
+            <label class="system-field"><span>Answer system</span><select class="system-select" id="planning-system"></select><small>All systems use the local Qwen model.</small></label>
             <button class="primary-button full-button" type="submit" disabled id="planning-submit">Enrich area and assess evidence</button>
           </form>
         </aside>

@@ -28,15 +28,22 @@ class FakeEngine:
 
     def config(self) -> dict:
         return {
-            "generation_models": [self.model],
-            "default_model": self.model,
+            "answer_systems": [
+                {"id": "graphrag", "label": "Microsoft GraphRAG"},
+                {"id": "plain_rag", "label": "Plain RAG"},
+                {"id": "climatekg", "label": "ClimateKG (context-aware)"},
+            ],
+            "default_system": "graphrag",
+            "generation_model": self.model,
             "graph_ready": True,
+            "graphrag_ready": True,
+            "plain_rag_ready": True,
             "corpus": {"papers": 2},
         }
 
-    def run(self, question, query_id, model, stage_callback):
+    def run(self, question, query_id, system, stage_callback, planning_feature=None):
         stage_callback("query_parsed", {"mode": "forward"})
-        return {"query_id": query_id, "question": question, "answer": "Grounded test answer"}
+        return {"query_id": query_id, "system": system, "question": question, "answer": "Grounded test answer"}
 
 
 def write_watersheds(path: Path) -> None:
@@ -94,7 +101,7 @@ def test_webapp_api_runs_process_job_and_serves_watersheds() -> None:
                 watersheds = json.load(response)
             job = post_json(f"{base}/api/process-query", {
                 "question": "How does irrigation affect heat?",
-                "model": "qwen3.6:27b",
+                "system": "graphrag",
             })
             for _ in range(20):
                 with urllib.request.urlopen(f"{base}/api/jobs/{job['id']}", timeout=5) as response:
@@ -102,6 +109,7 @@ def test_webapp_api_runs_process_job_and_serves_watersheds() -> None:
                 if final["status"] in {"complete", "failed"}:
                     break
             assert config["watersheds"]["count"] == 1
+            assert config["default_system"] == "graphrag"
             assert watersheds["features"][0]["properties"]["wsconc"] == "C07BRA20"
             assert final["status"] == "complete"
             assert final["result"]["answer"] == "Grounded test answer"
@@ -112,7 +120,7 @@ def test_webapp_api_runs_process_job_and_serves_watersheds() -> None:
             thread.join(timeout=5)
 
 
-def test_webapp_rejects_unknown_model() -> None:
+def test_webapp_rejects_unknown_answer_system() -> None:
     with workspace_test_dir() as test_dir:
         watershed_path = test_dir / "watersheds.geojson"
         write_watersheds(watershed_path)
@@ -123,7 +131,7 @@ def test_webapp_rejects_unknown_model() -> None:
         try:
             request = urllib.request.Request(
                 f"http://127.0.0.1:{server.server_port}/api/process-query",
-                data=json.dumps({"question": "test", "model": "unconfigured"}).encode(),
+                data=json.dumps({"question": "test", "system": "unconfigured"}).encode(),
                 headers={"Content-Type": "application/json"},
                 method="POST",
             )
@@ -147,3 +155,13 @@ def test_watershed_context_cards_have_explanation_dialog() -> None:
     assert "Why it matters here" in javascript
     assert "Data provenance" in javascript
     assert "source.dataset" in javascript
+
+
+def test_webapp_lists_real_answer_systems_with_graphrag_default() -> None:
+    html = Path("webapp/index.html").read_text(encoding="utf-8")
+    javascript = Path("webapp/js/app.js").read_text(encoding="utf-8")
+
+    assert 'id="process-system"' in html
+    assert 'id="planning-system"' in html
+    assert "config.answer_systems" in javascript
+    assert "config.default_system" in javascript

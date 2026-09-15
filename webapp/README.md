@@ -1,11 +1,12 @@
 # ClimateKG Webapp Prototype
 
-This local prototype exposes two workflows:
+This local prototype exposes two workflows and three answer systems:
 
-- **Process Understanding** submits a scientific question to the existing context-aware ClimateKG query pipeline.
-- **Land use planning** selects an Indian watershed, enriches its geometry with the configured datasets, and asks the same pipeline for literature-grounded intervention evidence.
+- **Process Understanding** submits a scientific question to Microsoft GraphRAG, Plain RAG, or the context-aware ClimateKG pipeline.
+- **Land use planning** selects an Indian watershed, enriches its geometry with the configured datasets, and supplies that context to the selected system.
+- **Microsoft GraphRAG** is selected by default. **Plain RAG** retrieves source passages. **ClimateKG** performs context matching, claim gating, and mechanism-path search.
 
-The browser performs no scientific scoring. It submits inputs, displays query stages, and renders the grounded answer and trace returned by `climatekg.query.run_query`.
+All three systems use the configured local `qwen3.6:27b` model for answer generation. The browser performs no scientific scoring; it submits inputs and renders the system-specific retrieval trace.
 
 ## Run
 
@@ -16,6 +17,7 @@ Requirements:
 - Earth Engine authenticated for project `ee-atharv` for watershed enrichment;
 - `assets/watershed_pan_india_simplified.geojson` present;
 - the Parquet graph at `climatekg/runtime/outputs/three_system_benchmark/parquet_graph`.
+- the saved baseline indexes at `climatekg/runtime/outputs/three_system_benchmark/baselines`.
 
 On first use, `tiktoken` downloads its standard `o200k_base` vocabulary into `climatekg/runtime/cache/tiktoken`. The cache must be present when running without network access.
 
