@@ -102,11 +102,29 @@ details label { padding: 4px 0 16px; display: block; }
 .answer-text { padding: 24px; line-height: 1.7; }
 .mode-badge { align-self: start; padding: 5px 8px; background: #e9f0ec; color: var(--forest-dark); font-size: 11px; font-weight: 800; text-transform: uppercase; }
 .result-section { margin-top: 26px; }
+.section-note { margin: -6px 0 14px; color: var(--muted); font-size: 12px; }
 .facet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
-.facet-grid article { background: white; padding: 15px; }
-.facet-grid span { color: var(--water); font-size: 10px; font-weight: 800; text-transform: uppercase; }
-.facet-grid strong { display: block; margin: 5px 0; font-size: 13px; }
-.facet-grid p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.facet-card { min-width: 0; border: 0; border-radius: 0; background: white; padding: 15px; color: var(--ink); text-align: left; }
+.facet-card:hover { background: #f5f9f6; box-shadow: inset 0 0 0 2px var(--forest); }
+.facet-card:focus-visible { position: relative; z-index: 1; outline: 3px solid rgba(39, 95, 71, 0.35); outline-offset: -3px; }
+.facet-card span { color: var(--water); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.facet-card strong { display: block; margin: 5px 0; font-size: 13px; }
+.facet-card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.facet-card small { display: block; margin-top: 13px; color: var(--forest); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.facet-dialog { width: min(620px, calc(100% - 32px)); max-height: min(760px, calc(100vh - 32px)); border: 0; border-top: 4px solid var(--forest); border-radius: 4px; padding: 0; color: var(--ink); box-shadow: 0 24px 70px rgba(19, 37, 29, 0.28); }
+.facet-dialog::backdrop { background: rgba(18, 31, 25, 0.58); }
+.facet-dialog > header { display: flex; justify-content: space-between; gap: 18px; padding: 20px 22px; border-bottom: 1px solid var(--line); }
+.dialog-close { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 4px; background: white; color: var(--muted); font-size: 24px; line-height: 1; }
+.dialog-close:hover { color: var(--ink); border-color: #9faea6; }
+.facet-dialog-body { padding: 4px 22px 22px; overflow-y: auto; }
+.facet-dialog-body section { padding: 17px 0; border-bottom: 1px solid var(--line); }
+.facet-dialog-body section:last-child { border-bottom: 0; }
+.facet-dialog-body h3 { margin-bottom: 7px; color: var(--forest-dark); font-size: 12px; }
+.facet-dialog-body p { margin: 0; color: #415149; font-size: 13px; line-height: 1.6; }
+.facet-dialog-body .ranking-note { margin-top: 10px; padding: 9px 11px; background: var(--soft); color: var(--muted); font-size: 11px; }
+.source-detail dl { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 8px 12px; margin: 0; }
+.source-detail dt { color: var(--muted); font-size: 11px; font-weight: 750; }
+.source-detail dd { margin: 0; font-size: 11px; overflow-wrap: anywhere; }
 .trace-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .trace-grid article { background: white; border: 1px solid var(--line); padding: 16px; min-width: 0; }
 .trace-grid > article > strong { display: block; color: var(--forest); font-size: 24px; }

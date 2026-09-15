@@ -91,6 +91,59 @@ function score(value) {
   return typeof value === "number" ? value.toFixed(3) : "unknown";
 }
 
+const facetGuidance = {
+  "aridity regime": {
+    meaning: "The long-term balance between precipitation and potential evapotranspiration. P/PET indicates how much atmospheric water demand can be met by precipitation.",
+    relevance: "Moisture availability can limit evapotranspiration, irrigation cooling, vegetation response, and moisture recycling. ClimateKG uses this value when comparing the watershed with the hydroclimatic setting of published findings.",
+  },
+  "koppen-geiger climate regime": {
+    meaning: "A broad climate classification based on long-term temperature and precipitation patterns. Percentages show the share of the watershed in each class.",
+    relevance: "This provides a coarse climate analogue for ranking study settings. It helps identify evidence from broadly similar regimes, but does not by itself establish that two locations are environmentally equivalent.",
+  },
+  "background wind regime": {
+    meaning: "The season's area-averaged 10 m wind direction, speed, and directional persistence. Direction is reported as where the wind comes from; persistence describes how consistently it maintains that direction.",
+    relevance: "Background flow affects local advection, downwind influence, and whether land-surface contrasts can organize patch or edge circulations. ClimateKG compares the matching season and preserves wind direction as a separate spatial condition.",
+  },
+  "terrain setting": {
+    meaning: "The watershed's elevation distribution, local relief, and typical slope. The p10-p90 range excludes the lowest and highest ten percent of elevation values.",
+    relevance: "Terrain can redirect airflow, create windward and leeward differences, and make evidence from flat or idealized studies less transferable. These values help screen and rank those study contexts.",
+  },
+  "land-cover composition": {
+    meaning: "The fraction of the watershed occupied by the main mapped land-cover classes in the stated reference year.",
+    relevance: "This is the baseline from which a land-use intervention would begin. ClimateKG uses it to compare study land surfaces and to avoid treating an intervention as transferable when the relevant source or replacement cover is absent. It describes composition, not patch shape or edge arrangement.",
+  },
+};
+
+function guidanceForFacet(item) {
+  const notion = (item.notion || "").toLowerCase();
+  if (notion.includes("background wind regime")) return facetGuidance["background wind regime"];
+  return facetGuidance[notion] || {
+    meaning: "A measured or derived environmental property of the selected watershed.",
+    relevance: "ClimateKG compares this property with conditions reported by indexed studies. It is a retrieval and applicability signal, not a probability that a scientific finding is true.",
+  };
+}
+
+function showFacetDetails(item) {
+  const dialog = $("#facet-dialog");
+  const guidance = guidanceForFacet(item);
+  const source = item.source || {};
+  $("#facet-dialog-domain").textContent = item.domain || "watershed context";
+  $("#facet-dialog-title").textContent = item.notion || "Context detail";
+  $("#facet-dialog-body").innerHTML = `
+    <section><h3>Value used</h3><p>${escapeHTML(item.description)}</p></section>
+    <section><h3>What it means</h3><p>${escapeHTML(guidance.meaning)}</p></section>
+    <section><h3>Why it matters here</h3><p>${escapeHTML(guidance.relevance)}</p><p class="ranking-note">This is a context-matching and applicability signal, not a probability that a scientific finding is true.</p></section>
+    <section class="source-detail"><h3>Data provenance</h3>
+      <dl>
+        <dt>Dataset</dt><dd>${escapeHTML(source.dataset || "Not recorded")}</dd>
+        <dt>Version</dt><dd>${escapeHTML(source.version || "Not recorded")}</dd>
+        <dt>Period</dt><dd>${escapeHTML(source.temporal_window || "Not specified")}</dd>
+        <dt>Method</dt><dd>${escapeHTML(source.method || "Not recorded")}</dd>
+      </dl>
+    </section>`;
+  dialog.showModal();
+}
+
 function renderResult(container, result) {
   const citations = Object.entries(result.provenance || {});
   const derived = result.derived_facets || [];
@@ -100,7 +153,7 @@ function renderResult(container, result) {
       <header><div><p class="eyebrow">Grounded answer</p><h2>${escapeHTML(result.question || "Result")}</h2></div><span class="mode-badge">${escapeHTML(result.mode || "query")}</span></header>
       <div class="answer-text">${escapeHTML(result.answer).replaceAll("\n", "<br>")}</div>
     </article>
-    ${derived.length ? `<section class="result-section"><h3>Watershed context used</h3><div class="facet-grid">${derived.map((item) => `<article><span>${escapeHTML(item.domain)}</span><strong>${escapeHTML(item.notion)}</strong><p>${escapeHTML(item.description)}</p></article>`).join("")}</div></section>` : ""}
+    ${derived.length ? `<section class="result-section"><h3>Watershed context used</h3><p class="section-note">Select a context value to see what it means, why it affects evidence matching, and where it came from.</p><div class="facet-grid">${derived.map((item, index) => `<button class="facet-card" type="button" data-facet-index="${index}"><span>${escapeHTML(item.domain)}</span><strong>${escapeHTML(item.notion)}</strong><p>${escapeHTML(item.description)}</p><small>View explanation</small></button>`).join("")}</div></section>` : ""}
     <section class="result-section"><h3>Evidence trace</h3><div class="trace-grid">
       <article><strong>${contexts.length}</strong><span>top contexts shown</span>${contexts.slice(0, 3).map((item) => `<p>${escapeHTML(item.context_id)} · ${score(item.context_similarity?.overall_score)}</p>`).join("")}</article>
       <article><strong>${result.claims?.length || 0}</strong><span>top claims shown</span>${(result.claims || []).slice(0, 4).map((item) => `<p>${escapeHTML(item.claim_id)} · ${score(item.R_claim)}</p>`).join("")}</article>
@@ -109,6 +162,9 @@ function renderResult(container, result) {
     <section class="result-section"><h3>Cited sources</h3>${citations.length ? `<div class="citation-list">${citations.map(([claim, item]) => `<article><strong>${escapeHTML(claim)}</strong><p>${escapeHTML(item.title)} (${escapeHTML(item.year || "n.d.")})${item.pages?.length ? `, pages ${escapeHTML(item.pages.join(", "))}` : ""}</p><span>${escapeHTML(item.source_block_ids?.join(", ") || "")}</span></article>`).join("")}</div>` : `<p class="empty-copy">No cited Claim survived grounding validation.</p>`}</section>
     ${result.warnings?.length ? `<details class="warning-list"><summary>${result.warnings.length} pipeline notices</summary>${result.warnings.map((item) => `<p>${escapeHTML(item)}</p>`).join("")}</details>` : ""}
     <p class="artifact-path">Full trace: ${escapeHTML(result.artifact_dir)}</p>`;
+  container.querySelectorAll("[data-facet-index]").forEach((card) => {
+    card.addEventListener("click", () => showFacetDetails(derived[Number(card.dataset.facetIndex)]));
+  });
 }
 
 function renderError(container, message) {
@@ -222,6 +278,10 @@ async function initialize() {
     }, $("#planning-result"), event.submitter);
   });
   $("#watershed-find").addEventListener("click", findWatershed);
+  $("#facet-dialog-close").addEventListener("click", () => $("#facet-dialog").close());
+  $("#facet-dialog").addEventListener("click", (event) => {
+    if (event.target === event.currentTarget) event.currentTarget.close();
+  });
   $("#watershed-search").addEventListener("keydown", (event) => {
     if (event.key === "Enter") { event.preventDefault(); findWatershed(); }
   });

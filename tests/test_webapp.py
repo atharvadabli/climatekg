@@ -136,3 +136,14 @@ def test_webapp_rejects_unknown_model() -> None:
             server.shutdown()
             server.server_close()
             thread.join(timeout=5)
+
+
+def test_watershed_context_cards_have_explanation_dialog() -> None:
+    html = Path("webapp/index.html").read_text(encoding="utf-8")
+    javascript = Path("webapp/js/app.js").read_text(encoding="utf-8")
+
+    assert 'id="facet-dialog"' in html
+    assert 'data-facet-index="${index}"' in javascript
+    assert "Why it matters here" in javascript
+    assert "Data provenance" in javascript
+    assert "source.dataset" in javascript
