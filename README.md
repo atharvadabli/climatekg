@@ -39,6 +39,7 @@ prompts/          Versioned standalone Qwen prompts
 scripts/          Validation, replay, export, and benchmark commands
 tests/            Deterministic and pipeline-boundary tests
 visualizer/       Local artifact and graph browser
+webapp/           Process-understanding and watershed-planning prototype
 docs/             Implementation and validation reports
 documents/        Technical and research-paper documents
 ```
@@ -129,3 +130,14 @@ The ANN and exact-MaxSim benchmark is documented in
 
 Open `http://127.0.0.1:8765` to inspect Contexts, Facets, Claims, States,
 SourceBlocks, provenance links, and saved query traces.
+
+## Webapp Prototype
+
+```powershell
+.\webapp\run_webapp.ps1
+```
+
+Open `http://127.0.0.1:8780`. The prototype provides a direct scientific query
+workflow and an India watershed-selection workflow that runs query-area
+enrichment before the same context-aware retrieval pipeline. See
+`webapp/README.md` for its local data and Earth Engine requirements.

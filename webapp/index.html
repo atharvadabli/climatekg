@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ClimateKG</title>
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="#" aria-label="ClimateKG home">
+      <span class="brand-mark" aria-hidden="true">CK</span>
+      <span><strong>ClimateKG</strong><small>Land-atmosphere evidence</small></span>
+    </a>
+    <nav class="workflow-tabs" aria-label="Choose workflow">
+      <button class="workflow-tab active" data-view="process">Process Understanding</button>
+      <button class="workflow-tab" data-view="planning">Land use planning</button>
+    </nav>
+    <div class="system-state"><i id="system-dot"></i><span id="system-label">Checking system</span></div>
+  </header>
+
+  <main>
+    <section class="workflow active" id="process-view">
+      <div class="section-heading">
+        <p class="eyebrow">Ask the indexed literature</p>
+        <h1>Understand a land-atmosphere process</h1>
+        <p>Ask about an intervention, mechanism, outcome, or environmental condition.</p>
+      </div>
+      <form class="query-form" id="process-form">
+        <label class="question-field">
+          <span>Question</span>
+          <textarea id="process-question" rows="4" required placeholder="How does surface heterogeneity affect local clouds and precipitation under weak background wind?"></textarea>
+        </label>
+        <div class="form-actions">
+          <label class="model-field"><span>Model</span><select class="model-select" id="process-model"></select></label>
+          <button class="primary-button" type="submit">Run query</button>
+        </div>
+      </form>
+      <div class="result-region" id="process-result" aria-live="polite"></div>
+    </section>
+
+    <section class="workflow" id="planning-view">
+      <div class="planning-layout">
+        <div class="map-panel">
+          <div class="map-toolbar">
+            <div>
+              <p class="eyebrow">India watershed registry</p>
+              <h1>Select a watershed</h1>
+            </div>
+            <label class="watershed-search"><span class="sr-only">Find watershed ID</span><input id="watershed-search" type="search" placeholder="Find ID, e.g. C07BRA20"><button id="watershed-find" type="button">Find</button></label>
+          </div>
+          <div id="watershed-map" role="application" aria-label="Selectable map of Indian watersheds"></div>
+          <div class="map-status" id="map-status">Loading watershed boundaries...</div>
+        </div>
+
+        <aside class="planning-panel">
+          <p class="eyebrow">Selected area</p>
+          <div class="selected-watershed" id="selected-watershed">
+            <strong>No watershed selected</strong>
+            <span>Choose a boundary on the map.</span>
+          </div>
+          <form id="planning-form">
+            <label>
+              <span>Planning objective</span>
+              <textarea id="planning-objective" rows="3" required>reduce local heat while avoiding adverse rainfall effects</textarea>
+            </label>
+            <details>
+              <summary>Additional local information</summary>
+              <label>
+                <span>Known land use, season, water availability, or constraints</span>
+                <textarea id="additional-information" rows="5" placeholder="Example: Mostly rainfed cropland; water is limited; prioritize the pre-monsoon hot season."></textarea>
+              </label>
+            </details>
+            <label class="model-field"><span>Model</span><select class="model-select" id="planning-model"></select></label>
+            <button class="primary-button full-button" type="submit" disabled id="planning-submit">Enrich area and assess evidence</button>
+          </form>
+        </aside>
+      </div>
+      <div class="result-region planning-result" id="planning-result" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <template id="loading-template">
+    <article class="run-status">
+      <div class="spinner" aria-hidden="true"></div>
+      <div><strong>Preparing query</strong><p>The local pipeline can take several minutes.</p></div>
+      <ol class="stage-list"></ol>
+    </article>
+  </template>
+
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
