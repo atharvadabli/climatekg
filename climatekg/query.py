@@ -11,11 +11,11 @@ from typing import Any, Callable
 from .canonicalize import canonical_concept, canonical_direction, state_id
 from .config import PIPELINE, QUERY_PIPELINE, ROOT, STATE_ALIASES
 from .earth_engine import EarthEngineBackend
-from .embeddings import DOMAIN_ORDER, effective_facets, facet_content_text, facet_notion_text
+from .embeddings import DOMAIN_ORDER, analysis_case_text, effective_facets, facet_content_text, facet_notion_text
 from .enrichment import derive_facets, query_facets
 from .extraction_models import ParsedQuery, ParsedQueryFacetBatch, SynthesisItem, SynthesisOutput
 from .geocoding import NominatimGeocoder
-from .models import Claim, ClaimEndpoint, Context, Facet, FinalPaper, QueryContext, QueryFacet, QuerySpec, SourceBlock, SpatialSupport, State, Transition
+from .models import Claim, ClaimEndpoint, Context, Facet, FinalPaper, QueryAnalysisCase, QueryContext, QueryFacet, QuerySpec, SourceBlock, SpatialSupport, State, Transition
 from .ollama import OllamaClient, stage_prompt_version
 from .spatial import resolve_spatial_support
 from .utils import cosine, normalize_text_key, token_count, write_json
@@ -46,12 +46,35 @@ def _read_prompt(name: str) -> str:
     return (ROOT / "prompts" / name).read_text(encoding="utf-8")
 
 
+def _shared_answer_guidance(answer_task: str) -> str:
+    """Return the task and writing guidance shared with GraphRAG.
+
+    ClimateKG cannot use the baseline prompt's plain-text OUTPUT section
+    because its response is schema-validated before citations are rendered.
+    """
+    filename = "webapp_land_use_rag_answer.txt" if answer_task == "planning" else "webapp_process_rag_answer.txt"
+    prompt = _read_prompt(filename)
+    guidance, marker, _ = prompt.partition("\nOUTPUT\n")
+    if not marker:
+        raise ValueError(f"Shared answer prompt has no OUTPUT section: {filename}")
+    return guidance.strip()
+
+
 def _query_spec_payload(spec: QuerySpec) -> dict[str, Any]:
     payload = spec.model_dump(by_alias=True)
     for facet in payload["context"]["facets"]:
         facet.pop("notion_embedding", None)
         facet.pop("content_embedding", None)
+    for case in payload["analysis_cases"]:
+        case.pop("embedding", None)
     return payload
+
+
+def _claim_payload(claim: Claim) -> dict[str, Any]:
+    return claim.model_dump(
+        by_alias=True,
+        exclude={"claim_embedding": True, "analysis_cases": {"__all__": {"embedding"}}},
+    )
 
 
 CONTEXT_VARIABLE_PATTERNS = {
@@ -125,7 +148,59 @@ def context_comparison_limitations(comparisons: list[dict[str, Any]]) -> list[Sy
     return limitations
 
 
-def _query_mode(parsed: ParsedQuery) -> str:
+def _assign_planning_details(
+    recommendations: list[SynthesisItem],
+    details: list[SynthesisItem],
+) -> tuple[list[list[SynthesisItem]], list[SynthesisItem]]:
+    """Attach a detail to the recommendation sharing the most Claim IDs."""
+    assigned = [[] for _ in recommendations]
+    unassigned: list[SynthesisItem] = []
+    recommendation_claims = [set(item.support_claim_ids) for item in recommendations]
+    for detail in details:
+        detail_claims = set(detail.support_claim_ids)
+        overlaps = [len(detail_claims & claim_ids) for claim_ids in recommendation_claims]
+        best = max(overlaps, default=0)
+        if best == 0:
+            unassigned.append(detail)
+            continue
+        assigned[overlaps.index(best)].append(detail)
+    return assigned, unassigned
+
+
+def render_planning_answer(
+    sections: dict[str, list[SynthesisItem]],
+    rendered_by_id: dict[int, str],
+) -> str:
+    recommendations = sections["direct_answer"]
+    mechanisms, extra_mechanisms = _assign_planning_details(recommendations, sections["mechanisms"])
+    spatial, extra_spatial = _assign_planning_details(recommendations, sections["spatial_guidance"])
+    parts = ["## Land use recommendation"]
+    if not recommendations:
+        parts.append("The retrieved evidence does not support a land-use recommendation for this watershed.")
+    for index, recommendation in enumerate(recommendations, 1):
+        lines = [
+            f"### Recommendation {index}",
+            f"**What change:** {rendered_by_id[id(recommendation)]}",
+        ]
+        if mechanisms[index - 1]:
+            lines.append("**Why it may help:** " + " ".join(rendered_by_id[id(item)] for item in mechanisms[index - 1]))
+        if spatial[index - 1]:
+            lines.append("**Where it may apply:** " + " ".join(rendered_by_id[id(item)] for item in spatial[index - 1]))
+        parts.append("\n\n".join(lines))
+    extras = [*extra_mechanisms, *extra_spatial]
+    if extras:
+        parts.append("### Additional supporting evidence\n\n" + "\n\n".join(rendered_by_id[id(item)] for item in extras))
+
+    limitations = sections["conditions_and_limitations"] + sections["contradictory_evidence"]
+    parts.append("## Limitations and other important notes")
+    parts.append(
+        "\n\n".join(rendered_by_id[id(item)] for item in limitations)
+        or "No additional limitations were identified from the supplied evidence."
+    )
+    return "\n\n".join(parts)
+
+
+def _query_mode(parsed: ParsedQuery, fallback_mode: str = "global") -> str:
     if parsed.global_requested:
         return "global"
     if parsed.source and parsed.target:
@@ -134,7 +209,7 @@ def _query_mode(parsed: ParsedQuery) -> str:
         return "forward"
     if parsed.target:
         return "backward"
-    return "global"
+    return fallback_mode
 
 
 def _is_unspecified_target_state(value: str) -> bool:
@@ -160,7 +235,21 @@ def _is_compound_unspecified_target(endpoint: Any) -> bool:
     return bool(endpoint and not endpoint.state.strip() and re.search(r"\band\b", endpoint.concept, re.I))
 
 
-def parse_query(question: str, query_id: str, client: OllamaClient, artifact_dir: Path) -> tuple[QuerySpec, list[str]]:
+def _is_generic_spatial_reference(value: str) -> bool:
+    """Reject spatial-scale wording that is not a named place or identifier."""
+    return normalize_text_key(value) in {
+        "area", "areas", "local", "locally", "region", "regions", "regional", "globally", "worldwide"
+    }
+
+
+def parse_query(
+    question: str,
+    query_id: str,
+    client: OllamaClient,
+    artifact_dir: Path,
+    spatial_support: SpatialSupport | None = None,
+    fallback_mode: str = "global",
+) -> tuple[QuerySpec, list[str]]:
     prompt = _read_prompt("query_parse.txt")
     system, user = prompt.split("USER\n", 1)
     config = QUERY_PIPELINE["ollama"]["stages"]["query_parse"]
@@ -192,11 +281,16 @@ The first parse omitted the environmental information at the beginning of this q
         facet_batch = client.structured(stage="query_parse_context_repair", system=facet_system, user=repair_user, schema=ParsedQueryFacetBatch, model=QUERY_PIPELINE["ollama"]["model"], temperature=repair_config["temperature"], thinking=repair_config["thinking"], artifact_dir=artifact_dir / "parse", paper_id=query_id, input_block_ids=[], retries=repair_config["retries"])
         parsed = parsed.model_copy(update={"explicit_context_facets": facet_batch.explicit_context_facets, "global_requested": False})
     spans = [x.supporting_text_span for x in parsed.explicit_context_facets]
+    spans += [x.supporting_text_span for x in parsed.analysis_cases]
     spans += [x.supporting_text_span for x in (parsed.source, parsed.target) if x]
     if any(unicodedata.normalize("NFC", span) not in normalized for span in spans):
         warnings.append("QUERY_INVALID_SUPPORTING_SPAN_DISCARDED")
     exact = lambda span: unicodedata.normalize("NFC", span) in normalized
     valid_facets = [item for item in parsed.explicit_context_facets if exact(item.supporting_text_span)]
+    valid_cases = [item for item in parsed.analysis_cases if exact(item.supporting_text_span)]
+    if parsed.spatial_reference and _is_generic_spatial_reference(parsed.spatial_reference.text):
+        warnings.append("QUERY_GENERIC_SPATIAL_REFERENCE_DISCARDED")
+        parsed = parsed.model_copy(update={"spatial_reference": None})
     if parsed.spatial_reference:
         spatial_key = normalize_text_key(parsed.spatial_reference.text)
         without_duplicate_place = [item for item in valid_facets if not (item.domain == "spatial_configuration" and normalize_text_key(item.supporting_text_span) == spatial_key)]
@@ -235,10 +329,11 @@ The first parse omitted the environmental information at the beginning of this q
                 valid_source = replacement
             else:
                 valid_target = replacement
-    parsed = parsed.model_copy(update={"explicit_context_facets": valid_facets, "source": valid_source, "target": valid_target, "global_requested": explicit_global})
+    parsed = parsed.model_copy(update={"explicit_context_facets": valid_facets, "analysis_cases": valid_cases, "source": valid_source, "target": valid_target, "global_requested": explicit_global})
     facets = [QueryFacet(id=f"{query_id}_F{index:03d}", domain=x.domain, notion=x.notion, description=x.description, origin="user", supporting_text_span=x.supporting_text_span) for index, x in enumerate(parsed.explicit_context_facets, 1)]
-    support: SpatialSupport | None = None
-    if parsed.spatial_reference:
+    analysis_cases = [QueryAnalysisCase(id=f"{query_id}_AC{index:03d}", label=x.label, supporting_text_span=x.supporting_text_span) for index, x in enumerate(parsed.analysis_cases, 1)]
+    support = spatial_support
+    if support is None and parsed.spatial_reference:
         hint = parsed.spatial_reference.kind_hint
         allowed = {"point", "patch", "watershed", "region", "climate_zone", "global", "unresolved"}
         enrichment_config = PIPELINE["enrichment"]
@@ -251,8 +346,14 @@ The first parse omitted the environmental information at the beginning of this q
         )
         geocoder = None if explicit_global else NominatimGeocoder(enrichment_config["geocoding"], ROOT)
         support = resolve_spatial_support(unresolved, enrichment_config["watershed_registry_path"], geocoder)
+        if geocoder is not None and geocoder.last_failure_reason:
+            warnings.append(f"SPATIAL_GAZETTEER_FAILED:{geocoder.last_failure_reason}")
+    if support is not None:
+        enrichment_config = PIPELINE["enrichment"]
         if support.geometry is None:
-            if support.enrichable_study_location_name:
+            if support.enrichable_study_location_name and not any(
+                warning.startswith("SPATIAL_GAZETTEER_FAILED:") for warning in warnings
+            ):
                 warnings.append("SPATIAL_REFERENCE_AMBIGUOUS")
             warnings.append("QUERY_ENRICHMENT_SKIPPED_UNRESOLVED_SPATIAL_SUPPORT")
         else:
@@ -266,7 +367,7 @@ The first parse omitted the environmental information at the beginning of this q
                 warning = f"QUERY_ENRICHMENT_FAILED:{type(exc).__name__}"
                 write_json(artifact_dir / "enrichment" / "enrichment.json", {"status": "failed", "spatial_support": support.model_dump(), "error": {"type": type(exc).__name__, "message": str(exc)}, "warnings": [warning]})
                 raise RuntimeError(f"{warning}: {exc}") from exc
-    spec = QuerySpec(query_id=query_id, mode=_query_mode(parsed), context=QueryContext(spatial_support=support, facets=facets), source=ClaimEndpoint(concept=parsed.source.concept, state=parsed.source.state) if parsed.source else None, target=ClaimEndpoint(concept=parsed.target.concept, state=parsed.target.state) if parsed.target else None, intervention_description=parsed.intervention_description, user_question=question, ambiguities=parsed.ambiguities)
+    spec = QuerySpec(query_id=query_id, mode=_query_mode(parsed, fallback_mode), context=QueryContext(spatial_support=support, facets=facets), source=ClaimEndpoint(concept=parsed.source.concept, state=parsed.source.state) if parsed.source else None, target=ClaimEndpoint(concept=parsed.target.concept, state=parsed.target.state) if parsed.target else None, intervention_description=parsed.intervention_description, analysis_cases=analysis_cases, analysis_comparison=parsed.analysis_comparison, user_question=question, ambiguities=parsed.ambiguities)
     write_json(artifact_dir / "query_spec.json", spec.model_dump(by_alias=True))
     return spec, warnings
 
@@ -284,7 +385,12 @@ def embed_query(spec: QuerySpec, client: OllamaClient) -> dict[str, list[float] 
     if spec.context.spatial_support:
         spatial = f"Spatial kind: {spec.context.spatial_support.kind}; name: {spec.context.spatial_support.name}\n"
     context_text = spatial + "\n---\n".join(facet_content_text(x) for x in sorted(facets, key=lambda x: (DOMAIN_ORDER.index(x.domain), x.notion, x.id)))
-    claim_text = f"Question: {spec.user_question}\nSource: {spec.source.concept + ' | ' + spec.source.state if spec.source else 'NONE'}\nTarget: {spec.target.concept + ' | ' + spec.target.state if spec.target else 'NONE'}"
+    if spec.analysis_cases:
+        case_vectors = client.embed([analysis_case_text(case.label) for case in spec.analysis_cases], model, dim)
+        for case, vector in zip(spec.analysis_cases, case_vectors):
+            case.embedding = vector
+    case_text = "; ".join(case.label for case in spec.analysis_cases) or "NONE"
+    claim_text = f"Question: {spec.user_question}\nSource: {spec.source.concept + ' | ' + spec.source.state if spec.source else 'NONE'}\nTarget: {spec.target.concept + ' | ' + spec.target.state if spec.target else 'NONE'}\nAnalysis cases: {case_text}\nComparison: {spec.analysis_comparison or 'NONE'}"
     texts = [claim_text]
     names = ["claim"]
     if context_text:
@@ -404,6 +510,31 @@ def _conditioning(claim: Claim, spec: QuerySpec, corpus: Corpus) -> dict[str, An
     return {"score": sum(known) / len(known) if known else None, "known_coverage": len(known) / len(claim.conditioning_facet_ids), "matches": matches}
 
 
+def _analysis_case_match(claim: Claim, spec: QuerySpec) -> dict[str, Any]:
+    if not spec.analysis_cases:
+        return {"score": None, "availability_coverage": None, "matches": [], "missing_query_case_ids": []}
+    if not claim.analysis_cases:
+        return {"score": None, "availability_coverage": 0.0, "matches": [], "missing_query_case_ids": [case.id for case in spec.analysis_cases]}
+    matches = []
+    for query_case in spec.analysis_cases:
+        candidates = [
+            {
+                "query_case_id": query_case.id,
+                "query_label": query_case.label,
+                "claim_case_label": claim_case.label,
+                "similarity": max(0.0, cosine(query_case.embedding or [], claim_case.embedding or [])),
+            }
+            for claim_case in claim.analysis_cases
+        ]
+        matches.append(max(candidates, key=lambda item: (item["similarity"], item["claim_case_label"])))
+    return {
+        "score": sum(item["similarity"] for item in matches) / len(matches),
+        "availability_coverage": min(1.0, len(claim.analysis_cases) / len(spec.analysis_cases)),
+        "matches": matches,
+        "missing_query_case_ids": [],
+    }
+
+
 def rank_claims(spec: QuerySpec, vectors: dict[str, list[float] | None], corpus: Corpus, context_reports: dict[str, dict[str, Any]], source_seeds: list[tuple[str, float]], target_seeds: list[tuple[str, float]], indexes: FaissIndexes | None = None) -> list[dict[str, Any]]:
     source_map, target_map = dict(source_seeds), dict(target_seeds)
     retained_contexts = set(context_reports)
@@ -437,6 +568,7 @@ def rank_claims(spec: QuerySpec, vectors: dict[str, list[float] | None], corpus:
         context_report = context_reports.get(scope_context)
         context_score = context_report["context_similarity"]["overall_score"] if context_report else None
         conditioning = _conditioning(claim, spec, corpus)
+        case_match = _analysis_case_match(claim, spec)
         beta = QUERY_PIPELINE["conditioning"]["weight_beta"]
         applicability = None if context_score is None else context_score if conditioning["score"] is None else (1 - beta) * context_score + beta * conditioning["score"]
         from_id, to_id = _claim_state_ids(claim)
@@ -445,12 +577,12 @@ def rank_claims(spec: QuerySpec, vectors: dict[str, list[float] | None], corpus:
         elif spec.mode == "backward": endpoint_score = target_score
         elif spec.mode == "a_to_b": endpoint_score = (source_score + target_score) / 2
         else: endpoint_score = (source_score + target_score) / (bool(source_seeds) + bool(target_seeds)) if source_seeds or target_seeds else None
-        components = {"context": applicability, "mechanism": semantic_scores.get(claim_id, max(0.0, cosine(vectors["claim"] or [], claim.claim_embedding or []))), "intervention": transition_scores.get(claim.scope_id) if claim.scope_type == "transition" and spec.intervention_description else None, "endpoint": endpoint_score}
+        components = {"context": applicability, "mechanism": semantic_scores.get(claim_id, max(0.0, cosine(vectors["claim"] or [], claim.claim_embedding or []))), "intervention": transition_scores.get(claim.scope_id) if claim.scope_type == "transition" and spec.intervention_description else None, "endpoint": endpoint_score, "analysis_case": case_match["score"]}
         weights = QUERY_PIPELINE["claim_ranking"]["weights"]
         present = [(weights[name], score) for name, score in components.items() if score is not None]
         rank = sum(weight * score for weight, score in present) / sum(weight for weight, _ in present)
         coverage = context_report["context_similarity"]["coverage"] if context_report else 0.0
-        rows.append({"claim_id": claim_id, "channels": sorted(channels), "R_claim": rank, "A_claim": applicability, "applicability_known": applicability is not None, "context_coverage": coverage, "S_claim_semantic": components["mechanism"], "S_transition": components["intervention"], "S_endpoint": endpoint_score, "conditioning_match": conditioning, "scope_context_id": scope_context})
+        rows.append({"claim_id": claim_id, "channels": sorted(channels), "R_claim": rank, "A_claim": applicability, "applicability_known": applicability is not None, "context_coverage": coverage, "S_claim_semantic": components["mechanism"], "S_transition": components["intervention"], "S_endpoint": endpoint_score, "analysis_case_match": case_match, "conditioning_match": conditioning, "scope_context_id": scope_context})
     rows.sort(key=lambda x: (-x["R_claim"], -x["applicability_known"], -x["context_coverage"], -(x["A_claim"] if x["A_claim"] is not None else -1), -(x["S_endpoint"] if x["S_endpoint"] is not None else -1), x["claim_id"]))
     return rows[:QUERY_PIPELINE["mechanism_retrieval"]["candidate_claim_top_k"]]
 
@@ -683,7 +815,7 @@ def retrieve_alternatives(paths: list[dict[str, Any]], ranked: list[dict[str, An
             elif {left, right} == {0, 1} or {left, right} == {0, -1}: kind = "null_alternative"
             elif normalize_text_key(candidate.to.state) == normalize_text_key(focal.to.state): kind = "supporting_alternative"
             else: kind = "alternative"
-            focal_items.append({"claim_id": candidate.id, "focal_claim_id": focal_id, "classification": kind, "claim": candidate.model_dump(by_alias=True, exclude={"claim_embedding"}), "scores": row_by_id.get(candidate.id)})
+            focal_items.append({"claim_id": candidate.id, "focal_claim_id": focal_id, "classification": kind, "claim": _claim_payload(candidate), "scores": row_by_id.get(candidate.id)})
         focal_items.sort(key=lambda x: (order[x["classification"]], -(x["scores"]["R_claim"] if x["scores"] else 0), x["claim_id"]))
         for item in focal_items[:per_focal]:
             alternatives.setdefault(item["claim_id"], item)
@@ -694,7 +826,7 @@ def retrieve_alternatives(paths: list[dict[str, Any]], ranked: list[dict[str, An
             claim_id = row["claim_id"]
             if claim_id in focal_ids or claim_id in alternatives or row["A_claim"] is None or corpus.claims[claim_id].paper_id not in focal_papers:
                 continue
-            alternatives[claim_id] = {"claim_id": claim_id, "focal_claim_id": None, "classification": "comparison_candidate", "claim": corpus.claims[claim_id].model_dump(by_alias=True, exclude={"claim_embedding"}), "scores": row}
+            alternatives[claim_id] = {"claim_id": claim_id, "focal_claim_id": None, "classification": "comparison_candidate", "claim": _claim_payload(corpus.claims[claim_id]), "scores": row}
             added += 1
             if added >= per_focal:
                 break
@@ -743,7 +875,7 @@ def trim_evidence_package(spec: QuerySpec, paths: list[dict[str, Any]], alternat
         payload = {
             "query_spec": _query_spec_payload(spec),
             "paths": selected_paths,
-            "claims": [corpus.claims[item_id].model_dump(by_alias=True, exclude={"claim_embedding"}) for item_id in claim_ids],
+            "claims": [_claim_payload(corpus.claims[item_id]) for item_id in claim_ids],
             "alternatives": selected_alternatives,
             "source_blocks": selected_blocks,
         }
@@ -815,13 +947,20 @@ def trim_evidence_package(spec: QuerySpec, paths: list[dict[str, Any]], alternat
     return selected_paths, selected_alternatives, selected_blocks, warnings
 
 
-def synthesize(spec: QuerySpec, context_comparisons: list[dict[str, Any]], paths: list[dict[str, Any]], ranked: list[dict[str, Any]], alternatives: list[dict[str, Any]], blocks: dict[str, list[dict[str, Any]]], corpus: Corpus, client: OllamaClient, artifact_dir: Path) -> tuple[str, dict[str, Any], list[str]]:
+def synthesize(spec: QuerySpec, context_comparisons: list[dict[str, Any]], paths: list[dict[str, Any]], ranked: list[dict[str, Any]], alternatives: list[dict[str, Any]], blocks: dict[str, list[dict[str, Any]]], corpus: Corpus, client: OllamaClient, artifact_dir: Path, answer_task: str = "process") -> tuple[str, dict[str, Any], list[str]]:
     selected_paths = []
     row_by_id = {x["claim_id"]: x for x in ranked}
     for path in paths[:QUERY_PIPELINE["synthesis"]["top_paths"]]:
-        selected_paths.append({**path, "claims": [{"claim": corpus.claims[x].model_dump(by_alias=True, exclude={"claim_embedding"}), "scores": row_by_id[x], "spatial_transfer": spatial_report(corpus.claims[x], corpus)} for x in path["claim_ids"]]})
-    prompt = _read_prompt("final_synthesis.txt")
+        selected_paths.append({**path, "claims": [{"claim": _claim_payload(corpus.claims[x]), "scores": row_by_id[x], "spatial_transfer": spatial_report(corpus.claims[x], corpus)} for x in path["claim_ids"]]})
+    prompt_name = "final_synthesis_planning.txt" if answer_task == "planning" else "final_synthesis.txt"
+    prompt = _read_prompt(prompt_name)
     system, user = prompt.split("USER QUESTION\n", 1)
+    structured_system = system.removeprefix("SYSTEM\n").strip()
+    system = (
+        f"{_shared_answer_guidance(answer_task)}\n\n"
+        "CLIMATEKG STRUCTURED EVIDENCE AND RESPONSE RULES\n\n"
+        f"{structured_system}"
+    )
     selected_claim_ids = [x for path in paths[:QUERY_PIPELINE["synthesis"]["top_paths"]] for x in path["claim_ids"]]
     spatial_translation = any(spatial_report(corpus.claims[x], corpus)["allowed"] for x in selected_claim_ids)
     synthesis_config = QUERY_PIPELINE["synthesis"]
@@ -830,7 +969,8 @@ def synthesize(spec: QuerySpec, context_comparisons: list[dict[str, Any]], paths
     llm_config = QUERY_PIPELINE["ollama"]["stages"][stage_name]
     rendered = "USER QUESTION\n" + user
     query_payload = _query_spec_payload(spec)
-    query_payload["context"]["facets"] = [facet for facet in query_payload["context"]["facets"] if facet["origin"] == "user"]
+    if answer_task != "planning":
+        query_payload["context"]["facets"] = [facet for facet in query_payload["context"]["facets"] if facet["origin"] == "user"]
     block_references = {
         claim_id: [
             {key: block[key] for key in ("id", "page", "section_path", "block_type") if key in block}
@@ -839,22 +979,43 @@ def synthesize(spec: QuerySpec, context_comparisons: list[dict[str, Any]], paths
         for claim_id, claim_blocks in blocks.items()
     }
     rendered = rendered.format(question=spec.user_question, query_spec=json.dumps(query_payload), query_context=json.dumps(query_payload["context"]), selected_paths=json.dumps(selected_paths), contradictions=json.dumps(alternatives), source_blocks=json.dumps(block_references))
-    output = client.structured(stage="final_synthesis", system=system.removeprefix("SYSTEM\n").strip(), user=rendered, schema=SynthesisOutput, model=QUERY_PIPELINE["ollama"]["model"], temperature=llm_config["temperature"], thinking=llm_config["thinking"], artifact_dir=artifact_dir / "synthesis", paper_id=spec.query_id, input_block_ids=[item["id"] for values in blocks.values() for item in values], retries=llm_config["retries"])
+    output = client.structured(stage="final_synthesis", system=system, user=rendered, schema=SynthesisOutput, model=QUERY_PIPELINE["ollama"]["model"], temperature=llm_config["temperature"], thinking=llm_config["thinking"], artifact_dir=artifact_dir / "synthesis", paper_id=spec.query_id, input_block_ids=[item["id"] for values in blocks.values() for item in values], retries=llm_config["retries"])
     allowed_claims = {x for path in paths[:QUERY_PIPELINE["synthesis"]["top_paths"]] for x in path["claim_ids"]} | {x["claim_id"] for x in alternatives}
     allowed_facets = {x.id for x in spec.context.facets}
+    allowed_cases = {x.id for x in spec.analysis_cases}
     warnings, valid = [], []
+    valid_sections: dict[str, list[SynthesisItem]] = {
+        "direct_answer": [],
+        "mechanisms": [],
+        "spatial_guidance": [],
+        "conditions_and_limitations": [],
+        "contradictory_evidence": [],
+    }
     scientific = {"direct_finding", "transfer_inference", "mechanism", "spatial_guidance"}
-    for item in output.direct_answer + output.mechanisms + output.spatial_guidance + output.conditions_and_limitations + output.contradictory_evidence:
-        okay = set(item.support_claim_ids) <= allowed_claims and set(item.support_query_facet_ids) <= allowed_facets
-        if item.kind in scientific and not item.support_claim_ids: okay = False
-        if item.kind == "spatial_guidance" and item.support_query_facet_ids and not any(spatial_report(corpus.claims[c], corpus)["allowed"] for c in item.support_claim_ids): okay = False
-        if okay: valid.append(item)
-        else: warnings.append("UNSUPPORTED_SYNTHESIS_ITEM")
-    valid.extend(context_comparison_limitations(context_comparisons))
+    output_sections = {
+        "direct_answer": output.direct_answer,
+        "mechanisms": output.mechanisms,
+        "spatial_guidance": output.spatial_guidance,
+        "conditions_and_limitations": output.conditions_and_limitations,
+        "contradictory_evidence": output.contradictory_evidence,
+    }
+    for section, items in output_sections.items():
+        for item in items:
+            okay = set(item.support_claim_ids) <= allowed_claims and set(item.support_query_facet_ids) <= allowed_facets and set(item.support_query_case_ids) <= allowed_cases
+            if item.kind in scientific and not item.support_claim_ids: okay = False
+            if item.kind == "spatial_guidance" and item.support_query_facet_ids and not any(spatial_report(corpus.claims[c], corpus)["allowed"] for c in item.support_claim_ids): okay = False
+            if okay:
+                valid.append(item)
+                valid_sections[section].append(item)
+            else:
+                warnings.append("UNSUPPORTED_SYNTHESIS_ITEM")
+    comparison_limitations = context_comparison_limitations(context_comparisons)
+    valid.extend(comparison_limitations)
+    valid_sections["conditions_and_limitations"].extend(comparison_limitations)
     if not any(x.kind in scientific for x in valid):
         warnings.append("FINAL_GROUNDING_VALIDATION_FAILED")
         return "Retrieved evidence could not support a grounded answer to this question.", {"items": [], "limitations": [item.model_dump() for item in output.conditions_and_limitations]}, warnings
-    rendered_items = []
+    rendered_by_id: dict[int, str] = {}
     provenance = {}
     for item in valid:
         citations = []
@@ -866,8 +1027,12 @@ def synthesize(spec: QuerySpec, context_comparisons: list[dict[str, Any]], paths
             citations.append(citation)
             provenance[claim_id] = {"paper_id": paper.id, "title": paper.title, "doi": paper.doi, "source_block_ids": claim.evidence_block_ids, "pages": pages}
         citation_text = f" [{'; '.join(citations)}]" if citations else ""
-        rendered_items.append(f"{item.text}{citation_text}")
-    return "\n\n".join(rendered_items), {"items": [x.model_dump() for x in valid], "provenance": provenance}, warnings
+        rendered_by_id[id(item)] = f"{item.text}{citation_text}"
+    if answer_task == "planning":
+        answer = render_planning_answer(valid_sections, rendered_by_id)
+    else:
+        answer = "\n\n".join(rendered_by_id[id(item)] for item in valid)
+    return answer, {"items": [x.model_dump() for x in valid], "provenance": provenance}, warnings
 
 
 def run_query(
@@ -878,6 +1043,8 @@ def run_query(
     client: OllamaClient | None = None,
     stage_callback: Callable[[str, dict[str, Any]], None] | None = None,
     indexes: FaissIndexes | None = None,
+    spatial_support: SpatialSupport | None = None,
+    answer_task: str = "process",
 ) -> dict[str, Any]:
     client = client or OllamaClient()
     artifact_dir = output_root / query_id
@@ -888,7 +1055,8 @@ def run_query(
             stage_callback(name, details)
 
     stage("corpus_loaded", {"papers": len(papers), "contexts": len(corpus.contexts), "facets": len(corpus.facets), "claims": len(corpus.claims), "states": len(corpus.states)})
-    spec, warnings = parse_query(question, query_id, client, artifact_dir)
+    fallback_mode = "backward" if answer_task == "planning" else "global"
+    spec, warnings = parse_query(question, query_id, client, artifact_dir, spatial_support, fallback_mode)
     context_comparisons = context_evidence_comparisons(spec)
     stage("query_parsed", {"mode": spec.mode, "facet_count": len(spec.context.facets), "source": spec.source.model_dump() if spec.source else None, "target": spec.target.model_dump() if spec.target else None, "intervention_description": spec.intervention_description, "warnings": list(warnings)})
     stage("context_evidence_compared", {"comparison_count": len(context_comparisons), "comparisons": context_comparisons})
@@ -902,7 +1070,7 @@ def run_query(
     target_seeds, more = map_endpoint(spec.target, corpus, client, indexes); warnings.extend(more)
     stage("states_mapped", {"source_seeds": source_seeds, "target_seeds": target_seeds, "warnings": source_warnings + more})
     ranked = rank_claims(spec, vectors, corpus, context_reports, source_seeds, target_seeds, indexes)
-    stage("claims_ranked", {"candidate_count": len(ranked), "top_claims": [{key: row[key] for key in ("claim_id", "R_claim", "A_claim", "context_coverage", "channels")} for row in ranked[:QUERY_PIPELINE["reporting"]["top_claims"]]]})
+    stage("claims_ranked", {"candidate_count": len(ranked), "top_claims": [{key: row[key] for key in ("claim_id", "R_claim", "A_claim", "context_coverage", "analysis_case_match", "channels")} for row in ranked[:QUERY_PIPELINE["reporting"]["top_claims"]]]})
     direct_paths = select_direct_evidence_paths(spec, corpus, ranked)
     anchor_rows = _query_focused_rows(
         spec,
@@ -920,9 +1088,10 @@ def run_query(
     stage("evidence_selected", {"object_count": len(selected_blocks), "source_block_count": sum(len(items) for items in selected_blocks.values()), "object_ids": sorted(selected_blocks)})
     synthesis_paths, synthesis_alternatives, selected_blocks, more = trim_evidence_package(spec, paths, alternatives, selected_blocks, corpus); warnings.extend(more)
     stage("evidence_trimmed", {"path_count": len(synthesis_paths), "alternative_count": len(synthesis_alternatives), "source_block_count": sum(len(items) for items in selected_blocks.values()), "warnings": more})
-    answer, synthesis, more = synthesize(spec, context_comparisons, synthesis_paths, ranked, synthesis_alternatives, selected_blocks, corpus, client, artifact_dir); warnings.extend(more)
+    answer, synthesis, more = synthesize(spec, context_comparisons, synthesis_paths, ranked, synthesis_alternatives, selected_blocks, corpus, client, artifact_dir, answer_task); warnings.extend(more)
     stage("answer_synthesized", {"answer_characters": len(answer), "grounded_item_count": len(synthesis.get("items", [])), "provenance_claim_count": len(synthesis.get("provenance", {})), "warnings": more})
-    report = {"query_id": query_id, "query_pipeline_version": "0.2-experiment", "query_spec": _query_spec_payload(spec), "context_evidence_comparisons": context_comparisons, "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "claim_candidates": ranked, "direct_evidence_paths": direct_paths, "graph_paths": graph_paths, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis")}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
+    synthesis_template = "final_synthesis_planning.txt" if answer_task == "planning" else "final_synthesis.txt"
+    report = {"query_id": query_id, "query_pipeline_version": "0.2-experiment", "answer_task": answer_task, "query_spec": _query_spec_payload(spec), "context_evidence_comparisons": context_comparisons, "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "claim_candidates": ranked, "direct_evidence_paths": direct_paths, "graph_paths": graph_paths, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis"), "final_synthesis_template": synthesis_template}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
     write_json(artifact_dir / "query_report.json", report)
     (artifact_dir / "answer.md").write_text(answer, encoding="utf-8")
     stage("artifacts_written", {"query_report": str(artifact_dir / "query_report.json"), "answer": str(artifact_dir / "answer.md")})

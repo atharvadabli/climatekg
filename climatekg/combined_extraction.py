@@ -61,6 +61,7 @@ def flatten_small_paper_v4(result: SmallPaperExtractionV4, catalog: EvidenceCata
             spatial_support=context.spatial_support,
             evidence_block_ids=catalog.resolve(context.evidence_handles, f"Context {context.temp_id}"),
             facet_seed_block_ids=catalog.resolve(context.facet_seed_handles, f"Context {context.temp_id}"),
+            claim_seed_block_ids=[],
         )
         for context in result.contexts
     ]
@@ -140,5 +141,14 @@ def _flatten_claim(
         description=claim.description,
         evidence_role=claim.evidence_role,
         conditioning_facet_temp_ids=conditioning_ids,
+        analysis_cases=[
+            {
+                "label": case.label,
+                "description": case.description,
+                "evidence_block_ids": catalog.resolve(case.evidence_handles, f"Claim CL{ordinal} analysis case {case.label}"),
+            }
+            for case in claim.analysis_cases
+        ],
+        analysis_comparison=claim.analysis_comparison,
         evidence_block_ids=catalog.resolve(claim.evidence_handles, f"Claim CL{ordinal}"),
     )

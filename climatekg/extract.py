@@ -280,13 +280,15 @@ def _validate_map_references(result: PaperMap, block_ids: set[str]) -> None:
     for context in result.contexts:
         if any(parent_id not in contexts for parent_id in context.parent_temp_ids):
             raise ValueError(f"invalid paper-map Context hierarchy: {context.temp_id}")
-        if any(block_id not in block_ids for block_id in context.evidence_block_ids + context.facet_seed_block_ids):
+        if any(block_id not in block_ids for block_id in context.evidence_block_ids + context.facet_seed_block_ids + context.claim_seed_block_ids):
             raise ValueError(f"invalid paper-map Context evidence: {context.temp_id}")
     for transition in result.transitions:
         if transition.from_context_temp_id not in contexts or transition.to_context_temp_id not in contexts:
             raise ValueError(f"invalid paper-map Transition scope: {transition.temp_id}")
         if any(block_id not in block_ids for block_id in transition.evidence_block_ids + transition.claim_seed_block_ids):
             raise ValueError(f"invalid paper-map Transition evidence: {transition.temp_id}")
+    if any(block_id not in block_ids for context in result.contexts for block_id in context.claim_seed_block_ids):
+        raise ValueError("invalid paper-map Context Claim seed evidence")
     if any(block_id not in block_ids for block_id in result.global_claim_seed_block_ids):
         raise ValueError("invalid paper-map global Claim seed evidence")
 
@@ -300,7 +302,7 @@ def _validate_reference_only_repair(original: PaperMap, repaired: PaperMap, bloc
     if set(original_contexts) != set(repaired_contexts):
         raise ValueError("reference repair changed Context IDs")
     for item_id, item in original_contexts.items():
-        expected = item.model_copy(update={"evidence_block_ids": repaired_contexts[item_id].evidence_block_ids, "facet_seed_block_ids": repaired_contexts[item_id].facet_seed_block_ids})
+        expected = item.model_copy(update={"evidence_block_ids": repaired_contexts[item_id].evidence_block_ids, "facet_seed_block_ids": repaired_contexts[item_id].facet_seed_block_ids, "claim_seed_block_ids": repaired_contexts[item_id].claim_seed_block_ids})
         if expected != repaired_contexts[item_id]:
             raise ValueError(f"reference repair changed Context semantics: {item_id}")
     original_transitions = {item.temp_id: item for item in original.transitions}
@@ -420,7 +422,7 @@ def map_paper(paper: Paper, blocks: list[SourceBlock], paper_dir: Path, client: 
         if reference_path.exists():
             reference_repaired = PaperMap.model_validate_json(reference_path.read_text(encoding="utf-8"))
         else:
-            invalid_ids = sorted({block_id for context in result.contexts for block_id in context.evidence_block_ids + context.facet_seed_block_ids if block_id not in block_ids} | {block_id for transition in result.transitions for block_id in transition.evidence_block_ids + transition.claim_seed_block_ids if block_id not in block_ids} | {block_id for block_id in result.global_claim_seed_block_ids if block_id not in block_ids})
+            invalid_ids = sorted({block_id for context in result.contexts for block_id in context.evidence_block_ids + context.facet_seed_block_ids + context.claim_seed_block_ids if block_id not in block_ids} | {block_id for transition in result.transitions for block_id in transition.evidence_block_ids + transition.claim_seed_block_ids if block_id not in block_ids} | {block_id for block_id in result.global_claim_seed_block_ids if block_id not in block_ids})
             unique_matches = {invalid_id: matches[0] for invalid_id in invalid_ids if len(matches := sorted(block_id for block_id in block_ids if block_id.endswith(f":{invalid_id}"))) == 1}
             reference_user = (
                 "TASK\n\nCorrect invalid SourceBlock IDs in one previously generated study-setting map. "
@@ -548,6 +550,25 @@ def evidence_bundle(blocks: list[SourceBlock], queries: list[str], aliases: list
     return sorted({x.id: x for x in selected}.values(), key=lambda x: x.order)
 
 
+def claim_result_pool(blocks: list[SourceBlock], mandatory_ids: list[str], excluded_sections: set[tuple[str, ...]] | None = None) -> list[SourceBlock]:
+    mandatory = set(mandatory_ids)
+    excluded_sections = excluded_sections or set()
+    result_terms = ("results", "analysis", "discussion", "conclusion", "findings")
+    stop_terms = ("acknowledgment", "author contribution", "data availability", "references", "bibliography")
+    selected = []
+    inside_results = False
+    for block in sorted(blocks, key=lambda item: item.order):
+        heading = normalize_text_key(block.text) if block.block_type == "heading" else ""
+        if heading and any(term in heading for term in result_terms):
+            inside_results = True
+        elif heading and any(term in heading for term in stop_terms):
+            inside_results = False
+        section = normalize_text_key(" ".join(block.section_path))
+        if block.id in mandatory or (tuple(block.section_path) not in excluded_sections and (inside_results or any(term in section for term in result_terms))):
+            selected.append(block)
+    return selected or blocks
+
+
 def effective_facet_ids(context_id: str, contexts: list[Context], facets: list[Facet]) -> list[Facet]:
     by_context = {x.id: x for x in contexts}
     allowed: set[str] = set()
@@ -621,14 +642,38 @@ def extract_claims(paper: Paper, mapped: PaperMap, contexts: list[Context], tran
         queries = [transition.label, *aliases, "effect response difference change increase decrease mechanism because due to caused associated result", "sensible heat latent heat evapotranspiration soil moisture boundary layer cloud precipitation convergence circulation temperature humidity wind dust aerosol"]
         available = effective_facet_ids(from_context.id, contexts, facets) + effective_facet_ids(to_context.id, contexts, facets)
         scopes.append((transition.id, "transition", queries, transition.evidence_block_ids + source.claim_seed_block_ids, available))
+    by_temp_context = {item.temp_id: item for item in mapped.contexts}
+    reverse_c = {permanent: temporary for temporary, permanent in map_meta["temp_to_permanent"].items()}
+    endpoint_ids = {context_id for transition in transitions for context_id in (transition.from_context_id, transition.to_context_id)}
+    parent_scope_ids = {parent_id for context_id in endpoint_ids for parent_id in next(item for item in contexts if item.id == context_id).parent_ids}
+    for context in contexts:
+        source = by_temp_context[reverse_c[context.id]]
+        if not source.claim_seed_block_ids and context.id not in parent_scope_ids:
+            continue
+        queries = [context.label, *context.aliases, "reported result subgroup stratum season wet dry year percentile subregion", "effect response mechanism climate temperature precipitation evapotranspiration"]
+        scopes.append((context.id, "context", queries, source.claim_seed_block_ids, effective_facet_ids(context.id, contexts, facets)))
     if not scopes:
         for context in contexts:
             queries = [context.label, *context.aliases, "effect response difference change increase decrease mechanism results climate temperature precipitation evapotranspiration"]
             scopes.append((context.id, "context", queries, mapped.global_claim_seed_block_ids or context.evidence_block_ids, effective_facet_ids(context.id, contexts, facets)))
     claims, hints = [], []
+    block_by_id = {block.id: block for block in blocks}
+    transition_result_sections = {
+        tuple(block_by_id[block_id].section_path)
+        for transition in mapped.transitions
+        for block_id in transition.claim_seed_block_ids
+        if block_id in block_by_id
+    }
     bundles = {
-        scope_id: evidence_bundle(blocks, queries, queries[:5], mandatory, client, claim=True)
-        for scope_id, _, queries, mandatory, _ in scopes
+        scope_id: evidence_bundle(
+            claim_result_pool(blocks, mandatory, transition_result_sections) if scope_type == "context" else blocks,
+            queries,
+            queries[:5],
+            mandatory,
+            client,
+            claim=True,
+        )
+        for scope_id, scope_type, queries, mandatory, _ in scopes
         if not (paper_dir / "extraction" / "claims" / scope_id / "validated.json").exists()
     }
     for scope_id, scope_type, queries, mandatory, available_facets in scopes:
@@ -639,21 +684,22 @@ def extract_claims(paper: Paper, mapped: PaperMap, contexts: list[Context], tran
             allowed_blocks = {x.id for x in blocks}
         else:
             bundle = bundles[scope_id]
-            target = next((x.model_dump() for x in transitions if x.id == scope_id), next((x.model_dump() for x in contexts if x.id == scope_id), {}))
-            request_text = user.format(paper_id=paper.id, context_registry=json.dumps(map_meta["registry"]), transitions=json.dumps([x.model_dump() for x in transitions]), available_scope_facets=json.dumps([x.model_dump() for x in available_facets]), target_scope=json.dumps(target), evidence_blocks=_render_blocks(bundle))
+            target = next((x.model_dump(exclude={"transition_embedding"}) for x in transitions if x.id == scope_id), next((x.model_dump(exclude={"retrieval_embedding"}) for x in contexts if x.id == scope_id), {}))
+            request_text = user.format(paper_id=paper.id, context_registry=json.dumps(map_meta["registry"]), transitions=json.dumps([x.model_dump(exclude={"transition_embedding"}) for x in transitions]), available_scope_facets=json.dumps([x.model_dump(exclude={"notion_embedding", "content_embedding"}) for x in available_facets]), target_scope=json.dumps(target), evidence_blocks=_render_blocks(bundle))
             batch = client.structured(stage="claim_extraction", system=system, user=request_text, schema=ClaimBatch, model=PIPELINE["ollama"]["model"], temperature=cfg["temperature"], thinking=cfg["thinking"], artifact_dir=cached_path.parent, paper_id=paper.id, input_block_ids=[x.id for x in bundle], retries=cfg["retries"])
             allowed_blocks = {x.id for x in bundle}
-            if batch.scope_id != scope_id or any(not set(x.evidence_block_ids) <= allowed_blocks for x in batch.claims):
+            if batch.scope_id != scope_id or any(not set(x.evidence_block_ids) <= allowed_blocks or any(not set(case.evidence_block_ids) <= allowed_blocks for case in x.analysis_cases) for x in batch.claims):
                 repair = request_text + f"\n\nCORRECTION TASK\n\nThe returned scientific relationships used an invalid scope or reference ID.\n\nPREVIOUS JSON OBJECT\n{batch.model_dump_json(by_alias=True)}\n\nREQUIRED SCOPE ID\n{scope_id}\n\nALLOWED EVIDENCE IDS\n{json.dumps(sorted(allowed_blocks))}\n\nALLOWED CONDITION IDS\n{json.dumps(sorted(reachable_facets))}\n\nReturn the complete JSON object again using the required scope ID and exact IDs from the allowed lists. Keep scientific content grounded in the original evidence passages above."
                 repair_cfg = PIPELINE["ollama"]["stages"]["claim_reference_repair"]
                 batch = client.structured(stage="claim_reference_repair", system=system, user=repair, schema=ClaimBatch, model=PIPELINE["ollama"]["model"], temperature=repair_cfg["temperature"], thinking=repair_cfg["thinking"], artifact_dir=cached_path.parent, paper_id=paper.id, input_block_ids=[x.id for x in bundle], retries=repair_cfg["retries"])
-        if batch.scope_id != scope_id or any(not set(x.evidence_block_ids) <= allowed_blocks for x in batch.claims):
+        if batch.scope_id != scope_id or any(not set(x.evidence_block_ids) <= allowed_blocks or any(not set(case.evidence_block_ids) <= allowed_blocks for case in x.analysis_cases) for x in batch.claims):
             raise ValueError(f"FAILED_REFERENCE_VALIDATION: Claim batch {scope_id}")
         for candidate in batch.claims:
             if candidate.evidence_role not in ("OWN_RESULT", "AUTHORS_INTERPRETATION_OF_OWN_RESULT") or not set(candidate.evidence_block_ids) <= allowed_blocks:
                 continue
             conditioning = [x for x in candidate.conditioning_facet_ids if x in reachable_facets]
-            claims.append(Claim(id=f"{paper.id}_CL{len(claims)+1:03d}", paper_id=paper.id, scope_type=scope_type, scope_id=scope_id, **{"from": candidate.from_.model_dump()}, to=candidate.to, relation=candidate.relation, description=candidate.description, evidence_role=candidate.evidence_role, conditioning_facet_ids=conditioning, evidence_block_ids=unique_in_order(candidate.evidence_block_ids, {x.id: x.order for x in blocks})))
+            case_evidence = [block_id for case in candidate.analysis_cases for block_id in case.evidence_block_ids]
+            claims.append(Claim(id=f"{paper.id}_CL{len(claims)+1:03d}", paper_id=paper.id, scope_type=scope_type, scope_id=scope_id, **{"from": candidate.from_.model_dump()}, to=candidate.to, relation=candidate.relation, description=candidate.description, evidence_role=candidate.evidence_role, conditioning_facet_ids=conditioning, analysis_cases=[case.model_dump() for case in candidate.analysis_cases], analysis_comparison=candidate.analysis_comparison.model_dump() if candidate.analysis_comparison else None, evidence_block_ids=unique_in_order(candidate.evidence_block_ids + case_evidence, {x.id: x.order for x in blocks})))
         hints.extend(batch.unmapped_context_hints)
         write_json(cached_path, batch.model_dump(by_alias=True))
     return exact_deduplicate_claims(claims), hints
@@ -666,6 +712,10 @@ def exact_deduplicate_claims(claims: list[Claim]) -> list[Claim]:
         if key in found:
             found[key].evidence_block_ids = unique_in_order(found[key].evidence_block_ids + claim.evidence_block_ids)
             found[key].conditioning_facet_ids = unique_in_order(found[key].conditioning_facet_ids + claim.conditioning_facet_ids)
+            existing_cases = {(normalize_text_key(case.label), normalize_text_key(case.description)) for case in found[key].analysis_cases}
+            found[key].analysis_cases.extend(case for case in claim.analysis_cases if (normalize_text_key(case.label), normalize_text_key(case.description)) not in existing_cases)
+            if found[key].analysis_comparison is None:
+                found[key].analysis_comparison = claim.analysis_comparison
         else:
             found[key] = claim
     result = list(found.values())

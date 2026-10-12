@@ -266,6 +266,12 @@ Use the same semantic writing conventions as indexing so query and paper represe
 
 These are soft targets, never hard validators. Missing information must remain missing rather than being filled to make a field more descriptive.
 
+## 4.2 Requested analysis cases
+
+The parser may return optional `analysis_cases` and `analysis_comparison` fields. Use them when the user asks for findings across reported subsets such as wet/dry years, seasons, percentile groups, or subregions. Such a comparison is not an intervention unless the user describes an imposed change or treatment.
+
+Each query case contains a stable query-local ID, a concise label, an exact supporting text span, and a runtime embedding. Candidate Claims retain a separate analysis-case similarity report based on directional best-match cosine similarity between query cases and indexed Claim cases. Report case similarity and case availability separately from Context similarity, Context coverage, and Claim applicability. Include the case score in Claim ranking only when the query requests cases; missing cases must not be interpreted as environmental mismatch.
+
 # 5. Determine query mode
 
 Prefer deterministic mode assignment after parsing source and target.

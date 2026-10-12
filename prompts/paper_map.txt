@@ -4,7 +4,7 @@ TASK
 
 Build a compact tree of the study settings and comparisons in one land-atmosphere research paper.
 
-A study setting is one complete combination of conditions that the paper directly analyzes. Conditions may include place, period, season or time of day, environmental regime, data source, observation or simulation setup, control or treatment, and values of experimental variables.
+A study setting is one complete combination of conditions that defines where and how the paper's evidence was produced. Conditions may include place, study period, environmental regime, data source, observation or simulation setup, control or treatment, and values of experimental variables.
 
 Settings are defined by their conditions, not by whether their results differ. Two analyzed combinations are separate settings when any condition that determines applicability differs, even when the paper reports the same effect, a similar effect, or no detectable effect in both.
 
@@ -21,15 +21,16 @@ You will receive:
 HOW TO BUILD THE SETTING TREE
 
 1. Start with conditions shared by most of the paper. Store them in a root setting.
-2. Add child settings for each study area, observation or simulation branch, control, treatment, season, time window, environmental regime, and experimental case that the paper analyzes separately.
+2. Add child settings for each study area, observation or simulation branch, control, treatment, environmental regime, and experimental case that changes the setup or the conditions under which evidence was produced.
 3. When several named cases share one condition, place that condition in a parent and place their differences in children.
 4. Create one child setting for each named experiment, control, scenario, site, or case with a distinct analyzed combination of conditions. A family setting may be their parent.
 5. Use `aliases` only for different names that denote the same complete setting. Names with different treatment values, forcing levels, places, periods, or other conditions are separate child settings, not aliases of one group.
 6. Treat each analyzed combination of experimental variables as one complete branch. If the paper analyzes a land treatment at two forcing levels, create two complete descendants that inherit the land treatment and differ by forcing level. A setting that says a variable was varied across a list or range is a family parent, not a complete leaf, when the paper evaluates the stated values individually. Create one child for every value actually evaluated. Do not create combinations that the paper did not analyze.
 7. Use the fewest nodes that preserve every analyzed combination. Sharing repeated conditions through inheritance makes the tree compact; merging two analyzed combinations because their results are similar does not.
-8. Distinguish a condition-defined regime from an outcome-defined group. A season, time window, soil-moisture range, wind regime, model configuration, or other condition used to stratify an analysis is a setting even when it has one reported finding. A group defined only by its observed result is a setting only when the paper subsequently analyzes that group under additional conditions; otherwise represent that result in the cited result passages.
-9. Keep settings from cited background studies out of the current paper's tree unless the current paper directly analyzes them as comparison data.
-10. Every leaf must be a complete setting under which the paper analyzes findings. Every non-leaf must supply a condition shared by at least two descendant settings. A variable value reused inside complete run names is not a separate sibling leaf.
+8. Distinguish a study setting from a reported analysis subset. A separate simulation, treatment, site, prescribed forcing, or independently sampled period is a setting. Wet versus dry years selected from one time series, seasonal summaries of the same observations, percentile groups, response classes, and subregions summarized inside one domain remain analysis subsets unless the paper changes the setup or samples them as independent settings. Keep their result passages in the parent setting's `claim_seed_block_ids`.
+9. Keep separately analyzed target populations as separate settings, including different land-cover classes, source or sink populations, study sites, or spatial domains. When the same named control or treatment is evaluated for two target populations, create population-specific descendants and use those complete descendants as comparison endpoints.
+10. Keep settings from cited background studies out of the current paper's tree unless the current paper directly analyzes them as comparison data.
+11. Every leaf must be a complete setting under which the paper analyzes findings. Every non-leaf must supply a condition shared by at least two descendant settings. A variable value reused inside complete run names is not a separate sibling leaf.
 
 HOW TO DECIDE WHETHER SETTINGS ARE SEPARATE
 
@@ -71,6 +72,7 @@ For each `contexts` item, return:
 - `spatial_support`: Use `null` when no location is stated. Otherwise return `kind`, `name`, `geometry`, `enrichable_study_location_name`, and `resolution` as defined below.
 - `evidence_block_ids`: Copy the smallest set of SourceBlock IDs that directly establishes the setting.
 - `facet_seed_block_ids`: Copy SourceBlock IDs containing environmental, temporal, spatial, model, or experimental conditions for this setting. Use an empty list when none are available.
+- `claim_seed_block_ids`: Copy SourceBlock IDs containing findings for this setting that are not results of one listed transition. Include findings split by reported analysis subsets such as wet/dry years, seasons, percentile groups, or subregions. Use an empty list when none are available.
 
 For `spatial_support`:
 - `kind`: Use exactly one of `point`, `patch`, `watershed`, `region`, `climate_zone`, `global`, or `unresolved`.
@@ -93,7 +95,7 @@ For each `transitions` item, return:
 
 Also return:
 - `context_mention_resolution`: Return an empty JSON object. This input has no preliminary setting inventory.
-- `global_claim_seed_block_ids`: Copy SourceBlock IDs containing paper-wide findings that do not belong to one listed comparison.
+- `global_claim_seed_block_ids`: Copy SourceBlock IDs containing paper-wide findings that cannot be assigned to one listed setting or comparison.
 - `ambiguities`: Write short descriptions of unresolved structural choices. Use an empty list when none remain.
 
 USER

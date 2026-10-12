@@ -172,7 +172,7 @@ def _json(value: Any) -> str:
 def _encode_row(row: dict[str, Any]) -> dict[str, Any]:
     encoded: dict[str, Any] = {}
     for key, value in row.items():
-        if isinstance(value, dict) or isinstance(value, list) and any(isinstance(item, (dict, list)) for item in value):
+        if isinstance(value, dict) or key in {"analysis_cases", "analysis_comparison"} or isinstance(value, list) and any(isinstance(item, (dict, list)) for item in value):
             encoded[f"{key}_json"] = _json(value)
         else:
             encoded[key] = value

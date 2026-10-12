@@ -126,7 +126,8 @@ def _extract_new_scope(paper: Paper, context: Context, contexts: list[Context], 
     for item in claim_batch.claims:
         if item.evidence_role not in ("OWN_RESULT", "AUTHORS_INTERPRETATION_OF_OWN_RESULT"):
             continue
-        new_claims.append(Claim(id=f"{paper.id}_CL{len(new_claims)+1:03d}", paper_id=paper.id, scope_type="context", scope_id=context.id, **{"from": item.from_.model_dump()}, to=item.to, relation=item.relation, description=item.description, evidence_role=item.evidence_role, conditioning_facet_ids=[value for value in item.conditioning_facet_ids if value in reachable], evidence_block_ids=item.evidence_block_ids))
+        case_evidence = [block_id for case in item.analysis_cases for block_id in case.evidence_block_ids]
+        new_claims.append(Claim(id=f"{paper.id}_CL{len(new_claims)+1:03d}", paper_id=paper.id, scope_type="context", scope_id=context.id, **{"from": item.from_.model_dump()}, to=item.to, relation=item.relation, description=item.description, evidence_role=item.evidence_role, conditioning_facet_ids=[value for value in item.conditioning_facet_ids if value in reachable], analysis_cases=[case.model_dump() for case in item.analysis_cases], analysis_comparison=item.analysis_comparison.model_dump() if item.analysis_comparison else None, evidence_block_ids=unique_in_order(item.evidence_block_ids + case_evidence, {block.id: block.order for block in blocks})))
     return new_facets, new_claims
 
 

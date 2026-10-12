@@ -79,6 +79,19 @@ class ClaimEndpoint(StrictModel):
     state: str
 
 
+class AnalysisCase(StrictModel):
+    label: str
+    description: str
+    evidence_block_ids: list[str] = Field(default_factory=list)
+    embedding: list[float] | None = None
+
+
+class AnalysisComparison(StrictModel):
+    dimension: str
+    case_labels: list[str] = Field(min_length=2)
+    description: str
+
+
 class Claim(StrictModel):
     id: str
     paper_id: str
@@ -90,6 +103,8 @@ class Claim(StrictModel):
     description: str
     evidence_role: Literal["OWN_RESULT", "AUTHORS_INTERPRETATION_OF_OWN_RESULT", "CITED_BACKGROUND", "HYPOTHESIS_OR_PROPOSAL"]
     conditioning_facet_ids: list[str] = Field(default_factory=list)
+    analysis_cases: list[AnalysisCase] = Field(default_factory=list)
+    analysis_comparison: AnalysisComparison | None = None
     evidence_block_ids: list[str] = Field(default_factory=list)
     claim_embedding: list[float] | None = None
 
@@ -179,6 +194,12 @@ class FinalPaper(StrictModel):
                 raise ValueError(f"unreachable conditioning Facet on Claim: {claim.id}")
             if not claim.evidence_block_ids or any(x not in blocks for x in claim.evidence_block_ids):
                 raise ValueError(f"invalid Claim evidence: {claim.id}")
+            if any(not case.evidence_block_ids or any(x not in blocks for x in case.evidence_block_ids) for case in claim.analysis_cases):
+                raise ValueError(f"invalid Claim analysis-case evidence: {claim.id}")
+            if any(not set(case.evidence_block_ids) <= set(claim.evidence_block_ids) for case in claim.analysis_cases):
+                raise ValueError(f"Claim analysis-case evidence is absent from Claim evidence: {claim.id}")
+            if claim.analysis_comparison and not set(claim.analysis_comparison.case_labels) <= {case.label for case in claim.analysis_cases}:
+                raise ValueError(f"invalid Claim analysis comparison: {claim.id}")
             if all(blocks[x].block_type == "reference" for x in claim.evidence_block_ids):
                 raise ValueError(f"reference-only Claim evidence: {claim.id}")
         return self
@@ -201,6 +222,13 @@ class QueryContext(StrictModel):
     facets: list[QueryFacet] = Field(default_factory=list)
 
 
+class QueryAnalysisCase(StrictModel):
+    id: str
+    label: str
+    supporting_text_span: str
+    embedding: list[float] | None = None
+
+
 class QuerySpec(StrictModel):
     query_id: str
     mode: Literal["forward", "backward", "a_to_b", "global"]
@@ -208,6 +236,8 @@ class QuerySpec(StrictModel):
     source: ClaimEndpoint | None = None
     target: ClaimEndpoint | None = None
     intervention_description: str | None = None
+    analysis_cases: list[QueryAnalysisCase] = Field(default_factory=list)
+    analysis_comparison: str | None = None
     user_question: str
     ambiguities: list[str] = Field(default_factory=list)
 
@@ -217,6 +247,7 @@ class AnswerItem(StrictModel):
     text: str
     support_claim_ids: list[str] = Field(default_factory=list)
     support_query_facet_ids: list[str] = Field(default_factory=list)
+    support_query_case_ids: list[str] = Field(default_factory=list)
 
 
 class Answer(StrictModel):

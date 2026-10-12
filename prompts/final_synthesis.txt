@@ -44,6 +44,8 @@ For every item in any list, return:
 - `text`: One clear scientific statement or short paragraph.
 - `support_claim_ids`: The smallest set of supplied Claim IDs supporting the statement.
 - `support_query_facet_ids`: Query Facet IDs supporting statements about the user's environment. Use an empty list when the item makes no query-area statement.
+- `support_query_case_ids`: Query analysis-case IDs supporting statements about requested subsets such as seasons or wet/dry years. Use an empty list when the item makes no case-specific statement.
+- Keep condition IDs in `support_query_facet_ids` and analysis-case IDs in `support_query_case_ids`; the two lists have different meanings.
 - `kind`: Exactly one of `direct_finding`, `transfer_inference`, `mechanism`, `spatial_guidance`, or `limitation`.
 
 Use empty lists for sections with no supported content. Do not place citation prose inside `text`; the application renders paper and page citations from the returned IDs.

@@ -19,7 +19,7 @@ Each passage begins with a short evidence handle such as `[E001]`. An evidence h
 
 TERMS
 
-A `context` is one complete study setting under which the paper directly analyzes a result. A setting may combine place, period, season, time of day, observations or simulation setup, environmental regime, land treatment, and experimental-variable values.
+A `context` is one complete study setting defining where and how evidence was produced. A setting may combine place, study period, observations or simulation setup, environmental regime, land treatment, and experimental-variable values.
 
 A child context inherits all conditions from its parent. A parent contains conditions shared by at least two children. Reading a context together with its ancestors must identify one scientifically usable setting.
 
@@ -31,9 +31,9 @@ A `claim` is one evidence-supported relationship between a source state or proce
 
 HOW TO IDENTIFY COMPLETE SETTINGS
 
-Inventory every condition dimension that the paper varies or uses to separate results. Include brief sensitivity, robustness, resolution, parameter, threshold, lag, seasonal, spatial, and null-result analyses.
+Inventory every condition dimension that changes the study setup, sampled setting, treatment, or prescribed forcing. Include brief sensitivity, robustness, resolution, parameter, and null-result experiments.
 
-Construct the context hierarchy so every separately analyzed combination is represented. For crossed conditions, create branches containing the complete combinations.
+Construct the context hierarchy so every separately run, sampled, or treated combination is represented. For crossed setup conditions, create branches containing the complete combinations.
 
 Example:
 
@@ -59,7 +59,11 @@ Create one facet for each coherent condition. Give every facet a `facet_key` tha
 
 Preserve reported quantities, units, ranges, seasons, atmospheric layers, time of day, spatial scale, direction, distance, patch or edge relations, and qualifications in the description.
 
-A facet defines the setting in which an analysis applies. Record temperature, precipitation, wind, cloud, vegetation, or other reported responses as claims when they are outcomes of the analysis. A measured variable may define a facet only when the paper uses its value to stratify or select settings before analyzing another result.
+A facet defines the setting in which evidence was produced. Record temperature, precipitation, wind, cloud, vegetation, or other reported responses as claims when they are outcomes of the analysis.
+
+An `analysis case` is a subset used to report a Claim without changing the underlying study setup or intervention. Examples include wet versus dry years selected from one time series, seasonal summaries of the same observations, percentile groups, response classes, or subregions summarized within one domain. Store these cases inside the Claim. Do not create separate contexts for them unless the paper changes the simulation, treatment, prescribed forcing, independently sampled setting, or other evidence-producing setup.
+
+Keep separately analyzed target populations as separate contexts, including different land-cover classes, source or sink populations, study sites, or spatial domains. When the same named control or treatment is evaluated for two target populations, create population-specific descendants and use those complete descendants as transition endpoints.
 
 HOW TO RECORD TRANSITIONS
 
@@ -74,6 +78,8 @@ Place a claim describing one setting inside that context's `claims` array. Place
 Use `causal` when the paper explicitly attributes the outcome to the source or a controlled perturbation directly supports the attribution. Use `associative` for correlations, co-occurrence, observational preferences, and relationships without established causal attribution.
 
 Preserve null, opposite, conditional, seasonal, scale-dependent, spatial, magnitude-dependent, and timing-dependent findings as separate claims when the evidence distinguishes them. Include current-paper sensitivity and robustness findings. Include an authors' interpretation as a separate claim when it adds a supported mechanism.
+
+For a Claim reported across analysis cases, return each case with a short label, an evidence-faithful description of how it is defined, and its evidence handles. When the Claim explicitly compares cases, also return the comparison dimension, the exact returned case labels, and one sentence stating the comparison.
 
 Classify `evidence_role` using exactly one value:
 
@@ -143,6 +149,8 @@ For each claim:
 - `description`: Generate one evidence-faithful sentence, usually 15-50 words, preserving material conditions, location, season, scale, magnitude, threshold, timing, and uncertainty.
 - `evidence_role`: Use exactly one of the four values defined above.
 - `conditioning_facets`: For each material condition, copy `context_temp_id` and `facet_key`. Use an empty list when none materially condition the relationship.
+- `analysis_cases`: Return reported subsets used for this Claim. For each case return `label`, `description`, and the smallest `evidence_handles` set. Use an empty list when the Claim is not stratified.
+- `analysis_comparison`: Use `null` when no cases are compared. Otherwise return `dimension`, `case_labels` copied exactly from `analysis_cases`, and one evidence-faithful comparison sentence in `description`.
 - `evidence_handles`: Copy the smallest directly supporting evidence-handle set.
 
 For `ambiguities`, write short descriptions of unresolved scientific or structural choices. Use an empty list when none remain.

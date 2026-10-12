@@ -50,7 +50,13 @@ def context_text(context: Context, contexts: list[Context], facets: list[Facet])
 
 
 def claim_text(claim: Claim) -> str:
-    return f"FROM: {claim.from_.concept} | {claim.from_.state}\nTO: {claim.to.concept} | {claim.to.state}\nRELATION: {claim.relation}\nDESCRIPTION: {claim.description}"
+    cases = "\n".join(f"ANALYSIS CASE: {case.label} | {case.description}" for case in claim.analysis_cases)
+    comparison = f"\nANALYSIS COMPARISON: {claim.analysis_comparison.description}" if claim.analysis_comparison else ""
+    return f"FROM: {claim.from_.concept} | {claim.from_.state}\nTO: {claim.to.concept} | {claim.to.state}\nRELATION: {claim.relation}\nDESCRIPTION: {claim.description}{comparison}\n{cases}".strip()
+
+
+def analysis_case_text(label: str, description: str = "") -> str:
+    return f"Analysis case: {label}\nDescription: {description}".strip()
 
 
 def transition_text(transition: Transition, contexts: list[Context]) -> str:
@@ -100,6 +106,9 @@ def embed_paper(client: OllamaClient, blocks: list[SourceBlock], contexts: list[
         item.retrieval_embedding = vector
     for item, vector in zip(claims, _embed_batches(client, [claim_text(x) for x in claims])):
         item.claim_embedding = vector
+    cases = [case for claim in claims for case in claim.analysis_cases]
+    for case, vector in zip(cases, _embed_batches(client, [analysis_case_text(x.label, x.description) for x in cases])):
+        case.embedding = vector
     for item, vector in zip(transitions, _embed_batches(client, [transition_text(x, contexts) for x in transitions])):
         item.transition_embedding = vector
     for item, vector in zip(states, _embed_batches(client, [x.concept for x in states])):
@@ -111,5 +120,8 @@ def embed_claims_and_states(client: OllamaClient, claims: list[Claim], states: l
     """Refresh embeddings whose text changes during State recanonicalization."""
     for item, vector in zip(claims, _embed_batches(client, [claim_text(x) for x in claims])):
         item.claim_embedding = vector
+    cases = [case for claim in claims for case in claim.analysis_cases]
+    for case, vector in zip(cases, _embed_batches(client, [analysis_case_text(x.label, x.description) for x in cases])):
+        case.embedding = vector
     for item, vector in zip(states, _embed_batches(client, [x.concept for x in states])):
         item.concept_embedding = vector

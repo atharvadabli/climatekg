@@ -4,7 +4,7 @@ TASK
 
 Read scientific evidence for one known study setting or comparison and extract each supported relationship between two scientific variables, processes, or land states.
 
-The output field `claims` stores these relationship records. Each record has one source endpoint, one target endpoint, one relation type, a description, an evidence role, optional conditioning records, and exact evidence passage IDs.
+The output field `claims` stores these relationship records. Each record has one source endpoint, one target endpoint, one relation type, a description, an evidence role, optional conditioning records, optional reported analysis cases, and exact evidence passage IDs.
 
 INPUT
 
@@ -30,6 +30,10 @@ Classify the role of the evidence using exactly one value:
 
 Only use a condition record in `conditioning_facet_ids` when the evidence indicates that the relationship depends on it, changes under it, is located or oriented by it, or is experimentally defined by it. Mere coexistence in the same setting is not conditioning.
 
+An `analysis case` is a subset or stratum used when reporting this relationship without changing the underlying study setup or intervention. Examples include wet versus dry years selected from one time series, seasonal summaries of the same observations, percentile groups, response classes, or subregions analyzed within one domain. Record these in `analysis_cases`, not as new environmental condition IDs.
+
+For each analysis case, provide a short label, one evidence-faithful description of how the subset is defined, and the smallest directly supporting passage IDs. If the Claim explicitly compares two or more cases, also return `analysis_comparison` with the comparison dimension, the exact case labels, and one sentence stating the reported comparison. Use an empty `analysis_cases` list and `null` comparison when the finding is not stratified this way.
+
 OUTPUT
 
 Return valid JSON only. The JSON Schema supplied with this request is authoritative.
@@ -42,6 +46,14 @@ Return valid JSON only. The JSON Schema supplied with this request is authoritat
   - `description`: One evidence-faithful sentence, usually 15-50 words, preserving material conditions, location, season, scale, magnitude, threshold, timing, or uncertainty.
   - `evidence_role`: Exactly one of the four values defined above.
   - `conditioning_facet_ids`: IDs copied from the supplied available condition records. Use an empty list when no specific condition is supported.
+  - `analysis_cases`: Reported subsets used to present this relationship. For each case:
+    - `label`: A concise generated label, usually 1-6 words.
+    - `description`: One evidence-faithful phrase or sentence defining the subset.
+    - `evidence_block_ids`: The smallest directly supporting SourceBlock set.
+  - `analysis_comparison`: Use `null` when the Claim does not compare cases. Otherwise return:
+    - `dimension`: A concise name for what separates the cases, usually 1-6 words.
+    - `case_labels`: Exact labels copied from `analysis_cases`.
+    - `description`: One evidence-faithful sentence stating how the cases differ in the reported result.
   - `evidence_block_ids`: The smallest directly supporting SourceBlock set.
 - `unmapped_context_hints`: Short descriptions of relationships whose true setting is missing from the supplied registry.
 - `ambiguities`: Short descriptions of extraction uncertainty.

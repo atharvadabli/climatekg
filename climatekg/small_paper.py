@@ -66,6 +66,7 @@ def _validate_combined(result: SmallPaperExtraction, blocks: list[SourceBlock]) 
     for context in result.contexts:
         _validate_evidence(context.evidence_block_ids, allowed_blocks, f"Context {context.temp_id}")
         _validate_optional_evidence(context.facet_seed_block_ids, allowed_blocks, f"Context {context.temp_id}")
+        _validate_optional_evidence(context.claim_seed_block_ids, allowed_blocks, f"Context {context.temp_id}")
     for facet in result.facets:
         if facet.context_temp_id not in contexts:
             raise ValueError(f"Facet {facet.temp_id} references unknown Context {facet.context_temp_id}")
@@ -88,6 +89,10 @@ def _validate_combined(result: SmallPaperExtraction, blocks: list[SourceBlock]) 
         if any(facets[facet_id].context_temp_id not in reachable for facet_id in claim.conditioning_facet_temp_ids):
             raise ValueError(f"Claim {claim.temp_id} references an unreachable conditioning Facet")
         _validate_evidence(claim.evidence_block_ids, allowed_blocks, f"Claim {claim.temp_id}")
+        for case in claim.analysis_cases:
+            _validate_evidence(case.evidence_block_ids, allowed_blocks, f"Claim {claim.temp_id} analysis case {case.label}")
+        if claim.analysis_comparison and not set(claim.analysis_comparison.case_labels) <= {case.label for case in claim.analysis_cases}:
+            raise ValueError(f"Claim {claim.temp_id} analysis comparison references an unknown case")
 
 
 def _validate_evidence(ids: list[str], allowed: set[str], label: str) -> None:
@@ -195,7 +200,9 @@ def extract_small_paper(
             description=item.description,
             evidence_role=item.evidence_role,
             conditioning_facet_ids=[facet_ids[facet_id] for facet_id in item.conditioning_facet_temp_ids],
-            evidence_block_ids=unique_in_order(item.evidence_block_ids, block_order),
+            analysis_cases=[case.model_dump() for case in item.analysis_cases],
+            analysis_comparison=item.analysis_comparison.model_dump() if item.analysis_comparison else None,
+            evidence_block_ids=unique_in_order(item.evidence_block_ids + [block_id for case in item.analysis_cases for block_id in case.evidence_block_ids], block_order),
         )
         for index, item in enumerate(result.claims, 1)
     ]

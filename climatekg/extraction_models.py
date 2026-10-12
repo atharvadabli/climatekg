@@ -85,6 +85,7 @@ class MapContext(CompleteOutputModel):
     spatial_support: ExtractedSpatialSupport | None = None
     evidence_block_ids: list[str]
     facet_seed_block_ids: list[str] = Field(default_factory=list)
+    claim_seed_block_ids: list[str] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def validate_spatial_geometry(self) -> "MapContext":
@@ -148,7 +149,21 @@ class ClaimCandidate(StrictModel):
     description: str
     evidence_role: Literal["OWN_RESULT", "AUTHORS_INTERPRETATION_OF_OWN_RESULT", "CITED_BACKGROUND", "HYPOTHESIS_OR_PROPOSAL"]
     conditioning_facet_ids: list[str] = Field(default_factory=list)
+    analysis_cases: list["AnalysisCaseCandidate"] = Field(default_factory=list)
+    analysis_comparison: "AnalysisComparisonCandidate | None" = None
     evidence_block_ids: list[str]
+
+
+class AnalysisCaseCandidate(StrictModel):
+    label: str
+    description: str
+    evidence_block_ids: list[str]
+
+
+class AnalysisComparisonCandidate(StrictModel):
+    dimension: str
+    case_labels: list[str] = Field(min_length=2)
+    description: str
 
 
 class ClaimBatch(StrictModel):
@@ -177,6 +192,8 @@ class SmallPaperClaim(CompleteOutputModel):
     description: str
     evidence_role: Literal["OWN_RESULT", "AUTHORS_INTERPRETATION_OF_OWN_RESULT", "CITED_BACKGROUND", "HYPOTHESIS_OR_PROPOSAL"]
     conditioning_facet_temp_ids: list[str] = Field(default_factory=list)
+    analysis_cases: list[AnalysisCaseCandidate] = Field(default_factory=list)
+    analysis_comparison: AnalysisComparisonCandidate | None = None
     evidence_block_ids: list[str]
 
 
@@ -208,6 +225,14 @@ class SmallPaperClaimV4(CompleteOutputModel):
     description: str
     evidence_role: Literal["OWN_RESULT", "AUTHORS_INTERPRETATION_OF_OWN_RESULT", "CITED_BACKGROUND", "HYPOTHESIS_OR_PROPOSAL"]
     conditioning_facets: list[ConditioningFacetRefV4] = Field(default_factory=list)
+    analysis_cases: list["AnalysisCaseHandleV4"] = Field(default_factory=list)
+    analysis_comparison: AnalysisComparisonCandidate | None = None
+    evidence_handles: list[str]
+
+
+class AnalysisCaseHandleV4(CompleteOutputModel):
+    label: str
+    description: str
     evidence_handles: list[str]
 
 
@@ -333,6 +358,11 @@ class ParsedQueryFacetBatch(StrictModel):
     explicit_context_facets: list[ParsedQueryFacet]
 
 
+class ParsedAnalysisCase(StrictModel):
+    label: str
+    supporting_text_span: str
+
+
 class SpatialReference(StrictModel):
     text: str
     kind_hint: str | None = None
@@ -342,6 +372,8 @@ class ParsedQuery(StrictModel):
     source: ParsedEndpoint | None = None
     target: ParsedEndpoint | None = None
     intervention_description: str | None = None
+    analysis_cases: list[ParsedAnalysisCase] = Field(default_factory=list)
+    analysis_comparison: str | None = None
     explicit_context_facets: list[ParsedQueryFacet] = Field(default_factory=list)
     spatial_reference: SpatialReference | None = None
     global_requested: bool = False
@@ -352,6 +384,7 @@ class SynthesisItem(StrictModel):
     text: str
     support_claim_ids: list[str]
     support_query_facet_ids: list[str]
+    support_query_case_ids: list[str] = Field(default_factory=list)
     kind: Literal["direct_finding", "transfer_inference", "mechanism", "spatial_guidance", "limitation"]
 
 

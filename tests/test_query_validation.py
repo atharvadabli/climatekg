@@ -51,15 +51,84 @@ def test_unspecified_query_state_is_compatible() -> None:
     assert _compatible("", "increase")
 
 
+def test_generic_spatial_scale_is_not_a_named_location() -> None:
+    from climatekg.query import _is_generic_spatial_reference
+
+    assert _is_generic_spatial_reference("regional")
+    assert _is_generic_spatial_reference("local")
+    assert not _is_generic_spatial_reference("East Asia")
+
+
 def test_query_spec_payload_excludes_runtime_embeddings() -> None:
-    from climatekg.models import QueryContext, QueryFacet, QuerySpec
+    from climatekg.models import QueryAnalysisCase, QueryContext, QueryFacet, QuerySpec
     from climatekg.query import _query_spec_payload
 
     facet = QueryFacet(id="Q_F1", domain="climate", notion="humid", description="humid climate", origin="user", notion_embedding=[1.0], content_embedding=[1.0])
-    spec = QuerySpec(query_id="Q", mode="global", context=QueryContext(facets=[facet]), user_question="question")
+    case = QueryAnalysisCase(id="Q_AC1", label="dry years", supporting_text_span="dry years", embedding=[1.0])
+    spec = QuerySpec(query_id="Q", mode="global", context=QueryContext(facets=[facet]), analysis_cases=[case], user_question="question")
     payload = _query_spec_payload(spec)
     assert "notion_embedding" not in payload["context"]["facets"][0]
     assert "content_embedding" not in payload["context"]["facets"][0]
+    assert "embedding" not in payload["analysis_cases"][0]
+
+
+def test_analysis_cases_match_separately_from_context() -> None:
+    from climatekg.models import AnalysisCase, Claim, QueryAnalysisCase, QueryContext, QuerySpec
+    from climatekg.query import _analysis_case_match
+
+    claim = Claim(
+        id="CL1", paper_id="P1", scope_type="context", scope_id="C1",
+        **{"from": {"concept": "irrigated evaporation", "state": "increase"}},
+        to={"concept": "rainfall contribution", "state": "increase"},
+        relation="associative", description="Contribution differs by year class.",
+        evidence_role="OWN_RESULT", evidence_block_ids=["B1"],
+        analysis_cases=[
+            AnalysisCase(label="wet years", description="wettest years", evidence_block_ids=["B1"], embedding=[1.0, 0.0]),
+            AnalysisCase(label="dry years", description="driest years", evidence_block_ids=["B1"], embedding=[0.0, 1.0]),
+        ],
+        analysis_comparison={"dimension": "rainfall-year class", "case_labels": ["wet years", "dry years"], "description": "The contribution is higher in dry years."},
+    )
+    spec = QuerySpec(
+        query_id="Q1", mode="a_to_b", context=QueryContext(), user_question="compare wet and dry years",
+        analysis_cases=[
+            QueryAnalysisCase(id="Q1_AC1", label="wet years", supporting_text_span="wet", embedding=[1.0, 0.0]),
+            QueryAnalysisCase(id="Q1_AC2", label="dry years", supporting_text_span="dry", embedding=[0.0, 1.0]),
+        ],
+    )
+
+    report = _analysis_case_match(claim, spec)
+
+    assert report["score"] == 1.0
+    assert report["availability_coverage"] == 1.0
+    assert [item["claim_case_label"] for item in report["matches"]] == ["wet years", "dry years"]
+
+
+def test_planning_answer_groups_mechanism_with_its_recommendation() -> None:
+    from climatekg.extraction_models import SynthesisItem
+    from climatekg.query import render_planning_answer
+
+    recommendation = SynthesisItem(text="Preserve tree cover.", support_claim_ids=["CL1"], support_query_facet_ids=[], kind="transfer_inference")
+    mechanism = SynthesisItem(text="Trees increase latent cooling.", support_claim_ids=["CL1"], support_query_facet_ids=[], kind="mechanism")
+    limitation = SynthesisItem(text="Local water availability is unknown.", support_claim_ids=[], support_query_facet_ids=[], kind="limitation")
+    sections = {
+        "direct_answer": [recommendation],
+        "mechanisms": [mechanism],
+        "spatial_guidance": [],
+        "conditions_and_limitations": [limitation],
+        "contradictory_evidence": [],
+    }
+    rendered = {
+        id(recommendation): "Preserve tree cover. [Claim CL1]",
+        id(mechanism): "Trees increase latent cooling. [Claim CL1]",
+        id(limitation): limitation.text,
+    }
+
+    answer = render_planning_answer(sections, rendered)
+
+    assert "### Recommendation 1" in answer
+    assert "**What change:** Preserve tree cover." in answer
+    assert "**Why it may help:** Trees increase latent cooling." in answer
+    assert answer.index("Why it may help") < answer.index("Limitations and other important notes")
 
 
 def test_reporting_and_relation_words_are_not_target_states() -> None:

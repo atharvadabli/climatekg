@@ -12,6 +12,7 @@ import pytest
 from climatekg.ollama import OllamaClient
 from climatekg.extraction_models import MapContext, PaperMap, SectionScout, SmallPaperExtraction
 from climatekg.location_extraction import enforce_copied_location_names
+from climatekg.query import _shared_answer_guidance
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -70,14 +71,37 @@ def test_query_prompt_preserves_land_pattern_geometry_as_context() -> None:
     assert "Preserve numerical values and units" in text
 
 
+def test_query_prompt_separates_requested_processes_from_applicability_conditions() -> None:
+    text = (PROMPT_DIR / "query_parse.txt").read_text(encoding="utf-8")
+    assert "setting in which evidence should apply" in text
+    assert "process, mechanism, response, or quantity" in text
+    assert "not an explicit condition" in text
+    assert "attributes a requested result" in text
+    assert "explicitly compares methods" in text
+
+
+def test_climatekg_uses_graphrag_answer_guidance() -> None:
+    cases = {
+        "planning": "webapp_land_use_rag_answer.txt",
+        "process": "webapp_process_rag_answer.txt",
+    }
+    for answer_task, filename in cases.items():
+        prompt = (PROMPT_DIR / filename).read_text(encoding="utf-8")
+        expected, marker, _ = prompt.partition("\nOUTPUT\n")
+        assert marker
+        assert _shared_answer_guidance(answer_task) == expected.strip()
+
+
 def test_small_paper_prompt_requires_value_specific_context_coverage() -> None:
     text = (PROMPT_DIR / "small_paper_extraction.txt").read_text(encoding="utf-8")
-    assert "every separately analyzed combination is represented" in text
+    assert "every separately run, sampled, or treated combination is represented" in text
     assert "brief sensitivity, robustness, resolution" in text
     assert "Rainfed during drought" in text
     assert "Place every claim about a comparison inside that transition's `claims` array" in text
     assert "Every returned handle must be one of the handles shown in the input" in text
     assert "reported responses as claims" in text
+    assert "An `analysis case` is a subset used to report a Claim" in text
+    assert "wet versus dry years selected from one time series" in text
 
 
 def test_complete_setting_v11_candidates_are_standalone_and_consistent() -> None:
@@ -96,8 +120,10 @@ def test_complete_setting_v11_candidates_are_standalone_and_consistent() -> None
         assert "similar or null results" in text
         assert "A leaf that still contains several individually evaluated values is incomplete" in text
         assert "only when the paper analyzes that group as a setting for multiple findings" not in text
-    assert (PROMPT_DIR / "paper_map.txt").read_bytes() == (candidate_dir / "paper_map_v11.txt").read_bytes()
-    assert (PROMPT_DIR / "map_consolidation.txt").read_bytes() == (candidate_dir / "map_consolidation_v11.txt").read_bytes()
+    for name in ("paper_map.txt", "map_consolidation.txt"):
+        text = (PROMPT_DIR / name).read_text(encoding="utf-8")
+        assert "reported analysis subset" in text
+        assert "claim_seed_block_ids" in text
 
 
 def test_paper_map_structured_schema_requires_every_declared_field() -> None:

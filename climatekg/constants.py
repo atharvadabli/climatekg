@@ -32,14 +32,15 @@ ROUTING_TOKENIZER_ENCODING = "o200k_base"
 FILE_HASH_CHUNK_BYTES = 1024 * 1024
 
 PROMPT_VERSIONS = {
-    "small_paper_extraction": "v4.3",
-    "paper_map": "v13",
-    "map_consolidation": "v13",
-    "paper_map_candidate": "v13",
-    "map_consolidation_candidate": "v13",
-    "section_scout": "v4",
-    "query_parse": "v3",
-    "final_synthesis": "v4",
+    "small_paper_extraction": "v5.1",
+    "paper_map": "v15",
+    "map_consolidation": "v15",
+    "paper_map_candidate": "v15",
+    "map_consolidation_candidate": "v15",
+    "section_scout": "v5",
+    "claim_extraction": "v3",
+    "query_parse": "v5",
+    "final_synthesis": "v5",
 }
 
 BASELINE_INDEXING_REASONING = {
@@ -136,7 +137,7 @@ INDEXING_PIPELINE: dict[str, Any] = {
     "parsing": {
         "model": "nvidia/NVIDIA-Nemotron-Parse-v1.2",
         "model_path": "climatekg/runtime/cache/nemotron_parse_v1_2",
-        "nemotron_python": "E:/Atharv/lulc_suggestor_poc/hipporag copy 3/.venv-nemotron/Scripts/python.exe",
+        "nemotron_python": "F:/Atharv/lulc_suggestor_poc/hipporag copy 3/.venv-nemotron/Scripts/python.exe",
         "pdfium_python": "C:/Users/DELL/.codex/venvs/mineru_py313/Scripts/python.exe",
         "render_dpi": 200,
         "render_timeout_seconds": 1800,
@@ -152,7 +153,7 @@ INDEXING_PIPELINE: dict[str, Any] = {
         # 32K window for instructions, schema, reasoning, and generated JSON.
         "combined_extraction_target_tokens": 8000,
         "combined_extraction_max_cleaned_tokens": 16000,
-        "whole_paper_threshold_tokens": 15000,
+        "whole_paper_threshold_tokens": 10000,
         "map_consolidation_source_budget_tokens": 9000,
         "evidence_input_budget_tokens": 18000,
         "hard_llm_input_budget_tokens": 24000,
@@ -335,7 +336,7 @@ QUERY_PIPELINE: dict[str, Any] = {
         "candidate_claim_top_k": 200,
     },
     "claim_ranking": {
-        "weights": {"context": 0.45, "mechanism": 0.20, "intervention": 0.15, "endpoint": 0.20}
+        "weights": {"context": 0.45, "mechanism": 0.20, "intervention": 0.15, "endpoint": 0.20, "analysis_case": 0.20}
     },
     "path_search": {
         "max_path_length": 4,

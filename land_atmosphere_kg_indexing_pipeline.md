@@ -613,6 +613,12 @@ No confidence field.
 
 `conditioning_facet_ids` is optional and may be empty. It references existing Context Facets that the paper specifically indicates are important for interpreting or transferring this Claim. It does **not** create a second kind of Facet.
 
+`analysis_cases` is optional and may be empty. It records subsets used to report a Claim without changing the evidence-producing setup or intervention, such as wet/dry years selected from one time series, seasonal summaries of the same observations, percentile groups, response classes, or subregions summarized within one domain. Each case contains `label`, `description`, `evidence_block_ids`, and an optional runtime `embedding`.
+
+`analysis_comparison` is optional. When present, it contains `dimension`, `case_labels`, and `description`. Every `case_labels` value must exactly match one returned `analysis_cases[].label`. Analysis-case evidence must also be included in the parent Claim's `evidence_block_ids`, preserving the existing Claim-to-SourceBlock provenance path.
+
+An independently run simulation, treatment, prescribed forcing, sampled site, or separately analyzed target population remains a Context. A post-processing stratum within the same setup is an analysis case. Analysis cases are not Context Facets and do not alter environmental applicability scoring.
+
 Rules:
 
 - reference only Facets attached to the Claim's scoped Context, inherited ancestors, or the FROM/TO Contexts of its scoped Transition;
