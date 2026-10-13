@@ -569,6 +569,20 @@ def claim_result_pool(blocks: list[SourceBlock], mandatory_ids: list[str], exclu
     return selected or blocks
 
 
+def include_evidence_blocks(
+    bundle: list[SourceBlock],
+    blocks: list[SourceBlock],
+    evidence_ids: set[str],
+) -> list[SourceBlock]:
+    """Add cited inherited evidence so reference validation matches the supplied context."""
+    selected = {block.id: block for block in bundle}
+    block_by_id = {block.id: block for block in blocks}
+    for block_id in evidence_ids:
+        if block_id in block_by_id:
+            selected[block_id] = block_by_id[block_id]
+    return sorted(selected.values(), key=lambda block: block.order)
+
+
 def effective_facet_ids(context_id: str, contexts: list[Context], facets: list[Facet]) -> list[Facet]:
     by_context = {x.id: x for x in contexts}
     allowed: set[str] = set()
@@ -606,7 +620,8 @@ def extract_facets(paper: Paper, mapped: PaperMap, contexts: list[Context], map_
             batch = FacetBatch.model_validate_json(cached_path.read_text(encoding="utf-8"))
             allowed = {x.id for x in blocks}
         else:
-            bundle = bundles[context.id]
+            inherited_evidence_ids = {block_id for facet in parent_facets for block_id in facet.evidence_block_ids}
+            bundle = include_evidence_blocks(bundles[context.id], blocks, inherited_evidence_ids)
             request_text = user.format(paper_id=paper.id, target_context=context.model_dump_json(), context_registry=json.dumps(map_meta["registry"]), parent_facets=json.dumps([x.model_dump() for x in parent_facets]), existing_target_facets="[]", evidence_blocks=_render_blocks(bundle))
             batch = client.structured(stage="facet_extraction", system=system, user=request_text, schema=FacetBatch, model=PIPELINE["ollama"]["model"], temperature=cfg["temperature"], thinking=cfg["thinking"], artifact_dir=cached_path.parent, paper_id=paper.id, input_block_ids=[x.id for x in bundle], retries=cfg["retries"])
             allowed = {x.id for x in bundle}
@@ -641,7 +656,8 @@ def extract_claims(paper: Paper, mapped: PaperMap, contexts: list[Context], tran
         aliases = transition.aliases + from_context.aliases + to_context.aliases
         queries = [transition.label, *aliases, "effect response difference change increase decrease mechanism because due to caused associated result", "sensible heat latent heat evapotranspiration soil moisture boundary layer cloud precipitation convergence circulation temperature humidity wind dust aerosol"]
         available = effective_facet_ids(from_context.id, contexts, facets) + effective_facet_ids(to_context.id, contexts, facets)
-        scopes.append((transition.id, "transition", queries, transition.evidence_block_ids + source.claim_seed_block_ids, available))
+        facet_evidence = [block_id for facet in available for block_id in facet.evidence_block_ids]
+        scopes.append((transition.id, "transition", queries, unique_in_order(transition.evidence_block_ids + source.claim_seed_block_ids + facet_evidence), available))
     by_temp_context = {item.temp_id: item for item in mapped.contexts}
     reverse_c = {permanent: temporary for temporary, permanent in map_meta["temp_to_permanent"].items()}
     endpoint_ids = {context_id for transition in transitions for context_id in (transition.from_context_id, transition.to_context_id)}
@@ -651,11 +667,16 @@ def extract_claims(paper: Paper, mapped: PaperMap, contexts: list[Context], tran
         if not source.claim_seed_block_ids and context.id not in parent_scope_ids:
             continue
         queries = [context.label, *context.aliases, "reported result subgroup stratum season wet dry year percentile subregion", "effect response mechanism climate temperature precipitation evapotranspiration"]
-        scopes.append((context.id, "context", queries, source.claim_seed_block_ids, effective_facet_ids(context.id, contexts, facets)))
+        available = effective_facet_ids(context.id, contexts, facets)
+        facet_evidence = [block_id for facet in available for block_id in facet.evidence_block_ids]
+        scopes.append((context.id, "context", queries, unique_in_order(context.evidence_block_ids + source.claim_seed_block_ids + facet_evidence), available))
     if not scopes:
         for context in contexts:
             queries = [context.label, *context.aliases, "effect response difference change increase decrease mechanism results climate temperature precipitation evapotranspiration"]
-            scopes.append((context.id, "context", queries, mapped.global_claim_seed_block_ids or context.evidence_block_ids, effective_facet_ids(context.id, contexts, facets)))
+            available = effective_facet_ids(context.id, contexts, facets)
+            facet_evidence = [block_id for facet in available for block_id in facet.evidence_block_ids]
+            mandatory = (mapped.global_claim_seed_block_ids or context.evidence_block_ids) + facet_evidence
+            scopes.append((context.id, "context", queries, unique_in_order(mandatory), available))
     claims, hints = [], []
     block_by_id = {block.id: block for block in blocks}
     transition_result_sections = {

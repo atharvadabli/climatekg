@@ -3,7 +3,7 @@ import shutil
 import uuid
 
 from climatekg.canonicalize import canonical_concept, canonical_direction, state_id
-from climatekg.extract import _apply_map_repair, _validate_map, _validate_map_references, _validate_map_repair, _validate_reference_only_repair, remove_internal_inventory_aliases, render_paper_map_tree, scout_setting_inventory, select_map_consolidation_blocks, validate_context_mention_resolution
+from climatekg.extract import _apply_map_repair, _validate_map, _validate_map_references, _validate_map_repair, _validate_reference_only_repair, include_evidence_blocks, remove_internal_inventory_aliases, render_paper_map_tree, scout_setting_inventory, select_map_consolidation_blocks, validate_context_mention_resolution
 from climatekg.extraction_models import ContextHintDecision, ContextReconciliationBatch, MapContext, MapTransition, PaperMap, ScoutMention, SectionScout
 from climatekg.graph import _flatten, _inflate
 from climatekg.indexer import _clear_derived_artifacts, current_prompt_versions, index_pdf, indexing_derivation_fingerprint
@@ -54,6 +54,15 @@ def test_bm25_prefers_matching_scientific_block() -> None:
         SourceBlock(id="P:S00:P0002", paper_id="P", order=1, page=1, block_type="paragraph", text="bibliographic publishing details", source_locator={"page": 1}),
     ]
     assert bm25(blocks, ["irrigation heat"], 2)[0].block.id == blocks[0].id
+
+
+def test_inherited_facet_evidence_is_included_in_child_bundle() -> None:
+    blocks = [
+        SourceBlock(id="B1", paper_id="P", order=0, page=1, block_type="paragraph", text="parent evidence", source_locator={"page": 1}),
+        SourceBlock(id="B2", paper_id="P", order=1, page=1, block_type="paragraph", text="child evidence", source_locator={"page": 1}),
+    ]
+    result = include_evidence_blocks([blocks[1]], blocks, {"B1", "UNKNOWN"})
+    assert [block.id for block in result] == ["B1", "B2"]
 
 
 def test_context_similarity_separates_missing_from_mismatch() -> None:
