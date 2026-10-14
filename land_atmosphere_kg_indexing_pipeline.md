@@ -498,6 +498,27 @@ Do not obligatorily atomize it into wind speed, wind direction, moisture source,
 
 Split only when the source clearly describes genuinely distinct regimes or notions.
 
+One evidence statement may describe several independently retrievable aspects of
+the same setting. Represent these as separate Facets with one domain each; the
+Facets may share the same evidence blocks. In particular, an explicitly reported
+physical arrangement or relation must have a `spatial_configuration` Facet even
+when the same statement also supports a `land_surface`, `hydrology`, `atmosphere`,
+`climate`, or `substrate_terrain` Facet. Preserve the non-spatial Facets rather
+than replacing them with the spatial record.
+
+Examples include an irrigated upwind source and rainfed downwind receptor
+(`land_surface`, `hydrology`, and `spatial_configuration`), a forest patch with a
+reported size (`land_surface` and `spatial_configuration`), and a forested
+windward slope (`land_surface`, `substrate_terrain`, and
+`spatial_configuration`). A place name alone belongs in `SpatialSupport`; model
+grid resolution alone is not physical spatial configuration.
+
+For staged Facet extraction, use low reasoning for a root Context because its
+evidence may contain shared conditions and references to several descendants.
+Use no reasoning for descendant Contexts after the root Facets are supplied as
+inherited conditions. This keeps ownership decisions reliable without paying the
+root-level reasoning cost for every Context.
+
 For `spatial_configuration`, preserve scientifically meaningful geometry and directional language in the description when reported, including terms such as:
 
 ```text
@@ -1041,7 +1062,7 @@ non-reference, non-empty paper text with the standard `o200k_base` tokenizer.
 Treat `8000` tokens as the preferred target for this route, not as a hard
 boundary. When explicitly enabled, the route may accept up to `16000` cleaned
 tokens while the runtime context window remains `32768`. Use the versioned
-`small_paper_extraction_v4.1` prompt in `prompts/small_paper_extraction.txt`.
+`small_paper_extraction_v5.7` prompt in `prompts/small_paper_extraction.txt`.
 This single call returns temporary nested Contexts, Facets, Transitions, and
 Claims.
 

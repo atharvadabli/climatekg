@@ -57,6 +57,12 @@ HOW TO RECORD FACETS
 
 Create one facet for each coherent condition. Give every facet a `facet_key` that is unique within its context, such as `season`, `water_source`, `patch_size`, or `background_wind`. The key is a short local identifier; the scientific wording belongs in `notion` and `description`.
 
+First decide which context owns a condition. Then, when one evidence statement describes several independently useful aspects of that condition, create a separate facet for each applicable domain, and allow those facets to cite the same evidence handles. Keep each facet focused on its own domain. Explicitly reported physical arrangement or relationships between areas belong in `spatial_configuration`, including upwind/downwind, windward/leeward, source/sink, patch size, edge/interior, orientation, separation distance, distance decay, and local versus remote influence. Keep any land-cover, water, atmospheric, climate, or terrain facets supported by the same evidence. For example, an irrigated source area located upwind of a rainfed receptor can support separate `land_surface`, `hydrology`, and `spatial_configuration` facets.
+
+Use `spatial_configuration` for physical scientific geometry, not merely because a passage contains a place name or a model-grid resolution.
+
+A `spatial_configuration` facet must state a physical size, shape, internal arrangement, or relative relationship between areas or features. A land-cover type, replacement, or absence without such geometry belongs in `land_surface` rather than `spatial_configuration`. A time window or duration remains temporal or methodological even when it is used to analyze a spatial relationship.
+
 Preserve reported quantities, units, ranges, seasons, atmospheric layers, time of day, spatial scale, direction, distance, patch or edge relations, and qualifications in the description.
 
 A facet defines the setting in which evidence was produced. Record temperature, precipitation, wind, cloud, vegetation, or other reported responses as claims when they are outcomes of the analysis.

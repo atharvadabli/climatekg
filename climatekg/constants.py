@@ -27,12 +27,14 @@ OLLAMA_REQUEST_TIMEOUT_SECONDS = 1800
 OLLAMA_CONTEXT_TOKENS = 32768
 OLLAMA_RETRIES = 2
 OLLAMA_RETRY_BACKOFF_BASE_SECONDS = 2
+ROOT_CONTEXT_FACET_REASONING = "low"
 TOKEN_ESTIMATE_CHARACTERS_PER_TOKEN = 3.5
 ROUTING_TOKENIZER_ENCODING = "o200k_base"
 FILE_HASH_CHUNK_BYTES = 1024 * 1024
 
 PROMPT_VERSIONS = {
-    "small_paper_extraction": "v5.1",
+    "small_paper_extraction": "v5.7",
+    "facet_extraction": "v7",
     "paper_map": "v15",
     "map_consolidation": "v15",
     "paper_map_candidate": "v15",
@@ -121,7 +123,7 @@ def _stages(
     temperatures: dict[str, float],
     retry_overrides: dict[str, int],
 ) -> dict[str, dict[str, Any]]:
-    return {
+    stages = {
         name: _stage(
             name,
             temperatures.get(name, 0.0),
@@ -131,6 +133,9 @@ def _stages(
         )
         for name in baseline
     }
+    if "facet_extraction" in stages:
+        stages["facet_extraction"]["root_thinking"] = ROOT_CONTEXT_FACET_REASONING
+    return stages
 
 
 INDEXING_PIPELINE: dict[str, Any] = {

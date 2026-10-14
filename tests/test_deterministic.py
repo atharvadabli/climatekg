@@ -3,7 +3,7 @@ import shutil
 import uuid
 
 from climatekg.canonicalize import canonical_concept, canonical_direction, state_id
-from climatekg.extract import _apply_map_repair, _validate_map, _validate_map_references, _validate_map_repair, _validate_reference_only_repair, include_evidence_blocks, remove_internal_inventory_aliases, render_paper_map_tree, scout_setting_inventory, select_map_consolidation_blocks, validate_context_mention_resolution
+from climatekg.extract import _apply_map_repair, _validate_map, _validate_map_references, _validate_map_repair, _validate_reference_only_repair, include_evidence_blocks, is_outcome_like_facet, remove_internal_inventory_aliases, render_paper_map_tree, scout_setting_inventory, select_map_consolidation_blocks, validate_context_mention_resolution
 from climatekg.extraction_models import ContextHintDecision, ContextReconciliationBatch, MapContext, MapTransition, PaperMap, ScoutMention, SectionScout
 from climatekg.graph import _flatten, _inflate
 from climatekg.indexer import _clear_derived_artifacts, current_prompt_versions, index_pdf, indexing_derivation_fingerprint
@@ -63,6 +63,21 @@ def test_inherited_facet_evidence_is_included_in_child_bundle() -> None:
     ]
     result = include_evidence_blocks([blocks[1]], blocks, {"B1", "UNKNOWN"})
     assert [block.id for block in result] == ["B1", "B2"]
+
+
+def test_outcome_like_facets_are_distinguished_from_prescribed_states() -> None:
+    assert is_outcome_like_facet(
+        "rainfall response",
+        "Removing upwind evaporation leads to reduced rainfall over rainfed cells.",
+    )
+    assert not is_outcome_like_facet(
+        "background soil moisture state",
+        "The experiment prescribes reduced root-zone soil moisture at initialization.",
+    )
+    assert not is_outcome_like_facet(
+        "trajectory window",
+        "Trajectories resulting in rainfall are traced backward for 15 days.",
+    )
 
 
 def test_context_similarity_separates_missing_from_mismatch() -> None:

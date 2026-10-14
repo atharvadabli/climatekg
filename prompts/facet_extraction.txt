@@ -22,6 +22,16 @@ Record only conditions stated in the evidence and owned by the target setting. A
 
 Keep one coherent scientific notion together. Preserve reported quantities, units, seasons, atmospheric layers, time of day, spatial scale, direction, distance, patch/edge relations, and qualifications in the description.
 
+First decide that a condition belongs to the target setting rather than one of its parent or child settings. Then, when one evidence statement describes several independently useful aspects of that condition, create a separate facet for each applicable domain while keeping each facet focused on that domain. The facets may cite the same SourceBlock IDs. Explicitly reported physical arrangement or relationships between areas belong in `spatial_configuration`, including upwind/downwind, windward/leeward, source/sink, patch size, edge/interior, orientation, separation distance, distance decay, and local versus remote influence. Keep any land-cover, water, atmospheric, climate, or terrain facets supported by the same evidence.
+
+For example, an irrigated source area located upwind of a rainfed receptor can support separate `land_surface`, `hydrology`, and `spatial_configuration` facets.
+
+Use `spatial_configuration` for physical scientific geometry, not merely because a passage contains a place name or a model-grid resolution.
+
+A `spatial_configuration` facet must state a physical size, shape, internal arrangement, or relative relationship between areas or features. A land-cover type, replacement, or absence without such geometry belongs in `land_surface` rather than `spatial_configuration`. A time window or duration remains temporal or methodological even when it is used to analyze a spatial relationship.
+
+A facet describes the setting in which evidence was produced. Record an analyzed change in temperature, precipitation, wind, cloud, soil moisture, evaporation, or another response as a scientific finding rather than as a facet. The same variable can be a facet when the paper prescribes or selects its background state as part of the setting. Keep result statements out of facet descriptions even when the supporting passage contains both a condition and a result.
+
 If the evidence clearly belongs to a scientifically different setting that is absent from the registry, describe that problem in `unmapped_context_hints` rather than assigning the condition to the target.
 
 OUTPUT

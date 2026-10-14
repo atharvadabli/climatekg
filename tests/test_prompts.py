@@ -104,6 +104,33 @@ def test_small_paper_prompt_requires_value_specific_context_coverage() -> None:
     assert "wet versus dry years selected from one time series" in text
 
 
+def test_facet_prompts_preserve_cross_domain_spatial_conditions() -> None:
+    for name in ("facet_extraction.txt", "small_paper_extraction.txt"):
+        text = (PROMPT_DIR / name).read_text(encoding="utf-8")
+        assert "separate facet for each applicable domain" in text
+        assert "allow those facets to cite the same evidence handles" in text or "facets may cite the same SourceBlock IDs" in text
+        assert "upwind/downwind" in text
+        assert "Keep any land-cover, water, atmospheric, climate, or terrain facets" in text
+        assert "not merely because a passage contains a place name or a model-grid resolution" in text
+        assert "must state a physical size, shape, internal arrangement, or relative relationship" in text
+        assert "A time window or duration remains temporal or methodological" in text
+    assert "First decide that a condition belongs to the target setting" in (PROMPT_DIR / "facet_extraction.txt").read_text(encoding="utf-8")
+    assert "First decide which context owns a condition" in (PROMPT_DIR / "small_paper_extraction.txt").read_text(encoding="utf-8")
+    staged = (PROMPT_DIR / "facet_extraction.txt").read_text(encoding="utf-8")
+    assert "setting in which evidence was produced" in staged
+    assert "as a scientific finding rather than as a facet" in staged
+    assert "Keep result statements out of facet descriptions" in staged
+
+
+def test_cross_domain_prompt_versions_are_explicit() -> None:
+    from climatekg.constants import INDEXING_PIPELINE, PROMPT_VERSIONS
+
+    assert PROMPT_VERSIONS["facet_extraction"] == "v7"
+    assert PROMPT_VERSIONS["small_paper_extraction"] == "v5.7"
+    assert INDEXING_PIPELINE["ollama"]["stages"]["facet_extraction"]["thinking"] == "no"
+    assert INDEXING_PIPELINE["ollama"]["stages"]["facet_extraction"]["root_thinking"] == "low"
+
+
 def test_complete_setting_v11_candidates_are_standalone_and_consistent() -> None:
     candidate_dir = PROMPT_DIR / "experiments" / "complete_setting_v11"
     cases = {

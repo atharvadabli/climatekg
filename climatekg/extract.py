@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
@@ -583,6 +584,14 @@ def include_evidence_blocks(
     return sorted(selected.values(), key=lambda block: block.order)
 
 
+def is_outcome_like_facet(notion: str, description: str) -> bool:
+    """Identify explicit response statements that belong in Claims, not Facets."""
+    text = normalize_text_key(f"{notion} {description}")
+    relation = re.search(r"\b(?:lead(?:s|ing)? to|caus(?:e|es|ed|ing)|increases|decreases|reduces|enhances|suppresses)\b", text)
+    response = re.search(r"\b(?:temperature|precipitation|rainfall|wind|cloud|humidity|soil moisture|evaporation|evapotranspiration|heat flux|water stress)\b", text)
+    return bool(relation and response)
+
+
 def effective_facet_ids(context_id: str, contexts: list[Context], facets: list[Facet]) -> list[Facet]:
     by_context = {x.id: x for x in contexts}
     allowed: set[str] = set()
@@ -596,24 +605,41 @@ def effective_facet_ids(context_id: str, contexts: list[Context], facets: list[F
     return [x for x in facets if x.context_id in allowed]
 
 
-def extract_facets(paper: Paper, mapped: PaperMap, contexts: list[Context], map_meta: dict[str, Any], blocks: list[SourceBlock], paper_dir: Path, client: OllamaClient) -> tuple[list[Facet], list[str]]:
+def extract_facets(
+    paper: Paper,
+    mapped: PaperMap,
+    contexts: list[Context],
+    map_meta: dict[str, Any],
+    blocks: list[SourceBlock],
+    paper_dir: Path,
+    client: OllamaClient,
+    evidence_bundles: dict[str, list[SourceBlock]] | None = None,
+    only_context_ids: set[str] | None = None,
+) -> tuple[list[Facet], list[str]]:
     system, user = _split_prompt(_prompt("facet_extraction.txt"))
     cfg = PIPELINE["ollama"]["stages"]["facet_extraction"]
     by_temp = {x.temp_id: x for x in mapped.contexts}
     reverse = {v: k for k, v in map_meta["temp_to_permanent"].items()}
-    facets, hints = [], []
+    facets, hints, excluded_outcomes = [], [], []
     context_by_id = {item.id: item for item in contexts}
     bundles: dict[str, list[SourceBlock]] = {}
     for context in contexts:
+        if only_context_ids is not None and context.id not in only_context_ids:
+            continue
         cached_path = paper_dir / "extraction" / "facets" / context.id / "validated.json"
         if cached_path.exists():
             continue
-        source = by_temp[reverse[context.id]]
-        parent_aliases = [alias for parent_id in context.parent_ids for alias in [context_by_id[parent_id].label, *context_by_id[parent_id].aliases]]
-        child_aliases = [alias for child in contexts if context.id in child.parent_ids for alias in [child.label, *child.aliases]]
-        queries = [context.label, *context.aliases, *(f"background context {alias}" for alias in parent_aliases), *(f"scenario {alias}" for alias in child_aliases), "study area location climate season meteorology", "wind atmospheric circulation humidity boundary layer", "land cover land use vegetation management", "hydrology soil moisture", "terrain topography elevation", "spatial configuration patch heterogeneity edge"]
-        bundles[context.id] = evidence_bundle(blocks, queries, context.aliases, source.facet_seed_block_ids, client)
+        if evidence_bundles and context.id in evidence_bundles:
+            bundles[context.id] = evidence_bundles[context.id]
+        else:
+            source = by_temp[reverse[context.id]]
+            parent_aliases = [alias for parent_id in context.parent_ids for alias in [context_by_id[parent_id].label, *context_by_id[parent_id].aliases]]
+            queries = [context.label, *context.aliases, *(f"background context {alias}" for alias in parent_aliases), "study area location climate season meteorology", "wind atmospheric circulation humidity boundary layer", "land cover land use vegetation management", "hydrology soil moisture", "terrain topography elevation", "spatial configuration patch heterogeneity edge"]
+            mandatory_ids = unique_in_order(source.evidence_block_ids + source.facet_seed_block_ids)
+            bundles[context.id] = evidence_bundle(blocks, queries, context.aliases, mandatory_ids, client)
     for context in contexts:
+        if only_context_ids is not None and context.id not in only_context_ids:
+            continue
         parent_facets = [facet for facet in effective_facet_ids(context.id, contexts, facets) if facet.context_id != context.id]
         cached_path = paper_dir / "extraction" / "facets" / context.id / "validated.json"
         if cached_path.exists():
@@ -623,7 +649,8 @@ def extract_facets(paper: Paper, mapped: PaperMap, contexts: list[Context], map_
             inherited_evidence_ids = {block_id for facet in parent_facets for block_id in facet.evidence_block_ids}
             bundle = include_evidence_blocks(bundles[context.id], blocks, inherited_evidence_ids)
             request_text = user.format(paper_id=paper.id, target_context=context.model_dump_json(), context_registry=json.dumps(map_meta["registry"]), parent_facets=json.dumps([x.model_dump() for x in parent_facets]), existing_target_facets="[]", evidence_blocks=_render_blocks(bundle))
-            batch = client.structured(stage="facet_extraction", system=system, user=request_text, schema=FacetBatch, model=PIPELINE["ollama"]["model"], temperature=cfg["temperature"], thinking=cfg["thinking"], artifact_dir=cached_path.parent, paper_id=paper.id, input_block_ids=[x.id for x in bundle], retries=cfg["retries"])
+            thinking = cfg["root_thinking"] if not context.parent_ids else cfg["thinking"]
+            batch = client.structured(stage="facet_extraction", system=system, user=request_text, schema=FacetBatch, model=PIPELINE["ollama"]["model"], temperature=cfg["temperature"], thinking=thinking, artifact_dir=cached_path.parent, paper_id=paper.id, input_block_ids=[x.id for x in bundle], retries=cfg["retries"])
             allowed = {x.id for x in bundle}
             if batch.context_id != context.id or any(not set(x.evidence_block_ids) <= allowed for x in batch.facets):
                 repair = request_text + f"\n\nCORRECTION TASK\n\nThe returned condition records used an invalid target ID or evidence ID.\n\nPREVIOUS JSON OBJECT\n{batch.model_dump_json(by_alias=True)}\n\nREQUIRED TARGET ID\n{context.id}\n\nALLOWED EVIDENCE IDS\n{json.dumps(sorted(allowed))}\n\nReturn the complete JSON object again. Copy already valid records. Keep an invalid record only when one or more allowed SourceBlocks directly supports it, and assign the smallest supporting allowed ID set. Remove a record that has no directly supporting allowed SourceBlock."
@@ -635,11 +662,21 @@ def extract_facets(paper: Paper, mapped: PaperMap, contexts: list[Context], map_
         for candidate in batch.facets:
             if not set(candidate.evidence_block_ids) <= allowed:
                 continue
+            if is_outcome_like_facet(candidate.notion, candidate.description):
+                excluded_outcomes.append({
+                    "context_id": context.id,
+                    "notion": candidate.notion,
+                    "description": candidate.description,
+                    "evidence_block_ids": candidate.evidence_block_ids,
+                    "reason": "explicit response relationship belongs in Claim extraction",
+                })
+                continue
             if (candidate.domain, normalize_text_key(candidate.notion), normalize_text_key(candidate.description)) in parent_keys:
                 hints.append("PARENT_DUPLICATE_AMBIGUOUS")
             facets.append(Facet(id=f"{paper.id}_F{len(facets)+1:03d}", context_id=context.id, domain=candidate.domain, notion=candidate.notion, description=candidate.description, origin="reported", source={"type": "paper", "id": paper.id}, evidence_block_ids=unique_in_order(candidate.evidence_block_ids, {x.id: x.order for x in blocks})))
         hints.extend(batch.unmapped_context_hints)
         write_json(cached_path, batch.model_dump(by_alias=True))
+    write_json(paper_dir / "extraction" / "facets" / "excluded_outcomes.json", excluded_outcomes)
     return exact_deduplicate_facets(facets, blocks), hints
 
 
