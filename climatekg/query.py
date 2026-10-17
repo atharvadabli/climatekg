@@ -444,6 +444,56 @@ def context_similarity(query_facets: list[QueryFacet | Facet], candidate_facets:
     return {"semantic_similarity": semantic, "coverage": coverage, "overall_score": overall, "alpha": alpha, "missing_coverage_penalty_lambda": missing_lambda, "domain_scores": domain_scores, "facet_matches": matches, "missing_query_facets": missing}
 
 
+def _context_family_id(context_id: str, corpus: Corpus) -> str:
+    """Group descendants that inherit from the same top-level paper setting."""
+    roots: set[str] = set()
+    pending = [context_id]
+    visited: set[str] = set()
+    while pending:
+        current = pending.pop()
+        if current in visited:
+            continue
+        visited.add(current)
+        parents = corpus.contexts[current].parent_ids
+        if parents:
+            pending.extend(parents)
+        else:
+            roots.add(current)
+    paper_id = corpus.contexts[context_id].paper_id
+    return f"{paper_id}:{','.join(sorted(roots))}"
+
+
+def _diversify_context_reports(
+    ordered: list[dict[str, Any]],
+    corpus: Corpus,
+    limit: int,
+    family_limit: int,
+    paper_limit: int,
+) -> list[dict[str, Any]]:
+    selected: list[dict[str, Any]] = []
+    deferred: list[dict[str, Any]] = []
+    family_counts: dict[str, int] = defaultdict(int)
+    paper_counts: dict[str, int] = defaultdict(int)
+    for report in ordered:
+        family_id = _context_family_id(report["context_id"], corpus)
+        report["context_family_id"] = family_id
+        if family_counts[family_id] >= family_limit or paper_counts[report["paper_id"]] >= paper_limit:
+            deferred.append(report)
+            continue
+        selected.append(report)
+        family_counts[family_id] += 1
+        paper_counts[report["paper_id"]] += 1
+        if len(selected) >= limit:
+            break
+    if len(selected) < limit:
+        selected_ids = {report["context_id"] for report in selected}
+        selected.extend(report for report in deferred if report["context_id"] not in selected_ids)
+        selected = selected[:limit]
+    for rank, report in enumerate(selected, start=1):
+        report["diversified_rank"] = rank
+    return selected
+
+
 def retrieve_contexts(spec: QuerySpec, vectors: dict[str, list[float] | None], corpus: Corpus, indexes: FaissIndexes | None = None) -> tuple[dict[str, dict[str, Any]], list[str]]:
     if not spec.context.facets:
         return {}, ["CONTEXT_GATE_DISABLED_EMPTY_QUERY_CONTEXT"]
@@ -458,7 +508,13 @@ def retrieve_contexts(spec: QuerySpec, vectors: dict[str, list[float] | None], c
     for ann_score, context in ann:
         reports[context.id] = {"context_id": context.id, "paper_id": context.paper_id, "coarse_ann_score": ann_score, "context_similarity": context_similarity(spec.context.facets, corpus.effective_facets(context.id))}
     ordered = sorted(reports.values(), key=lambda x: (-x["context_similarity"]["overall_score"], -x["context_similarity"]["semantic_similarity"], -x["coarse_ann_score"], x["context_id"]))
-    retained = ordered[:QUERY_PIPELINE["context_retrieval"]["rerank_top_k"]]
+    retained = _diversify_context_reports(
+        ordered,
+        corpus,
+        QUERY_PIPELINE["context_retrieval"]["rerank_top_k"],
+        QUERY_PIPELINE["context_retrieval"]["max_contexts_per_family"],
+        QUERY_PIPELINE["context_retrieval"]["max_contexts_per_paper"],
+    )
     return {x["context_id"]: x for x in retained}, []
 
 
@@ -607,7 +663,14 @@ def rank_claims(spec: QuerySpec, vectors: dict[str, list[float] | None], corpus:
         present = [(weights[name], score) for name, score in components.items() if score is not None]
         rank = sum(weight * score for weight, score in present) / sum(weight for weight, _ in present)
         coverage = context_report["context_similarity"]["coverage"] if context_report else 0.0
-        rows.append({"claim_id": claim_id, "channels": sorted(channels), "R_claim": rank, "A_claim": applicability, "applicability_known": applicability is not None, "applicability_status": "known" if applicability is not None else "unknown", "context_coverage": coverage, "S_claim_semantic": components["mechanism"], "S_source_block": components["source_block"], "S_transition": components["intervention"], "S_endpoint": endpoint_score, "analysis_case_match": case_match, "conditioning_match": conditioning, "scope_context_id": scope_context})
+        incompatible_threshold = QUERY_PIPELINE["context_retrieval"]["incompatible_context_score"]
+        if applicability is None:
+            applicability_status = "unknown"
+        elif incompatible_threshold is not None and applicability < incompatible_threshold:
+            applicability_status = "incompatible"
+        else:
+            applicability_status = "compatible_candidate"
+        rows.append({"claim_id": claim_id, "channels": sorted(channels), "R_claim": rank, "A_claim": applicability, "applicability_known": applicability is not None, "applicability_status": applicability_status, "context_coverage": coverage, "S_claim_semantic": components["mechanism"], "S_source_block": components["source_block"], "S_transition": components["intervention"], "S_endpoint": endpoint_score, "analysis_case_match": case_match, "conditioning_match": conditioning, "scope_context_id": scope_context})
     rows.sort(key=lambda x: (-x["R_claim"], -x["applicability_known"], -x["context_coverage"], -(x["A_claim"] if x["A_claim"] is not None else -1), -(x["S_endpoint"] if x["S_endpoint"] is not None else -1), x["claim_id"]))
     return rows[:QUERY_PIPELINE["mechanism_retrieval"]["candidate_claim_top_k"]]
 
@@ -668,6 +731,8 @@ def _query_focused_rows(
             continue
         if require_known and row["A_claim"] is None:
             continue
+        if row.get("applicability_status") == "incompatible":
+            continue
         selected.append(row)
         if len(selected) >= limit:
             break
@@ -684,7 +749,12 @@ def search_paths(
 ) -> list[dict[str, Any]]:
     config = QUERY_PIPELINE["evidence_assembly"]
     require_known = bool(spec.context.facets) and config["require_known_context_for_graph"]
-    rows = {x["claim_id"]: x for x in ranked if not require_known or x["A_claim"] is not None}
+    rows = {
+        x["claim_id"]: x
+        for x in ranked
+        if (not require_known or x["A_claim"] is not None)
+        and x.get("applicability_status") != "incompatible"
+    }
     outgoing: dict[str, list[str]] = defaultdict(list)
     incoming: dict[str, list[str]] = defaultdict(list)
     for claim_id in rows:
@@ -1116,7 +1186,7 @@ def run_query(
     answer, synthesis, more = synthesize(spec, context_comparisons, synthesis_paths, ranked, synthesis_alternatives, selected_blocks, corpus, client, artifact_dir, answer_task); warnings.extend(more)
     stage("answer_synthesized", {"answer_characters": len(answer), "grounded_item_count": len(synthesis.get("items", [])), "provenance_claim_count": len(synthesis.get("provenance", {})), "warnings": more})
     synthesis_template = "final_synthesis_planning.txt" if answer_task == "planning" else "final_synthesis.txt"
-    report = {"query_id": query_id, "query_pipeline_version": "0.3-evidence-union", "answer_task": answer_task, "query_spec": _query_spec_payload(spec), "context_evidence_comparisons": context_comparisons, "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "claim_candidates": ranked, "direct_evidence_paths": direct_paths, "graph_paths": graph_paths, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis"), "final_synthesis_template": synthesis_template}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
+    report = {"query_id": query_id, "query_pipeline_version": "0.4-soft-context", "answer_task": answer_task, "query_spec": _query_spec_payload(spec), "context_evidence_comparisons": context_comparisons, "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "claim_candidates": ranked, "direct_evidence_paths": direct_paths, "graph_paths": graph_paths, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis"), "final_synthesis_template": synthesis_template}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
     write_json(artifact_dir / "query_report.json", report)
     (artifact_dir / "answer.md").write_text(answer, encoding="utf-8")
     stage("artifacts_written", {"query_report": str(artifact_dir / "query_report.json"), "answer": str(artifact_dir / "answer.md")})

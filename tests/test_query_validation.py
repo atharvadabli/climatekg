@@ -236,6 +236,50 @@ def test_direct_evidence_lane_keeps_unknown_applicability_for_context_query() ->
     assert [path["claim_ids"] for path in paths] == [["CL_UNKNOWN"], ["CL_KNOWN"]]
 
 
+def test_direct_evidence_lane_rejects_explicit_incompatibility() -> None:
+    from climatekg.models import QueryContext, QueryFacet, QuerySpec
+    from climatekg.query import select_direct_evidence_paths
+
+    facet = QueryFacet(id="Q_F1", domain="climate", notion="rainy season", description="rainy season", origin="user")
+    spec = QuerySpec(query_id="Q", mode="forward", context=QueryContext(facets=[facet]), source={"concept": "deforestation", "state": ""}, user_question="What changed in the rainy season?")
+    ranked = [
+        {"claim_id": "CL_UNKNOWN", "R_claim": 0.90, "A_claim": None, "applicability_status": "unknown", "channels": ["claim_ann"]},
+        {"claim_id": "CL_ENDPOINT", "R_claim": 0.85, "A_claim": 0.10, "applicability_status": "incompatible", "channels": ["claim_ann"]},
+        {"claim_id": "CL_KNOWN", "R_claim": 0.80, "A_claim": 0.70, "applicability_status": "compatible_candidate", "channels": ["claim_ann"]},
+    ]
+
+    paths = select_direct_evidence_paths(spec, _direct_evidence_test_corpus(), ranked)
+
+    assert [path["claim_ids"] for path in paths] == [["CL_UNKNOWN"], ["CL_KNOWN"]]
+
+
+def test_context_diversification_admits_another_hierarchy_before_backfill() -> None:
+    from climatekg.models import Context, FinalPaper, Paper
+    from climatekg.query import Corpus, _diversify_context_reports
+
+    first_contexts = [Context(id="P1_ROOT", paper_id="P1", label="root")]
+    first_contexts.extend(
+        Context(id=f"P1_C{index}", paper_id="P1", label=f"case {index}", parent_ids=["P1_ROOT"])
+        for index in range(1, 5)
+    )
+    second_contexts = [Context(id="P2_ROOT", paper_id="P2", label="root")]
+    corpus = Corpus([
+        FinalPaper(paper=Paper(id="P1", title="First", source_file="first.pdf"), source_blocks=[], contexts=first_contexts, facets=[], transitions=[], claims=[], states=[]),
+        FinalPaper(paper=Paper(id="P2", title="Second", source_file="second.pdf"), source_blocks=[], contexts=second_contexts, facets=[], transitions=[], claims=[], states=[]),
+    ])
+    ordered = [
+        {"context_id": "P1_C1", "paper_id": "P1"},
+        {"context_id": "P1_C2", "paper_id": "P1"},
+        {"context_id": "P1_C3", "paper_id": "P1"},
+        {"context_id": "P2_ROOT", "paper_id": "P2"},
+    ]
+
+    selected = _diversify_context_reports(ordered, corpus, limit=3, family_limit=1, paper_limit=2)
+
+    assert [item["context_id"] for item in selected] == ["P1_C1", "P2_ROOT", "P1_C2"]
+    assert selected[0]["context_family_id"] == "P1:P1_ROOT"
+
+
 def test_source_block_retrieval_adds_claim_candidate_independently() -> None:
     from climatekg.models import QueryContext, QuerySpec
     from climatekg.query import rank_claims

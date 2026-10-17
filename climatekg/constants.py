@@ -321,6 +321,8 @@ QUERY_PIPELINE: dict[str, Any] = {
     "context_retrieval": {
         "ann_top_k": 100,
         "rerank_top_k": 30,
+        "max_contexts_per_family": 3,
+        "max_contexts_per_paper": 8,
         "notion_weight_alpha": 0.35,
         "missing_coverage_penalty_lambda": 0.25,
         "domain_weights": {
@@ -333,6 +335,7 @@ QUERY_PIPELINE: dict[str, Any] = {
             "other": 0.5,
         },
         "min_context_score": None,
+        "incompatible_context_score": None,
     },
     "conditioning": {"weight_beta": 0.25, "min_known_conditioning_score": None},
     "mechanism_retrieval": {

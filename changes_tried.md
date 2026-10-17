@@ -406,3 +406,39 @@ the managed-session Windows permission policy.
   rendered as one unresolved comparison. The final full run used 993 parse input
   tokens and 20,003 synthesis input tokens.
 - Change 3 tests: `89 passed`.
+
+# 2026-10-17: Soft Context and hierarchy diversification
+
+Branch: `experiment/query-soft-context`
+
+## Change
+
+- Diversify the 30 precisely reranked Contexts by top-level paper Context family.
+- Admit at most three Contexts per family and eight per paper during the first pass, then backfill
+  unused capacity in original score order.
+- Report Claim applicability as `compatible_candidate`, `unknown`, or `incompatible`.
+- Use `incompatible` only when `incompatible_context_score` is explicitly configured. It remains
+  disabled by default because no benchmark-calibrated threshold exists.
+- Exclude explicitly incompatible Claims from direct evidence and graph traversal. Unknown direct
+  evidence remains eligible; graph traversal still requires known applicability.
+
+`compatible_candidate` means that the Claim's Context was retrieved and scored. It is a ranking
+status, not a probability or a declaration that the scientific finding transfers.
+
+## Replay result
+
+Controlled replay artifact:
+`climatekg/runtime/outputs/query_soft_context/CKGQ0002_soft_context`.
+
+Before diversification, the 30 retained Contexts came only from `P000103` (15), `P000040` (11), and
+`P000056` (4). After diversification, the shortlist covered seven papers and included three
+`P000064` Contexts. The central `P000064_CL030` changed from unknown to `compatible_candidate`; other
+relevant `P000064` Claims correctly remained unknown rather than inheriting that score.
+
+The grounded answer retained the reported twofold-to-fourfold frequency increase and return-period
+shift from once per decade to every two or three years. No two-Claim graph path existed, so the graph
+lane remained empty instead of constructing a generic path.
+
+## Verification
+
+Focused query and Parquet/FAISS tests: `24 passed`. Python compilation completed successfully.
