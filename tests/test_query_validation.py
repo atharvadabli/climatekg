@@ -220,7 +220,7 @@ def test_direct_evidence_lane_uses_semantic_retrieval_not_endpoint_only() -> Non
     assert [path["claim_ids"] for path in paths] == [["CL_KNOWN"]]
 
 
-def test_direct_evidence_lane_requires_known_applicability_for_context_query() -> None:
+def test_direct_evidence_lane_keeps_unknown_applicability_for_context_query() -> None:
     from climatekg.models import QueryContext, QueryFacet, QuerySpec
     from climatekg.query import select_direct_evidence_paths
 
@@ -233,7 +233,32 @@ def test_direct_evidence_lane_requires_known_applicability_for_context_query() -
 
     paths = select_direct_evidence_paths(spec, _direct_evidence_test_corpus(), ranked)
 
-    assert [path["claim_ids"] for path in paths] == [["CL_KNOWN"]]
+    assert [path["claim_ids"] for path in paths] == [["CL_UNKNOWN"], ["CL_KNOWN"]]
+
+
+def test_source_block_retrieval_adds_claim_candidate_independently() -> None:
+    from climatekg.models import QueryContext, QuerySpec
+    from climatekg.query import rank_claims
+
+    corpus = _direct_evidence_test_corpus()
+    corpus.blocks["B"].embedding = [1.0, 0.0]
+    for claim in corpus.claims.values():
+        claim.claim_embedding = [0.0, 1.0]
+    spec = QuerySpec(query_id="Q", mode="global", context=QueryContext(), user_question="Supported result")
+
+    rows = rank_claims(
+        spec,
+        {"claim": [1.0, 0.0], "context": None, "intervention": None},
+        corpus,
+        {},
+        [],
+        [],
+    )
+
+    assert rows
+    assert all("source_block_ann" in row["channels"] for row in rows)
+    assert all(row["S_source_block"] == 1.0 for row in rows)
+    assert all(row["applicability_status"] == "unknown" for row in rows)
 
 
 def test_forward_graph_search_starts_from_query_focused_claim() -> None:

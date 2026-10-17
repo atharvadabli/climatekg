@@ -337,11 +337,12 @@ QUERY_PIPELINE: dict[str, Any] = {
     "conditioning": {"weight_beta": 0.25, "min_known_conditioning_score": None},
     "mechanism_retrieval": {
         "claim_semantic_top_k": 100,
+        "source_block_semantic_top_k": 100,
         "transition_top_k": 50,
         "candidate_claim_top_k": 200,
     },
     "claim_ranking": {
-        "weights": {"context": 0.45, "mechanism": 0.20, "intervention": 0.15, "endpoint": 0.20, "analysis_case": 0.20}
+        "weights": {"context": 0.45, "mechanism": 0.20, "source_block": 0.20, "intervention": 0.15, "endpoint": 0.20, "analysis_case": 0.20}
     },
     "path_search": {
         "max_path_length": 4,
@@ -355,7 +356,7 @@ QUERY_PIPELINE: dict[str, Any] = {
         "direct_claim_paths": 8,
         "graph_anchor_claims": 20,
         "graph_paths": 4,
-        "require_known_context_for_direct_claims": True,
+        "require_known_context_for_direct_claims": False,
         "require_known_context_for_graph": True,
     },
     "synthesis": {

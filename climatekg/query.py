@@ -36,6 +36,10 @@ class Corpus:
         self.states = {x.id: x for p in self.papers for x in p.states}
         self.contexts_by_paper = {p.paper.id: p.contexts for p in self.papers}
         self.facets_by_paper = {p.paper.id: p.facets for p in self.papers}
+        self.claim_ids_by_block: dict[str, list[str]] = defaultdict(list)
+        for claim in self.claims.values():
+            for block_id in claim.evidence_block_ids:
+                self.claim_ids_by_block[block_id].append(claim.id)
 
     def effective_facets(self, context_id: str) -> list[Facet]:
         context = self.contexts[context_id]
@@ -560,6 +564,27 @@ def rank_claims(spec: QuerySpec, vectors: dict[str, list[float] | None], corpus:
         for claim in corpus.claims.values():
             if claim.scope_type == "transition" and claim.scope_id in transition_scores: channel_map[claim.id].add("transition_ann")
     semantic_scores = {claim.id: score for score, claim in semantic}
+    block_top_k = QUERY_PIPELINE["mechanism_retrieval"]["source_block_semantic_top_k"]
+    if indexes and indexes.has_collection("source_blocks"):
+        semantic_blocks = [
+            (score, corpus.blocks[identifier])
+            for identifier, score in indexes.search("source_blocks", vectors["claim"] or [], block_top_k)
+            if identifier in corpus.blocks
+        ]
+    else:
+        semantic_blocks = sorted(
+            (
+                (max(0.0, cosine(vectors["claim"] or [], block.embedding or [])), block)
+                for block in corpus.blocks.values()
+                if block.embedding
+            ),
+            key=lambda item: (-item[0], item[1].id),
+        )[:block_top_k]
+    block_scores: dict[str, float] = {}
+    for score, block in semantic_blocks:
+        for claim_id in corpus.claim_ids_by_block.get(block.id, []):
+            channel_map[claim_id].add("source_block_ann")
+            block_scores[claim_id] = max(score, block_scores.get(claim_id, 0.0))
     rows = []
     for claim_id, channels in channel_map.items():
         claim = corpus.claims[claim_id]
@@ -577,12 +602,12 @@ def rank_claims(spec: QuerySpec, vectors: dict[str, list[float] | None], corpus:
         elif spec.mode == "backward": endpoint_score = target_score
         elif spec.mode == "a_to_b": endpoint_score = (source_score + target_score) / 2
         else: endpoint_score = (source_score + target_score) / (bool(source_seeds) + bool(target_seeds)) if source_seeds or target_seeds else None
-        components = {"context": applicability, "mechanism": semantic_scores.get(claim_id, max(0.0, cosine(vectors["claim"] or [], claim.claim_embedding or []))), "intervention": transition_scores.get(claim.scope_id) if claim.scope_type == "transition" and spec.intervention_description else None, "endpoint": endpoint_score, "analysis_case": case_match["score"]}
+        components = {"context": applicability, "mechanism": semantic_scores.get(claim_id, max(0.0, cosine(vectors["claim"] or [], claim.claim_embedding or []))), "source_block": block_scores.get(claim_id), "intervention": transition_scores.get(claim.scope_id) if claim.scope_type == "transition" and spec.intervention_description else None, "endpoint": endpoint_score, "analysis_case": case_match["score"]}
         weights = QUERY_PIPELINE["claim_ranking"]["weights"]
         present = [(weights[name], score) for name, score in components.items() if score is not None]
         rank = sum(weight * score for weight, score in present) / sum(weight for weight, _ in present)
         coverage = context_report["context_similarity"]["coverage"] if context_report else 0.0
-        rows.append({"claim_id": claim_id, "channels": sorted(channels), "R_claim": rank, "A_claim": applicability, "applicability_known": applicability is not None, "context_coverage": coverage, "S_claim_semantic": components["mechanism"], "S_transition": components["intervention"], "S_endpoint": endpoint_score, "analysis_case_match": case_match, "conditioning_match": conditioning, "scope_context_id": scope_context})
+        rows.append({"claim_id": claim_id, "channels": sorted(channels), "R_claim": rank, "A_claim": applicability, "applicability_known": applicability is not None, "applicability_status": "known" if applicability is not None else "unknown", "context_coverage": coverage, "S_claim_semantic": components["mechanism"], "S_source_block": components["source_block"], "S_transition": components["intervention"], "S_endpoint": endpoint_score, "analysis_case_match": case_match, "conditioning_match": conditioning, "scope_context_id": scope_context})
     rows.sort(key=lambda x: (-x["R_claim"], -x["applicability_known"], -x["context_coverage"], -(x["A_claim"] if x["A_claim"] is not None else -1), -(x["S_endpoint"] if x["S_endpoint"] is not None else -1), x["claim_id"]))
     return rows[:QUERY_PIPELINE["mechanism_retrieval"]["candidate_claim_top_k"]]
 
@@ -639,7 +664,7 @@ def _query_focused_rows(
     require_known = bool(spec.context.facets) and require_known_context
     selected = []
     for row in ranked:
-        if not ({"claim_ann", "transition_ann"} & set(row["channels"])):
+        if not ({"claim_ann", "source_block_ann", "transition_ann"} & set(row["channels"])):
             continue
         if require_known and row["A_claim"] is None:
             continue
@@ -1070,7 +1095,7 @@ def run_query(
     target_seeds, more = map_endpoint(spec.target, corpus, client, indexes); warnings.extend(more)
     stage("states_mapped", {"source_seeds": source_seeds, "target_seeds": target_seeds, "warnings": source_warnings + more})
     ranked = rank_claims(spec, vectors, corpus, context_reports, source_seeds, target_seeds, indexes)
-    stage("claims_ranked", {"candidate_count": len(ranked), "top_claims": [{key: row[key] for key in ("claim_id", "R_claim", "A_claim", "context_coverage", "analysis_case_match", "channels")} for row in ranked[:QUERY_PIPELINE["reporting"]["top_claims"]]]})
+    stage("claims_ranked", {"candidate_count": len(ranked), "top_claims": [{key: row[key] for key in ("claim_id", "R_claim", "A_claim", "applicability_status", "context_coverage", "S_claim_semantic", "S_source_block", "analysis_case_match", "channels")} for row in ranked[:QUERY_PIPELINE["reporting"]["top_claims"]]]})
     direct_paths = select_direct_evidence_paths(spec, corpus, ranked)
     anchor_rows = _query_focused_rows(
         spec,
@@ -1091,7 +1116,7 @@ def run_query(
     answer, synthesis, more = synthesize(spec, context_comparisons, synthesis_paths, ranked, synthesis_alternatives, selected_blocks, corpus, client, artifact_dir, answer_task); warnings.extend(more)
     stage("answer_synthesized", {"answer_characters": len(answer), "grounded_item_count": len(synthesis.get("items", [])), "provenance_claim_count": len(synthesis.get("provenance", {})), "warnings": more})
     synthesis_template = "final_synthesis_planning.txt" if answer_task == "planning" else "final_synthesis.txt"
-    report = {"query_id": query_id, "query_pipeline_version": "0.2-experiment", "answer_task": answer_task, "query_spec": _query_spec_payload(spec), "context_evidence_comparisons": context_comparisons, "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "claim_candidates": ranked, "direct_evidence_paths": direct_paths, "graph_paths": graph_paths, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis"), "final_synthesis_template": synthesis_template}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
+    report = {"query_id": query_id, "query_pipeline_version": "0.3-evidence-union", "answer_task": answer_task, "query_spec": _query_spec_payload(spec), "context_evidence_comparisons": context_comparisons, "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "claim_candidates": ranked, "direct_evidence_paths": direct_paths, "graph_paths": graph_paths, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis"), "final_synthesis_template": synthesis_template}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
     write_json(artifact_dir / "query_report.json", report)
     (artifact_dir / "answer.md").write_text(answer, encoding="utf-8")
     stage("artifacts_written", {"query_report": str(artifact_dir / "query_report.json"), "answer": str(artifact_dir / "answer.md")})

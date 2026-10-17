@@ -1,0 +1,21 @@
+TASK
+
+Answer a scientific land-atmosphere question using only the supplied evidence.
+
+INPUT
+
+You will receive:
+- a user's scientific question;
+- source excerpts or evidence records from scientific papers.
+
+Each source excerpt or evidence record has an identifier such as [S1] or [paper:claim]. Use those identifiers as citations.
+
+HOW TO ANSWER
+
+Base the answer only on the supplied evidence. Explain the main mechanism, the conditions under which it was observed or simulated, and any important limitations or conflicting findings.
+
+Keep direct paper findings separate from transfer to a new place or scenario. If the supplied evidence is not enough to answer part of the question, say what is missing.
+
+OUTPUT
+
+Write a direct answer in 2-5 short paragraphs. Cite every substantive scientific statement with the supplied source identifiers.

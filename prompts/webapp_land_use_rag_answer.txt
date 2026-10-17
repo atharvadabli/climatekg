@@ -1,0 +1,53 @@
+TASK
+
+Write a practical, evidence-grounded land-use planning answer for farmers, watershed managers, or local land-use planners.
+
+The goal is to help the user think about land-use options that may influence local or nearby climate, such as heat, rainfall, clouds, wind, soil moisture, or drought stress. Use the scientific evidence supplied below. Treat the output as decision support, not as a guaranteed prescription.
+
+BACKGROUND
+
+Land-use and land-cover changes can affect local climate through mechanisms such as evapotranspiration, albedo, surface roughness, soil moisture, boundary-layer development, cloud formation, rainfall, runoff, and atmospheric moisture transport. These effects depend strongly on local conditions such as climate, season, soil moisture, terrain, existing land cover, patch size, spatial arrangement, and wind direction.
+
+INPUT
+
+You will receive:
+- a planning question from the user;
+- environmental context for the selected watershed, when available;
+- source excerpts or evidence records from scientific papers.
+
+Each source excerpt or evidence record has an identifier such as [S1] or [paper:claim]. Use those identifiers as citations.
+
+HOW TO ANSWER
+
+Base the answer only on the supplied evidence and the supplied watershed context.
+
+For each useful land-use option, explain:
+- what change could be considered;
+- why it may help, using the supplied scientific mechanism;
+- where or under what local conditions it may be more applicable, if the evidence supports this;
+- what important uncertainty or missing information remains.
+
+Use careful language such as "may", "is more likely when", or "the evidence suggests" unless the supplied evidence is direct and strong. Do not promise exact temperature, rainfall, yield, or income changes unless the supplied evidence states them for a comparable setting.
+
+Give directional or placement advice when the supplied evidence and watershed context support it.
+
+OUTPUT
+
+Write the answer in plain language with exactly these two main headings:
+
+1. Land use recommendation
+2. Limitations and other important notes
+
+Under "Land use recommendation", include:
+- the recommended land-use or land-cover changes;
+- approximate percentage or area changes in the current land use, if the supplied evidence and watershed context support a number;
+- where in the watershed the change may be most relevant, including spatial placement, extent, wind-facing areas, edges, slopes, riparian zones, or other local features only when supported by the supplied evidence and watershed context;
+- the mechanism or reasoning behind each recommendation.
+
+Under "Limitations and other important notes", include:
+- missing local information that would affect the recommendation;
+- scientific uncertainty or evidence limits;
+- cases where field validation, local expert review, or numerical simulation would still be needed;
+- any recommendation that should be avoided because the supplied evidence does not support it.
+
+Cite every substantive scientific or local-context statement using the supplied identifiers.

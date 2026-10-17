@@ -149,6 +149,64 @@ py -3.13 -m pytest -q -p no:cacheprovider
 ```
 
 Result: `46 passed`.
+
+# 2026-10-17: Query evidence union
+
+Branch: `experiment/query-evidence-union`
+
+## Problem
+
+The Context shortlist can omit the Context attached to a semantically relevant Claim. The previous
+direct-evidence lane then removed that Claim because its applicability score was unknown. This made
+Context retrieval the only route into synthesis, even when Claim text or its supporting passage
+matched the question directly. Unknown Context coverage was therefore acting like a mismatch.
+
+## Change
+
+- Retrieve Claims by Claim embeddings as before.
+- Retrieve SourceBlocks independently by the same query embedding and map a retrieved block only to
+  Claims that explicitly cite it in `evidence_block_ids`.
+- Keep direct Claims reached through Claim, SourceBlock, or Transition retrieval when Context
+  applicability is unknown.
+- Preserve `A_claim=null` and report `applicability_status="unknown"`; no replacement match score is
+  invented.
+- Keep strict known-Context admission for multi-Claim graph traversal.
+- Add SourceBlocks as an optional FAISS HNSW collection. Existing indexes remain readable and use a
+  deterministic linear scan of stored block embeddings until rebuilt.
+
+This is a versioned experiment that intentionally replaces the v0.2 direct-lane requirement that a
+non-empty query Context must give every direct Claim known applicability. It does not weaken the
+Context-coherence requirement for mechanism paths or location-specific transfer claims.
+
+## Replay results
+
+Artifacts:
+
+- `climatekg/runtime/outputs/query_evidence_union/CKGQ0002_evidence_union`
+- `climatekg/runtime/outputs/query_evidence_union/CKGQ0001_evidence_union`
+
+`CKGQ0002` previously selected eight context-known but irrelevant direct Claims from `P000040` and
+`P000103`, then abstained. With evidence union it selected seven relevant `P000064` Claims with
+explicitly unknown applicability. The grounded answer recovered the reported twofold-to-fourfold
+increase and the return-period shift from once per decade to every two or three years. The graph
+lane remained empty because no eligible connected path existed.
+
+The supporting-passage lane assigned the key `P000064` Claims passage similarities of 0.653-0.773.
+Those Claims were also found by Claim retrieval, so this case shows that unknown-context admission,
+not passage retrieval alone, caused the recovery.
+
+The successful `CKGQ0001` control retained eight `P000100` direct Claims, including `P000100_CL008`
+with the dry/wet comparison and IGP value above 20%. Qwen placed the IGP sentence in the
+`spatial_guidance` output section, however, and the existing validator rejected it because that
+section requires a transferable spatial-relation rule. The final prose therefore retained the
+dry/wet result but omitted the IGP qualifier. This is a synthesis-label/validator issue, not a
+retrieval regression, and is intentionally not changed on this branch.
+
+## Verification
+
+Focused query and Parquet/FAISS tests: `22 passed`. The query, Parquet, and deterministic suites
+reached `51 passed`; one unrelated test could not create its pytest temporary directory because of
+the managed-session Windows permission policy.
 # 2026-08-28: Central constants and no-reasoning indexing ablation
 
 - Added `climatekg/constants.py` as the runtime tuning surface for both indexing

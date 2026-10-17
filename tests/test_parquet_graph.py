@@ -12,6 +12,7 @@ from climatekg.vector_index import _collections
 
 def _paper() -> FinalPaper:
     block = SourceBlock(id="P1:B1", paper_id="P1", order=0, page=1, block_type="paragraph", text="Forest cooling increased.", source_locator={"page": 1})
+    block.embedding = [0.6, 0.4]
     context = Context(id="P1:C1", paper_id="P1", label="forest case", evidence_block_ids=[block.id], retrieval_embedding=[1.0, 0.0])
     facet = Facet(id="P1:F1", context_id=context.id, domain="land_surface", notion="forest cover", description="forested land", origin="reported", evidence_block_ids=[block.id], notion_embedding=[1.0, 0.0], content_embedding=[0.8, 0.2])
     claim = Claim(id="P1:CL1", paper_id="P1", scope_type="context", scope_id=context.id, **{"from": {"concept": "forest cover", "state": "increase"}}, to={"concept": "surface temperature", "state": "decrease"}, relation="causal", description="Increased forest cover decreased surface temperature.", evidence_role="OWN_RESULT", conditioning_facet_ids=[facet.id], analysis_cases=[AnalysisCase(label="dry years", description="driest years", evidence_block_ids=[block.id], embedding=[0.0, 1.0]), AnalysisCase(label="wet years", description="wettest years", evidence_block_ids=[block.id], embedding=[1.0, 0.0])], analysis_comparison={"dimension": "year class", "case_labels": ["dry years", "wet years"], "description": "The result differed between dry and wet years."}, evidence_block_ids=[block.id], claim_embedding=[0.7, 0.3])
@@ -40,6 +41,7 @@ def test_parquet_graph_round_trip_and_edges() -> None:
         indexes = graph.read_indexes()
         assert indexes.search("contexts", [1.0, 0.0], 1)[0][0] == "P1:C1"
         assert indexes.search("claims", [0.7, 0.3], 1)[0][0] == "P1:CL1"
+        assert indexes.search("source_blocks", [0.6, 0.4], 1)[0][0] == "P1:B1"
     finally:
         shutil.rmtree(root, ignore_errors=True)
 

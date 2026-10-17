@@ -7,6 +7,7 @@ from typing import Iterable
 import faiss
 import numpy as np
 
+from .canonicalize import state_id
 from .models import FinalPaper
 from .utils import write_json
 
@@ -16,7 +17,9 @@ VECTOR_FIELDS = {
     "claims": "claim_embedding",
     "states": "concept_embedding",
     "transitions": "transition_embedding",
+    "source_blocks": "embedding",
 }
+REQUIRED_COLLECTIONS = {"contexts", "claims", "states", "transitions"}
 
 
 class FaissIndexes:
@@ -76,7 +79,12 @@ class FaissIndexes:
         if manifest.get("format") != "climatekg-faiss-hnsw" or manifest.get("format_version") != INDEX_VERSION:
             raise ValueError(f"Unsupported FAISS index format: {manifest}")
         indexes = {}
-        for name in VECTOR_FIELDS:
+        missing = REQUIRED_COLLECTIONS - set(manifest["collections"])
+        if missing:
+            raise ValueError(f"FAISS manifest is missing required collections: {sorted(missing)}")
+        for name in manifest["collections"]:
+            if name not in VECTOR_FIELDS:
+                raise ValueError(f"Unknown FAISS collection in manifest: {name}")
             path = root / f"{name}.faiss"
             if not path.exists():
                 raise FileNotFoundError(f"Required FAISS index not found: {path}")
@@ -87,6 +95,9 @@ class FaissIndexes:
                 raise ValueError(f"FAISS index count mismatch for {name}: {index.ntotal} != {expected}")
             indexes[name] = index
         return cls(root, manifest, indexes)
+
+    def has_collection(self, collection: str) -> bool:
+        return collection in self.indexes
 
     def search(self, collection: str, vector: list[float], top_k: int) -> list[tuple[str, float]]:
         if collection not in VECTOR_FIELDS:
@@ -115,16 +126,25 @@ def _matrix(vectors: list[list[float]], dimension: int) -> np.ndarray:
 
 def _collections(papers: list[FinalPaper]) -> dict[str, list[tuple[str, list[float]]]]:
     result: dict[str, list[tuple[str, list[float]]]] = {}
+    # Canonical States are shared across papers. Stable paper order makes the
+    # retained embedding reproducible when separate model calls differ slightly.
+    papers = sorted(papers, key=lambda paper: paper.paper.id)
     for name, field in VECTOR_FIELDS.items():
         seen: dict[str, list[float]] = {}
         for paper in papers:
             for item in getattr(paper, name):
                 vector = getattr(item, field)
                 if vector is None:
+                    if name == "source_blocks":
+                        continue
                     raise ValueError(f"Missing {field} for {item.id}")
+                if name == "states" and state_id(item.concept, item.state) != item.id:
+                    raise ValueError(f"Conflicting canonical State payload for shared ID {item.id}")
                 previous = seen.get(item.id)
                 if previous is not None and previous != vector:
-                    raise ValueError(f"Conflicting embeddings for shared ID {item.id}")
+                    if name != "states":
+                        raise ValueError(f"Conflicting embeddings for shared ID {item.id}")
+                    continue
                 seen[item.id] = vector
         result[name] = sorted(seen.items())
     return result
