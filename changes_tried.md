@@ -407,6 +407,49 @@ the managed-session Windows permission policy.
   tokens and 20,003 synthesis input tokens.
 - Change 3 tests: `89 passed`.
 
+# 2026-10-17: Evidence-seeded graph expansion
+
+Branch: `experiment/query-graph-expansion`
+
+## Change tested
+
+- Starting from Claims found independently by Claim, SourceBlock, or Transition retrieval, collect
+  neighboring Claims through exact canonical State equality.
+- Follow the query direction for at most three hops.
+- Tag added candidates as `graph_neighbor`; do not admit that tag to the direct-evidence lane.
+- Keep strict known-Context gating during actual path construction.
+- Reserve up to 100 additive graph-neighbor candidates after the primary 200 candidates so expansion
+  cannot displace independently ranked evidence.
+
+No embedding similarity creates an edge. Embeddings select evidence seeds; only canonical State
+identity creates adjacency.
+
+## Tests
+
+The deterministic tests confirm exact forward/backward adjacency, separation of direct and graph
+lanes, and additive candidate reservation. Focused query and Parquet/FAISS tests: `27 passed`.
+
+## Corpus results
+
+On the seven-paper graph, `CKGQ0007` already had all Claims in its connected component within the
+existing ANN candidate set. Expansion added zero candidates and therefore provided no benefit.
+
+On the 115-paper graph (1,724 Claims), expansion discovered 11 Claims beyond the primary 200 for
+`CKGQ0007`. Every added Claim had unknown Context applicability, so strict graph gating correctly
+produced no paths.
+
+For context-free `CKGQ0009`, the soft-context branch produced four Amazon temperature/drying paths.
+Expansion increased this to ten paths, including longer evapotranspiration-to-precipitation-to-drying
+chains. None reached the requested fire-intensity concept because that evidence was absent from the
+indexed Claims. These are exact graph paths but do not answer the question.
+
+## Decision
+
+Do not merge this experiment. Candidate expansion increases graph recall, but exact State adjacency
+alone does not guarantee query-focused paths. In the tested missing-evidence case it amplified
+topically adjacent chains without repairing the answer. The direct evidence union plus diversified
+soft Context retrieval remains the better architecture.
+
 # 2026-10-17: Soft Context and hierarchy diversification
 
 Branch: `experiment/query-soft-context`

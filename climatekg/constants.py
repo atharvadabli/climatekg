@@ -343,12 +343,15 @@ QUERY_PIPELINE: dict[str, Any] = {
         "source_block_semantic_top_k": 100,
         "transition_top_k": 50,
         "candidate_claim_top_k": 200,
+        "graph_neighbor_reserve": 100,
     },
     "claim_ranking": {
         "weights": {"context": 0.45, "mechanism": 0.20, "source_block": 0.20, "intervention": 0.15, "endpoint": 0.20, "analysis_case": 0.20}
     },
     "path_search": {
         "max_path_length": 4,
+        "evidence_seeded_expansion": True,
+        "evidence_seeded_expansion_depth": 3,
         "beam_width": 40,
         "max_paths": 20,
         "cross_edge_context_threshold": None,

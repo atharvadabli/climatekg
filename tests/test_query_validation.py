@@ -305,6 +305,57 @@ def test_source_block_retrieval_adds_claim_candidate_independently() -> None:
     assert all(row["applicability_status"] == "unknown" for row in rows)
 
 
+def test_evidence_seeded_graph_expansion_uses_exact_state_adjacency() -> None:
+    from climatekg.models import QueryContext, QuerySpec
+    from climatekg.query import _evidence_seeded_neighbor_ids
+
+    corpus = _direct_evidence_test_corpus()
+    forward = QuerySpec(query_id="QF", mode="forward", context=QueryContext(), user_question="What follows?")
+    backward = QuerySpec(query_id="QB", mode="backward", context=QueryContext(), user_question="What precedes it?")
+
+    assert _evidence_seeded_neighbor_ids({"CL_KNOWN"}, forward, corpus, 1) == {"CL_NEXT"}
+    assert _evidence_seeded_neighbor_ids({"CL_NEXT"}, backward, corpus, 1) == {
+        "CL_ENDPOINT",
+        "CL_KNOWN",
+        "CL_UNKNOWN",
+    }
+
+
+def test_graph_neighbor_channel_does_not_enter_direct_evidence() -> None:
+    from climatekg.models import QueryContext, QuerySpec
+    from climatekg.query import select_direct_evidence_paths
+
+    spec = QuerySpec(query_id="Q", mode="forward", context=QueryContext(), user_question="What follows?")
+    ranked = [
+        {
+            "claim_id": "CL_NEXT",
+            "R_claim": 0.9,
+            "A_claim": 0.7,
+            "applicability_status": "compatible_candidate",
+            "channels": ["graph_neighbor"],
+        }
+    ]
+
+    assert select_direct_evidence_paths(spec, _direct_evidence_test_corpus(), ranked) == []
+
+
+def test_graph_neighbor_reserve_is_additive_to_primary_candidates() -> None:
+    from climatekg.query import _retain_ranked_claims
+
+    rows = [
+        {"claim_id": f"CL{index}", "channels": ["claim_ann"]}
+        for index in range(4)
+    ]
+    rows.extend([
+        {"claim_id": "GN1", "channels": ["graph_neighbor"]},
+        {"claim_id": "GN2", "channels": ["graph_neighbor"]},
+    ])
+
+    retained = _retain_ranked_claims(rows, candidate_limit=3, graph_neighbor_reserve=1)
+
+    assert [row["claim_id"] for row in retained] == ["CL0", "CL1", "CL2", "GN1"]
+
+
 def test_forward_graph_search_starts_from_query_focused_claim() -> None:
     from climatekg.models import QueryContext, QuerySpec
     from climatekg.query import search_paths

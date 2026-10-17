@@ -554,6 +554,42 @@ def _claim_state_ids(claim: Claim) -> tuple[str, str]:
     return state_id(claim.from_.concept, claim.from_.state), state_id(claim.to.concept, claim.to.state)
 
 
+def _evidence_seeded_neighbor_ids(
+    seed_claim_ids: set[str],
+    spec: QuerySpec,
+    corpus: Corpus,
+    max_depth: int,
+) -> set[str]:
+    """Find exact State-adjacent Claims without creating semantic graph edges."""
+    if not seed_claim_ids or max_depth <= 0:
+        return set()
+    outgoing: dict[str, list[str]] = defaultdict(list)
+    incoming: dict[str, list[str]] = defaultdict(list)
+    for claim_id, claim in corpus.claims.items():
+        from_id, to_id = _claim_state_ids(claim)
+        outgoing[from_id].append(claim_id)
+        incoming[to_id].append(claim_id)
+    reverse = spec.mode == "backward"
+    frontier = set(seed_claim_ids)
+    visited = set(seed_claim_ids)
+    neighbors: set[str] = set()
+    for _ in range(max_depth):
+        next_frontier: set[str] = set()
+        for claim_id in frontier:
+            from_id, to_id = _claim_state_ids(corpus.claims[claim_id])
+            boundary_state = from_id if reverse else to_id
+            for adjacent_id in (incoming if reverse else outgoing).get(boundary_state, []):
+                if adjacent_id in visited:
+                    continue
+                visited.add(adjacent_id)
+                neighbors.add(adjacent_id)
+                next_frontier.add(adjacent_id)
+        frontier = next_frontier
+        if not frontier:
+            break
+    return neighbors
+
+
 def _conditioning(claim: Claim, spec: QuerySpec, corpus: Corpus) -> dict[str, Any]:
     if not claim.conditioning_facet_ids:
         return {"score": None, "known_coverage": None, "matches": []}
@@ -593,6 +629,21 @@ def _analysis_case_match(claim: Claim, spec: QuerySpec) -> dict[str, Any]:
         "matches": matches,
         "missing_query_case_ids": [],
     }
+
+
+def _retain_ranked_claims(
+    rows: list[dict[str, Any]],
+    candidate_limit: int,
+    graph_neighbor_reserve: int,
+) -> list[dict[str, Any]]:
+    selected = rows[:candidate_limit]
+    selected_ids = {row["claim_id"] for row in selected}
+    graph_neighbors = [
+        row
+        for row in rows
+        if "graph_neighbor" in row["channels"] and row["claim_id"] not in selected_ids
+    ]
+    return [*selected, *graph_neighbors[:graph_neighbor_reserve]]
 
 
 def rank_claims(spec: QuerySpec, vectors: dict[str, list[float] | None], corpus: Corpus, context_reports: dict[str, dict[str, Any]], source_seeds: list[tuple[str, float]], target_seeds: list[tuple[str, float]], indexes: FaissIndexes | None = None) -> list[dict[str, Any]]:
@@ -641,6 +692,20 @@ def rank_claims(spec: QuerySpec, vectors: dict[str, list[float] | None], corpus:
         for claim_id in corpus.claim_ids_by_block.get(block.id, []):
             channel_map[claim_id].add("source_block_ann")
             block_scores[claim_id] = max(score, block_scores.get(claim_id, 0.0))
+    if QUERY_PIPELINE["path_search"]["evidence_seeded_expansion"]:
+        independent_channels = {"claim_ann", "source_block_ann", "transition_ann"}
+        seeds = {
+            claim_id
+            for claim_id, channels in channel_map.items()
+            if independent_channels & channels
+        }
+        for claim_id in _evidence_seeded_neighbor_ids(
+            seeds,
+            spec,
+            corpus,
+            QUERY_PIPELINE["path_search"]["evidence_seeded_expansion_depth"],
+        ):
+            channel_map[claim_id].add("graph_neighbor")
     rows = []
     for claim_id, channels in channel_map.items():
         claim = corpus.claims[claim_id]
@@ -672,7 +737,9 @@ def rank_claims(spec: QuerySpec, vectors: dict[str, list[float] | None], corpus:
             applicability_status = "compatible_candidate"
         rows.append({"claim_id": claim_id, "channels": sorted(channels), "R_claim": rank, "A_claim": applicability, "applicability_known": applicability is not None, "applicability_status": applicability_status, "context_coverage": coverage, "S_claim_semantic": components["mechanism"], "S_source_block": components["source_block"], "S_transition": components["intervention"], "S_endpoint": endpoint_score, "analysis_case_match": case_match, "conditioning_match": conditioning, "scope_context_id": scope_context})
     rows.sort(key=lambda x: (-x["R_claim"], -x["applicability_known"], -x["context_coverage"], -(x["A_claim"] if x["A_claim"] is not None else -1), -(x["S_endpoint"] if x["S_endpoint"] is not None else -1), x["claim_id"]))
-    return rows[:QUERY_PIPELINE["mechanism_retrieval"]["candidate_claim_top_k"]]
+    candidate_limit = QUERY_PIPELINE["mechanism_retrieval"]["candidate_claim_top_k"]
+    graph_reserve = QUERY_PIPELINE["mechanism_retrieval"]["graph_neighbor_reserve"]
+    return _retain_ranked_claims(rows, candidate_limit, graph_reserve)
 
 
 def _ancestor_ids(context_id: str, corpus: Corpus) -> set[str]:
@@ -1165,7 +1232,7 @@ def run_query(
     target_seeds, more = map_endpoint(spec.target, corpus, client, indexes); warnings.extend(more)
     stage("states_mapped", {"source_seeds": source_seeds, "target_seeds": target_seeds, "warnings": source_warnings + more})
     ranked = rank_claims(spec, vectors, corpus, context_reports, source_seeds, target_seeds, indexes)
-    stage("claims_ranked", {"candidate_count": len(ranked), "top_claims": [{key: row[key] for key in ("claim_id", "R_claim", "A_claim", "applicability_status", "context_coverage", "S_claim_semantic", "S_source_block", "analysis_case_match", "channels")} for row in ranked[:QUERY_PIPELINE["reporting"]["top_claims"]]]})
+    stage("claims_ranked", {"candidate_count": len(ranked), "graph_neighbor_count": sum("graph_neighbor" in row["channels"] for row in ranked), "top_claims": [{key: row[key] for key in ("claim_id", "R_claim", "A_claim", "applicability_status", "context_coverage", "S_claim_semantic", "S_source_block", "analysis_case_match", "channels")} for row in ranked[:QUERY_PIPELINE["reporting"]["top_claims"]]]})
     direct_paths = select_direct_evidence_paths(spec, corpus, ranked)
     anchor_rows = _query_focused_rows(
         spec,
@@ -1186,7 +1253,7 @@ def run_query(
     answer, synthesis, more = synthesize(spec, context_comparisons, synthesis_paths, ranked, synthesis_alternatives, selected_blocks, corpus, client, artifact_dir, answer_task); warnings.extend(more)
     stage("answer_synthesized", {"answer_characters": len(answer), "grounded_item_count": len(synthesis.get("items", [])), "provenance_claim_count": len(synthesis.get("provenance", {})), "warnings": more})
     synthesis_template = "final_synthesis_planning.txt" if answer_task == "planning" else "final_synthesis.txt"
-    report = {"query_id": query_id, "query_pipeline_version": "0.4-soft-context", "answer_task": answer_task, "query_spec": _query_spec_payload(spec), "context_evidence_comparisons": context_comparisons, "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "claim_candidates": ranked, "direct_evidence_paths": direct_paths, "graph_paths": graph_paths, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis"), "final_synthesis_template": synthesis_template}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
+    report = {"query_id": query_id, "query_pipeline_version": "0.5-evidence-seeded-graph", "answer_task": answer_task, "query_spec": _query_spec_payload(spec), "context_evidence_comparisons": context_comparisons, "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "claim_candidates": ranked, "direct_evidence_paths": direct_paths, "graph_paths": graph_paths, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis"), "final_synthesis_template": synthesis_template}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
     write_json(artifact_dir / "query_report.json", report)
     (artifact_dir / "answer.md").write_text(answer, encoding="utf-8")
     stage("artifacts_written", {"query_report": str(artifact_dir / "query_report.json"), "answer": str(artifact_dir / "answer.md")})
