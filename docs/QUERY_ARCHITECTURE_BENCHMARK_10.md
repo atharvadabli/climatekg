@@ -1,5 +1,7 @@
 # Query architecture benchmark: ten questions
 
+> **Superseded benchmark:** Four gold cases (`CKGQ0003`, `CKGQ0005`, `CKGQ0008`, and `CKGQ0009`) were later found to use review passages summarizing cited studies. This run is retained for trace analysis but must not be used to rank the systems. The corrected cases are in `evaluation/output/climatekg_benchmark/dataset_v2_current_findings_10/cases.json`.
+
 ## Purpose
 
 This experiment compares six retrieval systems on the same ten answerable scientific questions:
@@ -93,6 +95,8 @@ Keep `soft_context` as the preferred experimental query architecture. Do not mer
 The next minimal experiment should add a provenance-preserving SourceBlock evidence lane beside structured Claim retrieval. It should retrieve raw SourceBlocks against the complete question, retain their paper/page/block IDs, and use them only when they directly cover a query component that the selected Claims do not cover. Review passages must be labeled as cited-literature evidence and attributed to the named underlying study, never presented as a finding of the review paper. Structured Claims remain responsible for Context gating and path reasoning.
 
 This is different from weakening Context gating or indiscriminately appending passages. Selection should be based on explicit query-component coverage, with a small fixed evidence budget and a visible reason for each admitted block.
+
+The numerical comparison above must be rerun on the corrected v2 cases before making a system-selection decision. The earlier soft-Context recommendation remains an architectural observation from the traces, not a valid benchmark conclusion.
 
 ## Reproduction
 
