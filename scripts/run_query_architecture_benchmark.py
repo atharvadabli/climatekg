@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import inspect
 import json
 import os
 import sys
@@ -49,8 +50,20 @@ def raw_parsed_query(case_id: str, project_root: Path) -> dict[str, Any]:
     return json.loads(envelope["message"]["content"])
 
 
-def frozen_spec(case: dict[str, Any], project_root: Path, query_module: Any, models: Any, extraction_models: Any) -> Any:
+def frozen_spec(
+    case: dict[str, Any],
+    project_root: Path,
+    query_module: Any,
+    models: Any,
+    extraction_models: Any,
+    spec_dir: Path | None = None,
+) -> Any:
     case_id = case["id"]
+    if spec_dir is not None:
+        path = spec_dir / f"{case_id}.json"
+        if not path.exists():
+            raise FileNotFoundError(f"Prepared QuerySpec not found: {path}")
+        return models.QuerySpec.model_validate(read_json(path))
     saved = report_spec(case_id, project_root)
     if saved is not None:
         return models.QuerySpec.model_validate(saved)
@@ -111,6 +124,10 @@ def main() -> None:
     parser.add_argument("--graph-root", type=Path, required=True)
     parser.add_argument("--dataset", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--system", choices=("plain_rag", "graphrag", "climatekg"), default="climatekg")
+    parser.add_argument("--plain-index", type=Path)
+    parser.add_argument("--graphrag-index", type=Path)
+    parser.add_argument("--spec-dir", type=Path)
     parser.add_argument("--case", action="append")
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
@@ -128,7 +145,31 @@ def main() -> None:
     import climatekg.models as models
     import climatekg.query as query_module
     from evaluation.metrics import score_result
+    import evaluation.plain_backend as plain_backend
+    import webapp.answer_systems as answer_systems
     from webapp.server import ClimateKGEngine
+
+    historical_read_prompt = query_module._read_prompt
+
+    def read_benchmark_prompt(name: str) -> str:
+        if name in {"webapp_process_rag_answer.txt", "webapp_land_use_rag_answer.txt"}:
+            shared = project_root / "prompts" / name
+            if not shared.exists():
+                raise FileNotFoundError(f"Shared benchmark answer prompt not found: {shared}")
+            return shared.read_text(encoding="utf-8")
+        return historical_read_prompt(name)
+
+    query_module._read_prompt = read_benchmark_prompt
+
+    if len(inspect.signature(plain_backend._plain_rag_prompt).parameters) == 2:
+        historical_plain_prompt = plain_backend._plain_rag_prompt
+        plain_backend._plain_rag_prompt = (
+            lambda question, sources, unused_mode: historical_plain_prompt(question, sources)
+        )
+    PlainPassageRAG = plain_backend.PlainPassageRAG
+
+    if args.graphrag_index is not None:
+        answer_systems.GRAPHRAG_INDEX = args.graphrag_index.resolve()
 
     cases = read_json(args.dataset)[:10]
     if args.case:
@@ -137,6 +178,11 @@ def main() -> None:
     output = args.output.resolve() / args.variant
     artifact_root = output / "artifacts"
     engine = ClimateKGEngine(graph_root=args.graph_root, output_root=artifact_root)
+    plain = None
+    if args.system == "plain_rag":
+        if args.plain_index is None:
+            raise ValueError("--plain-index is required for plain_rag")
+        plain = PlainPassageRAG(args.plain_index, engine.ollama_url, engine.embedding_model, engine.model)
 
     write_json(
         output / "run_manifest.json",
@@ -146,7 +192,12 @@ def main() -> None:
             "graph_root": str(args.graph_root.resolve()),
             "dataset": str(args.dataset.resolve()),
             "case_ids": [case["id"] for case in cases],
-            "query_protocol": "frozen saved QuerySpec; query parsing and enrichment are not rerun",
+            "system": args.system,
+            "query_protocol": (
+                f"prepared QuerySpec loaded from {args.spec_dir.resolve()}"
+                if args.system == "climatekg" and args.spec_dir is not None
+                else "question text passed directly; no ClimateKG QuerySpec used"
+            ),
         },
     )
 
@@ -158,22 +209,29 @@ def main() -> None:
                 print(f"[{index}/{len(cases)}] {case['id']}: reused", flush=True)
                 continue
         print(f"[{index}/{len(cases)}] {case['id']}: running", flush=True)
-        spec = frozen_spec(case, project_root, query_module, models, extraction_models)
-        frozen_path = output / "frozen_query_specs" / f"{case['id']}.json"
-        write_json(frozen_path, spec.model_dump(by_alias=True, exclude_none=False))
-        query_module.parse_query = lambda *unused_args, _spec=spec, **unused_kwargs: (
-            _spec.model_copy(deep=True),
-            ["QUERY_PARSE_REUSED_FOR_ARCHITECTURE_BENCHMARK"],
-        )
+        spec = None
+        if args.system == "climatekg":
+            spec = frozen_spec(
+                case, project_root, query_module, models, extraction_models, args.spec_dir
+            )
+            frozen_path = output / "frozen_query_specs" / f"{case['id']}.json"
+            write_json(frozen_path, spec.model_dump(by_alias=True, exclude_none=False))
+            query_module.parse_query = lambda *unused_args, _spec=spec, **unused_kwargs: (
+                _spec.model_copy(deep=True),
+                ["QUERY_PARSE_REUSED_FOR_ARCHITECTURE_BENCHMARK"],
+            )
         events: list[dict[str, Any]] = []
         started = time.perf_counter()
         try:
-            result = engine.run(
-                case["question"],
-                f"{case['id']}_{args.variant}",
-                "climatekg",
-                lambda stage, data: events.append({"stage": stage, "data": data}),
-            )
+            if args.system == "plain_rag":
+                result = plain.run(case["question"], top_k=5)
+            else:
+                result = engine.run(
+                    case["question"],
+                    f"{case['id']}_{args.variant}",
+                    args.system,
+                    lambda stage, data: events.append({"stage": stage, "data": data}),
+                )
             elapsed = time.perf_counter() - started
             expected = {
                 **case,

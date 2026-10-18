@@ -1,6 +1,6 @@
 # Query architecture benchmark: ten questions
 
-> **Superseded benchmark:** Four gold cases (`CKGQ0003`, `CKGQ0005`, `CKGQ0008`, and `CKGQ0009`) were later found to use review passages summarizing cited studies. This run is retained for trace analysis but must not be used to rank the systems. The corrected cases are in `evaluation/output/climatekg_benchmark/dataset_v2_current_findings_10/cases.json`.
+> **Superseded benchmark:** Four gold cases (`CKGQ0003`, `CKGQ0005`, `CKGQ0008`, and `CKGQ0009`) were later found to use review passages summarizing cited studies. This run is retained for trace analysis but must not be used to rank the systems. The corrected rerun is documented in `docs/QUERY_ARCHITECTURE_BENCHMARK_V2.md`.
 
 ## Purpose
 
