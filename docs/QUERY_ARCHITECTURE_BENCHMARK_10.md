@@ -40,7 +40,7 @@ Evidence union by itself does not improve the aggregate result. It helps expose 
 
 Graph expansion is not accepted. It increases the number of paths for CKGQ0009 from 4 to 20, but none reaches the requested fire-intensity finding. The answer still abstains. On average it performs below soft Context matching and is slightly slower. The added paths are related to Amazon climate processes but do not answer the question.
 
-PlainRAG is strongest on this benchmark. These questions ask for findings located in specific source passages. Direct passage retrieval can recover those passages even when structured extraction omitted the corresponding Claim. This does not test the main advantage expected from ClimateKG: combining compatible evidence across papers for context-dependent transfer or multi-step reasoning.
+PlainRAG is strongest on this benchmark. These questions ask for findings located in specific source passages. Four questions use passages in review papers that summarize findings from other cited studies. Direct passage retrieval can return those passages, while ClimateKG intentionally does not convert cited background into a finding of the review paper. This does not test the main advantage expected from ClimateKG: combining compatible evidence across papers for context-dependent transfer or multi-step reasoning.
 
 ## Scientific review of the best ClimateKG variant
 
@@ -48,30 +48,31 @@ PlainRAG is strongest on this benchmark. These questions ask for findings locate
 |---|---|---|
 | CKGQ0001 | Grounded abstention | P000100 is retrieved, but its extracted Claims omit the wet-year versus dry-year result and the greater-than-20% IGP finding. |
 | CKGQ0002 | Correct | P000064 Claims recover the increase from once per decade to every 2-3 years after forest conversion. |
-| CKGQ0003 | Incorrect | P000085 is missed. The answer uses P000097 and states that forest sensible heat remains higher, contradicting the requested drought reversal. |
+| CKGQ0003 | Incorrect | A P000085 Context reaches rank 12, but the requested statement is attributed to Teuling et al. and other cited studies in a review passage, so no equivalent current-paper Claim exists. The answer instead uses P000097 and contradicts the requested drought reversal. |
 | CKGQ0004 | Correct | P000056 Claims recover strong correspondence under both SON and DJF soil-moisture states. |
-| CKGQ0005 | Grounded abstention | P000085 is missed, and its extracted Claims do not contain the southwest-Australia seasonal albedo values. |
+| CKGQ0005 | Grounded abstention | No P000085 Context reaches the top 30. The requested review passage attributes the southwest-Australia values to cited studies, so no equivalent current-paper Claim exists. |
 | CKGQ0006 | Partial | P000120 is retrieved and the stronger El Nino effect is recovered, but the extracted Claims omit the requested 74% versus 49% frequency comparison. |
 | CKGQ0007 | Correct but incomplete | P000040 Claims recover the El Nino/La Nina contrast. September-specific Claims exist but are not selected into the final evidence set. |
-| CKGQ0008 | Partial | The answer recovers water limitation from other papers, but misses P000122 and the cold/high-humidity/vapour-deficit qualification. |
-| CKGQ0009 | Grounded abstention | P000103 is missed, and its three extracted Claims contain no fire-intensity finding. Graph expansion adds unrelated paths. |
+| CKGQ0008 | Partial | P000122 Claims reach ranks 9 and below, just outside the eight direct-evidence slots. The exact cold/high-humidity statement is attributed to cited studies in a review passage and has no equivalent current-paper Claim. |
+| CKGQ0009 | Grounded abstention | One unrelated P000103 Claim reaches rank 13. The requested review passage explicitly attributes the fire-intensity result to De Faria et al. (2017), so it is correctly absent as a current-paper Claim. Graph expansion adds unrelated paths. |
 | CKGQ0010 | Correct | P000056 Claims recover the surface-layer versus root-zone soil-moisture distinction and its transpiration mechanism. |
 
 The best ClimateKG variant therefore produces four substantially correct answers, two partial answers, three grounded abstentions, and one incorrect answer in this small manual review. Abstention is preferable to an unsupported answer, but it is still a task failure because all ten questions are answerable from indexed source text.
 
 ## Root causes
 
-### 1. Structured extraction recall is the main limit
+### 1. The benchmark conflicts with the current-paper Claim invariant
 
-Several gold passages exist in the indexed SourceBlocks but have no equivalent Claim:
+All four expected-paper misses use review passages that report findings from cited studies:
 
-- P000100: wettest versus driest years and the greater-than-20% IGP contribution;
-- P000085: the forest/grassland sensible-heat reversal during progressive drought and southwest-Australia seasonal albedo values;
-- P000122: reduced evapotranspirative cooling under cold or near-saturated high-humidity conditions;
-- P000103: the regional drivers of future fire intensity;
-- P000120: the exact 74% versus 49% hot-temperature frequencies.
+- P000085 attributes the progressive-drought comparison to Teuling et al. and related references;
+- P000085 attributes the southwest-Australia albedo observations to references 67-71;
+- P000122 attributes the humidity-dependent cooling statement to Davis et al. and other studies;
+- P000103 explicitly reports a result from De Faria et al. (2017).
 
-Changing Context gates or adding graph traversal cannot retrieve a missing structured fact.
+The indexing rules correctly prohibit turning these statements into findings of P000085, P000122, or P000103. The benchmark currently expects those review papers to be hit anyway. PlainRAG can answer because it retrieves raw prose without representing whether the statement is a finding of the indexed paper or cited background.
+
+There are also genuine current-paper extraction omissions outside the four expected-paper misses. P000100 omits its wettest-versus-driest-year finding, and P000120 omits the exact 74% versus 49% hot-temperature comparison. Those are extraction-recall problems.
 
 ### 2. Claim ranking can omit a needed companion Claim
 
@@ -89,7 +90,7 @@ Only CKGQ0009 materially changes its graph-path count. The additional paths conc
 
 Keep `soft_context` as the preferred experimental query architecture. Do not merge `graph_expansion` in its current form.
 
-The next minimal experiment should add a provenance-preserving SourceBlock evidence lane beside structured Claim retrieval. It should retrieve raw SourceBlocks against the complete question, retain their paper/page/block IDs, and use them only when they directly cover a query component that the selected Claims do not cover. Structured Claims remain responsible for Context gating and path reasoning; the SourceBlock lane prevents extraction omissions from making indexed evidence unreachable.
+The next minimal experiment should add a provenance-preserving SourceBlock evidence lane beside structured Claim retrieval. It should retrieve raw SourceBlocks against the complete question, retain their paper/page/block IDs, and use them only when they directly cover a query component that the selected Claims do not cover. Review passages must be labeled as cited-literature evidence and attributed to the named underlying study, never presented as a finding of the review paper. Structured Claims remain responsible for Context gating and path reasoning.
 
 This is different from weakening Context gating or indiscriminately appending passages. Selection should be based on explicit query-component coverage, with a small fixed evidence budget and a visible reason for each admitted block.
 
@@ -114,4 +115,3 @@ Rebuild the combined comparison:
   --project-root . `
   --output evaluation\output\query_architecture_benchmark_10
 ```
-
