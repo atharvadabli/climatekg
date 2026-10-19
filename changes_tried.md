@@ -478,3 +478,12 @@ Branch: `experiment/query-decomposition-v1`
 - Blinded scores changed from 3.6 to 3.2 for correctness, 3.8 to 3.0 for completeness, and 1.4 to 1.6
   for directness. The speed improvement is substantial, but the small completeness loss must remain
   visible rather than being presented as a free optimization.
+## 2026-10-20: Phase-batched compound queries
+
+- Parsed every fresh subquery before starting embedding and retrieval, without changing prompts,
+  reasoning, schemas, retrieval algorithms, evidence limits, or synthesis.
+- Median latency fell from 110.4 to 81.7 seconds; four warm cases improved by 19--35%.
+- Expected-paper retrieval remained 5/5 and blinded correctness remained 3.2/4.
+- One answer omitted a secondary 840 hPa value. Other core findings and the dependent P000082 Claim
+  connection were preserved.
+- Retained the change because it improves scheduling without weakening scientific gating or grounding.

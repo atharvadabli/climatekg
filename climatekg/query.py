@@ -1241,6 +1241,7 @@ def _run_atomic_query(
     answer_task: str = "process",
     preferred_paper_ids: set[str] | None = None,
     synthesize_answer: bool = True,
+    prepared_query: tuple[QuerySpec, list[str]] | None = None,
 ) -> dict[str, Any]:
     client = client or OllamaClient()
     artifact_dir = output_root / query_id
@@ -1252,8 +1253,12 @@ def _run_atomic_query(
             stage_callback(name, details)
 
     stage("corpus_loaded", {"papers": len(papers), "contexts": len(corpus.contexts), "facets": len(corpus.facets), "claims": len(corpus.claims), "states": len(corpus.states)})
-    fallback_mode = "backward" if answer_task == "planning" else "global"
-    spec, warnings = parse_query(question, query_id, client, artifact_dir, spatial_support, fallback_mode)
+    if prepared_query is None:
+        fallback_mode = "backward" if answer_task == "planning" else "global"
+        spec, warnings = parse_query(question, query_id, client, artifact_dir, spatial_support, fallback_mode)
+    else:
+        spec, prepared_warnings = prepared_query
+        warnings = list(prepared_warnings)
     context_comparisons = context_evidence_comparisons(spec)
     stage("query_parsed", {"mode": spec.mode, "facet_count": len(spec.context.facets), "source": spec.source.model_dump() if spec.source else None, "target": spec.target.model_dump() if spec.target else None, "intervention_description": spec.intervention_description, "warnings": list(warnings)})
     stage("context_evidence_compared", {"comparison_count": len(context_comparisons), "comparisons": context_comparisons})
@@ -1514,6 +1519,40 @@ def run_query(
     # Keep nested runtime paths short enough for Windows installations that
     # still enforce the traditional MAX_PATH limit.
     subquery_root = artifact_dir / "sq"
+    prepared_queries: dict[int, tuple[QuerySpec, list[str]]] = {}
+    reusable_candidates: dict[int, dict[str, Any]] = {}
+    fallback_mode = "backward" if answer_task == "planning" else "global"
+    for number, subquery in enumerate(plan.subqueries, 1):
+        subquery_id = f"q{number}"
+        saved_report_path = subquery_root / subquery_id / "query_report.json"
+        candidate = None
+        if saved_report_path.exists():
+            loaded = json.loads(saved_report_path.read_text(encoding="utf-8"))
+            if (
+                loaded.get("query_spec", {}).get("user_question") == subquery.question
+                and loaded.get("synthesis_mode") == "retrieval_only"
+            ):
+                candidate = loaded
+                reusable_candidates[number] = loaded
+        if candidate is None:
+            prepared_queries[number] = parse_query(
+                subquery.question,
+                subquery_id,
+                client,
+                subquery_root / subquery_id,
+                spatial_support,
+                fallback_mode,
+            )
+    if stage_callback:
+        stage_callback(
+            "subqueries_parsed",
+            {
+                "subquery_count": len(plan.subqueries),
+                "fresh_parse_count": len(prepared_queries),
+                "reusable_report_count": len(reusable_candidates),
+            },
+        )
+
     for number, subquery in enumerate(plan.subqueries, 1):
         subquery_id = f"q{number}"
         saved_report_path = subquery_root / subquery_id / "query_report.json"
@@ -1531,15 +1570,13 @@ def run_query(
                     {"subquery_number": _number, "stage": name, "details": details},
                 )
 
-        saved_report = None
-        if saved_report_path.exists():
-            candidate = json.loads(saved_report_path.read_text(encoding="utf-8"))
-            if (
-                candidate.get("query_spec", {}).get("user_question") == subquery.question
-                and candidate.get("dependency_paper_ids", []) == sorted(preferred_paper_ids)
-                and candidate.get("synthesis_mode") == "retrieval_only"
-            ):
-                saved_report = candidate
+        candidate = reusable_candidates.get(number)
+        saved_report = (
+            candidate
+            if candidate is not None
+            and candidate.get("dependency_paper_ids", []) == sorted(preferred_paper_ids)
+            else None
+        )
         if saved_report is not None:
             reports.append(saved_report)
             if stage_callback:
@@ -1548,6 +1585,16 @@ def run_query(
                     {"subquery_number": number, "query_report": str(saved_report_path)},
                 )
         else:
+            prepared_query = prepared_queries.get(number)
+            if prepared_query is None:
+                prepared_query = parse_query(
+                    subquery.question,
+                    subquery_id,
+                    client,
+                    subquery_root / subquery_id,
+                    spatial_support,
+                    fallback_mode,
+                )
             reports.append(
                 _run_atomic_query(
                     subquery.question,
@@ -1561,6 +1608,7 @@ def run_query(
                     answer_task,
                     preferred_paper_ids,
                     False,
+                    prepared_query,
                 )
             )
 
@@ -1590,7 +1638,7 @@ def run_query(
         warnings.extend(report.get("warnings", []))
     report = {
         "query_id": query_id,
-        "query_pipeline_version": "0.6-single-synthesis",
+        "query_pipeline_version": "0.7-phase-batched",
         "answer_task": answer_task,
         "original_question": question,
         "query_decomposition": plan.model_dump(),

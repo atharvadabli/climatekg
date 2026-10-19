@@ -189,6 +189,10 @@ references, label their originating subqueries, and perform one final synthesis 
 question. The answer may cite only Claim IDs in this combined evidence package. For a `join`, connect
 findings only when the evidence supports the link; otherwise report the missing link.
 
+For compound questions, parse all fresh subqueries before beginning embedding and retrieval. This
+phase ordering preserves the same `QuerySpec` and retrieval algorithms while avoiding repeated
+generation-model reloads between subqueries. Cached retrieval reports remain reusable.
+
 When a later subquery explicitly depends on an earlier result, reserve a configurable number of its
 direct-evidence positions for relevant Claims from the paper supporting the earlier primary direct
 finding. This is an evidence quota, not a paper filter: ordinary cross-corpus candidates retain the
