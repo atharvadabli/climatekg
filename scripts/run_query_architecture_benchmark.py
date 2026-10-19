@@ -128,6 +128,11 @@ def main() -> None:
     parser.add_argument("--plain-index", type=Path)
     parser.add_argument("--graphrag-index", type=Path)
     parser.add_argument("--spec-dir", type=Path)
+    parser.add_argument(
+        "--live-query-planning",
+        action="store_true",
+        help="Run query decomposition and parsing from question text instead of reusing a frozen QuerySpec.",
+    )
     parser.add_argument("--case", action="append")
     parser.add_argument("--limit", type=int)
     parser.add_argument("--force", action="store_true")
@@ -197,6 +202,9 @@ def main() -> None:
             "case_ids": [case["id"] for case in cases],
             "system": args.system,
             "query_protocol": (
+                "live decomposition and per-subquery parsing from question text"
+                if args.system == "climatekg" and args.live_query_planning
+                else
                 f"prepared QuerySpec loaded from {args.spec_dir.resolve()}"
                 if args.system == "climatekg" and args.spec_dir is not None
                 else "question text passed directly; no ClimateKG QuerySpec used"
@@ -213,7 +221,7 @@ def main() -> None:
                 continue
         print(f"[{index}/{len(cases)}] {case['id']}: running", flush=True)
         spec = None
-        if args.system == "climatekg":
+        if args.system == "climatekg" and not args.live_query_planning:
             spec = frozen_spec(
                 case, project_root, query_module, models, extraction_models, args.spec_dir
             )

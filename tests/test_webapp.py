@@ -10,7 +10,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator
 
-from webapp.server import JobManager, WatershedCatalog, create_server
+from webapp.server import JobManager, WatershedCatalog, compact_report, create_server
 
 
 @contextmanager
@@ -165,3 +165,20 @@ def test_webapp_lists_real_answer_systems_with_graphrag_default() -> None:
     assert 'id="planning-system"' in html
     assert "config.answer_systems" in javascript
     assert "config.default_system" in javascript
+
+
+def test_compact_report_keeps_claims_selected_during_recomposition() -> None:
+    report = {
+        "query_id": "Q1",
+        "claim_candidates": [{"claim_id": "CL_EARLY", "R_claim": 0.9}],
+        "synthesis": {
+            "provenance": {
+                "CL_LATE": {"paper_id": "P2", "source_block_ids": ["B2"]},
+            }
+        },
+    }
+
+    compact = compact_report(report, Path("unused"))
+
+    assert [item["claim_id"] for item in compact["claims"]] == ["CL_EARLY", "CL_LATE"]
+    assert compact["claims"][1]["selected_for_synthesis"] is True

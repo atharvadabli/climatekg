@@ -166,6 +166,91 @@ def test_comparison_query_detection_uses_intervention_text() -> None:
     assert not _is_comparison_query(ordinary)
 
 
+def test_query_decomposition_schema_represents_independent_and_dependent_searches() -> None:
+    from climatekg.extraction_models import QueryDecomposition
+
+    plan = QueryDecomposition.model_validate({
+        "operation": "join",
+        "subqueries": [
+            {"question": "Where did irrigation increase evaporation?", "depends_on": []},
+            {"question": "How did that moisture affect rainfall?", "depends_on": [1]},
+        ],
+    })
+
+    assert plan.operation == "join"
+    assert plan.subqueries[1].depends_on == [1]
+
+
+def test_broad_named_region_is_not_geocoded_to_one_point() -> None:
+    from climatekg.models import SpatialSupport
+    from climatekg.spatial import resolve_spatial_support
+
+    class FailingGeocoder:
+        def resolve(self, query: str):
+            raise AssertionError("broad regions must not be sent to a point gazetteer")
+
+    support = SpatialSupport(
+        kind="region",
+        name="Himalaya region",
+        geometry=None,
+        enrichable_study_location_name="Himalaya region",
+        resolution="unresolved",
+    )
+
+    resolved = resolve_spatial_support(support, "unused.geojson", FailingGeocoder())
+
+    assert resolved.geometry is None
+    assert resolved.resolution == "named_region"
+
+
+def test_dependency_uses_primary_direct_answer_paper_only() -> None:
+    from climatekg.query import _primary_answer_paper_ids
+
+    report = {
+        "synthesis": {
+            "items": [
+                {"kind": "direct_finding", "support_claim_ids": ["CL_PRIMARY"]},
+                {"kind": "mechanism", "support_claim_ids": ["CL_BACKGROUND"]},
+            ],
+            "provenance": {
+                "CL_PRIMARY": {"paper_id": "P_PRIMARY"},
+                "CL_BACKGROUND": {"paper_id": "P_BACKGROUND"},
+            },
+        }
+    }
+
+    assert _primary_answer_paper_ids(report) == {"P_PRIMARY"}
+
+
+def test_dependency_reserves_direct_evidence_from_primary_paper() -> None:
+    from climatekg.config import QUERY_PIPELINE
+    from climatekg.models import QueryContext, QuerySpec
+    from climatekg.query import select_direct_evidence_paths
+
+    corpus = _direct_evidence_test_corpus()
+    corpus.claims["CL_UNKNOWN"].paper_id = "P_PRIMARY"
+    spec = QuerySpec(
+        query_id="Q",
+        mode="forward",
+        context=QueryContext(),
+        source={"concept": "deforestation", "state": ""},
+        user_question="What changed?",
+    )
+    ranked = [
+        {"claim_id": "CL_ENDPOINT", "R_claim": 0.99, "A_claim": None, "channels": ["claim_ann"]},
+        {"claim_id": "CL_UNKNOWN", "R_claim": 0.70, "A_claim": None, "channels": ["claim_ann"]},
+    ]
+    original_limit = QUERY_PIPELINE["evidence_assembly"]["direct_claim_paths"]
+    QUERY_PIPELINE["evidence_assembly"]["direct_claim_paths"] = 1
+    try:
+        paths = select_direct_evidence_paths(spec, corpus, ranked, {"P_PRIMARY"})
+    finally:
+        QUERY_PIPELINE["evidence_assembly"]["direct_claim_paths"] = original_limit
+
+    assert paths[0]["claim_ids"] == ["CL_UNKNOWN"]
+    assert paths[0]["dependency_paper_match"] is True
+
+
 def _direct_evidence_test_corpus():
     from climatekg.models import Claim, Context, FinalPaper, Paper, SourceBlock
     from climatekg.query import Corpus

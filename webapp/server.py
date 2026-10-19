@@ -198,6 +198,12 @@ class ClimateKGEngine:
 def compact_report(report: dict[str, Any], artifact_dir: Path) -> dict[str, Any]:
     spec = report.get("query_spec", {})
     facets = spec.get("context", {}).get("facets", [])
+    claims = list(report.get("claim_candidates", [])[:8])
+    present_claim_ids = {item.get("claim_id") for item in claims}
+    for claim_id, source in report.get("synthesis", {}).get("provenance", {}).items():
+        if claim_id not in present_claim_ids:
+            claims.append({"claim_id": claim_id, "paper_id": source.get("paper_id"), "selected_for_synthesis": True})
+            present_claim_ids.add(claim_id)
     return {
         "query_id": report["query_id"],
         "answer": report.get("answer", ""),
@@ -207,7 +213,7 @@ def compact_report(report: dict[str, Any], artifact_dir: Path) -> dict[str, Any]
         "user_facets": [item for item in facets if item.get("origin") == "user"],
         "derived_facets": [item for item in facets if item.get("origin") == "derived"],
         "contexts": report.get("context_candidates", [])[:5],
-        "claims": report.get("claim_candidates", [])[:8],
+        "claims": claims,
         "paths": report.get("paths", [])[:5],
         "provenance": report.get("synthesis", {}).get("provenance", {}),
         "warnings": report.get("warnings", []),

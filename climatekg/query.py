@@ -13,7 +13,14 @@ from .config import PIPELINE, QUERY_PIPELINE, ROOT, STATE_ALIASES
 from .earth_engine import EarthEngineBackend
 from .embeddings import DOMAIN_ORDER, analysis_case_text, effective_facets, facet_content_text, facet_notion_text
 from .enrichment import derive_facets, query_facets
-from .extraction_models import ParsedQuery, ParsedQueryFacetBatch, SynthesisItem, SynthesisOutput
+from .extraction_models import (
+    ParsedQuery,
+    ParsedQueryFacetBatch,
+    QueryDecomposition,
+    QueryRecomposition,
+    SynthesisItem,
+    SynthesisOutput,
+)
 from .geocoding import NominatimGeocoder
 from .models import Claim, ClaimEndpoint, Context, Facet, FinalPaper, QueryAnalysisCase, QueryContext, QueryFacet, QuerySpec, SourceBlock, SpatialSupport, State, Transition
 from .ollama import OllamaClient, stage_prompt_version
@@ -79,6 +86,65 @@ def _claim_payload(claim: Claim) -> dict[str, Any]:
         by_alias=True,
         exclude={"claim_embedding": True, "analysis_cases": {"__all__": {"embedding"}}},
     )
+
+
+def decompose_query(
+    question: str,
+    query_id: str,
+    client: OllamaClient,
+    artifact_dir: Path,
+) -> tuple[QueryDecomposition, list[str]]:
+    """Create the smallest executable query plan before scientific parsing."""
+    prompt = _read_prompt("query_decomposition.txt")
+    system, user = prompt.split("USER\n", 1)
+    config = QUERY_PIPELINE["ollama"]["stages"]["query_decomposition"]
+    plan = client.structured(
+        stage="query_decomposition",
+        system=system.removeprefix("SYSTEM\n").strip(),
+        user=user.format(user_question=question).strip(),
+        schema=QueryDecomposition,
+        model=QUERY_PIPELINE["ollama"]["model"],
+        temperature=config["temperature"],
+        thinking=config["thinking"],
+        artifact_dir=artifact_dir / "decomposition",
+        paper_id=query_id,
+        input_block_ids=[],
+        retries=config["retries"],
+    )
+    warnings: list[str] = []
+    max_subqueries = QUERY_PIPELINE["query_decomposition"]["max_subqueries"]
+    cleaned = []
+    seen: set[str] = set()
+    for index, item in enumerate(plan.subqueries[:max_subqueries], 1):
+        text = item.question.strip()
+        key = normalize_text_key(text)
+        if not text or key in seen:
+            warnings.append("QUERY_DECOMPOSITION_EMPTY_OR_DUPLICATE_REMOVED")
+            continue
+        dependencies = sorted({value for value in item.depends_on if 1 <= value < index})
+        if dependencies != item.depends_on:
+            warnings.append("QUERY_DECOMPOSITION_DEPENDENCIES_NORMALIZED")
+        cleaned.append(item.model_copy(update={"question": text, "depends_on": dependencies}))
+        seen.add(key)
+    if not cleaned:
+        warnings.append("QUERY_DECOMPOSITION_FELL_BACK_TO_ORIGINAL")
+        plan = QueryDecomposition(
+            operation="retrieve",
+            subqueries=[{"question": question, "depends_on": []}],
+        )
+    else:
+        plan = plan.model_copy(update={"subqueries": cleaned})
+    if plan.operation in {"retrieve", "aggregate"} and len(plan.subqueries) != 1:
+        warnings.append("QUERY_DECOMPOSITION_SINGLE_OPERATION_NORMALIZED")
+        plan = QueryDecomposition(
+            operation=plan.operation,
+            subqueries=[{"question": question, "depends_on": []}],
+        )
+    write_json(
+        artifact_dir / "query_decomposition.json",
+        {"original_question": question, "plan": plan.model_dump(), "warnings": warnings},
+    )
+    return plan, warnings
 
 
 CONTEXT_VARIABLE_PATTERNS = {
@@ -803,15 +869,31 @@ def select_direct_evidence_paths(
     spec: QuerySpec,
     corpus: Corpus,
     ranked: list[dict[str, Any]],
+    preferred_paper_ids: set[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Keep query-focused Claims even when exact State wording blocks traversal."""
     config = QUERY_PIPELINE["evidence_assembly"]
-    rows = _query_focused_rows(
+    all_rows = _query_focused_rows(
         spec,
         ranked,
-        config["direct_claim_paths"],
+        len(ranked),
         config["require_known_context_for_direct_claims"],
     )
+    limit = config["direct_claim_paths"]
+    preferred_paper_ids = preferred_paper_ids or set()
+    preferred_limit = min(
+        QUERY_PIPELINE["query_decomposition"]["dependency_paper_claims"],
+        limit,
+    )
+    preferred = [
+        row for row in all_rows
+        if corpus.claims[row["claim_id"]].paper_id in preferred_paper_ids
+    ][:preferred_limit]
+    preferred_ids = {row["claim_id"] for row in preferred}
+    rows = [
+        *preferred,
+        *(row for row in all_rows if row["claim_id"] not in preferred_ids),
+    ][:limit]
     selected = []
     for row in rows:
         claim_id = row["claim_id"]
@@ -820,6 +902,7 @@ def select_direct_evidence_paths(
                 "claim_ids": [claim_id],
                 "state_ids": list(_claim_state_ids(corpus.claims[claim_id])),
                 "evidence_lane": "direct",
+                "dependency_paper_match": corpus.claims[claim_id].paper_id in preferred_paper_ids,
                 **_path_score([row], [claim_id], corpus),
             }
         )
@@ -1130,7 +1213,7 @@ def synthesize(spec: QuerySpec, context_comparisons: list[dict[str, Any]], paths
     return answer, {"items": [x.model_dump() for x in valid], "provenance": provenance}, warnings
 
 
-def run_query(
+def _run_atomic_query(
     question: str,
     query_id: str,
     papers: list[FinalPaper],
@@ -1140,9 +1223,11 @@ def run_query(
     indexes: FaissIndexes | None = None,
     spatial_support: SpatialSupport | None = None,
     answer_task: str = "process",
+    preferred_paper_ids: set[str] | None = None,
 ) -> dict[str, Any]:
     client = client or OllamaClient()
     artifact_dir = output_root / query_id
+    artifact_dir.mkdir(parents=True, exist_ok=True)
     corpus = Corpus(papers)
 
     def stage(name: str, details: dict[str, Any]) -> None:
@@ -1166,7 +1251,7 @@ def run_query(
     stage("states_mapped", {"source_seeds": source_seeds, "target_seeds": target_seeds, "warnings": source_warnings + more})
     ranked = rank_claims(spec, vectors, corpus, context_reports, source_seeds, target_seeds, indexes)
     stage("claims_ranked", {"candidate_count": len(ranked), "top_claims": [{key: row[key] for key in ("claim_id", "R_claim", "A_claim", "applicability_status", "context_coverage", "S_claim_semantic", "S_source_block", "analysis_case_match", "channels")} for row in ranked[:QUERY_PIPELINE["reporting"]["top_claims"]]]})
-    direct_paths = select_direct_evidence_paths(spec, corpus, ranked)
+    direct_paths = select_direct_evidence_paths(spec, corpus, ranked, preferred_paper_ids)
     anchor_rows = _query_focused_rows(
         spec,
         ranked,
@@ -1187,7 +1272,307 @@ def run_query(
     stage("answer_synthesized", {"answer_characters": len(answer), "grounded_item_count": len(synthesis.get("items", [])), "provenance_claim_count": len(synthesis.get("provenance", {})), "warnings": more})
     synthesis_template = "final_synthesis_planning.txt" if answer_task == "planning" else "final_synthesis.txt"
     report = {"query_id": query_id, "query_pipeline_version": "0.4-soft-context", "answer_task": answer_task, "query_spec": _query_spec_payload(spec), "context_evidence_comparisons": context_comparisons, "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "claim_candidates": ranked, "direct_evidence_paths": direct_paths, "graph_paths": graph_paths, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis"), "final_synthesis_template": synthesis_template}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
+    report["dependency_paper_ids"] = sorted(preferred_paper_ids or set())
     write_json(artifact_dir / "query_report.json", report)
     (artifact_dir / "answer.md").write_text(answer, encoding="utf-8")
     stage("artifacts_written", {"query_report": str(artifact_dir / "query_report.json"), "answer": str(artifact_dir / "answer.md")})
+    return report
+
+
+def _recompose_query_answers(
+    question: str,
+    query_id: str,
+    plan: QueryDecomposition,
+    reports: list[dict[str, Any]],
+    corpus: Corpus,
+    client: OllamaClient,
+    artifact_dir: Path,
+) -> tuple[str, dict[str, Any], list[str]]:
+    package_subqueries = []
+    allowed_claims: set[str] = set()
+    provenance: dict[str, Any] = {}
+    for number, (subquery, report) in enumerate(zip(plan.subqueries, reports), 1):
+        items = report.get("synthesis", {}).get("items", [])
+        claim_ids = {
+            claim_id
+            for item in items
+            for claim_id in item.get("support_claim_ids", [])
+        }
+        allowed_claims.update(claim_ids)
+        provenance.update(report.get("synthesis", {}).get("provenance", {}))
+        package_subqueries.append(
+            {
+                "number": number,
+                "question": subquery.question,
+                "depends_on": subquery.depends_on,
+                "grounded_answer_items": items,
+            }
+        )
+    query_package = {
+        "original_question": question,
+        "operation": plan.operation,
+        "subqueries": package_subqueries,
+    }
+    prompt = _read_prompt("query_recomposition.txt")
+    system, user = prompt.split("USER\n", 1)
+    config = QUERY_PIPELINE["ollama"]["stages"]["query_recomposition"]
+    output = client.structured(
+        stage="query_recomposition",
+        system=system.removeprefix("SYSTEM\n").strip(),
+        user=user.format(query_package=json.dumps(query_package, ensure_ascii=False)).strip(),
+        schema=QueryRecomposition,
+        model=QUERY_PIPELINE["ollama"]["model"],
+        temperature=config["temperature"],
+        thinking=config["thinking"],
+        artifact_dir=artifact_dir / "recomposition",
+        paper_id=query_id,
+        input_block_ids=[],
+        retries=config["retries"],
+    )
+    warnings: list[str] = []
+    valid = []
+    scientific_kinds = {"direct_finding", "comparison", "mechanism", "recommendation"}
+    subquery_numbers = set(range(1, len(reports) + 1))
+    for item in output.items:
+        supported = set(item.support_claim_ids) <= allowed_claims
+        valid_numbers = bool(item.support_subquery_numbers) and set(item.support_subquery_numbers) <= subquery_numbers
+        grounded = item.kind not in scientific_kinds or bool(item.support_claim_ids)
+        if supported and valid_numbers and grounded:
+            valid.append(item)
+        else:
+            warnings.append("UNSUPPORTED_RECOMPOSED_ITEM")
+    if not valid:
+        warnings.append("RECOMPOSITION_GROUNDING_VALIDATION_FAILED")
+        answer = "\n\n".join(
+            f"### {subquery.question}\n\n{report['answer']}"
+            for subquery, report in zip(plan.subqueries, reports)
+        )
+        return answer, {"items": [], "provenance": provenance}, warnings
+
+    rendered = []
+    used_provenance: dict[str, Any] = {}
+    for item in valid:
+        citations = []
+        for claim_id in item.support_claim_ids:
+            claim = corpus.claims[claim_id]
+            paper = corpus.paper_by_id[claim.paper_id]
+            pages = sorted(
+                {
+                    corpus.blocks[block_id].page
+                    for block_id in claim.evidence_block_ids
+                    if block_id in corpus.blocks and corpus.blocks[block_id].page
+                }
+            )
+            citations.append(
+                f"{paper.title} ({paper.year or 'n.d.'}), pp. {','.join(map(str, pages))}, Claim {claim_id}"
+            )
+            used_provenance[claim_id] = provenance.get(
+                claim_id,
+                {
+                    "paper_id": paper.id,
+                    "title": paper.title,
+                    "doi": paper.doi,
+                    "source_block_ids": claim.evidence_block_ids,
+                    "pages": pages,
+                },
+            )
+        citation_text = f" [{'; '.join(citations)}]" if citations else ""
+        rendered.append(f"{item.text}{citation_text}")
+    return (
+        "\n\n".join(rendered),
+        {"items": [item.model_dump() for item in valid], "provenance": used_provenance},
+        warnings,
+    )
+
+
+def _primary_answer_paper_ids(report: dict[str, Any]) -> set[str]:
+    """Return papers supporting the direct answer, not ancillary mechanisms."""
+    synthesis = report.get("synthesis", {})
+    items = synthesis.get("items", [])
+    primary = next(
+        (item for item in items if item.get("kind") == "direct_finding" and item.get("support_claim_ids")),
+        next((item for item in items if item.get("support_claim_ids")), None),
+    )
+    if primary is None:
+        return set()
+    provenance = synthesis.get("provenance", {})
+    return {
+        provenance[claim_id]["paper_id"]
+        for claim_id in primary["support_claim_ids"]
+        if claim_id in provenance and provenance[claim_id].get("paper_id")
+    }
+
+
+def run_query(
+    question: str,
+    query_id: str,
+    papers: list[FinalPaper],
+    output_root: Path,
+    client: OllamaClient | None = None,
+    stage_callback: Callable[[str, dict[str, Any]], None] | None = None,
+    indexes: FaissIndexes | None = None,
+    spatial_support: SpatialSupport | None = None,
+    answer_task: str = "process",
+) -> dict[str, Any]:
+    client = client or OllamaClient()
+    artifact_dir = output_root / query_id
+    if not QUERY_PIPELINE["query_decomposition"]["enabled"]:
+        return _run_atomic_query(
+            question, query_id, papers, output_root, client, stage_callback,
+            indexes, spatial_support, answer_task,
+        )
+
+    plan, warnings = decompose_query(question, query_id, client, artifact_dir)
+    if stage_callback:
+        stage_callback(
+            "query_decomposed",
+            {
+                "operation": plan.operation,
+                "subqueries": [item.model_dump() for item in plan.subqueries],
+                "warnings": warnings,
+            },
+        )
+    if len(plan.subqueries) == 1:
+        report = _run_atomic_query(
+            plan.subqueries[0].question,
+            query_id,
+            papers,
+            output_root,
+            client,
+            stage_callback,
+            indexes,
+            spatial_support,
+            answer_task,
+        )
+        report["query_decomposition"] = plan.model_dump()
+        report["original_question"] = question
+        report["warnings"] = list(dict.fromkeys([*warnings, *report.get("warnings", [])]))
+        write_json(artifact_dir / "query_report.json", report)
+        return report
+
+    reports = []
+    # Keep nested runtime paths short enough for Windows installations that
+    # still enforce the traditional MAX_PATH limit.
+    subquery_root = artifact_dir / "sq"
+    for number, subquery in enumerate(plan.subqueries, 1):
+        subquery_id = f"q{number}"
+        saved_report_path = subquery_root / subquery_id / "query_report.json"
+        preferred_paper_ids = {
+            paper_id
+            for dependency in subquery.depends_on
+            if 1 <= dependency <= len(reports)
+            for paper_id in _primary_answer_paper_ids(reports[dependency - 1])
+        }
+
+        def subquery_stage(name: str, details: dict[str, Any], *, _number: int = number) -> None:
+            if stage_callback:
+                stage_callback(
+                    "subquery_stage",
+                    {"subquery_number": _number, "stage": name, "details": details},
+                )
+
+        saved_report = None
+        if saved_report_path.exists():
+            candidate = json.loads(saved_report_path.read_text(encoding="utf-8"))
+            if (
+                candidate.get("query_spec", {}).get("user_question") == subquery.question
+                and candidate.get("dependency_paper_ids", []) == sorted(preferred_paper_ids)
+            ):
+                saved_report = candidate
+        if saved_report is not None:
+            reports.append(saved_report)
+            if stage_callback:
+                stage_callback(
+                    "subquery_reused",
+                    {"subquery_number": number, "query_report": str(saved_report_path)},
+                )
+        else:
+            reports.append(
+                _run_atomic_query(
+                    subquery.question,
+                    subquery_id,
+                    papers,
+                    subquery_root,
+                    client,
+                    subquery_stage,
+                    indexes,
+                    spatial_support,
+                    answer_task,
+                    preferred_paper_ids,
+                )
+            )
+
+    corpus = Corpus(papers)
+    answer, synthesis, more = _recompose_query_answers(
+        question, query_id, plan, reports, corpus, client, artifact_dir
+    )
+    warnings.extend(more)
+    first_spec = dict(reports[0]["query_spec"])
+    first_spec["user_question"] = question
+    context_candidates = []
+    claim_candidates = []
+    paths = []
+    for number, report in enumerate(reports, 1):
+        context_candidates.extend(
+            {**row, "subquery_number": number}
+            for row in report.get("context_candidates", [])
+        )
+        claim_candidates.extend(
+            {**row, "subquery_number": number}
+            for row in report.get("claim_candidates", [])
+        )
+        paths.extend(
+            {**row, "subquery_number": number}
+            for row in report.get("paths", [])
+        )
+        warnings.extend(report.get("warnings", []))
+    report = {
+        "query_id": query_id,
+        "query_pipeline_version": "0.5-query-decomposition",
+        "answer_task": answer_task,
+        "original_question": question,
+        "query_decomposition": plan.model_dump(),
+        "query_spec": first_spec,
+        "subquery_reports": [
+            {
+                "number": number,
+                "question": subquery.question,
+                "depends_on": subquery.depends_on,
+                "query_id": subreport["query_id"],
+                "query_spec": subreport["query_spec"],
+                "answer": subreport["answer"],
+                "artifact_dir": str(subquery_root / subreport["query_id"]),
+            }
+            for number, (subquery, subreport) in enumerate(zip(plan.subqueries, reports), 1)
+        ],
+        "context_candidates": context_candidates,
+        "claim_candidates": claim_candidates,
+        "paths": paths,
+        "synthesis": synthesis,
+        "answer": answer,
+        "prompt_versions": {
+            "query_decomposition": stage_prompt_version("query_decomposition"),
+            "query_parse": stage_prompt_version("query_parse"),
+            "query_recomposition": stage_prompt_version("query_recomposition"),
+        },
+        "models": {
+            "generation": QUERY_PIPELINE["ollama"]["model"],
+            "embedding": QUERY_PIPELINE["embeddings"],
+        },
+        "state_alias_registry_version": STATE_ALIASES["version"],
+        "effective_parameters": QUERY_PIPELINE,
+        "warnings": list(dict.fromkeys(warnings)),
+    }
+    write_json(artifact_dir / "query_report.json", report)
+    (artifact_dir / "answer.md").write_text(answer, encoding="utf-8")
+    if stage_callback:
+        stage_callback(
+            "answer_recomposed",
+            {
+                "subquery_count": len(reports),
+                "answer_characters": len(answer),
+                "grounded_item_count": len(synthesis.get("items", [])),
+                "warnings": more,
+            },
+        )
     return report

@@ -442,3 +442,25 @@ lane remained empty instead of constructing a generic path.
 ## Verification
 
 Focused query and Parquet/FAISS tests: `24 passed`. Python compilation completed successfully.
+
+# 2026-10-19: Query decomposition and grounded recomposition
+
+Branch: `experiment/query-decomposition-v1`
+
+- Added a standalone Qwen planner that classifies a question as `retrieve`, `enumerate`, `compare`,
+  `join`, `aggregate`, or `select` and emits at most five standalone atomic subqueries.
+- Each subquery independently executes the existing parse, Context retrieval, Claim gating, path
+  search, evidence selection, and grounded synthesis pipeline.
+- Added grounded recomposition. Combined scientific statements may cite only Claim IDs validated in
+  the subquery outputs.
+- Added dependency-aware evidence allocation for joins. Later subqueries reserve three direct-evidence
+  positions for the paper supporting the preceding primary direct finding without excluding
+  cross-corpus candidates.
+- Added resumable per-subquery checkpoints and prevented broad named regions from being geocoded to
+  arbitrary points.
+- Audited all 30 benchmark questions: 16 were compound and 14 required one retrieval.
+- On five representative compound questions, blinded correctness/completeness increased from 1.6/4
+  to 3.4/4 and directness from 0.6/2 to 1.8/2. Median latency increased from 171.6 to 551.5 seconds.
+- One wet/dry comparison remained incorrect because the required dry-year finding is absent from the
+  indexed graph. This is an indexing limitation, not a decomposition-prompt failure.
+- Full results and remaining work are documented in `docs/QUERY_DECOMPOSITION_EXPERIMENT.md`.

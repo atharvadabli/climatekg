@@ -380,6 +380,27 @@ class ParsedQuery(StrictModel):
     ambiguities: list[str] = Field(default_factory=list)
 
 
+class DecomposedSubquery(StrictModel):
+    question: str
+    depends_on: list[int] = Field(default_factory=list)
+
+
+class QueryDecomposition(StrictModel):
+    operation: Literal["retrieve", "enumerate", "compare", "join", "aggregate", "select"]
+    subqueries: list[DecomposedSubquery] = Field(min_length=1, max_length=5)
+
+
+class RecomposedItem(StrictModel):
+    text: str
+    support_claim_ids: list[str]
+    support_subquery_numbers: list[int]
+    kind: Literal["direct_finding", "comparison", "mechanism", "recommendation", "limitation"]
+
+
+class QueryRecomposition(StrictModel):
+    items: list[RecomposedItem]
+
+
 class SynthesisItem(StrictModel):
     text: str
     support_claim_ids: list[str]

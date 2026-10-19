@@ -42,6 +42,8 @@ PROMPT_VERSIONS = {
     "section_scout": "v5",
     "claim_extraction": "v3",
     "query_parse": "v5",
+    "query_decomposition": "v3",
+    "query_recomposition": "v2",
     "final_synthesis": "v5",
 }
 
@@ -63,10 +65,12 @@ BASELINE_INDEXING_REASONING = {
 }
 
 BASELINE_QUERY_REASONING = {
+    "query_decomposition": "no",
     "query_parse": "no",
     "query_parse_context_repair": "no",
     "final_synthesis": "low",
     "final_synthesis_complex": "medium",
+    "query_recomposition": "low",
 }
 
 VALIDATED_INDEXING_REASONING = {
@@ -393,6 +397,11 @@ QUERY_PIPELINE: dict[str, Any] = {
         "top_contexts": 5,
         "top_claims": 10,
         "top_paths": 5,
+    },
+    "query_decomposition": {
+        "enabled": True,
+        "max_subqueries": 5,
+        "dependency_paper_claims": 3,
     },
 }
 

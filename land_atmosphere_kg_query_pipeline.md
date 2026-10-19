@@ -168,6 +168,33 @@ Query-area derived facts additionally point to their enrichment source and metho
 
 ---
 
+## 2.7 Decompose independently retrievable requests before parsing
+
+One sentence may request several findings. Before creating a `QuerySpec`, classify the top-level
+answer operation as one of:
+
+```text
+retrieve | enumerate | compare | join | aggregate | select
+```
+
+`retrieve` and `aggregate` execute one ordinary query. The other operations may produce up to five
+standalone subqueries. Each subquery requests one outcome for one stated case and repeats every
+location, season, numerical value, unit, and environmental condition needed for its own retrieval.
+Conditions that only restrict applicability remain inside the relevant subquery; they are not separate
+searches. A connected source-to-outcome mechanism remains one subquery.
+
+Parse, embed, retrieve Contexts, gate Claims, and search paths independently for every subquery.
+Preserve a complete report for each run. Recomposition receives the original question and the
+validated, cited output of every subquery. It may cite only Claim IDs present in those outputs. For a
+`join`, connect findings only when the evidence supports the link; otherwise report the missing link.
+
+When a later subquery explicitly depends on an earlier result, reserve a configurable number of its
+direct-evidence positions for relevant Claims from the paper supporting the earlier primary direct
+finding. This is an evidence quota, not a paper filter: ordinary cross-corpus candidates retain the
+remaining positions.
+
+---
+
 # 3. Minimal Query schema
 
 Keep the semantic schema small.
@@ -298,7 +325,9 @@ Examples:
 "How does deforestation affect climate globally?" → global
 ```
 
-When a question asks how one source changes two or more outcomes joined by `and`, keep the source, preserve the requested outcomes in `intervention_description`, leave `target=null`, and use `forward` mode. One target object represents one graph endpoint; a combined target would require a nonexistent compound State and suppress otherwise valid direct paths.
+When a question asks how one source changes two or more independently retrievable outcomes, create one
+subquery per outcome before applying this mode rule. Do not create a compound target State. Outcomes
+that form one connected mechanism pathway may remain in one subquery.
 
 `global` means the answer is not gated to one query environment. Source and target may still be populated.
 
@@ -313,7 +342,9 @@ ollama:
   model: "qwen3.6:27b"
   structured_output: true
   stages:
+    query_decomposition: {temperature: 0.0, thinking: no}
     query_parse: {temperature: 0.0, thinking: no}
+    query_recomposition: {temperature: 0.0, thinking: low}
     final_synthesis: {temperature: 0.0, thinking: low}
     final_synthesis_complex: {temperature: 0.0, thinking: medium}
 

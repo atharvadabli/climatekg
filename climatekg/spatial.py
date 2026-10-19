@@ -91,6 +91,11 @@ def resolve_spatial_support(
     if support.kind == "global":
         return support.model_copy(update={"geometry": None, "enrichable_study_location_name": None, "resolution": "global"})
 
+    if support.kind in {"region", "climate_zone"}:
+        # A broad named area is valid spatial information, but a gazetteer
+        # point is not a defensible representation of its extent.
+        return support.model_copy(update={"geometry": None, "resolution": "named_region"})
+
     point = _coordinate_geometry(support.name)
     if point is not None:
         return support.model_copy(update={"kind": "point", "geometry": point, "resolution": "exact"})

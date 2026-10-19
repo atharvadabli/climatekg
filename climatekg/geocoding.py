@@ -57,6 +57,7 @@ class NominatimGeocoder:
         self._lock = threading.Lock()
         self._last_request = 0.0
         self._cache = self._read_cache()
+        self.last_failure_reason: str | None = None
 
     def _read_cache(self) -> dict[str, Any]:
         if not self.cache_path.exists():
