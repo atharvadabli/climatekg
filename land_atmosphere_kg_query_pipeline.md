@@ -345,7 +345,7 @@ ollama:
   stages:
     query_decomposition: {temperature: 0.0, thinking: no}
     query_parse: {temperature: 0.0, thinking: no}
-    query_combined_synthesis: {temperature: 0.0, thinking: low}
+    query_combined_synthesis: {temperature: 0.0, thinking: no}
     final_synthesis: {temperature: 0.0, thinking: low}
     final_synthesis_complex: {temperature: 0.0, thinking: medium}
 

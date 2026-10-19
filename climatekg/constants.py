@@ -70,7 +70,7 @@ BASELINE_QUERY_REASONING = {
     "query_parse_context_repair": "no",
     "final_synthesis": "low",
     "final_synthesis_complex": "medium",
-    "query_combined_synthesis": "low",
+    "query_combined_synthesis": "no",
 }
 
 VALIDATED_INDEXING_REASONING = {

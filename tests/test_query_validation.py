@@ -251,6 +251,24 @@ def test_dependency_reserves_direct_evidence_from_primary_paper() -> None:
     assert paths[0]["dependency_paper_match"] is True
 
 
+def test_dependency_handoff_uses_highest_semantic_direct_claim() -> None:
+    from climatekg.query import _primary_semantic_paper_ids
+
+    corpus = _direct_evidence_test_corpus()
+    corpus.claims["CL_ENDPOINT"].paper_id = "P_OVERALL"
+    corpus.claims["CL_UNKNOWN"].paper_id = "P_SEMANTIC"
+    paths = [
+        {"claim_ids": ["CL_ENDPOINT"]},
+        {"claim_ids": ["CL_UNKNOWN"]},
+    ]
+    ranked = [
+        {"claim_id": "CL_ENDPOINT", "S_claim_semantic": 0.70},
+        {"claim_id": "CL_UNKNOWN", "S_claim_semantic": 0.91},
+    ]
+
+    assert _primary_semantic_paper_ids(paths, ranked, corpus) == ["P_SEMANTIC"]
+
+
 def _direct_evidence_test_corpus():
     from climatekg.models import Claim, Context, FinalPaper, Paper, SourceBlock
     from climatekg.query import Corpus

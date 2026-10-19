@@ -909,6 +909,22 @@ def select_direct_evidence_paths(
     return selected
 
 
+def _primary_semantic_paper_ids(
+    direct_paths: list[dict[str, Any]],
+    ranked: list[dict[str, Any]],
+    corpus: Corpus,
+) -> list[str]:
+    """Choose the paper whose direct Claim best preserves dependency meaning."""
+    ranked_by_id = {row["claim_id"]: row for row in ranked}
+    direct_claim_ids = [claim_id for path in direct_paths for claim_id in path["claim_ids"]]
+    primary_claim_id = max(
+        direct_claim_ids,
+        key=lambda claim_id: ranked_by_id.get(claim_id, {}).get("S_claim_semantic", 0.0),
+        default=None,
+    )
+    return [corpus.claims[primary_claim_id].paper_id] if primary_claim_id is not None else []
+
+
 def assemble_evidence_paths(
     direct_paths: list[dict[str, Any]],
     graph_paths: list[dict[str, Any]],
@@ -1280,8 +1296,7 @@ def _run_atomic_query(
     synthesis_template = "final_synthesis_planning.txt" if answer_task == "planning" else "final_synthesis.txt"
     report = {"query_id": query_id, "query_pipeline_version": "0.4-soft-context", "answer_task": answer_task, "query_spec": _query_spec_payload(spec), "context_evidence_comparisons": context_comparisons, "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "claim_candidates": ranked, "direct_evidence_paths": direct_paths, "graph_paths": graph_paths, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis"), "final_synthesis_template": synthesis_template}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
     report["dependency_paper_ids"] = sorted(preferred_paper_ids or set())
-    primary_claim_ids = direct_paths[0]["claim_ids"] if direct_paths else []
-    report["primary_evidence_paper_ids"] = sorted({corpus.claims[claim_id].paper_id for claim_id in primary_claim_ids})
+    report["primary_evidence_paper_ids"] = _primary_semantic_paper_ids(direct_paths, ranked, corpus)
     report["synthesis_mode"] = "full" if synthesize_answer else "retrieval_only"
     write_json(artifact_dir / "query_report.json", report)
     (artifact_dir / "answer.md").write_text(answer, encoding="utf-8")

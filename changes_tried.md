@@ -473,3 +473,8 @@ Branch: `experiment/query-decomposition-v1`
   was terminated after total query time exceeded ten minutes.
 - Conclusion: call-count reduction is structurally correct, but the remaining combined synthesis must
   avoid long internal reasoning generation.
+- Changing only combined synthesis from low to no thinking reduced median latency from 551.5 to 110.4
+  seconds across five compound questions.
+- Blinded scores changed from 3.6 to 3.2 for correctness, 3.8 to 3.0 for completeness, and 1.4 to 1.6
+  for directness. The speed improvement is substantial, but the small completeness loss must remain
+  visible rather than being presented as a free optimization.
