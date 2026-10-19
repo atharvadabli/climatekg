@@ -62,7 +62,7 @@ Score each candidate independently:
 - `explanation`: one short sentence identifying the main strength or failure.
 
 The reference answer defines the expected scientific content. Citations may add useful detail, but unsupported or contradictory statements reduce correctness. Return valid JSON only using the supplied schema."""
-    config = QUERY_PIPELINE["ollama"]["stages"]["query_recomposition"]
+    config = QUERY_PIPELINE["ollama"]["stages"]["query_combined_synthesis"]
     for case_id in args.case:
         case = cases[case_id]
         baseline = read_json(args.baseline_results / f"{case_id}.json")["generated_answer"]
@@ -75,7 +75,7 @@ The reference answer defines the expected scientific content. Citations may add 
             f"CANDIDATE A\n{systems[0][1]}\n\nCANDIDATE B\n{systems[1][1]}"
         )
         review = client.structured(
-            stage="query_recomposition",
+            stage="query_combined_synthesis",
             system=system,
             user=user,
             schema=PairReview,

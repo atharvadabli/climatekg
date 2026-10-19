@@ -184,9 +184,10 @@ Conditions that only restrict applicability remain inside the relevant subquery;
 searches. A connected source-to-outcome mechanism remains one subquery.
 
 Parse, embed, retrieve Contexts, gate Claims, and search paths independently for every subquery.
-Preserve a complete report for each run. Recomposition receives the original question and the
-validated, cited output of every subquery. It may cite only Claim IDs present in those outputs. For a
-`join`, connect findings only when the evidence supports the link; otherwise report the missing link.
+Preserve a complete retrieval report for each run. Deduplicate the selected Claims and SourceBlock
+references, label their originating subqueries, and perform one final synthesis for the original
+question. The answer may cite only Claim IDs in this combined evidence package. For a `join`, connect
+findings only when the evidence supports the link; otherwise report the missing link.
 
 When a later subquery explicitly depends on an earlier result, reserve a configurable number of its
 direct-evidence positions for relevant Claims from the paper supporting the earlier primary direct
@@ -344,7 +345,7 @@ ollama:
   stages:
     query_decomposition: {temperature: 0.0, thinking: no}
     query_parse: {temperature: 0.0, thinking: no}
-    query_recomposition: {temperature: 0.0, thinking: low}
+    query_combined_synthesis: {temperature: 0.0, thinking: low}
     final_synthesis: {temperature: 0.0, thinking: low}
     final_synthesis_complex: {temperature: 0.0, thinking: medium}
 

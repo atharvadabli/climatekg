@@ -29,7 +29,7 @@ EXPECTED_PLACEHOLDERS = {
     "paper_consolidation.txt": {"paper_metadata", "candidate_pairs"},
     "query_parse.txt": {"user_question"},
     "query_decomposition.txt": {"user_question"},
-    "query_recomposition.txt": {"query_package"},
+    "query_combined_synthesis.txt": {"query_package"},
     "final_synthesis.txt": {"question", "query_spec", "query_context", "selected_paths", "contradictions", "source_blocks"},
     "state_adjudication.txt": {"concept_a", "examples_a", "concept_b", "examples_b"},
     "conditioning_facet_adjudication.txt": {"claim", "facet", "claim_evidence", "facet_evidence"},

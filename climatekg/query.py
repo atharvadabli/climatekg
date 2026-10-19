@@ -14,10 +14,10 @@ from .earth_engine import EarthEngineBackend
 from .embeddings import DOMAIN_ORDER, analysis_case_text, effective_facets, facet_content_text, facet_notion_text
 from .enrichment import derive_facets, query_facets
 from .extraction_models import (
+    CombinedSynthesis,
     ParsedQuery,
     ParsedQueryFacetBatch,
     QueryDecomposition,
-    QueryRecomposition,
     SynthesisItem,
     SynthesisOutput,
 )
@@ -1224,6 +1224,7 @@ def _run_atomic_query(
     spatial_support: SpatialSupport | None = None,
     answer_task: str = "process",
     preferred_paper_ids: set[str] | None = None,
+    synthesize_answer: bool = True,
 ) -> dict[str, Any]:
     client = client or OllamaClient()
     artifact_dir = output_root / query_id
@@ -1268,18 +1269,27 @@ def _run_atomic_query(
     stage("evidence_selected", {"object_count": len(selected_blocks), "source_block_count": sum(len(items) for items in selected_blocks.values()), "object_ids": sorted(selected_blocks)})
     synthesis_paths, synthesis_alternatives, selected_blocks, more = trim_evidence_package(spec, paths, alternatives, selected_blocks, corpus); warnings.extend(more)
     stage("evidence_trimmed", {"path_count": len(synthesis_paths), "alternative_count": len(synthesis_alternatives), "source_block_count": sum(len(items) for items in selected_blocks.values()), "warnings": more})
-    answer, synthesis, more = synthesize(spec, context_comparisons, synthesis_paths, ranked, synthesis_alternatives, selected_blocks, corpus, client, artifact_dir, answer_task); warnings.extend(more)
-    stage("answer_synthesized", {"answer_characters": len(answer), "grounded_item_count": len(synthesis.get("items", [])), "provenance_claim_count": len(synthesis.get("provenance", {})), "warnings": more})
+    if synthesize_answer:
+        answer, synthesis, more = synthesize(spec, context_comparisons, synthesis_paths, ranked, synthesis_alternatives, selected_blocks, corpus, client, artifact_dir, answer_task)
+        warnings.extend(more)
+        stage("answer_synthesized", {"answer_characters": len(answer), "grounded_item_count": len(synthesis.get("items", [])), "provenance_claim_count": len(synthesis.get("provenance", {})), "warnings": more})
+    else:
+        answer = ""
+        synthesis = {"items": [], "provenance": {}}
+        stage("evidence_ready", {"path_count": len(synthesis_paths), "alternative_count": len(synthesis_alternatives), "source_block_count": sum(len(items) for items in selected_blocks.values())})
     synthesis_template = "final_synthesis_planning.txt" if answer_task == "planning" else "final_synthesis.txt"
     report = {"query_id": query_id, "query_pipeline_version": "0.4-soft-context", "answer_task": answer_task, "query_spec": _query_spec_payload(spec), "context_evidence_comparisons": context_comparisons, "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "claim_candidates": ranked, "direct_evidence_paths": direct_paths, "graph_paths": graph_paths, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis"), "final_synthesis_template": synthesis_template}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
     report["dependency_paper_ids"] = sorted(preferred_paper_ids or set())
+    primary_claim_ids = direct_paths[0]["claim_ids"] if direct_paths else []
+    report["primary_evidence_paper_ids"] = sorted({corpus.claims[claim_id].paper_id for claim_id in primary_claim_ids})
+    report["synthesis_mode"] = "full" if synthesize_answer else "retrieval_only"
     write_json(artifact_dir / "query_report.json", report)
     (artifact_dir / "answer.md").write_text(answer, encoding="utf-8")
     stage("artifacts_written", {"query_report": str(artifact_dir / "query_report.json"), "answer": str(artifact_dir / "answer.md")})
     return report
 
 
-def _recompose_query_answers(
+def _synthesize_combined_evidence(
     question: str,
     query_id: str,
     plan: QueryDecomposition,
@@ -1287,46 +1297,78 @@ def _recompose_query_answers(
     corpus: Corpus,
     client: OllamaClient,
     artifact_dir: Path,
+    answer_task: str,
 ) -> tuple[str, dict[str, Any], list[str]]:
     package_subqueries = []
     allowed_claims: set[str] = set()
-    provenance: dict[str, Any] = {}
+    claims: dict[str, Any] = {}
+    block_references: dict[str, list[dict[str, Any]]] = {}
     for number, (subquery, report) in enumerate(zip(plan.subqueries, reports), 1):
-        items = report.get("synthesis", {}).get("items", [])
+        ranked = {row["claim_id"]: row for row in report.get("claim_candidates", [])}
+        paths = report.get("synthesis_package", {}).get("paths", [])
+        alternatives = report.get("synthesis_package", {}).get("contradictions_and_alternatives", [])
         claim_ids = {
             claim_id
-            for item in items
-            for claim_id in item.get("support_claim_ids", [])
-        }
+            for path in paths
+            for claim_id in path.get("claim_ids", [])
+        } | {item["claim_id"] for item in alternatives}
         allowed_claims.update(claim_ids)
-        provenance.update(report.get("synthesis", {}).get("provenance", {}))
+        for claim_id in claim_ids:
+            claim = corpus.claims[claim_id]
+            claims.setdefault(
+                claim_id,
+                {
+                    "claim": _claim_payload(claim),
+                    "spatial_transfer": spatial_report(claim, corpus),
+                    "scores_by_subquery": {},
+                },
+            )
+            if claim_id in ranked:
+                claims[claim_id]["scores_by_subquery"][str(number)] = ranked[claim_id]
+        for claim_id, items in report.get("source_blocks", {}).items():
+            block_references.setdefault(claim_id, [])
+            existing = {item.get("id") for item in block_references[claim_id]}
+            for item in items:
+                reference = {
+                    key: item[key]
+                    for key in ("id", "page", "section_path", "block_type")
+                    if key in item
+                }
+                if reference.get("id") not in existing:
+                    block_references[claim_id].append(reference)
+                    existing.add(reference.get("id"))
         package_subqueries.append(
             {
                 "number": number,
                 "question": subquery.question,
                 "depends_on": subquery.depends_on,
-                "grounded_answer_items": items,
+                "structured_question": report.get("query_spec", {}),
+                "environmental_comparisons": report.get("context_evidence_comparisons", []),
+                "selected_evidence_paths": paths,
+                "alternative_findings": alternatives,
             }
         )
     query_package = {
         "original_question": question,
         "operation": plan.operation,
         "subqueries": package_subqueries,
+        "claims": claims,
+        "source_passage_references": block_references,
     }
-    prompt = _read_prompt("query_recomposition.txt")
+    prompt = _read_prompt("query_combined_synthesis.txt")
     system, user = prompt.split("USER\n", 1)
-    config = QUERY_PIPELINE["ollama"]["stages"]["query_recomposition"]
+    config = QUERY_PIPELINE["ollama"]["stages"]["query_combined_synthesis"]
     output = client.structured(
-        stage="query_recomposition",
+        stage="query_combined_synthesis",
         system=system.removeprefix("SYSTEM\n").strip(),
         user=user.format(query_package=json.dumps(query_package, ensure_ascii=False)).strip(),
-        schema=QueryRecomposition,
+        schema=CombinedSynthesis,
         model=QUERY_PIPELINE["ollama"]["model"],
         temperature=config["temperature"],
         thinking=config["thinking"],
-        artifact_dir=artifact_dir / "recomposition",
+        artifact_dir=artifact_dir / "combined_synthesis",
         paper_id=query_id,
-        input_block_ids=[],
+        input_block_ids=[item["id"] for values in block_references.values() for item in values],
         retries=config["retries"],
     )
     warnings: list[str] = []
@@ -1342,14 +1384,10 @@ def _recompose_query_answers(
         else:
             warnings.append("UNSUPPORTED_RECOMPOSED_ITEM")
     if not valid:
-        warnings.append("RECOMPOSITION_GROUNDING_VALIDATION_FAILED")
-        answer = "\n\n".join(
-            f"### {subquery.question}\n\n{report['answer']}"
-            for subquery, report in zip(plan.subqueries, reports)
-        )
-        return answer, {"items": [], "provenance": provenance}, warnings
+        warnings.append("COMBINED_SYNTHESIS_GROUNDING_VALIDATION_FAILED")
+        return "Retrieved evidence could not support a grounded answer to this question.", {"items": [], "provenance": {}}, warnings
 
-    rendered = []
+    rendered: list[tuple[str, str]] = []
     used_provenance: dict[str, Any] = {}
     for item in valid:
         citations = []
@@ -1366,20 +1404,25 @@ def _recompose_query_answers(
             citations.append(
                 f"{paper.title} ({paper.year or 'n.d.'}), pp. {','.join(map(str, pages))}, Claim {claim_id}"
             )
-            used_provenance[claim_id] = provenance.get(
-                claim_id,
-                {
-                    "paper_id": paper.id,
-                    "title": paper.title,
-                    "doi": paper.doi,
-                    "source_block_ids": claim.evidence_block_ids,
-                    "pages": pages,
-                },
-            )
+            used_provenance[claim_id] = {
+                "paper_id": paper.id,
+                "title": paper.title,
+                "doi": paper.doi,
+                "source_block_ids": claim.evidence_block_ids,
+                "pages": pages,
+            }
         citation_text = f" [{'; '.join(citations)}]" if citations else ""
-        rendered.append(f"{item.text}{citation_text}")
+        rendered.append((item.kind, f"{item.text}{citation_text}"))
+    if answer_task == "planning":
+        recommendations = [text for kind, text in rendered if kind != "limitation"]
+        limitations = [text for kind, text in rendered if kind == "limitation"]
+        answer = "## Land use recommendation\n\n" + "\n\n".join(recommendations)
+        if limitations:
+            answer += "\n\n## Limitations and other important notes\n\n" + "\n\n".join(limitations)
+    else:
+        answer = "\n\n".join(text for _, text in rendered)
     return (
-        "\n\n".join(rendered),
+        answer,
         {"items": [item.model_dump() for item in valid], "provenance": used_provenance},
         warnings,
     )
@@ -1387,6 +1430,8 @@ def _recompose_query_answers(
 
 def _primary_answer_paper_ids(report: dict[str, Any]) -> set[str]:
     """Return papers supporting the direct answer, not ancillary mechanisms."""
+    if report.get("primary_evidence_paper_ids"):
+        return set(report["primary_evidence_paper_ids"])
     synthesis = report.get("synthesis", {})
     items = synthesis.get("items", [])
     primary = next(
@@ -1477,6 +1522,7 @@ def run_query(
             if (
                 candidate.get("query_spec", {}).get("user_question") == subquery.question
                 and candidate.get("dependency_paper_ids", []) == sorted(preferred_paper_ids)
+                and candidate.get("synthesis_mode") == "retrieval_only"
             ):
                 saved_report = candidate
         if saved_report is not None:
@@ -1499,12 +1545,13 @@ def run_query(
                     spatial_support,
                     answer_task,
                     preferred_paper_ids,
+                    False,
                 )
             )
 
     corpus = Corpus(papers)
-    answer, synthesis, more = _recompose_query_answers(
-        question, query_id, plan, reports, corpus, client, artifact_dir
+    answer, synthesis, more = _synthesize_combined_evidence(
+        question, query_id, plan, reports, corpus, client, artifact_dir, answer_task
     )
     warnings.extend(more)
     first_spec = dict(reports[0]["query_spec"])
@@ -1528,7 +1575,7 @@ def run_query(
         warnings.extend(report.get("warnings", []))
     report = {
         "query_id": query_id,
-        "query_pipeline_version": "0.5-query-decomposition",
+        "query_pipeline_version": "0.6-single-synthesis",
         "answer_task": answer_task,
         "original_question": question,
         "query_decomposition": plan.model_dump(),
@@ -1553,7 +1600,7 @@ def run_query(
         "prompt_versions": {
             "query_decomposition": stage_prompt_version("query_decomposition"),
             "query_parse": stage_prompt_version("query_parse"),
-            "query_recomposition": stage_prompt_version("query_recomposition"),
+            "query_combined_synthesis": stage_prompt_version("query_combined_synthesis"),
         },
         "models": {
             "generation": QUERY_PIPELINE["ollama"]["model"],
@@ -1567,7 +1614,7 @@ def run_query(
     (artifact_dir / "answer.md").write_text(answer, encoding="utf-8")
     if stage_callback:
         stage_callback(
-            "answer_recomposed",
+            "answer_synthesized",
             {
                 "subquery_count": len(reports),
                 "answer_characters": len(answer),

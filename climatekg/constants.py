@@ -43,7 +43,7 @@ PROMPT_VERSIONS = {
     "claim_extraction": "v3",
     "query_parse": "v5",
     "query_decomposition": "v3",
-    "query_recomposition": "v2",
+    "query_combined_synthesis": "v1",
     "final_synthesis": "v5",
 }
 
@@ -70,7 +70,7 @@ BASELINE_QUERY_REASONING = {
     "query_parse_context_repair": "no",
     "final_synthesis": "low",
     "final_synthesis_complex": "medium",
-    "query_recomposition": "low",
+    "query_combined_synthesis": "low",
 }
 
 VALIDATED_INDEXING_REASONING = {

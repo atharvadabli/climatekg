@@ -390,15 +390,15 @@ class QueryDecomposition(StrictModel):
     subqueries: list[DecomposedSubquery] = Field(min_length=1, max_length=5)
 
 
-class RecomposedItem(StrictModel):
+class CombinedSynthesisItem(StrictModel):
     text: str
     support_claim_ids: list[str]
     support_subquery_numbers: list[int]
     kind: Literal["direct_finding", "comparison", "mechanism", "recommendation", "limitation"]
 
 
-class QueryRecomposition(StrictModel):
-    items: list[RecomposedItem]
+class CombinedSynthesis(StrictModel):
+    items: list[CombinedSynthesisItem]
 
 
 class SynthesisItem(StrictModel):

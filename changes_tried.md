@@ -464,3 +464,12 @@ Branch: `experiment/query-decomposition-v1`
 - One wet/dry comparison remained incorrect because the required dry-year finding is absent from the
   indexed graph. This is an indexing limitation, not a decomposition-prompt failure.
 - Full results and remaining work are documented in `docs/QUERY_DECOMPOSITION_EXPERIMENT.md`.
+## 2026-10-19: Single synthesis for compound queries
+
+- Removed intermediate answer generation for each decomposed subquery.
+- Kept the complete parsing, Context retrieval, Claim gating, path search, and evidence selection flow.
+- Deduplicated selected Claims and SourceBlock references before one combined synthesis.
+- The first low-reasoning combined call exceeded 458 seconds without completing; the controlled run
+  was terminated after total query time exceeded ten minutes.
+- Conclusion: call-count reduction is structurally correct, but the remaining combined synthesis must
+  avoid long internal reasoning generation.
