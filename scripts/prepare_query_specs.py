@@ -26,6 +26,7 @@ def main() -> None:
     parser.add_argument("--dataset", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--case", action="append")
+    parser.add_argument("--limit", type=int)
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
 
@@ -45,7 +46,9 @@ def main() -> None:
     if not hasattr(NominatimGeocoder, "last_failure_reason"):
         NominatimGeocoder.last_failure_reason = None
 
-    cases = read_json(args.dataset)[:10]
+    cases = read_json(args.dataset)
+    if args.limit is not None:
+        cases = cases[: args.limit]
     if args.case:
         requested = set(args.case)
         cases = [case for case in cases if case["id"] in requested]
@@ -74,7 +77,7 @@ def main() -> None:
             "dataset": str(args.dataset.resolve()),
             "code_root": str(code_root),
             "case_ids": [case["id"] for case in cases],
-            "protocol": "Each v2 question is parsed once; saved QuerySpecs are reused by all ClimateKG variants.",
+            "protocol": "Each question is parsed once; saved QuerySpecs are reused by all ClimateKG variants.",
             "compatibility_note": (
                 "The historical geocoder receives a null last_failure_reason class attribute because "
                 "the matching query parser reads that attribute although the class did not initialize it."

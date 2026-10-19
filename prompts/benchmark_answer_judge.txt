@@ -1,0 +1,75 @@
+TASK
+
+Compare three candidate answers to one scientific question. Use the supplied reference answer as the authoritative account of the finding being tested.
+
+Evaluate whether each candidate:
+
+1. gives the scientifically correct answer;
+2. includes the important conditions and qualifications listed in the input;
+3. directly answers the question without replacing it with a different topic; and
+4. avoids a conclusion that conflicts with the reference answer.
+
+Equivalent wording is acceptable. A candidate may include additional compatible detail. Citations and writing style do not affect scientific correctness.
+
+INPUT
+
+You will receive a JSON object containing:
+
+- `question`: the scientific question to answer;
+- `reference_answer`: the finding against which the candidates are compared;
+- `required_qualifiers`: important conditions or details expected in a complete answer;
+- `known_wrong_conclusions`: conclusions that conflict with the reference finding;
+- `candidates`: three answers identified only as `A`, `B`, and `C`.
+
+{{input_json}}
+
+OUTPUT
+
+Return valid JSON only, with no Markdown fences or surrounding commentary, in exactly this form:
+
+{
+  "evaluations": [
+    {
+      "candidate": "A",
+      "scientific_correctness": 0,
+      "completeness": 0,
+      "directness": 0,
+      "covered_qualifiers": ["string"],
+      "missed_qualifiers": ["string"],
+      "conflicts_with_reference": false,
+      "matches_known_wrong_conclusion": false,
+      "explanation": "string"
+    }
+  ]
+}
+
+Return one evaluation for each of `A`, `B`, and `C`.
+
+- `scientific_correctness`: Use an integer from 0 to 4.
+  - `0`: no usable answer or contradicts the reference finding.
+  - `1`: mostly incorrect; only a small relevant part is correct.
+  - `2`: partly correct but misses or changes a central result.
+  - `3`: mostly correct with a minor scientific omission or imprecision.
+  - `4`: correct and consistent with the reference finding.
+
+- `completeness`: Use an integer from 0 to 4.
+  - `0`: covers none of the central finding.
+  - `1`: covers a small part.
+  - `2`: covers roughly half.
+  - `3`: covers most important parts.
+  - `4`: covers the complete finding and its material qualifications.
+
+- `directness`: Use an integer from 0 to 2.
+  - `0`: does not answer the question asked.
+  - `1`: answers indirectly or mixes in substantial unrelated material.
+  - `2`: directly answers the question.
+
+- `covered_qualifiers`: Copy each supplied qualifier that the candidate meaningfully covers.
+
+- `missed_qualifiers`: Copy each supplied qualifier that the candidate does not meaningfully cover.
+
+- `conflicts_with_reference`: Use `true` only when the candidate states something incompatible with the reference answer.
+
+- `matches_known_wrong_conclusion`: Use `true` only when the candidate states one of the supplied known-wrong conclusions or an equivalent conclusion.
+
+- `explanation`: Write one short sentence explaining the scores, usually 10-30 words.

@@ -1,4 +1,4 @@
-"""Run one ClimateKG query architecture on the frozen ten-query benchmark."""
+"""Run one retrieval system on a frozen benchmark dataset."""
 
 from __future__ import annotations
 
@@ -129,6 +129,7 @@ def main() -> None:
     parser.add_argument("--graphrag-index", type=Path)
     parser.add_argument("--spec-dir", type=Path)
     parser.add_argument("--case", action="append")
+    parser.add_argument("--limit", type=int)
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
 
@@ -171,7 +172,9 @@ def main() -> None:
     if args.graphrag_index is not None:
         answer_systems.GRAPHRAG_INDEX = args.graphrag_index.resolve()
 
-    cases = read_json(args.dataset)[:10]
+    cases = read_json(args.dataset)
+    if args.limit is not None:
+        cases = cases[: args.limit]
     if args.case:
         requested = set(args.case)
         cases = [case for case in cases if case["id"] in requested]
