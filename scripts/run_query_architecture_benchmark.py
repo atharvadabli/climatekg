@@ -186,6 +186,13 @@ def main() -> None:
     output = args.output.resolve() / args.variant
     artifact_root = output / "artifacts"
     engine = ClimateKGEngine(graph_root=args.graph_root, output_root=artifact_root)
+    shared_assets = project_root / "assets"
+    engine.watershed_path = (shared_assets / "watershed_pan_india_simplified.geojson").resolve()
+    engine.koppen_path = (shared_assets / "Global_1986-2010_KG_5m.kmz.zip").resolve()
+    query_module.PIPELINE["enrichment"]["watershed_registry_path"] = str(engine.watershed_path)
+    query_module.PIPELINE["enrichment"]["datasets"]["climate_regime"]["source_path"] = str(
+        engine.koppen_path
+    )
     plain = None
     if args.system == "plain_rag":
         if args.plain_index is None:

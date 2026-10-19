@@ -487,3 +487,18 @@ Branch: `experiment/query-decomposition-v1`
 - One answer omitted a secondary 840 hPa value. Other core findings and the dependent P000082 Claim
   connection were preserved.
 - Retained the change because it improves scheduling without weakening scientific gating or grounding.
+
+## 2026-10-20: Phase-batched 20-query validation
+
+- Completed 20 live-planned questions against the 115-paper Parquet graph.
+- Mean/median/P90 latency was 94.9/71.5/156.5 seconds. The 17 decomposed questions had a 69.7-second
+  median; three single-retrieval questions retained slower reasoning and had a 214.9-second median.
+- The expected paper entered candidate retrieval for 20/20 questions and survived into final evidence
+  for 17/20.
+- A supplemental reference-answer review marked 9 correct, 3 mostly correct, 2 partly correct, and 6
+  incorrect. Manual inspection confirmed the weak cases and traced them to missing indexed findings,
+  target-free parsing for multi-outcome questions, and correct Claims falling below the fixed eight
+  direct-evidence slots.
+- Fixed the benchmark runner so worktrees reuse the main project's watershed and Koppen assets instead
+  of redirecting enrichment to nonexistent `worktree/assets` paths.
+- Full results and case-level root causes are in `docs/QUERY_PHASE_BATCHING_20_QUERY_REPORT.md`.
