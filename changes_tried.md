@@ -502,3 +502,12 @@ Branch: `experiment/query-decomposition-v1`
 - Fixed the benchmark runner so worktrees reuse the main project's watershed and Koppen assets instead
   of redirecting enrichment to nonexistent `worktree/assets` paths.
 - Full results and case-level root causes are in `docs/QUERY_PHASE_BATCHING_20_QUERY_REPORT.md`.
+
+# P000100 analysis-case artifact correction
+
+- Rebuilt a separate 115-paper Parquet graph while replacing only the stale nine-Claim `P000100`
+  artifact with the validated 14-Claim analysis-case extraction.
+- Verified `P000100_CL011` and SourceBlock `P000100:S12:P0063` after the Parquet round trip.
+- Reran `CKGQ0001` through live decomposition and parsing without changing retrieval or synthesis.
+- The corrected Claim ranked first, reached the direct evidence path, and produced the expected
+  higher-in-dry-years and greater-than-20%-in-the-IGP answer.
