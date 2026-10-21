@@ -511,3 +511,14 @@ Branch: `experiment/query-decomposition-v1`
 - Reran `CKGQ0001` through live decomposition and parsing without changing retrieval or synthesis.
 - The corrected Claim ranked first, reached the direct evidence path, and produced the expected
   higher-in-dry-years and greater-than-20%-in-the-IGP answer.
+
+## P000100 patch: 20-query rerun
+
+- Reran the same 20 live-planning queries against the corrected 115-paper graph.
+- Completed 20/20 after running the one Earth-Engine-dependent case with project `ee-atharv` outside
+  the restricted network sandbox.
+- Mean token F1 increased from 0.3004 to 0.3217 and paired-review correctness from 2.9 to 3.1 out of
+  4. Expected-paper hits remained 17/20.
+- The intended case, `CKGQ0001`, improved from 1/4 to 4/4 in the paired reference review.
+- The four remaining incorrect cases are documented in
+  `docs/P000100_PATCH_20_QUERY_RERUN.md`; they are unrelated to the P000100 artifact correction.
