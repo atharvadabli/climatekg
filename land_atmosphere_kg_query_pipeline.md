@@ -168,20 +168,38 @@ Query-area derived facts additionally point to their enrichment source and metho
 
 ---
 
-## 2.7 Decompose independently retrievable requests before parsing
+## 2.7 Build atomic query plans before retrieval
 
-One sentence may request several findings. Before creating a `QuerySpec`, classify the top-level
+One sentence may request several findings. In one structured planning call, classify the top-level
 answer operation as one of:
 
 ```text
 retrieve | enumerate | compare | join | aggregate | select
 ```
 
-`retrieve` and `aggregate` execute one ordinary query. The other operations may produce up to five
-standalone subqueries. Each subquery requests one outcome for one stated case and repeats every
+The plan may contain up to eight atomic searches. Each search contains the parsed source, target,
+intervention, analysis case, explicit Context Facets, and spatial reference needed to construct its
+`QuerySpec`; do not send each generated search through a second semantic parsing call. Each search
+requests at most one outcome for at most one stated case and repeats every
 location, season, numerical value, unit, and environmental condition needed for its own retrieval.
 Conditions that only restrict applicability remain inside the relevant subquery; they are not separate
 searches. A connected source-to-outcome mechanism remains one subquery.
+
+When a question contains multiple independently requested outcomes and multiple named result cases,
+the plan contains their complete cross-product. A mechanism question must retain both its stated
+source and outcome. Exact supporting spans are copied from the original question, even when the
+standalone search question is rewritten.
+
+When a normalized case label is not contiguous in the question, its supporting span is the smallest
+exact continuous phrase that distinguishes the case. If the structured model joins separated source
+text with an ellipsis, deterministically reduce it to an exact segment already present in the question;
+prefer the final exact segment for a spatial reference. Reject the item when no exact segment exists.
+
+A collective contrast such as "other months", "other seasons", or "the remaining regions" is not an
+independent evidence search. For a question about one named case versus such a collective contrast,
+retain one search for the named case and keep the comparison wording in its structured comparison
+field. If the LLM nevertheless emits a collective-contrast search beside a named-case search, remove
+that redundant search deterministically and change the operation to `retrieve` when one search remains.
 
 Parse, embed, retrieve Contexts, gate Claims, and search paths independently for every subquery.
 Preserve a complete retrieval report for each run. Deduplicate the selected Claims and SourceBlock
@@ -189,9 +207,9 @@ references, label their originating subqueries, and perform one final synthesis 
 question. The answer may cite only Claim IDs in this combined evidence package. For a `join`, connect
 findings only when the evidence supports the link; otherwise report the missing link.
 
-For compound questions, parse all fresh subqueries before beginning embedding and retrieval. This
-phase ordering preserves the same `QuerySpec` and retrieval algorithms while avoiding repeated
-generation-model reloads between subqueries. Cached retrieval reports remain reusable.
+Compile all planned searches to `QuerySpec` objects before beginning embedding and retrieval. This
+phase ordering preserves the same retrieval algorithms and removes redundant generation calls between
+atomic searches. Cached retrieval reports remain reusable when their plan and pipeline version match.
 
 When a later subquery explicitly depends on an earlier result, reserve a configurable number of its
 direct-evidence positions for relevant Claims from the paper supporting the earlier primary direct
@@ -298,6 +316,11 @@ Use the same semantic writing conventions as indexing so query and paper represe
 
 These are soft targets, never hard validators. Missing information must remain missing rather than being filled to make a field more descriptive.
 
+A named spatial reference is also represented as a `spatial_configuration` Query Facet for Context
+retrieval. Keep the structured `spatial_support` object for geocoding/enrichment and provenance; the
+Facet supplies the semantic comparison channel. Method names and atmospheric-process names are not
+spatial references.
+
 ## 4.2 Requested analysis cases
 
 The parser may return optional `analysis_cases` and `analysis_comparison` fields. Use them when the user asks for findings across reported subsets such as wet/dry years, seasons, percentile groups, or subregions. Such a comparison is not an intervention unless the user describes an imposed change or treatment.
@@ -347,8 +370,7 @@ ollama:
   model: "qwen3.6:27b"
   structured_output: true
   stages:
-    query_decomposition: {temperature: 0.0, thinking: no}
-    query_parse: {temperature: 0.0, thinking: no}
+    query_plan: {temperature: 0.0, thinking: no}
     query_combined_synthesis: {temperature: 0.0, thinking: no}
     final_synthesis: {temperature: 0.0, thinking: low}
     final_synthesis_complex: {temperature: 0.0, thinking: medium}
@@ -689,7 +711,7 @@ For each endpoint:
 1. deterministic normalization;
 2. exact alias lookup;
 3. Qwen State/concept embedding retrieval;
-4. filter/score by endpoint state direction;
+4. filter/score by endpoint state direction or categorical-token compatibility;
 5. retain top candidates rather than force a merge when ambiguous.
 
 Example report:
@@ -1064,6 +1086,12 @@ E. Transition/intervention retrieval when intervention_description exists
 ```
 
 Deduplicate by `claim_id`.
+
+For a Claim found through channels B-E whose supporting Context was not retained in the Context ANN
+shortlist, compute the same Context/Facet similarity directly for that supporting Context before Claim
+ranking and path construction. Record this as `claim_context_on_demand`. This is not a bypass of
+Context gating: it prevents the ANN shortlist or tied sibling Contexts from suppressing a Claim before
+its actual supporting Context has been scored.
 
 Then attach:
 
@@ -2288,12 +2316,17 @@ Clamp negative cosine to zero.
 
 Normalize query state using the curated state-direction registry.
 
-For each canonical State under the retrieved concept:
+For each canonical State under the retrieved concept, first compare the curated direction family.
+Opposite directions are incompatible. If neither state is a single direction, compare normalized
+categorical tokens after removing relation words such as `change`, `conversion`, and `cover` and
+normalizing simple lexical variants such as `cropland`/`crop`:
 
 ```text
 state_compatible = True  if normalized state exactly matches
 state_compatible = True  if query state is empty/unspecified
-state_compatible = False otherwise
+state_compatible = True  if direction families match
+state_compatible = True  if categorical token overlap reaches the configured threshold
+state_compatible = False otherwise, including opposite directions
 ```
 
 Discard incompatible States. Do not infer that one directional state is “close enough” to another.

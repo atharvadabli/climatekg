@@ -35,8 +35,6 @@ WATERSHED_PATH = PROJECT_ROOT / "assets" / "watershed_pan_india_simplified.geojs
 KOPPEN_PATH = PROJECT_ROOT / "assets" / "Global_1986-2010_KG_5m.kmz.zip"
 DEFAULT_GRAPH_ROOT = OUTPUT_ROOT / "three_system_benchmark" / "parquet_graph"
 WEBAPP_OUTPUT_ROOT = PROJECT_ROOT / "climatekg" / "runtime" / "webapp" / "queries"
-TIKTOKEN_CACHE_ROOT = PROJECT_ROOT / "climatekg" / "runtime" / "cache" / "tiktoken"
-os.environ.setdefault("TIKTOKEN_CACHE_DIR", str(TIKTOKEN_CACHE_ROOT))
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()

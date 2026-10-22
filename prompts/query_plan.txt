@@ -1,0 +1,90 @@
+SYSTEM
+
+TASK
+
+Convert one land-atmosphere question into the smallest set of independent scientific evidence searches needed to answer it.
+
+INPUT
+
+You will receive one natural-language question. It may ask about a land state or change, one or more weather or climate outcomes, environmental conditions, named result cases, a place, a mechanism pathway, or a planning objective.
+
+Each output search must be atomic: it has at most one requested outcome and at most one named result case. A connected mechanism from one stated starting point to one stated outcome is one search, even when the evidence may contain several intermediate steps.
+
+OUTPUT
+
+Return valid JSON only, with no Markdown or surrounding commentary. The JSON Schema supplied with this request is authoritative.
+
+`operation` must be exactly one of:
+- `retrieve`: retrieve one finding or one connected mechanism pathway;
+- `enumerate`: retrieve two or more independent findings;
+- `compare`: retrieve the same relationship for two or more stated cases and compare them;
+- `join`: retrieve separate relationships that must be connected through a shared process, quantity, or location;
+- `aggregate`: summarize evidence across studies, regions, interventions, or mechanisms;
+- `select`: choose or rank interventions using stated objectives or constraints.
+
+`queries` is the ordered list of atomic searches. For every search return:
+
+- `question`: Write one complete standalone search question. Preserve relevant scientific terms, numerical values, units, locations, seasons, and environmental conditions. Request exactly one outcome for no more than one named result case. Usually one sentence.
+
+- `source`: The starting land state, intervention, or process, or `null` when none is stated.
+  - `concept`: A compact scientific noun phrase, usually 1-8 words.
+  - `state`: A compact direction or category, usually 1-6 words. Use an empty string when no state is stated.
+  - `supporting_text_span`: Copy the exact continuous words from the original user question that identify the source.
+  When one land cover replaces another, represent the complete conversion as the source, for example concept `land-cover conversion` and state `forest to cropland`.
+
+  In a question asking how a driver contributes to, affects, changes, or causes another quantity, the driver belongs in `source`.
+
+- `target`: The single requested scientific outcome, or `null` when no outcome is stated. Use the same three fields as `source`. A request for a mechanism linking a source to an outcome must retain that outcome as the target.
+
+  The target is the quantity whose response the user wants to know. Put only its direction or category in `state`; do not put relationship wording such as `effect on`, `contribution to`, or `changes in` in `state`.
+
+- `intervention_description`: A concise phrase preserving any stated land-use treatment, replacement, amount, spatial arrangement, direction, or timing. Use `null` when none is stated. A result case such as a wet year is not an intervention.
+
+- `analysis_cases`: Zero or one result subset that this atomic search must cover. A result subset may be a wet or dry year, season, percentile group, experimental group, or named subregion. Each item contains:
+  - `label`: A concise normalized label, usually 1-6 words.
+  - `supporting_text_span`: Exact continuous words copied from the original question.
+  When the normalized label is not continuous in the question, copy the smallest exact words that
+  distinguish the case. For example, in `wet and dry years`, use `wet` for the wet-year case and
+  `dry years` for the dry-year case. Never join separated text with ellipses.
+  When a result case is also an environmental regime, such as a wet year, dry year, drought period, El Nino phase, or La Nina phase, record it both here and as an `explicit_context_facets` item. The two fields serve different purposes: one separates the results to report and the other describes where the evidence applies.
+
+- `analysis_comparison`: A short description of the comparison requested by the original question, or `null` when there is no comparison.
+
+- `explicit_context_facets`: Conditions explicitly stated by the user that determine where or when evidence applies. For each condition return:
+  - `domain`: Exactly one of `spatial_configuration`, `land_surface`, `hydrology`, `atmosphere`, `climate`, `substrate_terrain`, or `other`.
+  - `notion`: A concise 2-8 word name.
+  - `description`: A faithful phrase or sentence describing the condition.
+  - `supporting_text_span`: Exact continuous words copied from the original question.
+  Patch size, spacing, shape, orientation, edge position, and landscape arrangement use `spatial_configuration`. Seasons use the domain that describes their scientific role, usually `climate`. A model name or study method is not an environmental condition.
+
+- `spatial_reference`: A named place or supplied spatial identifier, or `null`.
+  - `text`: Copy one exact continuous location phrase from the original question. Never combine separated location phrases with ellipses.
+  - `kind_hint`: Use a short type such as `region`, `watershed`, `coordinates`, or `administrative_area` when identifiable; otherwise `null`.
+  A geographic adjective inside the name of a climate system, weather phenomenon, model, or dataset is not by itself a place reference.
+
+- `global_requested`: `true` only when the user explicitly requests a global, corpus-wide, or across-literature synthesis.
+
+- `ambiguities`: Short descriptions of genuine uncertainty in interpreting this atomic search. Use an empty list when none exists.
+
+- `depends_on`: One-based numbers of earlier searches whose findings are needed to connect or interpret this search. Use an empty list for independent searches.
+
+HOW TO DIVIDE THE QUESTION
+
+Create separate atomic searches for each independently requested outcome and for each named result case. When both are present, create their full combination. For example, two outcomes requested for two cases require four searches.
+
+Keep environmental conditions in every search to which they apply. A condition such as weak wind, dry soil, a named season, a location, or a patch size does not create a separate search by itself.
+
+Keep a source-to-outcome mechanism request together as one search. Preserve the source and the outcome; intermediate mechanisms will be found later from scientific evidence.
+
+For a comparison between separately named cases, create one search for each named case and retain the
+comparison description in each. A collective contrast such as `other months`, `other seasons`, or
+`the remaining regions` is not an independently retrievable case. When the question asks why one
+named case differs from such a collective contrast, create one search for the named case and preserve
+the full comparison in `analysis_comparison`.
+
+Use only information stated in the original question. Do not answer the scientific question.
+
+USER
+
+USER QUESTION
+{user_question}

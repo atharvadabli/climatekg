@@ -3,7 +3,7 @@ import shutil
 import uuid
 
 from climatekg.canonicalize import canonical_concept, canonical_direction, state_id
-from climatekg.extract import _apply_map_repair, _validate_map, _validate_map_references, _validate_map_repair, _validate_reference_only_repair, include_evidence_blocks, is_outcome_like_facet, remove_internal_inventory_aliases, render_paper_map_tree, scout_setting_inventory, select_map_consolidation_blocks, validate_context_mention_resolution
+from climatekg.extract import _apply_map_repair, _validate_map, _validate_map_references, _validate_map_repair, _validate_reference_only_repair, compact_claim_facets, include_evidence_blocks, is_outcome_like_facet, partition_claim_blocks, relevant_claim_contexts, remove_internal_inventory_aliases, render_paper_map_tree, scout_setting_inventory, select_map_consolidation_blocks, validate_context_mention_resolution
 from climatekg.extraction_models import ContextHintDecision, ContextReconciliationBatch, MapContext, MapTransition, PaperMap, ScoutMention, SectionScout
 from climatekg.graph import _flatten, _inflate
 from climatekg.indexer import _clear_derived_artifacts, current_prompt_versions, index_pdf, indexing_derivation_fingerprint
@@ -13,7 +13,7 @@ import pytest
 
 from climatekg.models import Claim, ClaimEndpoint, Context, Facet, FinalPaper, Paper, QueryContext, QueryFacet, QuerySpec, SourceBlock, Transition
 from climatekg.pdf import _split_text, _validated_parse_cache, clean_parse
-from climatekg.query import Corpus, _is_compound_unspecified_target, context_similarity, trim_evidence_package
+from climatekg.query import Corpus, context_similarity, trim_evidence_package
 from climatekg.reconcile import _validate_reconciliation_batch, reversal_hints
 from climatekg.retrieval import bm25
 from climatekg.utils import normalize_text_key
@@ -26,10 +26,51 @@ def test_normative_normalization() -> None:
     assert canonical_direction("no significant change") == "no_detectable_change"
 
 
-def test_compound_unspecified_target_becomes_forward_candidate() -> None:
-    assert _is_compound_unspecified_target(ClaimEndpoint(concept="circulation and moisture", state=""))
-    assert not _is_compound_unspecified_target(ClaimEndpoint(concept="circulation", state="increase"))
+def test_state_identifier_is_deterministic() -> None:
     assert state_id("surface temperature", "increase") == "state::surface_temperature::increase"
+
+
+def test_large_claim_bundles_split_without_dropping_blocks() -> None:
+    blocks = [
+        SourceBlock(
+            id=f"B{index}",
+            paper_id="P",
+            order=index,
+            page=1,
+            section_path=["results", f"section {index // 2}"],
+            block_type="paragraph",
+            text=("result evidence " * 80).strip(),
+            source_locator={"page": 1},
+        )
+        for index in range(6)
+    ]
+
+    parts = partition_claim_blocks(blocks, target_tokens=250)
+
+    assert len(parts) > 1
+    assert [block.id for part in parts for block in part] == [block.id for block in blocks]
+
+
+def test_claim_prompt_context_is_limited_to_target_lineage() -> None:
+    contexts = [
+        Context(id="ROOT", paper_id="P", label="common"),
+        Context(id="A", paper_id="P", parent_ids=["ROOT"], label="control"),
+        Context(id="B", paper_id="P", parent_ids=["ROOT"], label="treatment"),
+        Context(id="UNRELATED", paper_id="P", label="other experiment"),
+    ]
+    transition = Transition(id="T", paper_id="P", from_context_id="A", to_context_id="B", label="change", description="change")
+
+    result = relevant_claim_contexts("T", "transition", contexts, [transition])
+
+    assert [item["id"] for item in result] == ["ROOT", "A", "B"]
+
+
+def test_claim_prompt_facets_omit_provenance_metadata() -> None:
+    facet = Facet(id="F", context_id="C", domain="climate", notion="season", description="wet season", origin="reported", evidence_block_ids=["B"])
+
+    assert compact_claim_facets([facet]) == [
+        {"id": "F", "domain": "climate", "notion": "season", "description": "wet season"}
+    ]
 
 
 def test_corpus_verified_endpoint_normalization() -> None:

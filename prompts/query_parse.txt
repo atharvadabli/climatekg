@@ -61,7 +61,7 @@ HOW TO HANDLE COMMON QUESTIONS
 - A pure place name belongs in `spatial_reference`. Do not duplicate the same pure place text as a spatial condition record.
 - Words such as `effect`, `impact`, `affect`, and `reported` describe the question, not a scientific endpoint state.
 - A comparison between reported subsets, such as wet versus dry years or summer versus winter, belongs in `analysis_cases` and `analysis_comparison`. It belongs in `intervention_description` only when the user describes an imposed change or treatment.
-- When the question asks how one source changes two or more outcomes joined by `and`, preserve the requested outcomes in `intervention_description` and return `target` as `null`. A target represents one scientific endpoint; leaving this combined target open allows retrieval of each stated outcome.
+- This prompt receives one atomic search question. Record its single requested scientific outcome as `target` whenever one is stated, including mechanism questions that ask how a source leads to that outcome.
 - In a `where` question, preserve edge, interior, patch, distance, windward, or directional wording as spatial information rather than turning location into an outcome state.
 
 Use no environmental or geographic facts beyond the user's words. Do not answer the scientific question in this task.

@@ -42,7 +42,7 @@ def main() -> None:
         (args.source_paper_dir / "extraction" / "map" / "paper_map.json").read_text(encoding="utf-8")
     )
     blocks = load_blocks(args.source_paper_dir)
-    contexts, transitions, map_meta = permanent_map(source_final.paper, mapped)
+    contexts, transitions, _ = permanent_map(source_final.paper, mapped)
     facets = [
         Facet.model_validate(item)
         for item in json.loads((args.experiment_paper_dir / "facets.json").read_text(encoding="utf-8"))
@@ -55,7 +55,6 @@ def main() -> None:
         contexts,
         transitions,
         facets,
-        map_meta,
         blocks,
         args.experiment_paper_dir,
         client,

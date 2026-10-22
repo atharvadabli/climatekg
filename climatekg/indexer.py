@@ -210,7 +210,7 @@ def index_pdf(pdf_path: Path, data_root: Path, paper_id: str, client: OllamaClie
             manifest["status"] = "extracting_claims"
             write_json(paper_dir / "manifest.json", manifest)
             with _timed_phase(timing_path, timing_report, "claim_extraction"):
-                claims, claim_hints = extract_claims(paper, mapped, contexts, transitions, facets, map_meta, blocks, paper_dir, client)
+                claims, claim_hints = extract_claims(paper, mapped, contexts, transitions, facets, blocks, paper_dir, client)
         manifest["status"] = "reconciling_contexts"
         write_json(paper_dir / "manifest.json", manifest)
         with _timed_phase(timing_path, timing_report, "context_reconciliation"):

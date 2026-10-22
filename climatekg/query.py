@@ -17,7 +17,7 @@ from .extraction_models import (
     CombinedSynthesis,
     ParsedQuery,
     ParsedQueryFacetBatch,
-    QueryDecomposition,
+    QueryPlan,
     SynthesisItem,
     SynthesisOutput,
 )
@@ -88,60 +88,187 @@ def _claim_payload(claim: Claim) -> dict[str, Any]:
     )
 
 
-def decompose_query(
+def _remove_collective_contrast_queries(plan: QueryPlan) -> tuple[QueryPlan, bool]:
+    """Remove vague comparison groups that cannot retrieve independent evidence."""
+    if plan.operation != "compare" or len(plan.queries) < 2:
+        return plan, False
+    collective = re.compile(r"^(?:other|all other|remaining|the remaining|rest of|the rest of)\b")
+    numbered = list(enumerate(plan.queries, 1))
+    removable = {
+        number
+        for number, item in numbered
+        if item.analysis_cases
+        and all(collective.search(normalize_text_key(case.label)) for case in item.analysis_cases)
+    }
+    if not removable or len(removable) == len(numbered):
+        return plan, False
+    kept = [(number, item) for number, item in numbered if number not in removable]
+    renumber = {old: new for new, (old, _) in enumerate(kept, 1)}
+    queries = [
+        item.model_copy(
+            update={
+                "depends_on": [renumber[value] for value in item.depends_on if value in renumber]
+            }
+        )
+        for _, item in kept
+    ]
+    operation = "retrieve" if len(queries) == 1 else plan.operation
+    return plan.model_copy(update={"operation": operation, "queries": queries}), True
+
+
+def _exact_ellipsis_segment(
+    value: str,
+    question: str,
+    *,
+    prefer_last: bool = False,
+) -> str:
+    """Reduce an LLM ellipsis span to one exact continuous segment from the question."""
+    normalized_question = unicodedata.normalize("NFC", question)
+    normalized_value = unicodedata.normalize("NFC", value.strip())
+    if normalized_value in normalized_question:
+        return value.strip()
+    parts = [part.strip() for part in re.split(r"(?:\.\.\.|…)", normalized_value) if part.strip()]
+    matches = [part for part in parts if part in normalized_question]
+    if not matches:
+        return value.strip()
+    return matches[-1] if prefer_last else matches[0]
+
+
+def _normalize_planned_spans(item: Any, question: str) -> Any:
+    facets = [
+        facet.model_copy(
+            update={
+                "supporting_text_span": _exact_ellipsis_segment(
+                    facet.supporting_text_span,
+                    question,
+                )
+            }
+        )
+        for facet in item.explicit_context_facets
+    ]
+    cases = [
+        case.model_copy(
+            update={
+                "supporting_text_span": _exact_ellipsis_segment(
+                    case.supporting_text_span,
+                    question,
+                )
+            }
+        )
+        for case in item.analysis_cases
+    ]
+    source = (
+        item.source.model_copy(
+            update={
+                "supporting_text_span": _exact_ellipsis_segment(
+                    item.source.supporting_text_span,
+                    question,
+                )
+            }
+        )
+        if item.source
+        else None
+    )
+    target = (
+        item.target.model_copy(
+            update={
+                "supporting_text_span": _exact_ellipsis_segment(
+                    item.target.supporting_text_span,
+                    question,
+                )
+            }
+        )
+        if item.target
+        else None
+    )
+    spatial = (
+        item.spatial_reference.model_copy(
+            update={
+                "text": _exact_ellipsis_segment(
+                    item.spatial_reference.text,
+                    question,
+                    prefer_last=True,
+                )
+            }
+        )
+        if item.spatial_reference
+        else None
+    )
+    return item.model_copy(
+        update={
+            "explicit_context_facets": facets,
+            "analysis_cases": cases,
+            "source": source,
+            "target": target,
+            "spatial_reference": spatial,
+        }
+    )
+
+
+def plan_query(
     question: str,
     query_id: str,
     client: OllamaClient,
     artifact_dir: Path,
-) -> tuple[QueryDecomposition, list[str]]:
-    """Create the smallest executable query plan before scientific parsing."""
-    prompt = _read_prompt("query_decomposition.txt")
+) -> tuple[QueryPlan, list[str]]:
+    """Parse and atomize a question in one schema-validated LLM call."""
+    prompt = _read_prompt("query_plan.txt")
     system, user = prompt.split("USER\n", 1)
-    config = QUERY_PIPELINE["ollama"]["stages"]["query_decomposition"]
+    config = QUERY_PIPELINE["ollama"]["stages"]["query_plan"]
     plan = client.structured(
-        stage="query_decomposition",
+        stage="query_plan",
         system=system.removeprefix("SYSTEM\n").strip(),
         user=user.format(user_question=question).strip(),
-        schema=QueryDecomposition,
+        schema=QueryPlan,
         model=QUERY_PIPELINE["ollama"]["model"],
         temperature=config["temperature"],
         thinking=config["thinking"],
-        artifact_dir=artifact_dir / "decomposition",
+        artifact_dir=artifact_dir / "plan",
         paper_id=query_id,
         input_block_ids=[],
         retries=config["retries"],
     )
     warnings: list[str] = []
-    max_subqueries = QUERY_PIPELINE["query_decomposition"]["max_subqueries"]
+    max_queries = QUERY_PIPELINE["query_plan"]["max_queries"]
+    normalized_question = unicodedata.normalize("NFC", question)
     cleaned = []
     seen: set[str] = set()
-    for index, item in enumerate(plan.subqueries[:max_subqueries], 1):
+    for index, item in enumerate(plan.queries[:max_queries], 1):
+        item = _normalize_planned_spans(item, question)
         text = item.question.strip()
-        key = normalize_text_key(text)
+        case_key = tuple(normalize_text_key(case.label) for case in item.analysis_cases)
+        target_key = (
+            normalize_text_key(item.target.concept), normalize_text_key(item.target.state)
+        ) if item.target else ("", "")
+        key = repr((normalize_text_key(text), case_key, target_key))
         if not text or key in seen:
-            warnings.append("QUERY_DECOMPOSITION_EMPTY_OR_DUPLICATE_REMOVED")
+            warnings.append("QUERY_PLAN_EMPTY_OR_DUPLICATE_REMOVED")
             continue
+        spans = [facet.supporting_text_span for facet in item.explicit_context_facets]
+        spans.extend(case.supporting_text_span for case in item.analysis_cases)
+        spans.extend(
+            endpoint.supporting_text_span for endpoint in (item.source, item.target) if endpoint
+        )
+        invalid_spans = [
+            span
+            for span in spans
+            if unicodedata.normalize("NFC", span) not in normalized_question
+        ]
+        if invalid_spans:
+            warnings.append(f"QUERY_PLAN_INVALID_SUPPORTING_SPAN:{index}")
         dependencies = sorted({value for value in item.depends_on if 1 <= value < index})
         if dependencies != item.depends_on:
-            warnings.append("QUERY_DECOMPOSITION_DEPENDENCIES_NORMALIZED")
+            warnings.append("QUERY_PLAN_DEPENDENCIES_NORMALIZED")
         cleaned.append(item.model_copy(update={"question": text, "depends_on": dependencies}))
         seen.add(key)
     if not cleaned:
-        warnings.append("QUERY_DECOMPOSITION_FELL_BACK_TO_ORIGINAL")
-        plan = QueryDecomposition(
-            operation="retrieve",
-            subqueries=[{"question": question, "depends_on": []}],
-        )
-    else:
-        plan = plan.model_copy(update={"subqueries": cleaned})
-    if plan.operation in {"retrieve", "aggregate"} and len(plan.subqueries) != 1:
-        warnings.append("QUERY_DECOMPOSITION_SINGLE_OPERATION_NORMALIZED")
-        plan = QueryDecomposition(
-            operation=plan.operation,
-            subqueries=[{"question": question, "depends_on": []}],
-        )
+        raise ValueError("Query planning returned no executable searches")
+    plan = plan.model_copy(update={"queries": cleaned})
+    plan, collective_removed = _remove_collective_contrast_queries(plan)
+    if collective_removed:
+        warnings.append("QUERY_PLAN_COLLECTIVE_CONTRAST_REMOVED")
     write_json(
-        artifact_dir / "query_decomposition.json",
+        artifact_dir / "query_plan.json",
         {"original_question": question, "plan": plan.model_dump(), "warnings": warnings},
     )
     return plan, warnings
@@ -301,15 +428,28 @@ def _is_comparative_endpoint(endpoint: Any) -> bool:
     return bool(endpoint and " or " in normalize_text_key(endpoint.state))
 
 
-def _is_compound_unspecified_target(endpoint: Any) -> bool:
-    return bool(endpoint and not endpoint.state.strip() and re.search(r"\band\b", endpoint.concept, re.I))
-
-
 def _is_generic_spatial_reference(value: str) -> bool:
     """Reject spatial-scale wording that is not a named place or identifier."""
     return normalize_text_key(value) in {
         "area", "areas", "local", "locally", "region", "regions", "regional", "globally", "worldwide"
     }
+
+
+def _is_scientific_process_reference(value: str) -> bool:
+    """Identify process or method names mistakenly returned as places."""
+    text = normalize_text_key(value)
+    process = re.search(r"\b(?:monsoon|rainfall|precipitation|temperature|feedback|simulation|model)\b", text)
+    location = re.search(r"\b(?:region|basin|watershed|plain|plateau|valley|province|state|district|country)\b", text)
+    return bool(process and not location)
+
+
+def _is_method_facet(facet: Any) -> bool:
+    if facet.domain != "other":
+        return False
+    text = normalize_text_key(
+        f"{facet.notion} {facet.description} {facet.supporting_text_span}"
+    )
+    return bool(re.search(r"\b(?:model|simulations?|observations?|dataset|study|paper|author)\b", text))
 
 
 def parse_query(
@@ -319,18 +459,24 @@ def parse_query(
     artifact_dir: Path,
     spatial_support: SpatialSupport | None = None,
     fallback_mode: str = "global",
+    parsed_query: ParsedQuery | None = None,
+    supporting_question: str | None = None,
 ) -> tuple[QuerySpec, list[str]]:
-    prompt = _read_prompt("query_parse.txt")
-    system, user = prompt.split("USER\n", 1)
-    config = QUERY_PIPELINE["ollama"]["stages"]["query_parse"]
     warnings: list[str] = []
-    parsed = client.structured(stage="query_parse", system=system.removeprefix("SYSTEM\n").strip(), user=user.format(user_question=question).strip(), schema=ParsedQuery, model=QUERY_PIPELINE["ollama"]["model"], temperature=config["temperature"], thinking=config["thinking"], artifact_dir=artifact_dir / "parse", paper_id=query_id, input_block_ids=[], retries=config["retries"])
-    normalized = unicodedata.normalize("NFC", question)
+    if parsed_query is None:
+        prompt = _read_prompt("query_parse.txt")
+        system, user = prompt.split("USER\n", 1)
+        config = QUERY_PIPELINE["ollama"]["stages"]["query_parse"]
+        parsed = client.structured(stage="query_parse", system=system.removeprefix("SYSTEM\n").strip(), user=user.format(user_question=question).strip(), schema=ParsedQuery, model=QUERY_PIPELINE["ollama"]["model"], temperature=config["temperature"], thinking=config["thinking"], artifact_dir=artifact_dir / "parse", paper_id=query_id, input_block_ids=[], retries=config["retries"])
+    else:
+        parsed = parsed_query
+    evidence_question = supporting_question or question
+    normalized = unicodedata.normalize("NFC", evidence_question)
     explicit_global = bool(re.search(r"\b(?:across (?:the )?(?:indexed )?(?:literature|studies)|global(?:ly)?|corpus-wide)\b", normalized, re.I))
     if parsed.global_requested != explicit_global:
         warnings.append("QUERY_GLOBAL_FLAG_NORMALIZED")
         parsed = parsed.model_copy(update={"global_requested": explicit_global})
-    if not parsed.explicit_context_facets and not explicit_global and re.match(r"\s*(?:in|under|during)\b", normalized, re.I):
+    if parsed_query is None and not parsed.explicit_context_facets and not explicit_global and re.match(r"\s*(?:in|under|during)\b", normalized, re.I):
         warnings.append("QUERY_CONTEXT_FACET_REPAIR")
         facet_system = """TASK
 
@@ -344,7 +490,7 @@ Return valid JSON only in the supplied schema. The output field `explicit_contex
 
 Use only conditions stated in the question."""
         repair_user = f"""USER QUESTION
-{question}
+{evidence_question}
 
 The first parse omitted the environmental information at the beginning of this question. Extract the stated climate, season, land surface, hydrology, atmosphere, terrain, and spatial-configuration conditions."""
         repair_config = QUERY_PIPELINE["ollama"]["stages"]["query_parse_context_repair"]
@@ -357,16 +503,17 @@ The first parse omitted the environmental information at the beginning of this q
         warnings.append("QUERY_INVALID_SUPPORTING_SPAN_DISCARDED")
     exact = lambda span: unicodedata.normalize("NFC", span) in normalized
     valid_facets = [item for item in parsed.explicit_context_facets if exact(item.supporting_text_span)]
+    method_facets = [item for item in valid_facets if _is_method_facet(item)]
+    if method_facets:
+        warnings.append("QUERY_METHOD_FACET_DISCARDED")
+        valid_facets = [item for item in valid_facets if item not in method_facets]
     valid_cases = [item for item in parsed.analysis_cases if exact(item.supporting_text_span)]
-    if parsed.spatial_reference and _is_generic_spatial_reference(parsed.spatial_reference.text):
-        warnings.append("QUERY_GENERIC_SPATIAL_REFERENCE_DISCARDED")
+    if parsed.spatial_reference and (
+        _is_generic_spatial_reference(parsed.spatial_reference.text)
+        or _is_scientific_process_reference(parsed.spatial_reference.text)
+    ):
+        warnings.append("QUERY_NON_GEOGRAPHIC_SPATIAL_REFERENCE_DISCARDED")
         parsed = parsed.model_copy(update={"spatial_reference": None})
-    if parsed.spatial_reference:
-        spatial_key = normalize_text_key(parsed.spatial_reference.text)
-        without_duplicate_place = [item for item in valid_facets if not (item.domain == "spatial_configuration" and normalize_text_key(item.supporting_text_span) == spatial_key)]
-        if len(without_duplicate_place) != len(valid_facets):
-            warnings.append("QUERY_DUPLICATE_SPATIAL_FACET_DISCARDED")
-            valid_facets = without_duplicate_place
     valid_source = parsed.source if parsed.source and exact(parsed.source.supporting_text_span) else None
     valid_target = parsed.target if parsed.target and exact(parsed.target.supporting_text_span) else None
     if len(valid_facets) != len(parsed.explicit_context_facets) or valid_source is not parsed.source or valid_target is not parsed.target:
@@ -383,9 +530,6 @@ The first parse omitted the environmental information at the beginning of this q
         warnings.append("QUERY_COMPARATIVE_ENDPOINTS_DISCARDED")
         valid_source = None
         valid_target = None
-    if _is_compound_unspecified_target(valid_target):
-        warnings.append("QUERY_COMPOUND_TARGET_TREATED_AS_FORWARD")
-        valid_target = None
     for name, endpoint in (("source", valid_source), ("target", valid_target)):
         if not endpoint or not endpoint.state.strip():
             continue
@@ -401,6 +545,22 @@ The first parse omitted the environmental information at the beginning of this q
                 valid_target = replacement
     parsed = parsed.model_copy(update={"explicit_context_facets": valid_facets, "analysis_cases": valid_cases, "source": valid_source, "target": valid_target, "global_requested": explicit_global})
     facets = [QueryFacet(id=f"{query_id}_F{index:03d}", domain=x.domain, notion=x.notion, description=x.description, origin="user", supporting_text_span=x.supporting_text_span) for index, x in enumerate(parsed.explicit_context_facets, 1)]
+    if parsed.spatial_reference and not any(
+        facet.domain == "spatial_configuration"
+        and normalize_text_key(facet.supporting_text_span or "")
+        == normalize_text_key(parsed.spatial_reference.text)
+        for facet in facets
+    ):
+        facets.append(
+            QueryFacet(
+                id=f"{query_id}_F{len(facets) + 1:03d}",
+                domain="spatial_configuration",
+                notion="study region",
+                description=parsed.spatial_reference.text,
+                origin="user",
+                supporting_text_span=parsed.spatial_reference.text,
+            )
+        )
     analysis_cases = [QueryAnalysisCase(id=f"{query_id}_AC{index:03d}", label=x.label, supporting_text_span=x.supporting_text_span) for index, x in enumerate(parsed.analysis_cases, 1)]
     support = spatial_support
     if support is None and parsed.spatial_reference:
@@ -588,9 +748,21 @@ def map_endpoint(endpoint: ClaimEndpoint | None, corpus: Corpus, client: OllamaC
     if endpoint is None:
         return [], []
     concept, direction = canonical_concept(endpoint.concept), canonical_direction(endpoint.state)
-    exact = [(state.id, 1.0) for state in corpus.states.values() if state.concept == concept and _compatible(direction, state.state)]
+    state_weight = QUERY_PIPELINE["state_mapping"]["state_weight"]
+    exact = sorted(
+        (
+            (state.id, (1 - state_weight) + state_weight * compatibility)
+            for state in corpus.states.values()
+            if state.concept == concept
+            and (compatibility := _state_compatibility(direction, state.state))
+            >= QUERY_PIPELINE["state_mapping"]["categorical_token_overlap_min"]
+        ),
+        key=lambda item: (-item[1], item[0]),
+    )
     if exact:
-        return sorted(exact), []
+        best = exact[0][1]
+        seeds = [item for item in exact if best - item[1] <= QUERY_PIPELINE["state_mapping"]["candidate_margin"]]
+        return seeds[:QUERY_PIPELINE["state_mapping"]["seed_top_k"]], ["STATE_MAPPING_AMBIGUOUS"] if len(seeds) > 1 else []
     vector = client.embed([endpoint.concept], QUERY_PIPELINE["embeddings"]["model"], QUERY_PIPELINE["embeddings"]["dimension"])[0]
     top_k = QUERY_PIPELINE["state_mapping"]["top_k"]
     if indexes:
@@ -601,7 +773,14 @@ def map_endpoint(endpoint: ClaimEndpoint | None, corpus: Corpus, client: OllamaC
         states = [corpus.states[identifier] for identifier, _ in indexes.search("states", vector, pool_k)]
     else:
         states = list(corpus.states.values())
-    candidates = sorted(((max(0.0, cosine(vector, state.concept_embedding or [])), state) for state in states if _compatible(direction, state.state)), key=lambda x: (-x[0], x[1].id))[:top_k]
+    candidates = []
+    for state in states:
+        state_score = _state_compatibility(direction, state.state)
+        if state_score < QUERY_PIPELINE["state_mapping"]["categorical_token_overlap_min"]:
+            continue
+        concept_score = max(0.0, cosine(vector, state.concept_embedding or []))
+        candidates.append(((1 - state_weight) * concept_score + state_weight * state_score, state))
+    candidates = sorted(candidates, key=lambda x: (-x[0], x[1].id))[:top_k]
     seeds = [(state.id, score) for score, state in candidates[:QUERY_PIPELINE["state_mapping"]["seed_top_k"]]]
     warnings = []
     if len(candidates) > 1 and candidates[0][0] - candidates[1][0] < QUERY_PIPELINE["state_mapping"]["candidate_margin"]:
@@ -609,11 +788,42 @@ def map_endpoint(endpoint: ClaimEndpoint | None, corpus: Corpus, client: OllamaC
     return seeds, warnings
 
 
-def _compatible(query_state: str, candidate_state: str) -> bool:
+def _direction_family(value: str) -> str | None:
+    tokens = set(re.findall(r"[a-z0-9]+", normalize_text_key(value).replace("_", " ")))
+    families = []
+    if tokens & {"increase", "increased", "increasing", "rise", "rising", "higher", "warming", "expansion", "more"}:
+        families.append("increase")
+    if tokens & {"decrease", "decreased", "decreasing", "decline", "reduction", "reduced", "lower", "cooling", "less"}:
+        families.append("decrease")
+    if "no_detectable_change" in value or ({"no", "change"} <= tokens):
+        families.append("no_detectable_change")
+    return families[0] if len(set(families)) == 1 else None
+
+
+def _state_tokens(value: str) -> set[str]:
+    aliases = {"cropland": "crop", "croplands": "crop", "forests": "forest"}
+    ignored = {"in", "of", "and", "to", "from", "cover", "change", "changed", "conversion"}
+    return {
+        aliases.get(token, token)
+        for token in re.findall(r"[a-z0-9]+", normalize_text_key(value).replace("_", " "))
+        if token not in ignored
+    }
+
+
+def _state_compatibility(query_state: str, candidate_state: str) -> float:
     if not normalize_text_key(query_state):
-        return True
-    directional = {"increase", "decrease", "no_detectable_change"}
-    return query_state == candidate_state if query_state in directional or candidate_state in directional else normalize_text_key(query_state) == normalize_text_key(candidate_state)
+        return 1.0
+    if normalize_text_key(query_state) == normalize_text_key(candidate_state):
+        return 1.0
+    query_family = _direction_family(query_state)
+    candidate_family = _direction_family(candidate_state)
+    if query_family or candidate_family:
+        return 1.0 if query_family == candidate_family and query_family is not None else 0.0
+    query_tokens = _state_tokens(query_state)
+    candidate_tokens = _state_tokens(candidate_state)
+    if not query_tokens or not candidate_tokens:
+        return 0.0
+    return len(query_tokens & candidate_tokens) / min(len(query_tokens), len(candidate_tokens))
 
 
 def _claim_state_ids(claim: Claim) -> tuple[str, str]:
@@ -713,6 +923,18 @@ def rank_claims(spec: QuerySpec, vectors: dict[str, list[float] | None], corpus:
         if claim.scope_type == "context": scope_context = claim.scope_id
         else: scope_context = corpus.transitions[claim.scope_id].from_context_id
         context_report = context_reports.get(scope_context)
+        context_scoring_source = "context_shortlist" if context_report else None
+        if context_report is None and spec.context.facets:
+            context_report = {
+                "context_id": scope_context,
+                "paper_id": claim.paper_id,
+                "coarse_ann_score": None,
+                "context_similarity": context_similarity(
+                    spec.context.facets,
+                    corpus.effective_facets(scope_context),
+                ),
+            }
+            context_scoring_source = "claim_context_on_demand"
         context_score = context_report["context_similarity"]["overall_score"] if context_report else None
         conditioning = _conditioning(claim, spec, corpus)
         case_match = _analysis_case_match(claim, spec)
@@ -736,7 +958,7 @@ def rank_claims(spec: QuerySpec, vectors: dict[str, list[float] | None], corpus:
             applicability_status = "incompatible"
         else:
             applicability_status = "compatible_candidate"
-        rows.append({"claim_id": claim_id, "channels": sorted(channels), "R_claim": rank, "A_claim": applicability, "applicability_known": applicability is not None, "applicability_status": applicability_status, "context_coverage": coverage, "S_claim_semantic": components["mechanism"], "S_source_block": components["source_block"], "S_transition": components["intervention"], "S_endpoint": endpoint_score, "analysis_case_match": case_match, "conditioning_match": conditioning, "scope_context_id": scope_context})
+        rows.append({"claim_id": claim_id, "channels": sorted(channels), "R_claim": rank, "A_claim": applicability, "applicability_known": applicability is not None, "applicability_status": applicability_status, "context_coverage": coverage, "context_scoring_source": context_scoring_source, "S_claim_semantic": components["mechanism"], "S_source_block": components["source_block"], "S_transition": components["intervention"], "S_endpoint": endpoint_score, "analysis_case_match": case_match, "conditioning_match": conditioning, "scope_context_id": scope_context})
     rows.sort(key=lambda x: (-x["R_claim"], -x["applicability_known"], -x["context_coverage"], -(x["A_claim"] if x["A_claim"] is not None else -1), -(x["S_endpoint"] if x["S_endpoint"] is not None else -1), x["claim_id"]))
     return rows[:QUERY_PIPELINE["mechanism_retrieval"]["candidate_claim_top_k"]]
 
@@ -865,6 +1087,47 @@ def search_paths(
     return [{"claim_ids": x["claims"], "state_ids": x["states"], **{k: x[k] for k in ("A_path", "C_path", "M_path", "length_factor", "R_path", "context_unknown", "coherence_unknown")}} for x in completed[:QUERY_PIPELINE["path_search"]["max_paths"]]]
 
 
+def _balanced_evidence_rows(
+    all_rows: list[dict[str, Any]],
+    paper_ids_by_claim: dict[str, str],
+    preferred_paper_ids: set[str],
+    limit: int,
+    slots: dict[str, int],
+) -> list[dict[str, Any]]:
+    """Fill a fixed evidence budget from distinct retrieval signals."""
+    rows: list[dict[str, Any]] = []
+    selected_ids: set[str] = set()
+
+    def add(candidates: list[dict[str, Any]], count: int) -> None:
+        if count <= 0:
+            return
+        for candidate in candidates:
+            if candidate["claim_id"] in selected_ids:
+                continue
+            rows.append(candidate)
+            selected_ids.add(candidate["claim_id"])
+            if len(rows) >= limit or count <= 1:
+                break
+            count -= 1
+
+    add(
+        [row for row in all_rows if paper_ids_by_claim[row["claim_id"]] in preferred_paper_ids],
+        slots["dependency_paper"],
+    )
+    for field, slot_name in (
+        ("S_source_block", "source_block"),
+        ("S_claim_semantic", "claim_semantic"),
+        ("S_endpoint", "endpoint"),
+    ):
+        candidates = sorted(
+            (row for row in all_rows if row.get(field) is not None),
+            key=lambda row: (-row[field], -row["R_claim"], row["claim_id"]),
+        )
+        add(candidates, slots[slot_name])
+    add(all_rows, limit - len(rows))
+    return rows
+
+
 def select_direct_evidence_paths(
     spec: QuerySpec,
     corpus: Corpus,
@@ -881,19 +1144,13 @@ def select_direct_evidence_paths(
     )
     limit = config["direct_claim_paths"]
     preferred_paper_ids = preferred_paper_ids or set()
-    preferred_limit = min(
-        QUERY_PIPELINE["query_decomposition"]["dependency_paper_claims"],
+    rows = _balanced_evidence_rows(
+        all_rows,
+        {claim_id: claim.paper_id for claim_id, claim in corpus.claims.items()},
+        preferred_paper_ids,
         limit,
+        config["direct_selection_slots"],
     )
-    preferred = [
-        row for row in all_rows
-        if corpus.claims[row["claim_id"]].paper_id in preferred_paper_ids
-    ][:preferred_limit]
-    preferred_ids = {row["claim_id"] for row in preferred}
-    rows = [
-        *preferred,
-        *(row for row in all_rows if row["claim_id"] not in preferred_ids),
-    ][:limit]
     selected = []
     for row in rows:
         claim_id = row["claim_id"]
@@ -1299,10 +1556,12 @@ def _run_atomic_query(
         synthesis = {"items": [], "provenance": {}}
         stage("evidence_ready", {"path_count": len(synthesis_paths), "alternative_count": len(synthesis_alternatives), "source_block_count": sum(len(items) for items in selected_blocks.values())})
     synthesis_template = "final_synthesis_planning.txt" if answer_task == "planning" else "final_synthesis.txt"
-    report = {"query_id": query_id, "query_pipeline_version": "0.4-soft-context", "answer_task": answer_task, "query_spec": _query_spec_payload(spec), "context_evidence_comparisons": context_comparisons, "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "claim_candidates": ranked, "direct_evidence_paths": direct_paths, "graph_paths": graph_paths, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis"), "final_synthesis_template": synthesis_template}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
+    report = {"query_id": query_id, "query_pipeline_version": "0.8-atomic-plan", "answer_task": answer_task, "query_spec": _query_spec_payload(spec), "context_evidence_comparisons": context_comparisons, "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "claim_candidates": ranked, "direct_evidence_paths": direct_paths, "graph_paths": graph_paths, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis"), "final_synthesis_template": synthesis_template}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
     report["dependency_paper_ids"] = sorted(preferred_paper_ids or set())
     report["primary_evidence_paper_ids"] = _primary_semantic_paper_ids(direct_paths, ranked, corpus)
     report["synthesis_mode"] = "full" if synthesize_answer else "retrieval_only"
+    if prepared_query is not None:
+        report["prompt_versions"].pop("query_parse", None)
     write_json(artifact_dir / "query_report.json", report)
     (artifact_dir / "answer.md").write_text(answer, encoding="utf-8")
     stage("artifacts_written", {"query_report": str(artifact_dir / "query_report.json"), "answer": str(artifact_dir / "answer.md")})
@@ -1312,7 +1571,7 @@ def _run_atomic_query(
 def _synthesize_combined_evidence(
     question: str,
     query_id: str,
-    plan: QueryDecomposition,
+    plan: QueryPlan,
     reports: list[dict[str, Any]],
     corpus: Corpus,
     client: OllamaClient,
@@ -1323,7 +1582,7 @@ def _synthesize_combined_evidence(
     allowed_claims: set[str] = set()
     claims: dict[str, Any] = {}
     block_references: dict[str, list[dict[str, Any]]] = {}
-    for number, (subquery, report) in enumerate(zip(plan.subqueries, reports), 1):
+    for number, (subquery, report) in enumerate(zip(plan.queries, reports), 1):
         ranked = {row["claim_id"]: row for row in report.get("claim_candidates", [])}
         paths = report.get("synthesis_package", {}).get("paths", [])
         alternatives = report.get("synthesis_package", {}).get("contradictions_and_alternatives", [])
@@ -1481,25 +1740,30 @@ def run_query(
 ) -> dict[str, Any]:
     client = client or OllamaClient()
     artifact_dir = output_root / query_id
-    if not QUERY_PIPELINE["query_decomposition"]["enabled"]:
-        return _run_atomic_query(
-            question, query_id, papers, output_root, client, stage_callback,
-            indexes, spatial_support, answer_task,
-        )
-
-    plan, warnings = decompose_query(question, query_id, client, artifact_dir)
+    plan, warnings = plan_query(question, query_id, client, artifact_dir)
     if stage_callback:
         stage_callback(
-            "query_decomposed",
+            "query_planned",
             {
                 "operation": plan.operation,
-                "subqueries": [item.model_dump() for item in plan.subqueries],
+                "queries": [item.model_dump() for item in plan.queries],
                 "warnings": warnings,
             },
         )
-    if len(plan.subqueries) == 1:
+    if len(plan.queries) == 1:
+        planned = plan.queries[0]
+        prepared = parse_query(
+            planned.question,
+            query_id,
+            client,
+            artifact_dir,
+            spatial_support,
+            "backward" if answer_task == "planning" else "global",
+            ParsedQuery.model_validate(planned.model_dump(exclude={"question", "depends_on"})),
+            question,
+        )
         report = _run_atomic_query(
-            plan.subqueries[0].question,
+            planned.question,
             query_id,
             papers,
             output_root,
@@ -1508,9 +1772,11 @@ def run_query(
             indexes,
             spatial_support,
             answer_task,
+            prepared_query=prepared,
         )
-        report["query_decomposition"] = plan.model_dump()
+        report["query_plan"] = plan.model_dump()
         report["original_question"] = question
+        report["prompt_versions"]["query_plan"] = stage_prompt_version("query_plan")
         report["warnings"] = list(dict.fromkeys([*warnings, *report.get("warnings", [])]))
         write_json(artifact_dir / "query_report.json", report)
         return report
@@ -1522,7 +1788,7 @@ def run_query(
     prepared_queries: dict[int, tuple[QuerySpec, list[str]]] = {}
     reusable_candidates: dict[int, dict[str, Any]] = {}
     fallback_mode = "backward" if answer_task == "planning" else "global"
-    for number, subquery in enumerate(plan.subqueries, 1):
+    for number, subquery in enumerate(plan.queries, 1):
         subquery_id = f"q{number}"
         saved_report_path = subquery_root / subquery_id / "query_report.json"
         candidate = None
@@ -1531,6 +1797,7 @@ def run_query(
             if (
                 loaded.get("query_spec", {}).get("user_question") == subquery.question
                 and loaded.get("synthesis_mode") == "retrieval_only"
+                and loaded.get("query_pipeline_version") == "0.8-atomic-plan"
             ):
                 candidate = loaded
                 reusable_candidates[number] = loaded
@@ -1542,18 +1809,20 @@ def run_query(
                 subquery_root / subquery_id,
                 spatial_support,
                 fallback_mode,
+                ParsedQuery.model_validate(subquery.model_dump(exclude={"question", "depends_on"})),
+                question,
             )
     if stage_callback:
         stage_callback(
-            "subqueries_parsed",
+            "atomic_queries_compiled",
             {
-                "subquery_count": len(plan.subqueries),
-                "fresh_parse_count": len(prepared_queries),
+                "query_count": len(plan.queries),
+                "fresh_compile_count": len(prepared_queries),
                 "reusable_report_count": len(reusable_candidates),
             },
         )
 
-    for number, subquery in enumerate(plan.subqueries, 1):
+    for number, subquery in enumerate(plan.queries, 1):
         subquery_id = f"q{number}"
         saved_report_path = subquery_root / subquery_id / "query_report.json"
         preferred_paper_ids = {
@@ -1594,6 +1863,8 @@ def run_query(
                     subquery_root / subquery_id,
                     spatial_support,
                     fallback_mode,
+                    ParsedQuery.model_validate(subquery.model_dump(exclude={"question", "depends_on"})),
+                    question,
                 )
             reports.append(
                 _run_atomic_query(
@@ -1638,10 +1909,10 @@ def run_query(
         warnings.extend(report.get("warnings", []))
     report = {
         "query_id": query_id,
-        "query_pipeline_version": "0.7-phase-batched",
+        "query_pipeline_version": "0.8-atomic-plan",
         "answer_task": answer_task,
         "original_question": question,
-        "query_decomposition": plan.model_dump(),
+        "query_plan": plan.model_dump(),
         "query_spec": first_spec,
         "subquery_reports": [
             {
@@ -1653,7 +1924,7 @@ def run_query(
                 "answer": subreport["answer"],
                 "artifact_dir": str(subquery_root / subreport["query_id"]),
             }
-            for number, (subquery, subreport) in enumerate(zip(plan.subqueries, reports), 1)
+            for number, (subquery, subreport) in enumerate(zip(plan.queries, reports), 1)
         ],
         "context_candidates": context_candidates,
         "claim_candidates": claim_candidates,
@@ -1661,8 +1932,7 @@ def run_query(
         "synthesis": synthesis,
         "answer": answer,
         "prompt_versions": {
-            "query_decomposition": stage_prompt_version("query_decomposition"),
-            "query_parse": stage_prompt_version("query_parse"),
+            "query_plan": stage_prompt_version("query_plan"),
             "query_combined_synthesis": stage_prompt_version("query_combined_synthesis"),
         },
         "models": {

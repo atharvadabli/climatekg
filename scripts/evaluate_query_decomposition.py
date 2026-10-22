@@ -1,4 +1,4 @@
-"""Run and save query-decomposition plans for a benchmark dataset."""
+"""Run and save atomic query plans for a benchmark dataset."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ def main() -> None:
 
     sys.path.insert(0, str(args.code_root.resolve()))
     from climatekg.ollama import OllamaClient
-    from climatekg.query import decompose_query
+    from climatekg.query import plan_query
 
     cases = read_json(args.dataset)
     output = args.output.resolve()
@@ -43,7 +43,7 @@ def main() -> None:
             print(f"[{index}/{len(cases)}] {case['id']}: reused", flush=True)
             continue
         started = time.perf_counter()
-        plan, warnings = decompose_query(
+        plan, warnings = plan_query(
             case["question"],
             case["id"],
             client,
@@ -53,14 +53,14 @@ def main() -> None:
             "case_id": case["id"],
             "question": case["question"],
             "operation": plan.operation,
-            "subqueries": [item.model_dump() for item in plan.subqueries],
+            "subqueries": [item.model_dump() for item in plan.queries],
             "warnings": warnings,
             "elapsed_seconds": round(time.perf_counter() - started, 3),
         }
         write_json(target, record)
         records.append(record)
         print(
-            f"[{index}/{len(cases)}] {case['id']}: {plan.operation} ({len(plan.subqueries)})",
+            f"[{index}/{len(cases)}] {case['id']}: {plan.operation} ({len(plan.queries)})",
             flush=True,
         )
 

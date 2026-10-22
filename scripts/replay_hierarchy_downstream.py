@@ -84,7 +84,7 @@ def main() -> None:
 
     started = time.time()
     claims, claim_hints = extract_claims(
-        paper, mapped, contexts, transitions, facets, map_meta, blocks, output_dir, client
+        paper, mapped, contexts, transitions, facets, blocks, output_dir, client
     )
     write_json(output_dir / "stages" / "03_claims.json", {
         "claims": [item.model_dump(by_alias=True) for item in claims],

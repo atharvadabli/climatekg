@@ -584,6 +584,36 @@ def include_evidence_blocks(
     return sorted(selected.values(), key=lambda block: block.order)
 
 
+def partition_claim_blocks(blocks: list[SourceBlock], target_tokens: int) -> list[list[SourceBlock]]:
+    """Split large Claim inputs at section boundaries without dropping passages."""
+    if token_count(_render_blocks(blocks)) <= target_tokens:
+        return [blocks]
+    groups: list[list[SourceBlock]] = []
+    for block in sorted(blocks, key=lambda item: item.order):
+        if not groups or groups[-1][0].section_path != block.section_path:
+            groups.append([])
+        groups[-1].append(block)
+    parts: list[list[SourceBlock]] = []
+    current: list[SourceBlock] = []
+    for group in groups:
+        if token_count(_render_blocks(group)) > target_tokens:
+            for block in group:
+                proposal = [*current, block]
+                if current and token_count(_render_blocks(proposal)) > target_tokens:
+                    parts.append(current)
+                    current = []
+                current.append(block)
+            continue
+        proposal = [*current, *group]
+        if current and token_count(_render_blocks(proposal)) > target_tokens:
+            parts.append(current)
+            current = []
+        current.extend(group)
+    if current:
+        parts.append(current)
+    return parts
+
+
 def is_outcome_like_facet(notion: str, description: str) -> bool:
     """Identify explicit response statements that belong in Claims, not Facets."""
     text = normalize_text_key(f"{notion} {description}")
@@ -603,6 +633,52 @@ def effective_facet_ids(context_id: str, contexts: list[Context], facets: list[F
         allowed.add(current)
         pending.extend(by_context[current].parent_ids)
     return [x for x in facets if x.context_id in allowed]
+
+
+def relevant_claim_contexts(
+    scope_id: str,
+    scope_type: str,
+    contexts: list[Context],
+    transitions: list[Transition],
+) -> list[dict[str, Any]]:
+    """Return only the target Contexts and their ancestors for Claim extraction."""
+    by_id = {context.id: context for context in contexts}
+    if scope_type == "transition":
+        transition = next(item for item in transitions if item.id == scope_id)
+        pending = [transition.from_context_id, transition.to_context_id]
+    else:
+        pending = [scope_id]
+    selected: set[str] = set()
+    while pending:
+        context_id = pending.pop()
+        if context_id in selected or context_id not in by_id:
+            continue
+        selected.add(context_id)
+        pending.extend(by_id[context_id].parent_ids)
+    return [
+        {
+            "id": context.id,
+            "label": context.label,
+            "parent_ids": context.parent_ids,
+            "aliases": context.aliases,
+            "spatial_support": context.spatial_support.model_dump(mode="json") if context.spatial_support else None,
+        }
+        for context in contexts
+        if context.id in selected
+    ]
+
+
+def compact_claim_facets(facets: list[Facet]) -> list[dict[str, Any]]:
+    """Keep only Facet identity and scientific meaning needed by Claim extraction."""
+    return [
+        {
+            "id": facet.id,
+            "domain": facet.domain,
+            "notion": facet.notion,
+            "description": facet.description,
+        }
+        for facet in facets
+    ]
 
 
 def extract_facets(
@@ -680,7 +756,7 @@ def extract_facets(
     return exact_deduplicate_facets(facets, blocks), hints
 
 
-def extract_claims(paper: Paper, mapped: PaperMap, contexts: list[Context], transitions: list[Transition], facets: list[Facet], map_meta: dict[str, Any], blocks: list[SourceBlock], paper_dir: Path, client: OllamaClient) -> tuple[list[Claim], list[str]]:
+def extract_claims(paper: Paper, mapped: PaperMap, contexts: list[Context], transitions: list[Transition], facets: list[Facet], blocks: list[SourceBlock], paper_dir: Path, client: OllamaClient) -> tuple[list[Claim], list[str]]:
     system, user = _split_prompt(_prompt("claim_extraction.txt"))
     cfg = PIPELINE["ollama"]["stages"]["claim_extraction"]
     by_temp_transition = {x.temp_id: x for x in mapped.transitions}
@@ -743,13 +819,41 @@ def extract_claims(paper: Paper, mapped: PaperMap, contexts: list[Context], tran
         else:
             bundle = bundles[scope_id]
             target = next((x.model_dump(exclude={"transition_embedding"}) for x in transitions if x.id == scope_id), next((x.model_dump(exclude={"retrieval_embedding"}) for x in contexts if x.id == scope_id), {}))
-            request_text = user.format(paper_id=paper.id, context_registry=json.dumps(map_meta["registry"]), transitions=json.dumps([x.model_dump(exclude={"transition_embedding"}) for x in transitions]), available_scope_facets=json.dumps([x.model_dump(exclude={"notion_embedding", "content_embedding"}) for x in available_facets]), target_scope=json.dumps(target), evidence_blocks=_render_blocks(bundle))
-            batch = client.structured(stage="claim_extraction", system=system, user=request_text, schema=ClaimBatch, model=PIPELINE["ollama"]["model"], temperature=cfg["temperature"], thinking=cfg["thinking"], artifact_dir=cached_path.parent, paper_id=paper.id, input_block_ids=[x.id for x in bundle], retries=cfg["retries"])
+            parts = partition_claim_blocks(
+                bundle,
+                PIPELINE["evidence_retrieval"]["claim_bundle_target_tokens"],
+            )
+            part_batches: list[ClaimBatch] = []
+            for part_number, part in enumerate(parts, 1):
+                part_dir = cached_path.parent / "parts" / f"part{part_number:03d}"
+                part_cache = part_dir / "validated.json"
+                allowed_part_blocks = {x.id for x in part}
+                if part_cache.exists():
+                    part_batch = ClaimBatch.model_validate_json(part_cache.read_text(encoding="utf-8"))
+                else:
+                    request_text = user.format(
+                        paper_id=paper.id,
+                        relevant_contexts=json.dumps(relevant_claim_contexts(scope_id, scope_type, contexts, transitions)),
+                        available_scope_facets=json.dumps(compact_claim_facets(available_facets)),
+                        target_scope=json.dumps(target),
+                        evidence_blocks=_render_blocks(part),
+                    )
+                    part_batch = client.structured(stage="claim_extraction", system=system, user=request_text, schema=ClaimBatch, model=PIPELINE["ollama"]["model"], temperature=cfg["temperature"], thinking=cfg["thinking"], artifact_dir=part_dir, paper_id=paper.id, input_block_ids=[x.id for x in part], retries=cfg["retries"])
+                    if part_batch.scope_id != scope_id or any(not set(x.evidence_block_ids) <= allowed_part_blocks or any(not set(case.evidence_block_ids) <= allowed_part_blocks for case in x.analysis_cases) for x in part_batch.claims):
+                        repair = request_text + f"\n\nCORRECTION TASK\n\nThe returned scientific relationships used an invalid scope or reference ID.\n\nPREVIOUS JSON OBJECT\n{part_batch.model_dump_json(by_alias=True)}\n\nREQUIRED SCOPE ID\n{scope_id}\n\nALLOWED EVIDENCE IDS\n{json.dumps(sorted(allowed_part_blocks))}\n\nALLOWED CONDITION IDS\n{json.dumps(sorted(reachable_facets))}\n\nReturn the complete JSON object again using the required scope ID and exact IDs from the allowed lists. Keep scientific content grounded in the original evidence passages above."
+                        repair_cfg = PIPELINE["ollama"]["stages"]["claim_reference_repair"]
+                        part_batch = client.structured(stage="claim_reference_repair", system=system, user=repair, schema=ClaimBatch, model=PIPELINE["ollama"]["model"], temperature=repair_cfg["temperature"], thinking=repair_cfg["thinking"], artifact_dir=part_dir, paper_id=paper.id, input_block_ids=[x.id for x in part], retries=repair_cfg["retries"])
+                    write_json(part_cache, part_batch.model_dump(by_alias=True))
+                if part_batch.scope_id != scope_id or any(not set(x.evidence_block_ids) <= allowed_part_blocks or any(not set(case.evidence_block_ids) <= allowed_part_blocks for case in x.analysis_cases) for x in part_batch.claims):
+                    raise ValueError(f"FAILED_REFERENCE_VALIDATION: Claim batch {scope_id} part {part_number}")
+                part_batches.append(part_batch)
+            batch = ClaimBatch(
+                scope_id=scope_id,
+                claims=[claim for part_batch in part_batches for claim in part_batch.claims],
+                unmapped_context_hints=unique_in_order([hint for part_batch in part_batches for hint in part_batch.unmapped_context_hints]),
+                ambiguities=unique_in_order([item for part_batch in part_batches for item in part_batch.ambiguities]),
+            )
             allowed_blocks = {x.id for x in bundle}
-            if batch.scope_id != scope_id or any(not set(x.evidence_block_ids) <= allowed_blocks or any(not set(case.evidence_block_ids) <= allowed_blocks for case in x.analysis_cases) for x in batch.claims):
-                repair = request_text + f"\n\nCORRECTION TASK\n\nThe returned scientific relationships used an invalid scope or reference ID.\n\nPREVIOUS JSON OBJECT\n{batch.model_dump_json(by_alias=True)}\n\nREQUIRED SCOPE ID\n{scope_id}\n\nALLOWED EVIDENCE IDS\n{json.dumps(sorted(allowed_blocks))}\n\nALLOWED CONDITION IDS\n{json.dumps(sorted(reachable_facets))}\n\nReturn the complete JSON object again using the required scope ID and exact IDs from the allowed lists. Keep scientific content grounded in the original evidence passages above."
-                repair_cfg = PIPELINE["ollama"]["stages"]["claim_reference_repair"]
-                batch = client.structured(stage="claim_reference_repair", system=system, user=repair, schema=ClaimBatch, model=PIPELINE["ollama"]["model"], temperature=repair_cfg["temperature"], thinking=repair_cfg["thinking"], artifact_dir=cached_path.parent, paper_id=paper.id, input_block_ids=[x.id for x in bundle], retries=repair_cfg["retries"])
         if batch.scope_id != scope_id or any(not set(x.evidence_block_ids) <= allowed_blocks or any(not set(case.evidence_block_ids) <= allowed_blocks for case in x.analysis_cases) for x in batch.claims):
             raise ValueError(f"FAILED_REFERENCE_VALIDATION: Claim batch {scope_id}")
         for candidate in batch.claims:

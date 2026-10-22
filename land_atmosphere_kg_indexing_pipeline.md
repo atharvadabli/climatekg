@@ -1644,6 +1644,13 @@ T1 / clouds and precipitation
 T1 / circulation
 ```
 
+Before an LLM request, deterministically partition a Claim evidence bundle larger than the configured
+`claim_bundle_target_tokens` (default 6000) into reading-order batches. Preserve section boundaries
+when they fit; split an oversized section between SourceBlocks. Every selected SourceBlock must occur
+in exactly one batch. Run the same Claim prompt for every batch, preserve the original `scope_id`,
+then concatenate and exact-deduplicate the validated candidates. This batching is an attention and
+output-recall control; it must not discard evidence or introduce a semantic pre-classification call.
+
 ---
 
 # 20. Stage 12 — Claim extraction
@@ -1719,17 +1726,19 @@ Hard rules:
 20. Aim for a 15–50 word Claim description without padding. It may be longer
     when required to preserve conditional, spatial, or non-monotonic behavior.
 21. Return only schema-valid JSON.
+22. Read the supplied passages once for reported outcomes and once for supported explanations.
+23. When causal wording such as "because", "due to", "resulting from", or "attributed to" states a
+    supported relationship, return that explanation separately from the outcome it explains.
+24. An interpretation of this paper's own result remains AUTHORS_INTERPRETATION_OF_OWN_RESULT when a
+    supporting literature citation appears at the end of the sentence.
 
 USER
 
 Paper:
 {paper_id}
 
-Known Context Registry:
-{context_registry}
-
-Known Transitions:
-{transitions}
+Relevant target Contexts and their ancestors:
+{relevant_contexts}
 
 Available effective Facets for the target scope:
 {available_scope_facets}
@@ -1740,6 +1749,12 @@ Target scope:
 Evidence bundle:
 {evidence_blocks}
 ```
+
+The prompt input contains only the target Context lineage, the target Context or Transition, and the
+effective Facets available to that target. Facets are serialized as `id`, `domain`, `notion`, and
+`description`; graph ownership, provenance objects, embeddings, and Facet evidence lists are omitted
+because they are not used to extract a Claim. This compaction does not change which Facet IDs may be
+selected as conditioning Facets.
 
 ## Claim output schema
 

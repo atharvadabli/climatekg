@@ -522,3 +522,27 @@ Branch: `experiment/query-decomposition-v1`
 - The intended case, `CKGQ0001`, improved from 1/4 to 4/4 in the paired reference review.
 - The four remaining incorrect cases are documented in
   `docs/P000100_PATCH_20_QUERY_RERUN.md`; they are unrelated to the P000100 artifact correction.
+
+## 2026-10-21: Atomic query planning and balanced retrieval
+
+- Replaced decomposition followed by repeated semantic parsing with one structured atomic query-plan
+  call. Every atomic search carries its parsed source, target, case, Context Facets, and location.
+- Removed the rule that discarded compound targets, and removed redundant collective-contrast searches
+  such as `other months` when the focal case already preserves the requested comparison.
+- Normalized Qwen ellipsis spans to exact question text without another LLM call; unrepairable spans
+  remain visibly rejected.
+- Added fixed-budget evidence diversification, state compatibility, and on-demand Context scoring for
+  Claims found outside the initial Context shortlist.
+- Reduced large Claim-extraction inputs to relevant Context lineage and compact Facets, and batched
+  evidence without dropping SourceBlocks. A generic second reading for supported explanations recovered
+  the missing P000040 September mechanism from `P000040:S03:P0039`.
+- Removed unused query-plan and Claim-extraction experiment switches after validation.
+- In the 20-case rerun, 18 completed cases retrieved the expected paper in 18/18 cases. Mean/median
+  reference-token F1 was 0.3572/0.3813 and mean/median latency was 97.4/80.1 seconds. Two cases failed
+  for external runtime reasons (missing worktree-visible Earth Engine configuration and a refused local
+  Ollama connection), so these numbers are not reported as a strict 20-case comparison.
+- Trace review marked `CKGQ0007`, `CKGQ0011`, and `CKGQ0026` scientifically correct. `CKGQ0033`
+  recovered a supported evapotranspiration mechanism but not the benchmark's complete roughness-wind
+  route because one indexed multi-cause finding has only one source endpoint. This remains an indexing
+  atomicity issue and was not patched with a query heuristic.
+- Detailed design, targeted results, and artifact paths are in `docs/ATOMIC_QUERY_PLAN_V1.md`.

@@ -10,8 +10,7 @@ INPUT
 
 You will receive:
 - a paper identifier;
-- the known study settings;
-- the known comparisons between settings;
+- the study setting or settings needed to understand the target;
 - environmental or experimental condition records available to the target scope;
 - the one target setting or comparison to which all returned relationships must belong;
 - evidence passages with stable SourceBlock IDs.
@@ -22,11 +21,27 @@ Use `causal` when the paper explicitly attributes the target response to the sou
 
 Preserve separate, null, opposite, conditional, seasonal, scale-dependent, spatial, magnitude-dependent, and timing-dependent findings as separate records when the evidence distinguishes them. A multi-step mechanism may be split only when the evidence supports every individual step.
 
+Read every supplied passage before finalizing the list. When one passage reports an outcome and also
+gives a supported explanation for why that outcome is stronger or weaker in a particular season,
+location, scale, or case, return the reported outcome and the explanatory relationship as separate
+records. Preserve each distinct directly supported relationship rather than folding the explanation
+into a general outcome description.
+
+Review the passages twice before returning the JSON: first identify reported outcomes; then identify
+explanations introduced by language such as `because`, `due to`, `resulting from`, or `attributed to`.
+When such an explanation states a supported relationship, return it as its own record even when the
+same passage already supports an outcome record.
+
 Classify the role of the evidence using exactly one value:
 - `OWN_RESULT`: A result produced by this paper's analysis, observations, or experiment.
 - `AUTHORS_INTERPRETATION_OF_OWN_RESULT`: The authors' interpretation of their own result.
 - `CITED_BACKGROUND`: A finding attributed only to another publication.
 - `HYPOTHESIS_OR_PROPOSAL`: A proposed explanation or expected relationship not established as this paper's result.
+
+An explanation in the paper's Results or Discussion of why its own reported response is stronger,
+weaker, earlier, later, seasonal, or case-dependent is `AUTHORS_INTERPRETATION_OF_OWN_RESULT`. A
+supporting literature citation at the end of that explanation does not change the role when the
+sentence explicitly interprets the current paper's result.
 
 Only use a condition record in `conditioning_facet_ids` when the evidence indicates that the relationship depends on it, changes under it, is located or oriented by it, or is experimentally defined by it. Mere coexistence in the same setting is not conditioning.
 
@@ -65,11 +80,8 @@ USER
 PAPER IDENTIFIER
 {paper_id}
 
-KNOWN STUDY SETTINGS
-{context_registry}
-
-KNOWN COMPARISONS
-{transitions}
+RELEVANT STUDY SETTINGS
+{relevant_contexts}
 
 AVAILABLE CONDITION RECORDS FOR THE TARGET
 {available_scope_facets}

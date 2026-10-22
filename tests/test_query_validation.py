@@ -46,9 +46,9 @@ def test_required_scientific_claim_groups_must_reach_grounded_answer() -> None:
 
 
 def test_unspecified_query_state_is_compatible() -> None:
-    from climatekg.query import _compatible
+    from climatekg.query import _state_compatibility
 
-    assert _compatible("", "increase")
+    assert _state_compatibility("", "increase") == 1.0
 
 
 def test_generic_spatial_scale_is_not_a_named_location() -> None:
@@ -166,19 +166,112 @@ def test_comparison_query_detection_uses_intervention_text() -> None:
     assert not _is_comparison_query(ordinary)
 
 
-def test_query_decomposition_schema_represents_independent_and_dependent_searches() -> None:
-    from climatekg.extraction_models import QueryDecomposition
+def test_query_plan_schema_represents_atomic_dependent_searches() -> None:
+    from climatekg.extraction_models import QueryPlan
 
-    plan = QueryDecomposition.model_validate({
+    plan = QueryPlan.model_validate({
         "operation": "join",
-        "subqueries": [
-            {"question": "Where did irrigation increase evaporation?", "depends_on": []},
-            {"question": "How did that moisture affect rainfall?", "depends_on": [1]},
+        "queries": [
+            {
+                "question": "Where did irrigation increase evaporation?",
+                "source": {"concept": "irrigation", "state": "increase", "supporting_text_span": "irrigation increase"},
+                "target": {"concept": "evaporation", "state": "increase", "supporting_text_span": "increase evaporation"},
+                "depends_on": [],
+            },
+            {
+                "question": "How did irrigation-related moisture affect rainfall?",
+                "source": {"concept": "irrigation-related moisture", "state": "", "supporting_text_span": "that moisture"},
+                "target": {"concept": "rainfall", "state": "", "supporting_text_span": "rainfall"},
+                "depends_on": [1],
+            },
         ],
     })
 
     assert plan.operation == "join"
-    assert plan.subqueries[1].depends_on == [1]
+    assert plan.queries[1].depends_on == [1]
+    assert plan.queries[0].target.concept == "evaporation"
+
+
+def test_collective_contrast_does_not_create_a_second_retrieval() -> None:
+    from climatekg.extraction_models import QueryPlan
+    from climatekg.query import _remove_collective_contrast_queries
+
+    plan = QueryPlan.model_validate({
+        "operation": "compare",
+        "queries": [
+            {
+                "question": "Why is feedback strongest in September?",
+                "analysis_cases": [{"label": "September", "supporting_text_span": "September"}],
+            },
+            {
+                "question": "How strong is feedback in other monsoon months?",
+                "analysis_cases": [{"label": "other monsoon months", "supporting_text_span": "other monsoon months"}],
+            },
+        ],
+    })
+
+    cleaned, changed = _remove_collective_contrast_queries(plan)
+
+    assert changed is True
+    assert cleaned.operation == "retrieve"
+    assert [item.question for item in cleaned.queries] == ["Why is feedback strongest in September?"]
+
+
+def test_planned_ellipsis_spans_are_reduced_to_exact_question_text() -> None:
+    from climatekg.extraction_models import PlannedQuery
+    from climatekg.query import _normalize_planned_spans
+
+    question = "Compare wet and dry years, particularly in the Indo-Gangetic Plain."
+    item = PlannedQuery.model_validate({
+        "question": "What happens in wet years?",
+        "analysis_cases": [{"label": "wet years", "supporting_text_span": "wet ... years"}],
+        "spatial_reference": {
+            "text": "wet and dry years ... Indo-Gangetic Plain",
+            "kind_hint": "region",
+        },
+    })
+
+    normalized = _normalize_planned_spans(item, question)
+
+    assert normalized.analysis_cases[0].supporting_text_span == "wet"
+    assert normalized.spatial_reference.text == "Indo-Gangetic Plain"
+
+
+def test_balanced_evidence_selection_preserves_distinct_retrieval_signals() -> None:
+    from climatekg.query import _balanced_evidence_rows
+
+    rows = [
+        {
+            "claim_id": f"C{index}",
+            "R_claim": 1.0 - index / 100,
+            "S_source_block": 0.99 if index == 8 else 0.1,
+            "S_claim_semantic": 0.98 if index == 7 else 0.2,
+            "S_endpoint": 0.97 if index == 6 else 0.3,
+        }
+        for index in range(10)
+    ]
+    selected = _balanced_evidence_rows(
+        rows,
+        {f"C{index}": "preferred" if index == 9 else "other" for index in range(10)},
+        {"preferred"},
+        5,
+        {"dependency_paper": 1, "source_block": 1, "claim_semantic": 1, "endpoint": 1},
+    )
+
+    selected_ids = {row["claim_id"] for row in selected}
+    assert selected_ids == {"C0", "C6", "C7", "C8", "C9"}
+
+
+def test_state_compatibility_handles_direction_and_conversion_wording() -> None:
+    from climatekg.query import _state_compatibility
+
+    assert _state_compatibility("reduction", "decrease_in_frequency") == 1.0
+    assert _state_compatibility("increase", "decrease_in_frequency") == 0.0
+    assert _state_compatibility(
+        "decrease in forest cover and increase in crop cover",
+        "forest_to_crop_conversion",
+    ) == 1.0
+    assert _state_compatibility("forest to grass conversion", "forest_to_crop_conversion") < 1.0
 
 
 def test_broad_named_region_is_not_geocoded_to_one_point() -> None:

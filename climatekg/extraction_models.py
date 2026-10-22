@@ -380,14 +380,23 @@ class ParsedQuery(StrictModel):
     ambiguities: list[str] = Field(default_factory=list)
 
 
-class DecomposedSubquery(StrictModel):
+class PlannedQuery(ParsedQuery):
+    """One independently retrievable part of a user's question."""
+
     question: str
+    analysis_cases: list[ParsedAnalysisCase] = Field(default_factory=list, max_length=1)
     depends_on: list[int] = Field(default_factory=list)
 
 
-class QueryDecomposition(StrictModel):
+class QueryPlan(StrictModel):
     operation: Literal["retrieve", "enumerate", "compare", "join", "aggregate", "select"]
-    subqueries: list[DecomposedSubquery] = Field(min_length=1, max_length=5)
+    queries: list[PlannedQuery] = Field(min_length=1, max_length=8)
+
+    @model_validator(mode="after")
+    def validate_atomic_comparison(self) -> "QueryPlan":
+        if self.operation == "compare" and len(self.queries) < 2:
+            raise ValueError("A comparison requires at least two atomic searches")
+        return self
 
 
 class CombinedSynthesisItem(StrictModel):

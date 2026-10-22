@@ -40,9 +40,9 @@ PROMPT_VERSIONS = {
     "paper_map_candidate": "v15",
     "map_consolidation_candidate": "v15",
     "section_scout": "v5",
-    "claim_extraction": "v3",
+    "claim_extraction": "v6",
     "query_parse": "v5",
-    "query_decomposition": "v3",
+    "query_plan": "v3",
     "query_combined_synthesis": "v1",
     "final_synthesis": "v5",
 }
@@ -65,7 +65,7 @@ BASELINE_INDEXING_REASONING = {
 }
 
 BASELINE_QUERY_REASONING = {
-    "query_decomposition": "no",
+    "query_plan": "no",
     "query_parse": "no",
     "query_parse_context_repair": "no",
     "final_synthesis": "low",
@@ -224,6 +224,7 @@ INDEXING_PIPELINE: dict[str, Any] = {
         "semantic_top_k": 10,
         "neighbor_blocks_each_side": 1,
         "max_context_bundle_blocks": 80,
+        "claim_bundle_target_tokens": 6000,
         "bm25_k1": 1.5,
         "bm25_b": 0.75,
     },
@@ -319,6 +320,8 @@ QUERY_PIPELINE: dict[str, Any] = {
         "top_k": 5,
         "seed_top_k": 5,
         "candidate_margin": 0.05,
+        "state_weight": 0.25,
+        "categorical_token_overlap_min": 0.5,
         "exact_fallback_pool_multiplier": 10,
         "exact_fallback_pool_minimum": 50,
     },
@@ -363,6 +366,12 @@ QUERY_PIPELINE: dict[str, Any] = {
         "direct_claim_paths": 8,
         "graph_anchor_claims": 20,
         "graph_paths": 4,
+        "direct_selection_slots": {
+            "dependency_paper": 2,
+            "source_block": 2,
+            "claim_semantic": 2,
+            "endpoint": 1,
+        },
         "require_known_context_for_direct_claims": False,
         "require_known_context_for_graph": True,
     },
@@ -398,10 +407,8 @@ QUERY_PIPELINE: dict[str, Any] = {
         "top_claims": 10,
         "top_paths": 5,
     },
-    "query_decomposition": {
-        "enabled": True,
-        "max_subqueries": 5,
-        "dependency_paper_claims": 3,
+    "query_plan": {
+        "max_queries": 8,
     },
 }
 
