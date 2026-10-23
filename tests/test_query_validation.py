@@ -262,6 +262,53 @@ def test_balanced_evidence_selection_preserves_distinct_retrieval_signals() -> N
     assert selected_ids == {"C0", "C6", "C7", "C8", "C9"}
 
 
+def test_default_dependency_quota_keeps_five_same_paper_and_three_open_slots() -> None:
+    from climatekg.config import QUERY_PIPELINE
+    from climatekg.query import _balanced_evidence_rows
+
+    rows = [
+        {
+            "claim_id": f"P{index}",
+            "R_claim": 1.0 - index / 100,
+            "S_source_block": 0.1,
+            "S_claim_semantic": 0.1,
+            "S_endpoint": 0.1,
+        }
+        for index in range(6)
+    ]
+    rows.extend(
+        {
+            "claim_id": claim_id,
+            "R_claim": 0.5,
+            "S_source_block": source_block,
+            "S_claim_semantic": semantic,
+            "S_endpoint": endpoint,
+        }
+        for claim_id, source_block, semantic, endpoint in (
+            ("SOURCE", 1.0, 0.2, 0.2),
+            ("SEMANTIC", 0.2, 1.0, 0.2),
+            ("ENDPOINT", 0.2, 0.2, 1.0),
+        )
+    )
+    paper_ids = {
+        row["claim_id"]: "preferred" if row["claim_id"].startswith("P") else "other"
+        for row in rows
+    }
+
+    selected = _balanced_evidence_rows(
+        rows,
+        paper_ids,
+        {"preferred"},
+        QUERY_PIPELINE["evidence_assembly"]["direct_claim_paths"],
+        QUERY_PIPELINE["evidence_assembly"]["direct_selection_slots"],
+    )
+    selected_ids = {row["claim_id"] for row in selected}
+
+    assert len(selected) == 8
+    assert len(selected_ids & {f"P{index}" for index in range(6)}) == 5
+    assert {"SOURCE", "SEMANTIC", "ENDPOINT"} <= selected_ids
+
+
 def test_state_compatibility_handles_direction_and_conversion_wording() -> None:
     from climatekg.query import _state_compatibility
 

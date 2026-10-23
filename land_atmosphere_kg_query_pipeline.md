@@ -216,6 +216,12 @@ direct-evidence positions for relevant Claims from the paper supporting the earl
 finding. This is an evidence quota, not a paper filter: ordinary cross-corpus candidates retain the
 remaining positions.
 
+For an eight-Claim direct-evidence budget, the initial dependency-paper quota is five. One position
+each is then selected by SourceBlock similarity, Claim semantic similarity, and endpoint similarity.
+These three positions remain open to ordinary cross-corpus retrieval. The larger within-paper quota
+is needed because a dependent mechanism or multi-outcome question may require several distinct Claims
+from the paper established by the preceding atomic query.
+
 ---
 
 # 3. Minimal Query schema

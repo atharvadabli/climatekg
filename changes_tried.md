@@ -546,3 +546,24 @@ Branch: `experiment/query-decomposition-v1`
   route because one indexed multi-cause finding has only one source endpoint. This remains an indexing
   atomicity issue and was not patched with a query heuristic.
 - Detailed design, targeted results, and artifact paths are in `docs/ATOMIC_QUERY_PLAN_V1.md`.
+
+## 2026-10-24: Evidence-stage audit and dependent-query allocation
+
+- Audited 18 completed atomic-plan queries at candidate, delivered-evidence,
+  and cited-evidence stages against independently selected SourceBlocks.
+- Expected-paper retrieval was 18/18, while mean delivered SourceBlock recall
+  was 0.704 and cited SourceBlock recall was 0.676.
+- Six incomplete cases primarily require indexing fixes because at least one
+  gold SourceBlock supports no indexed Claim. `CKGQ0030` was the one clean
+  evidence-allocation failure.
+- Increased the dependent-subquery paper quota from two to five within the
+  unchanged eight-Claim direct-evidence budget. The remaining three slots use
+  SourceBlock, Claim-semantic, and endpoint similarity. Replay recovered the omitted
+  energy-flux evidence, increasing mean delivered recall from 0.704 to 0.722
+  across the 18 completed cases with no observed case-level regression.
+- Corrected the evidence selector's upper-bound check so any future slot
+  configuration cannot append a ninth Claim to an eight-Claim budget.
+- Added `docs/ADDITIONAL_QUERY_EVALUATION.md` and
+  `docs/CLIMATEKG_CAPABILITY_EVALUATION.md`. The latter separates common
+  grounded QA from the Context, mechanism, transfer, spatial, contradiction,
+  and abstention capabilities that ClimateKG is designed to provide.

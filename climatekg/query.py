@@ -1102,11 +1102,13 @@ def _balanced_evidence_rows(
         if count <= 0:
             return
         for candidate in candidates:
+            if len(rows) >= limit:
+                break
             if candidate["claim_id"] in selected_ids:
                 continue
             rows.append(candidate)
             selected_ids.add(candidate["claim_id"])
-            if len(rows) >= limit or count <= 1:
+            if count <= 1:
                 break
             count -= 1
 

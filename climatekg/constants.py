@@ -367,9 +367,9 @@ QUERY_PIPELINE: dict[str, Any] = {
         "graph_anchor_claims": 20,
         "graph_paths": 4,
         "direct_selection_slots": {
-            "dependency_paper": 2,
-            "source_block": 2,
-            "claim_semantic": 2,
+            "dependency_paper": 5,
+            "source_block": 1,
+            "claim_semantic": 1,
             "endpoint": 1,
         },
         "require_known_context_for_direct_claims": False,
