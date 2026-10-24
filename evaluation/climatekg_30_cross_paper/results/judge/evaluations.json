@@ -1,0 +1,578 @@
+[
+  {
+    "id": "XPG001",
+    "verdict": "mostly_correct",
+    "scientific_correctness": 3,
+    "completeness": 3,
+    "directness": 2,
+    "covered_qualifiers": [
+      "season",
+      "background wind",
+      "cloud-only response",
+      "rainfall"
+    ],
+    "missed_qualifiers": [],
+    "unsupported_conclusion_present": false,
+    "problems": [
+      "The answer focuses heavily on null and cloud-only responses from specific model simulations but omits the reference's point that larger regional conversions reduce evapotranspiration and moisture convergence to reduce rainfall."
+    ],
+    "explanation": "The answer correctly identifies conditional effects based on wind and season, covering cloud-only and null cases, but misses the mechanism for rainfall reduction via reduced moisture convergence in large-scale scenarios."
+  },
+  {
+    "id": "XPG002",
+    "verdict": "correct",
+    "scientific_correctness": 4,
+    "completeness": 4,
+    "directness": 2,
+    "covered_qualifiers": [
+      "dry-bulb cooling",
+      "humidity",
+      "wet-bulb",
+      "setting"
+    ],
+    "missed_qualifiers": [],
+    "unsupported_conclusion_present": false,
+    "problems": [],
+    "explanation": "The answer accurately explains the energy balance shift causing dry-bulb cooling and wet-bulb warming, correctly identifies the trade-off, and specifies the relevant settings like South/East Asia."
+  },
+  {
+    "id": "XPG003",
+    "verdict": "correct",
+    "scientific_correctness": 4,
+    "completeness": 4,
+    "directness": 2,
+    "covered_qualifiers": [
+      "rainfed",
+      "irrigated",
+      "drought",
+      "evaporative fraction"
+    ],
+    "missed_qualifiers": [],
+    "unsupported_conclusion_present": false,
+    "problems": [],
+    "explanation": "The answer correctly distinguishes between rainfed and irrigated responses to drought and accurately explains how background evaporative fraction modifies the sensitivity of irrigation cooling."
+  },
+  {
+    "id": "XPG004",
+    "verdict": "correct",
+    "scientific_correctness": 4,
+    "completeness": 4,
+    "directness": 2,
+    "covered_qualifiers": [
+      "regional sign",
+      "moisture transport",
+      "circulation",
+      "India"
+    ],
+    "missed_qualifiers": [],
+    "unsupported_conclusion_present": false,
+    "problems": [],
+    "explanation": "The answer correctly attributes precipitation changes to moisture transport and circulation shifts, citing both increases and decreases in India and globally as required."
+  },
+  {
+    "id": "XPG005",
+    "verdict": "partly_correct",
+    "scientific_correctness": 2,
+    "completeness": 2,
+    "directness": 1,
+    "covered_qualifiers": [
+      "water availability"
+    ],
+    "missed_qualifiers": [
+      "albedo",
+      "latent heat",
+      "season"
+    ],
+    "unsupported_conclusion_present": false,
+    "problems": [
+      "The answer lists numerous temperature statistics from various studies but fails to explicitly reconcile the warming/cooling dichotomy using the required physical mechanisms of albedo and latent heat.",
+      "It does not clearly explain how season or vegetation type drives the sign change, instead providing a disjointed list of regional outcomes."
+    ],
+    "explanation": "While the answer provides data on temperature changes, it fails to synthesize the underlying physical reasons (albedo vs. latent heat) and seasonal dependencies required to reconcile why afforestation warms in some contexts and cools in others."
+  },
+  {
+    "id": "XPG006",
+    "verdict": "partly_correct",
+    "scientific_correctness": 2,
+    "completeness": 1,
+    "directness": 1,
+    "covered_qualifiers": [
+      "El Nino",
+      "La Nina"
+    ],
+    "missed_qualifiers": [
+      "dry conditions",
+      "regional response"
+    ],
+    "unsupported_conclusion_present": false,
+    "problems": [
+      "The answer explicitly states that evidence for Borneo and South America is missing, failing to address the question's scope.",
+      "It does not discuss how dry conditions amplify temperature effects or how wet conditions amplify vegetation contrasts as specified in the reference.",
+      "It misses the specific finding that Borneo deforestation warming compounds El Nino heat."
+    ],
+    "explanation": "The answer correctly details India's ENSO responses but fails to address Borneo, South America, and the general effects of dry/wet conditions on land-use impacts."
+  },
+  {
+    "id": "XPG007",
+    "verdict": "mostly_correct",
+    "scientific_correctness": 3,
+    "completeness": 3,
+    "directness": 1,
+    "covered_qualifiers": [
+      "cloud loss",
+      "radiative warming",
+      "offset"
+    ],
+    "missed_qualifiers": [
+      "turbulent heat flux"
+    ],
+    "unsupported_conclusion_present": false,
+    "problems": [
+      "The answer does not explicitly trace the chain from deforestation through reduced turbulent heat flux (latent/sensible) to cloud cover reduction.",
+      "It focuses heavily on quantitative offsets and albedo effects without clearly linking the physical mechanism of turbulent flux reduction to cloud loss."
+    ],
+    "explanation": "The answer correctly identifies that cloud loss offsets albedo cooling by about half, but omits the explicit mechanistic link via turbulent heat flux reduction."
+  },
+  {
+    "id": "XPG008",
+    "verdict": "mostly_correct",
+    "scientific_correctness": 3,
+    "completeness": 3,
+    "directness": 1,
+    "covered_qualifiers": [
+      "upwind",
+      "pre-monsoon",
+      "Indo-Gangetic Plain"
+    ],
+    "missed_qualifiers": [
+      "dry years"
+    ],
+    "unsupported_conclusion_present": false,
+    "problems": [
+      "The answer does not explicitly state that the contribution is largest during dry years or provide the >20% statistic for dry years in the Indo-Gangetic Plain.",
+      "It mentions pre-monsoon and non-monsoon seasons but lacks the specific 'dry year' qualifier emphasized in the reference."
+    ],
+    "explanation": "The answer correctly describes the upwind moisture recycling mechanism and seasonal variations but misses the specific emphasis on dry-year conditions and their magnitude."
+  },
+  {
+    "id": "XPG009",
+    "verdict": "incorrect",
+    "scientific_correctness": 1,
+    "completeness": 0,
+    "directness": 0,
+    "covered_qualifiers": [],
+    "missed_qualifiers": [
+      "secondary circulation",
+      "wet-to-dry moisture transport",
+      "moisture pool",
+      "deep convection"
+    ],
+    "unsupported_conclusion_present": false,
+    "problems": [
+      "The answer explicitly states that the evidence does not describe the mechanism of moisture transport or pooling.",
+      "It fails to explain the secondary circulation, ascent over dry patches, or moisture pooling near the boundary-layer top.",
+      "It focuses on patch size effects rather than the physical sequence requested."
+    ],
+    "explanation": "The answer explicitly declines to provide the requested mechanism, stating the evidence is insufficient, and thus fails to answer the question."
+  },
+  {
+    "id": "XPG010",
+    "verdict": "correct",
+    "scientific_correctness": 4,
+    "completeness": 4,
+    "directness": 2,
+    "covered_qualifiers": [
+      "roughness",
+      "albedo",
+      "boundary-layer moistening",
+      "observations"
+    ],
+    "missed_qualifiers": [],
+    "unsupported_conclusion_present": false,
+    "problems": [],
+    "explanation": "The answer correctly identifies the mechanisms (albedo, roughness, moistening) and cites observational evidence supporting higher daytime cloud occurrence over forests."
+  },
+  {
+    "id": "XPG011",
+    "verdict": "mostly_correct",
+    "scientific_correctness": 3,
+    "completeness": 3,
+    "directness": 2,
+    "covered_qualifiers": [
+      "roughness",
+      "boundary-layer moisture",
+      "regional precipitation"
+    ],
+    "missed_qualifiers": [
+      "latent heat"
+    ],
+    "unsupported_conclusion_present": false,
+    "problems": [
+      "The answer attributes the reduction in evapotranspiration to lower roughness, leaf area, and rooting depth, but does not explicitly state that available energy shifts away from latent heat flux, which is a central mechanism in the reference."
+    ],
+    "explanation": "The answer correctly identifies the impacts on precipitation, moisture convergence, and surface properties like roughness, but omits the explicit shift of energy partitioning away from latent heat."
+  },
+  {
+    "id": "XPG012",
+    "verdict": "correct",
+    "scientific_correctness": 4,
+    "completeness": 4,
+    "directness": 2,
+    "covered_qualifiers": [
+      "outside the basin",
+      "moisture transport",
+      "return precipitation",
+      "sign reversal"
+    ],
+    "missed_qualifiers": [],
+    "unsupported_conclusion_present": false,
+    "problems": [],
+    "explanation": "The answer accurately describes how external land-use changes affect internal flow via moisture transport and explains how accounting for return precipitation can reduce or reverse estimated flow changes."
+  },
+  {
+    "id": "XPG013",
+    "verdict": "partly_correct",
+    "scientific_correctness": 2,
+    "completeness": 2,
+    "directness": 2,
+    "covered_qualifiers": [
+      "local cooling",
+      "remote rainfall",
+      "latent heat"
+    ],
+    "missed_qualifiers": [
+      "causal or moisture tracking evidence"
+    ],
+    "unsupported_conclusion_present": false,
+    "problems": [
+      "The answer mentions 'spatial decoupling' and 'altered atmospheric feedbacks' as evidence but fails to explicitly name the specific methods required by the reference: moisture tracking and causal transfer analysis."
+    ],
+    "explanation": "While the physical mechanisms of local cooling and remote warming are described, the answer misses the specific methodological evidence (moisture tracking/causal analysis) requested in the question."
+  },
+  {
+    "id": "XPG014",
+    "verdict": "correct",
+    "scientific_correctness": 4,
+    "completeness": 4,
+    "directness": 2,
+    "covered_qualifiers": [
+      "agreement",
+      "magnitude",
+      "drought",
+      "nighttime or moist heat"
+    ],
+    "missed_qualifiers": [],
+    "unsupported_conclusion_present": false,
+    "problems": [],
+    "explanation": "The answer correctly identifies the consensus on cooling, details factors affecting magnitude including drought and evaporative fraction, and distinguishes dry-bulb cooling from moist-heat warming."
+  },
+  {
+    "id": "XPG015",
+    "verdict": "incorrect",
+    "scientific_correctness": 1,
+    "completeness": 1,
+    "directness": 0,
+    "covered_qualifiers": [
+      "season"
+    ],
+    "missed_qualifiers": [
+      "cross-method",
+      "forest type",
+      "scale"
+    ],
+    "unsupported_conclusion_present": false,
+    "problems": [
+      "The answer consists of a disjointed list of temperature impacts and specific case studies without synthesizing the cross-method evidence for low cloud enhancement.",
+      "It fails to address the general qualifications regarding forest type, wind, and spatial scale that prevent a universal conclusion."
+    ],
+    "explanation": "The answer provides fragmented data points on temperature and specific cloud cases but fails to synthesize the cross-method evidence or address the required qualifications for a general conclusion."
+  },
+  {
+    "id": "XPG016",
+    "verdict": "partly_correct",
+    "scientific_correctness": 2,
+    "completeness": 2,
+    "directness": 1,
+    "covered_qualifiers": [
+      "tropical",
+      "boreal",
+      "albedo"
+    ],
+    "missed_qualifiers": [
+      "evapotranspiration"
+    ],
+    "unsupported_conclusion_present": false,
+    "problems": [
+      "Fails to explain the physical mechanisms (latent heat, roughness) causing tropical warming.",
+      "Does not discuss atmospheric or ocean circulation redistribution effects on global means.",
+      "Omits the role of evapotranspiration in tropical warming."
+    ],
+    "explanation": "The answer provides observational statistics on temperature changes but fails to explain the underlying physical pathways requested, such as latent heat and circulation."
+  },
+  {
+    "id": "XPG017",
+    "verdict": "mostly_correct",
+    "scientific_correctness": 3,
+    "completeness": 3,
+    "directness": 2,
+    "covered_qualifiers": [
+      "observations",
+      "parameterized models",
+      "gradient"
+    ],
+    "missed_qualifiers": [
+      "organized circulation"
+    ],
+    "unsupported_conclusion_present": false,
+    "problems": [
+      "Does not explicitly synthesize how organized circulations reconcile the conflict between observations and models.",
+      "Focuses heavily on resolution effects rather than the specific dry vs. wet soil initiation debate."
+    ],
+    "explanation": "The answer correctly identifies that observations favor dry anomalies/gradients while models favor wet soils due to parameterization, but misses the explicit reconciliation via organized circulation."
+  },
+  {
+    "id": "XPG018",
+    "verdict": "correct",
+    "scientific_correctness": 4,
+    "completeness": 4,
+    "directness": 2,
+    "covered_qualifiers": [
+      "not monotonic",
+      "threshold",
+      "intermediate optimum",
+      "large patches"
+    ],
+    "missed_qualifiers": [],
+    "unsupported_conclusion_present": false,
+    "problems": [],
+    "explanation": "The answer accurately describes the non-monotonic response, identifying thresholds, intermediate optima for timing, and large-patch effects on circulation strength."
+  },
+  {
+    "id": "XPG019",
+    "verdict": "partly_correct",
+    "scientific_correctness": 2,
+    "completeness": 2,
+    "directness": 1,
+    "covered_qualifiers": [
+      "daytime",
+      "nighttime"
+    ],
+    "missed_qualifiers": [
+      "diurnal range",
+      "measurement"
+    ],
+    "unsupported_conclusion_present": false,
+    "problems": [
+      "Does not discuss the diurnal range or event timing.",
+      "Fails to explain why outcomes should not be collapsed into one score.",
+      "Omits discussion of measurement dependencies."
+    ],
+    "explanation": "The answer details daytime and nighttime temperature effects but misses the crucial synthesis regarding diurnal range, timing, and the rationale for separate reporting."
+  },
+  {
+    "id": "XPG020",
+    "verdict": "mostly_correct",
+    "scientific_correctness": 3,
+    "completeness": 3,
+    "directness": 2,
+    "covered_qualifiers": [
+      "local",
+      "downwind",
+      "basin boundary"
+    ],
+    "missed_qualifiers": [
+      "prevailing flow"
+    ],
+    "unsupported_conclusion_present": false,
+    "problems": [
+      "Does not explicitly mention prevailing flow as a determinant of transport distance.",
+      "Focuses on interception vs. transpiration rather than atmospheric convergence or seasonality."
+    ],
+    "explanation": "The answer correctly distinguishes between local and downwind/basin-scale effects but omits the specific role of prevailing flow in determining transport pathways."
+  },
+  {
+    "id": "XPG021",
+    "verdict": "correct",
+    "scientific_correctness": 4,
+    "completeness": 4,
+    "directness": 2,
+    "covered_qualifiers": [
+      "nonlinear",
+      "affected area",
+      "local patch",
+      "basin scale"
+    ],
+    "missed_qualifiers": [],
+    "unsupported_conclusion_present": false,
+    "problems": [],
+    "explanation": "The answer correctly identifies the nonlinear relationship, distinguishes between local and basin scales, and explains that large-scale thresholds do not apply to local patches."
+  },
+  {
+    "id": "XPG022",
+    "verdict": "correct",
+    "scientific_correctness": 4,
+    "completeness": 4,
+    "directness": 2,
+    "covered_qualifiers": [
+      "association",
+      "intervention",
+      "causal pathway",
+      "caution"
+    ],
+    "missed_qualifiers": [],
+    "unsupported_conclusion_present": false,
+    "problems": [],
+    "explanation": "The answer clearly distinguishes between observational associations requiring caution and modeled causal pathways providing stronger evidence, aligning with the reference."
+  },
+  {
+    "id": "XPG023",
+    "verdict": "correct",
+    "scientific_correctness": 4,
+    "completeness": 4,
+    "directness": 2,
+    "covered_qualifiers": [
+      "1 m/s",
+      "downwind edge",
+      "cloud advection",
+      "14.4 km"
+    ],
+    "missed_qualifiers": [],
+    "unsupported_conclusion_present": false,
+    "problems": [],
+    "explanation": "The answer accurately describes the effects of 1 m/s wind on symmetry, convergence location, cloud advection, and deep convection potential for 14.4 km patches."
+  },
+  {
+    "id": "XPG024",
+    "verdict": "correct",
+    "scientific_correctness": 4,
+    "completeness": 4,
+    "directness": 2,
+    "covered_qualifiers": [
+      "downwind edge",
+      "greater than 1 m/s",
+      "Landes",
+      "Sologne"
+    ],
+    "missed_qualifiers": [],
+    "unsupported_conclusion_present": false,
+    "problems": [],
+    "explanation": "The answer correctly identifies the downwind enhancement for Landes forests above 1 m/s and explains the lack of clear patterns for the smaller Sologne forest."
+  },
+  {
+    "id": "XPG025",
+    "verdict": "correct",
+    "scientific_correctness": 4,
+    "completeness": 4,
+    "directness": 2,
+    "covered_qualifiers": [
+      "threshold",
+      "12.8 km",
+      "collision timing",
+      "different setups"
+    ],
+    "missed_qualifiers": [],
+    "unsupported_conclusion_present": false,
+    "problems": [],
+    "explanation": "The answer correctly distinguishes the 5 km threshold for moisture pooling from the 12.8 km optimum for collision timing in different experimental setups."
+  },
+  {
+    "id": "XPG026",
+    "verdict": "mostly_correct",
+    "scientific_correctness": 3,
+    "completeness": 3,
+    "directness": 1,
+    "covered_qualifiers": [
+      "scale",
+      "flow direction"
+    ],
+    "missed_qualifiers": [
+      "relation family",
+      "geometry"
+    ],
+    "unsupported_conclusion_present": false,
+    "problems": [
+      "The answer provides excessive detail on the physical mechanisms of each pathway rather than focusing on the specific evidence needed for placement recommendations.",
+      "It fails to explicitly list 'relation family' and 'geometry' as required qualifiers for translation, instead embedding them vaguely in 'spatial configurations'.",
+      "The distinction between local geometry-scale processes and continental pathways is present but obscured by lengthy mechanistic descriptions."
+    ],
+    "explanation": "The answer correctly identifies the need for scale and flow direction data but misses explicit mention of relation family and geometry as required qualifiers, while being overly verbose on mechanisms."
+  },
+  {
+    "id": "XPG027",
+    "verdict": "incorrect",
+    "scientific_correctness": 1,
+    "completeness": 1,
+    "directness": 1,
+    "covered_qualifiers": [
+      "limited groundwater",
+      "moist heat"
+    ],
+    "missed_qualifiers": [
+      "drought failure",
+      "no verified rainfall benefit"
+    ],
+    "unsupported_conclusion_present": true,
+    "problems": [
+      "The answer explicitly recommends 'Irrigation expansion' as the most effective intervention, which directly contradicts the reference's warning that irrigation increases water demand and moist heat in limited groundwater contexts.",
+      "It violates the unsupported conclusion constraint by advocating for irrigation despite the explicit constraint of limited groundwater.",
+      "It fails to emphasize that rainfed cooling fails in drought as a primary mechanism to test, instead dismissing it too quickly without highlighting the 'water-efficient ways' suggested in the reference."
+    ],
+    "explanation": "The answer incorrectly advocates for irrigation expansion in a water-scarce context, contradicting the reference's caution against increasing water demand and moist heat."
+  },
+  {
+    "id": "XPG028",
+    "verdict": "partly_correct",
+    "scientific_correctness": 2,
+    "completeness": 2,
+    "directness": 0,
+    "covered_qualifiers": [
+      "humid tropical"
+    ],
+    "missed_qualifiers": [
+      "mechanism transfer",
+      "magnitude uncertainty",
+      "local validation"
+    ],
+    "unsupported_conclusion_present": false,
+    "problems": [
+      "The answer lists numerous specific statistical findings from other regions (Amazon, Europe, Sahel) without clearly distinguishing which mechanisms are transferable versus which magnitudes are location-specific.",
+      "It fails to explicitly state that exact temperature, cloud, and rainfall responses require local validation or simulation for the new watershed.",
+      "The response is a disjointed list of facts rather than a synthesized answer addressing transferability and uncertainty."
+    ],
+    "explanation": "The answer lists relevant studies but fails to synthesize them into a clear distinction between transferable mechanisms and location-specific magnitudes, missing the core requirement for local validation."
+  },
+  {
+    "id": "XPG029",
+    "verdict": "correct",
+    "scientific_correctness": 4,
+    "completeness": 4,
+    "directness": 2,
+    "covered_qualifiers": [
+      "unsupported exact percentage",
+      "unsupported cardinal direction",
+      "unsupported magnitude",
+      "required local data"
+    ],
+    "missed_qualifiers": [],
+    "unsupported_conclusion_present": false,
+    "problems": [],
+    "explanation": "The answer correctly identifies that general mechanisms are supported but specific quantitative and spatial claims require abstention due to lack of evidence."
+  },
+  {
+    "id": "XPG030",
+    "verdict": "correct",
+    "scientific_correctness": 4,
+    "completeness": 4,
+    "directness": 2,
+    "covered_qualifiers": [
+      "no universal recommendation",
+      "dry heat",
+      "moist heat",
+      "rainfall sign"
+    ],
+    "missed_qualifiers": [],
+    "unsupported_conclusion_present": false,
+    "problems": [],
+    "explanation": "The answer correctly rejects a universal recommendation, detailing the trade-offs between dry and moist heat stress and noting the lack of evidence for rainfall benefits."
+  }
+]

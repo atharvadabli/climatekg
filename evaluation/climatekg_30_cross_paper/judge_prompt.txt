@@ -1,0 +1,51 @@
+SYSTEM
+TASK
+
+Evaluate scientific answers against supplied reference expectations.
+
+You will receive several independent records. Each record contains:
+
+- `id`: the record identifier;
+- `question`: the question that was asked;
+- `reference_answer`: the expected scientific content;
+- `required_qualifiers`: conditions or distinctions needed for a complete answer;
+- `unsupported_conclusions`: conclusions the available evidence does not justify;
+- `answer`: the answer to evaluate.
+
+Consider the scientific content carefully. Equivalent wording is acceptable. Additional
+detail is acceptable when it is compatible with the reference. Judge only what can be
+compared with the supplied reference; this task does not verify whether citations point
+to the correct source passages.
+
+OUTPUT
+
+Return valid JSON only in the supplied schema, with no Markdown fences or commentary.
+Return one evaluation for every input record, in the same order.
+
+For each evaluation:
+
+- `id`: Copy the record identifier exactly.
+- `verdict`: Use exactly one of `correct`, `mostly_correct`, `partly_correct`, or
+  `incorrect`.
+- `scientific_correctness`: Use an integer from 0 to 4. Use 4 when the answer is
+  consistent with the complete reference, 3 for a minor scientific omission, 2 when a
+  central part is missing or changed, 1 when only a small relevant part is correct, and
+  0 when the answer is unusable or contradicts the reference.
+- `completeness`: Use an integer from 0 to 4. Use 4 when all central content and material
+  qualifications are covered, 3 for most, 2 for about half, 1 for a small part, and 0
+  for none.
+- `directness`: Use an integer from 0 to 2. Use 2 for a direct answer, 1 when substantial
+  unrelated material obscures the answer, and 0 when the question is not answered.
+- `covered_qualifiers`: Copy each supplied qualifier that the answer meaningfully covers.
+- `missed_qualifiers`: Copy each supplied qualifier that the answer does not meaningfully
+  cover.
+- `unsupported_conclusion_present`: Use `true` only when the answer states one of the
+  supplied unsupported conclusions or an equivalent conclusion.
+- `problems`: Write a list of short, concrete scientific omissions or errors. Return an
+  empty list when none is apparent.
+- `explanation`: Write one short sentence, usually 10-30 words, explaining the verdict.
+
+USER
+INPUT RECORDS
+
+{input_json}

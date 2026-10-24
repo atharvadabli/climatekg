@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import urllib.error
 from pathlib import Path
 from typing import Any
 
@@ -113,11 +114,11 @@ def test_unique_qualified_study_location_resolves_and_is_cached(tmp_path: Path) 
 
     geocoder = NominatimGeocoder(_geocoder_config(), tmp_path, fetch)
     support = SpatialSupport(
-        kind="region",
+        kind="unresolved",
         name="Central Amazon study domain",
         geometry=None,
         enrichable_study_location_name="Central Amazon, Brazil",
-        resolution="named_region",
+        resolution="unresolved",
     )
     first = resolve_spatial_support(support, "unused.geojson", geocoder)
     second = resolve_spatial_support(support, "unused.geojson", geocoder)
@@ -137,15 +138,36 @@ def test_ambiguous_named_place_remains_unresolved(tmp_path: Path) -> None:
     ]
     geocoder = NominatimGeocoder(_geocoder_config(), tmp_path, lambda *_: candidates)
     support = SpatialSupport(
-        kind="region",
+        kind="unresolved",
         name="Springfield study area",
         geometry=None,
         enrichable_study_location_name="Springfield, State, Country",
-        resolution="named_region",
+        resolution="unresolved",
     )
     resolved = resolve_spatial_support(support, "unused.geojson", geocoder)
     assert resolved.geometry is None
     assert resolved.resolution == "unresolved"
+
+
+def test_geocoder_transport_failure_is_visible_and_remains_unresolved(tmp_path: Path) -> None:
+    def fail(*_args: object) -> list[dict[str, object]]:
+        raise urllib.error.URLError("connection refused")
+
+    geocoder = NominatimGeocoder(_geocoder_config(), tmp_path, fail)
+    support = SpatialSupport(
+        kind="watershed",
+        name="unnamed Indian watershed",
+        geometry=None,
+        enrichable_study_location_name="Indian watershed",
+        resolution="unresolved",
+    )
+
+    resolved = resolve_spatial_support(support, "unused.geojson", geocoder)
+
+    assert resolved.geometry is None
+    assert resolved.resolution == "unresolved"
+    assert geocoder.last_failure_reason == "URLError: <urlopen error connection refused>"
+    assert not (tmp_path / "cache/geocoding.json").exists()
 
 
 def test_global_support_does_not_call_geocoder(tmp_path: Path) -> None:

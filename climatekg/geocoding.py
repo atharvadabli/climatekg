@@ -5,6 +5,7 @@ import re
 import threading
 import time
 import unicodedata
+import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
@@ -137,7 +138,11 @@ class NominatimGeocoder:
         with self._lock:
             cached = self._cache["entries"].get(key)
         if cached is None:
-            candidates = self._request(query)
+            try:
+                candidates = self._request(query)
+            except (urllib.error.URLError, TimeoutError, OSError) as exc:
+                self.last_failure_reason = f"{type(exc).__name__}: {exc}"
+                return GeocodingDecision(None, "gazetteer_request_failed")
             cached = {
                 "query": query,
                 "retrieved_at": datetime.now(timezone.utc).isoformat(),
@@ -146,4 +151,5 @@ class NominatimGeocoder:
             with self._lock:
                 self._cache["entries"][key] = cached
                 self._write_cache()
+        self.last_failure_reason = None
         return GeocodingDecision(cached.get("geometry"), str(cached["reason"]))
