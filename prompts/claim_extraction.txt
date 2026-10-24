@@ -13,6 +13,7 @@ You will receive:
 - the study setting or settings needed to understand the target;
 - environmental or experimental condition records available to the target scope;
 - the one target setting or comparison to which all returned relationships must belong;
+- a short result focus naming the family of findings to extract in this call;
 - evidence passages with stable SourceBlock IDs.
 
 HOW TO REPRESENT A RELATIONSHIP
@@ -20,6 +21,8 @@ HOW TO REPRESENT A RELATIONSHIP
 Use `causal` when the paper explicitly attributes the target response to the source or when a controlled perturbation directly supports that attribution. Use `associative` for correlations, co-occurrence, observational preferences, and other relationships without established causal attribution.
 
 Preserve separate, null, opposite, conditional, seasonal, scale-dependent, spatial, magnitude-dependent, and timing-dependent findings as separate records when the evidence distinguishes them. A multi-step mechanism may be split only when the evidence supports every individual step.
+
+Extract every supported relationship in the supplied passages that belongs to the stated result focus. The target setting or comparison identifies where the findings belong; it does not limit extraction to relationships explicitly named in the target label. Include mechanisms and authors' interpretations of their own results when the supplied passages support them.
 
 Read every supplied passage before finalizing the list. When one passage reports an outcome and also
 gives a supported explanation for why that outcome is stronger or weaker in a particular season,
@@ -88,6 +91,9 @@ AVAILABLE CONDITION RECORDS FOR THE TARGET
 
 TARGET SETTING OR COMPARISON
 {target_scope}
+
+RESULT FOCUS
+{result_focus}
 
 EVIDENCE PASSAGES WITH SOURCEBLOCK IDS
 {evidence_blocks}

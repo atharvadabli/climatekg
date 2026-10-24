@@ -24,7 +24,7 @@ EXPECTED_PLACEHOLDERS = {
     "section_scout.txt": {"paper_id", "section_path", "section_blocks"},
     "map_consolidation.txt": {"paper_metadata", "scout_outputs", "selected_blocks"},
     "facet_extraction.txt": {"paper_id", "target_context", "context_registry", "parent_facets", "existing_target_facets", "evidence_blocks"},
-    "claim_extraction.txt": {"paper_id", "relevant_contexts", "available_scope_facets", "target_scope", "evidence_blocks"},
+    "claim_extraction.txt": {"paper_id", "relevant_contexts", "available_scope_facets", "target_scope", "result_focus", "evidence_blocks"},
     "context_reconciliation.txt": {"context_registry", "hints", "hint_evidence_blocks"},
     "paper_consolidation.txt": {"paper_metadata", "candidate_pairs"},
     "query_parse.txt": {"user_question"},
@@ -158,11 +158,22 @@ def test_complete_setting_v11_candidates_are_standalone_and_consistent() -> None
 def test_paper_map_structured_schema_requires_every_declared_field() -> None:
     schema = PaperMap.model_json_schema()
     assert set(schema["required"]) == set(schema["properties"])
-    for name in ("MapContext", "MapTransition"):
+    for name in ("MapContext", "MapTransition", "MapResultScope"):
         item_schema = schema["$defs"][name]
         assert set(item_schema["required"]) == set(item_schema["properties"])
     spatial_schema = schema["$defs"]["ExtractedSpatialSupport"]
     assert "enrichable_study_location_name" in spatial_schema["required"]
+
+
+def test_staged_prompts_define_focused_result_extraction() -> None:
+    for name in ("paper_map.txt", "map_consolidation.txt"):
+        text = (PROMPT_DIR / name).read_text(encoding="utf-8")
+        assert "A result-extraction scope is a temporary reading task" in text
+        assert "result_scopes" in text
+        assert "local versus nonlocal response" in text
+    claim_text = (PROMPT_DIR / "claim_extraction.txt").read_text(encoding="utf-8")
+    assert "RESULT FOCUS" in claim_text
+    assert "does not limit extraction to relationships explicitly named in the target label" in claim_text
 
 
 def test_unsupported_geocoding_qualifier_is_removed_and_recorded() -> None:

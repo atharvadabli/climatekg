@@ -12,6 +12,8 @@ A child setting inherits every condition from its parent and stores only what ch
 
 A comparison is an observed or imposed change between two study settings.
 
+A result-extraction scope is a temporary reading task. It groups a small set of passages that report related findings for one study setting or one comparison. It is not a scientific object and will not be stored in the final graph. Its purpose is to ensure that mechanisms, regional differences, seasonal behavior, null effects, and other reported findings are read in focused groups rather than one large paper-wide task.
+
 INPUT
 
 You will receive:
@@ -60,6 +62,14 @@ HOW TO BUILD COMPARISONS
 - Describe the manipulation or contrast itself, rather than its climatic result.
 - Cite passages that establish the comparison and passages containing its reported results.
 
+HOW TO PLAN RESULT EXTRACTION
+
+1. The preliminary notes list `RESULT BLOCKS` found while reading separate sections. Assign every listed result block to at least one result-extraction scope.
+2. Group related passages into compact scopes. Split scopes when findings concern different outcome or mechanism families, or when they are separately reported by region, season, scale, environmental regime, or local versus nonlocal response.
+3. Assign each scope to the existing study setting or comparison that produced the finding. Use a study setting when the finding is reported within that setting and does not itself compare the endpoints of a listed comparison.
+4. Reported analysis subsets, such as seasons, wet and dry years, latitude bands, or subregions within one unchanged setup, may have separate result-extraction scopes without becoming new study settings.
+5. A passage may occur in more than one scope when it directly supports different related findings. Keep each scope small enough to state one clear scientific focus.
+
 Use only information stated in the supplied original passages. Record unresolved structural uncertainty in `ambiguities`.
 
 OUTPUT
@@ -97,6 +107,13 @@ For each `transitions` item, return:
 - `description`: Generate one sentence, usually 10-50 words, describing what changes between the endpoints.
 - `evidence_block_ids`: Copy the smallest set of SourceBlock IDs that establishes the comparison.
 - `claim_seed_block_ids`: Copy SourceBlock IDs containing results of this comparison. Use an empty list when none are available.
+
+For each `result_scopes` item, return:
+- `temp_id`: Generate one unique temporary ID.
+- `label`: Generate a concise scientific focus, usually 3-10 words, such as an outcome family, mechanism family, or reported analysis split.
+- `scope_type`: Use exactly `context` or `transition`.
+- `scope_temp_id`: Copy the temporary ID of the setting or comparison that owns these findings.
+- `claim_seed_block_ids`: Copy SourceBlock IDs from `RESULT BLOCKS` and selected original passages that contain findings for this focus. Every `RESULT BLOCKS` ID must appear in at least one result scope.
 
 Also return:
 - `context_mention_resolution`: Return one JSON object entry for every `CM###` identifier in `SETTING INVENTORY`. Each value is the `temp_id` of its corresponding setting. Use an empty object only when the inventory is empty.

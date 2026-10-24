@@ -3,8 +3,8 @@ import shutil
 import uuid
 
 from climatekg.canonicalize import canonical_concept, canonical_direction, state_id
-from climatekg.extract import _apply_map_repair, _validate_map, _validate_map_references, _validate_map_repair, _validate_reference_only_repair, compact_claim_facets, include_evidence_blocks, is_outcome_like_facet, partition_claim_blocks, relevant_claim_contexts, remove_internal_inventory_aliases, render_paper_map_tree, scout_setting_inventory, select_map_consolidation_blocks, validate_context_mention_resolution
-from climatekg.extraction_models import ContextHintDecision, ContextReconciliationBatch, MapContext, MapTransition, PaperMap, ScoutMention, SectionScout
+from climatekg.extract import _apply_map_repair, _render_blocks, _validate_map, _validate_map_references, _validate_map_repair, _validate_reference_only_repair, compact_claim_facets, include_evidence_blocks, is_outcome_like_facet, partition_claim_blocks, relevant_claim_contexts, remove_internal_inventory_aliases, render_paper_map_tree, scout_setting_inventory, select_map_consolidation_blocks, validate_context_mention_resolution, validate_result_scope_coverage
+from climatekg.extraction_models import ContextHintDecision, ContextReconciliationBatch, MapContext, MapResultScope, MapTransition, PaperMap, ScoutMention, SectionScout
 from climatekg.graph import _flatten, _inflate
 from climatekg.indexer import _clear_derived_artifacts, current_prompt_versions, index_pdf, indexing_derivation_fingerprint
 import json
@@ -16,7 +16,7 @@ from climatekg.pdf import _split_text, _validated_parse_cache, clean_parse
 from climatekg.query import Corpus, context_similarity, trim_evidence_package
 from climatekg.reconcile import _validate_reconciliation_batch, reversal_hints
 from climatekg.retrieval import bm25
-from climatekg.utils import normalize_text_key
+from climatekg.utils import normalize_text_key, token_count
 from climatekg.utils import sha256_file
 
 
@@ -261,6 +261,24 @@ def test_map_selector_uses_scout_evidence_without_keyword_sweep() -> None:
     assert "UNRELATED" not in report["selected_block_ids"]
 
 
+def test_map_selector_prioritizes_result_text_before_additional_facet_detail() -> None:
+    blocks = [
+        SourceBlock(id="TITLE", paper_id="P", order=0, page=1, block_type="title", text="Paper title", source_locator={"page": 1}),
+        SourceBlock(id="SETTING", paper_id="P", order=1, page=2, block_type="paragraph", text="Named experiment setting.", source_locator={"page": 2}),
+        SourceBlock(id="RESULT", paper_id="P", order=2, page=3, block_type="paragraph", text="A reported regional mechanism.", source_locator={"page": 3}),
+        SourceBlock(id="FACET", paper_id="P", order=3, page=4, block_type="paragraph", text="Additional model configuration detail.", source_locator={"page": 4}),
+    ]
+    scout = SectionScout(
+        context_mentions=[ScoutMention(name="EXP", description="Named experiment.", block_ids=["SETTING"])],
+        claim_seed_block_ids=["RESULT"],
+        facet_seed_block_ids=["FACET"],
+    )
+    budget = sum(token_count(_render_blocks([block])) for block in blocks[:3])
+    selected, report = select_map_consolidation_blocks(blocks, [scout], budget)
+    assert [block.id for block in selected] == ["TITLE", "SETTING", "RESULT"]
+    assert report["dropped_block_ids_by_reason"]["facet_seed"] == ["FACET"]
+
+
 def test_scout_setting_inventory_checks_coverage_without_string_matching() -> None:
     scouts = [
         SectionScout(context_mentions=[ScoutMention(name="RUN-A", description="First mention.", block_ids=["B1"])]),
@@ -283,6 +301,39 @@ def test_scout_setting_inventory_checks_coverage_without_string_matching() -> No
     validate_context_mention_resolution(mapped.model_copy(update={"context_mention_resolution": {"CM001": "A", "CM002": "A"}}), inventory)
     with pytest.raises(ValueError, match="unknown Context"):
         validate_context_mention_resolution(mapped.model_copy(update={"context_mention_resolution": {"CM001": "A", "CM002": "missing"}}), inventory)
+
+
+def test_result_scope_coverage_checks_ids_without_matching_generated_text() -> None:
+    mapped = PaperMap(
+        contexts=[MapContext(temp_id="C", label="common experiment", evidence_block_ids=["SETUP"])],
+        transitions=[],
+        result_scopes=[MapResultScope(
+            temp_id="R1",
+            label="regional energy-balance mechanisms",
+            scope_type="context",
+            scope_temp_id="C",
+            claim_seed_block_ids=["RESULT_A", "RESULT_B"],
+        )],
+    )
+    validate_result_scope_coverage(mapped, {"RESULT_A", "RESULT_B"})
+    with pytest.raises(ValueError, match="RESULT_C"):
+        validate_result_scope_coverage(mapped, {"RESULT_A", "RESULT_C"})
+
+
+def test_map_validation_rejects_unknown_result_scope_target() -> None:
+    mapped = PaperMap(
+        contexts=[MapContext(temp_id="C", label="common experiment", evidence_block_ids=["SETUP"])],
+        transitions=[],
+        result_scopes=[MapResultScope(
+            temp_id="R1",
+            label="surface-energy response",
+            scope_type="context",
+            scope_temp_id="MISSING",
+            claim_seed_block_ids=["RESULT"],
+        )],
+    )
+    with pytest.raises(ValueError, match="invalid result-scope target"):
+        _validate_map(mapped, {"SETUP", "RESULT"})
 
 
 def test_internal_inventory_ids_are_not_scientific_aliases() -> None:
@@ -335,7 +386,7 @@ def test_explicit_derived_rebuild_retains_parse_and_blocks() -> None:
         assert (paper_dir / "blocks" / "artifact.txt").exists()
         assert not (paper_dir / "extraction").exists()
         assert not (paper_dir / "final").exists()
-        assert current_prompt_versions()["map_consolidation"] == "v15"
+        assert current_prompt_versions()["map_consolidation"] == "v16"
         assert current_prompt_versions()["section_scout"] == "v5"
     finally:
         shutil.rmtree(data_root, ignore_errors=True)

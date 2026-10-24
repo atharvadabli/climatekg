@@ -104,9 +104,20 @@ class MapTransition(CompleteOutputModel):
     claim_seed_block_ids: list[str] = Field(default_factory=list)
 
 
+class MapResultScope(CompleteOutputModel):
+    """Focused extraction task; this is not persisted as a graph object."""
+
+    temp_id: str
+    label: str
+    scope_type: Literal["context", "transition"]
+    scope_temp_id: str
+    claim_seed_block_ids: list[str]
+
+
 class PaperMap(CompleteOutputModel):
     contexts: list[MapContext]
     transitions: list[MapTransition]
+    result_scopes: list[MapResultScope] = Field(default_factory=list)
     context_mention_resolution: dict[str, str] = Field(default_factory=dict)
     global_claim_seed_block_ids: list[str] = Field(default_factory=list)
     ambiguities: list[str] = Field(default_factory=list)

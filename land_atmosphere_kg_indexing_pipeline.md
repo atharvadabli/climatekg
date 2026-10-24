@@ -1149,12 +1149,13 @@ On this staged route, do **not** extract detailed Facets or Claims yet.
 
 ## Prompt: `paper_map.txt`
 
-The exact standalone Qwen3.6-27B prompt is versioned as `paper_map_v11` in `prompts/paper_map.txt`. It must:
+The exact standalone Qwen3.6-27B prompt is versioned as `paper_map_v16` in `prompts/paper_map.txt`. It must:
 
 - define a study setting, inheritance, complete effective setting, and comparison without assuming project knowledge;
 - implement the complete-setting tree algorithm in Section 97.9;
 - explain every input and output field;
 - preserve paper-local names for separately reported study units;
+- create focused result-extraction scopes that assign reported result passages to an existing Context or Transition;
 - use no benchmark-paper names or identifiers;
 - return only schema-valid JSON.
 
@@ -1189,6 +1190,15 @@ The exact standalone Qwen3.6-27B prompt is versioned as `paper_map_v11` in `prom
       "aliases": ["EXP1"],
       "description": "Forest is replaced by pasture.",
       "evidence_block_ids": ["P000123:S03:P0027"],
+      "claim_seed_block_ids": ["P000123:S04:P0041"]
+    }
+  ],
+  "result_scopes": [
+    {
+      "temp_id": "R1",
+      "label": "surface-energy mechanisms by region",
+      "scope_type": "context",
+      "scope_temp_id": "C1",
       "claim_seed_block_ids": ["P000123:S04:P0041"]
     }
   ],
@@ -1271,7 +1281,9 @@ Input:
 
 ## Prompt: `map_consolidation.txt`
 
-The exact standalone Qwen3.6-27B prompt is versioned as `map_consolidation_v11` in `prompts/map_consolidation.txt`. It has the same complete-setting requirements as `paper_map_v11`, and additionally explains the distinction between preliminary scout notes and selected original evidence.
+The exact standalone Qwen3.6-27B prompt is versioned as `map_consolidation_v16` in `prompts/map_consolidation.txt`. It has the same complete-setting requirements as `paper_map_v16`, and additionally explains the distinction between preliminary scout notes and selected original evidence.
+
+The map must assign every result block identified by the section scouts to at least one `result_scope`. A result scope is an extraction-planning record, not a graph node. It names one focused family of findings, identifies the existing Context or Transition that owns them, and lists the SourceBlocks that must reach Claim extraction. Missing scout-result coverage is a visible mapping failure.
 
 The output schema is the same `paper_map` schema used for short papers.
 
@@ -1553,16 +1565,16 @@ After validation, assign permanent Facet IDs.
 
 Claims require different evidence than Context Facets.
 
-For each Transition `T`:
+For each focused `result_scope` produced by the paper map:
 
 ## 19.1 Seeds
 
 Include:
 
-- Transition map evidence blocks
-- `claim_seed_block_ids`
-- from/to Context aliases
-- Transition aliases
+- the result scope's `claim_seed_block_ids`;
+- evidence defining its target Context or Transition;
+- effective Facet evidence for that target;
+- target Context or Transition aliases.
 
 ## 19.2 Search terms
 
@@ -1618,7 +1630,7 @@ Analysis
 Conclusions
 ```
 
-Also include the experimental-design blocks defining the Transition.
+Also include the experimental-design blocks defining the target Context or Transition.
 
 ## 19.4 Neighbor expansion
 
@@ -1632,7 +1644,7 @@ Same default:
 <= 18000 evidence tokens
 ```
 
-If too large, split by outcome/mechanism family while preserving the same `scope_id`.
+The paper map should already split evidence by outcome/mechanism family. If one focused bundle is still too large, partition it by contiguous scientific subsection while preserving the same target `scope_id` and result focus.
 
 For example:
 
@@ -1656,6 +1668,8 @@ output-recall control; it must not discard evidence or introduce a semantic pre-
 # 20. Stage 12 — Claim extraction
 
 ## Prompt: `claim_extraction.txt`
+
+The exact standalone Qwen3.6-27B prompt is versioned as `claim_extraction_v7`. Each call receives one target Context or Transition and one plain-language result focus. The target establishes ownership; it does not restrict extraction to relationships named in the target label.
 
 ```text
 SYSTEM

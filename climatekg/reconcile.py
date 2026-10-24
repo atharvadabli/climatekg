@@ -116,7 +116,14 @@ def _extract_new_scope(paper: Paper, context: Context, contexts: list[Context], 
     new_facets = [Facet(id=f"{paper.id}_F{len(facets)+index:03d}", context_id=context.id, domain=item.domain, notion=item.notion, description=item.description, origin="reported", source={"type": "paper", "id": paper.id}, evidence_block_ids=item.evidence_block_ids) for index, item in enumerate(facet_batch.facets, 1)]
     available = effective_facet_ids(context.id, contexts, [*facets, *new_facets])
     claim_system, claim_user = _split_prompt((ROOT / "prompts" / "claim_extraction.txt").read_text(encoding="utf-8"))
-    claim_request = claim_user.format(paper_id=paper.id, context_registry=json.dumps(registry), transitions=json.dumps([item.model_dump() for item in transitions]), available_scope_facets=json.dumps([item.model_dump() for item in available]), target_scope=context.model_dump_json(), evidence_blocks=_render_blocks(bundle))
+    claim_request = claim_user.format(
+        paper_id=paper.id,
+        relevant_contexts=json.dumps([context.model_dump(exclude={"retrieval_embedding"})]),
+        available_scope_facets=json.dumps([item.model_dump(exclude={"notion_embedding", "content_embedding"}) for item in available]),
+        target_scope=context.model_dump_json(exclude={"retrieval_embedding"}),
+        result_focus="findings that require this newly reconciled study setting",
+        evidence_blocks=_render_blocks(bundle),
+    )
     claim_cfg = PIPELINE["ollama"]["stages"]["claim_extraction"]
     claim_batch = client.structured(stage="reconciliation_claim_extraction", system=claim_system, user=claim_request, schema=ClaimBatch, model=PIPELINE["ollama"]["model"], temperature=claim_cfg["temperature"], thinking=claim_cfg["thinking"], artifact_dir=paper_dir / "extraction" / "reconciliation" / context.id / "claims", paper_id=paper.id, input_block_ids=[item.id for item in bundle], retries=claim_cfg["retries"])
     reachable = {item.id for item in available}
