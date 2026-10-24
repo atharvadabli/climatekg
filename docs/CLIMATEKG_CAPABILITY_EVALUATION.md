@@ -142,11 +142,11 @@ or WRF scenario experiments.
 ## Execution order
 
 1. Human-verify the current 30-question regression set.
-2. Complete the six missing indexing findings identified by the stage audit,
+2. Complete the missing indexing findings identified by the stage audit and
+   the 12-case preflight in `docs/NOT_YET_RUN_QUERY_PREFLIGHT.md`,
    using the ordinary extraction design rather than query-specific patches.
 3. Build and freeze the 36-question capability set.
 4. Run the three systems and ClimateKG ablations without mid-run tuning.
 5. Perform blinded scientific review and stage-level root-cause analysis.
 6. Report headline metrics, capability-stratified results, confidence
    intervals, latency, and all failures.
-

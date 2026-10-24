@@ -567,3 +567,9 @@ Branch: `experiment/query-decomposition-v1`
   `docs/CLIMATEKG_CAPABILITY_EVALUATION.md`. The latter separates common
   grounded QA from the Context, mechanism, transfer, spatial, contradiction,
   and abstention capabilities that ClimateKG is designed to provide.
+- Preflighted the 12 questions without completed atomic-plan reports. Six have
+  complete indexed evidence, three are partly indexing-limited, and three have
+  no indexed Claim for their central evidence. The first live run then stopped
+  before query parsing because the required local Qwen3.6 model could not
+  allocate its working buffer; no fallback model was used and the case was not
+  counted as an incorrect answer. See `docs/NOT_YET_RUN_QUERY_PREFLIGHT.md`.
