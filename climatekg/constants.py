@@ -25,6 +25,10 @@ EMBEDDING_DIMENSION = 2048
 OLLAMA_BASE_URL = "http://localhost:11434"
 OLLAMA_REQUEST_TIMEOUT_SECONDS = 1800
 OLLAMA_CONTEXT_TOKENS = 32768
+# Offload every available layer of the 27B generation model. Ollama caps this
+# value at the model's real layer count. On the 24 GB validation GPU, this uses
+# about 20.7 GB at 32K context and leaves about 3.6 GB of operating headroom.
+OLLAMA_GENERATION_GPU_LAYERS = int(environment_value("CLIMATEKG_GENERATION_GPU_LAYERS") or "80")
 OLLAMA_RETRIES = 2
 OLLAMA_RETRY_BACKOFF_BASE_SECONDS = 2
 ROOT_CONTEXT_FACET_REASONING = "low"
@@ -40,7 +44,7 @@ PROMPT_VERSIONS = {
     "paper_map_candidate": "v16",
     "map_consolidation_candidate": "v16",
     "section_scout": "v5",
-    "claim_extraction": "v7",
+    "claim_extraction": "v10",
     "query_parse": "v5",
     "query_plan": "v3",
     "query_combined_synthesis": "v1",
@@ -172,6 +176,7 @@ INDEXING_PIPELINE: dict[str, Any] = {
         "base_url": OLLAMA_BASE_URL,
         "request_timeout_seconds": OLLAMA_REQUEST_TIMEOUT_SECONDS,
         "context_tokens": OLLAMA_CONTEXT_TOKENS,
+        "generation_gpu_layers": OLLAMA_GENERATION_GPU_LAYERS,
         "retries": OLLAMA_RETRIES,
         "retry_backoff_base_seconds": OLLAMA_RETRY_BACKOFF_BASE_SECONDS,
         "final_repair_retries": 0,
@@ -299,6 +304,7 @@ QUERY_PIPELINE: dict[str, Any] = {
         "base_url": OLLAMA_BASE_URL,
         "request_timeout_seconds": OLLAMA_REQUEST_TIMEOUT_SECONDS,
         "context_tokens": OLLAMA_CONTEXT_TOKENS,
+        "generation_gpu_layers": OLLAMA_GENERATION_GPU_LAYERS,
         "retries": OLLAMA_RETRIES,
         "retry_backoff_base_seconds": OLLAMA_RETRY_BACKOFF_BASE_SECONDS,
         "final_repair_retries": 0,

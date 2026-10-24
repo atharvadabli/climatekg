@@ -129,6 +129,7 @@ def test_cross_domain_prompt_versions_are_explicit() -> None:
 
     assert PROMPT_VERSIONS["facet_extraction"] == "v7"
     assert PROMPT_VERSIONS["small_paper_extraction"] == "v5.7"
+    assert PROMPT_VERSIONS["claim_extraction"] == "v10"
     assert INDEXING_PIPELINE["ollama"]["stages"]["facet_extraction"]["thinking"] == "no"
     assert INDEXING_PIPELINE["ollama"]["stages"]["facet_extraction"]["root_thinking"] == "low"
 
@@ -174,6 +175,9 @@ def test_staged_prompts_define_focused_result_extraction() -> None:
     claim_text = (PROMPT_DIR / "claim_extraction.txt").read_text(encoding="utf-8")
     assert "RESULT FOCUS" in claim_text
     assert "does not limit extraction to relationships explicitly named in the target label" in claim_text
+    assert "applies to the entire target setting" in claim_text
+    assert "latitude band" in claim_text
+    assert "one scientific target variable or process" in claim_text
 
 
 def test_unsupported_geocoding_qualifier_is_removed_and_recorded() -> None:

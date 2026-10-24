@@ -1669,7 +1669,7 @@ output-recall control; it must not discard evidence or introduce a semantic pre-
 
 ## Prompt: `claim_extraction.txt`
 
-The exact standalone Qwen3.6-27B prompt is versioned as `claim_extraction_v7`. Each call receives one target Context or Transition and one plain-language result focus. The target establishes ownership; it does not restrict extraction to relationships named in the target label.
+The exact standalone Qwen3.6-27B prompt is versioned as `claim_extraction_v10`. Each call receives one target Context or Transition and one plain-language result focus. The target establishes ownership; it does not restrict extraction to relationships named in the target label. For every Claim, extraction decides whether the relationship applies to the entire target setting or only to a reported subset. A location, region, latitude band, season, year class, spatial scale, or response group that limits the relationship is recorded as an analysis case unless it is already a supplied conditioning Facet. Each Claim has one scientific target variable or process; a passage reporting responses for physically different targets produces separate Claims.
 
 ```text
 SYSTEM

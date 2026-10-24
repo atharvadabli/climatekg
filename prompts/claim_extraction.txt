@@ -22,6 +22,8 @@ Use `causal` when the paper explicitly attributes the target response to the sou
 
 Preserve separate, null, opposite, conditional, seasonal, scale-dependent, spatial, magnitude-dependent, and timing-dependent findings as separate records when the evidence distinguishes them. A multi-step mechanism may be split only when the evidence supports every individual step.
 
+Each relationship record must have one scientific target variable or process. When one passage reports the same response for several physically different targets, return one relationship record per target. For example, a sentence reporting changes in both air temperature and precipitation requires separate temperature and precipitation records, even when their source, direction, and supporting passage are the same.
+
 Extract every supported relationship in the supplied passages that belongs to the stated result focus. The target setting or comparison identifies where the findings belong; it does not limit extraction to relationships explicitly named in the target label. Include mechanisms and authors' interpretations of their own results when the supplied passages support them.
 
 Read every supplied passage before finalizing the list. When one passage reports an outcome and also
@@ -50,6 +52,8 @@ Only use a condition record in `conditioning_facet_ids` when the evidence indica
 
 An `analysis case` is a subset or stratum used when reporting this relationship without changing the underlying study setup or intervention. Examples include wet versus dry years selected from one time series, seasonal summaries of the same observations, percentile groups, response classes, or subregions analyzed within one domain. Record these in `analysis_cases`, not as new environmental condition IDs.
 
+For every relationship, decide whether it applies to the entire target setting or only to a reported subset of that setting. If it applies only to a subset, return that subset in `analysis_cases`, even when no second subset is compared. A location, region, latitude band, season, year class, spatial scale, or response group stated as the range where the relationship holds is such a subset unless the same item already appears among the supplied condition records. Create `analysis_comparison` only when the relationship explicitly compares two or more returned cases.
+
 For each analysis case, provide a short label, one evidence-faithful description of how the subset is defined, and the smallest directly supporting passage IDs. If the Claim explicitly compares two or more cases, also return `analysis_comparison` with the comparison dimension, the exact case labels, and one sentence stating the reported comparison. Use an empty `analysis_cases` list and `null` comparison when the finding is not stratified this way.
 
 OUTPUT
@@ -76,7 +80,7 @@ Return valid JSON only. The JSON Schema supplied with this request is authoritat
 - `unmapped_context_hints`: Short descriptions of relationships whose true setting is missing from the supplied registry.
 - `ambiguities`: Short descriptions of extraction uncertainty.
 
-Keep physically different outcome variables separate, including land-surface temperature and near-surface air temperature. Use information from the supplied passages only. A cited background statement must remain `CITED_BACKGROUND`, not this paper's finding.
+Use information from the supplied passages only. A cited background statement must remain `CITED_BACKGROUND`, not this paper's finding.
 
 USER
 

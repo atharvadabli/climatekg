@@ -79,7 +79,37 @@ The live `P000084` replay is stored under:
 climatekg/runtime/outputs/result_scope_p84_v1/
 ```
 
-Nemotron parsing, cleaning, and SourceBlock generation completed. The replay stopped at the first Qwen section-scout request because Ollama could not allocate a 15,507,660,800-byte CUDA buffer for `qwen3.6:27b`. The same failure occurred at 32K and 16K request contexts. No alternative model or CPU fallback was used, so no new scientific extraction result is claimed yet.
+Nemotron parsing, cleaning, and SourceBlock generation completed. The first Qwen section-scout request stopped because Ollama's automatic device placement tried to allocate a 15,507,660,800-byte CUDA buffer for `qwen3.6:27b`. A host commit-memory leak in `WavesSvc64.exe` also left only 6.7 GB of virtual-memory headroom. After releasing one leaked process, the exact configured model completed a direct 32K-context test with `num_gpu=80`. Ollama capped the value at the model's available layers, used about 20.7 GB of the 24 GB GPU, retained about 3.6 GB of headroom, and completed a warm test response in 0.7 seconds. The client applies this explicit full-layer offload to generation calls only; it does not substitute a model, shorten the context, or change embedding calls. `CLIMATEKG_GENERATION_GPU_LAYERS` remains available for machines with different GPU capacity.
+
+### Completed P000084 replay
+
+The cached replay completed in 1,589.4 seconds (26.5 minutes):
+
+| Phase | Seconds |
+|---|---:|
+| Paper mapping | 673.1 |
+| Facet extraction | 328.2 |
+| Claim extraction | 544.2 |
+| Paper consolidation | 31.6 |
+| Final embeddings | 11.2 |
+
+The final artifact contains 7 Contexts, 15 Facets, 2 Transitions, 50 Claims, and 87 canonical States. `RS001`, labelled `Local versus nonlocal effect mechanisms`, explicitly includes `P000084:S09:P0057`. That scope produced separate Claims for:
+
+- reduced surface-atmosphere heat exchange after roughness reduction;
+- humid-tropical latent-heat response linked, with the paper's uncertainty retained, to evapotranspiration efficiency;
+- snow-enhanced albedo and shortwave reduction north of 40 degrees N;
+- a southward shift of tropical rainbands; and
+- reduced atmospheric water vapor and cloud cover.
+
+The original sparse-versus-extensive findings remain represented, including robustness of local effects, dependence of nonlocal effects on changed area, and matching energy-balance mechanisms. Only one exact duplicate Claim description was present among the 50 final Claims.
+
+### Remaining structural limitations
+
+Frozen-input prompt checks were run after the full replay. Their exact requests and responses are under `experiments/claim_v8_result_001`, `experiments/claim_v9_result_001`, and `experiments/claim_v10_result_003_part001` beside the replay data.
+
+Clearer general instructions increased the number of Claims carrying analysis cases, but Qwen continued to encode the `P000084:S09:P0057` qualifiers such as `humid tropics` and `north of 40 degrees N` in endpoints and descriptions rather than in `analysis_cases`. Qwen also continued to combine surface temperature, precipitation, and 2-m air temperature in the sparse-versus-extensive robustness Claim despite an explicit one-target-variable instruction. These Claims remain semantically retrievable, but their structured case filtering and graph endpoints are less precise than intended.
+
+No additional repair call, string-matching validator, or deterministic scientific inference was added. Those would mask the observed model behavior rather than address its cause. The v10 prompt retains the clearer general rules, and this experiment remains subject to cross-paper regression checks.
 
 ## Adoption criteria
 

@@ -14,6 +14,7 @@ from .constants import (
     EMBEDDING_DIMENSION,
     OLLAMA_BASE_URL,
     OLLAMA_CONTEXT_TOKENS,
+    OLLAMA_GENERATION_GPU_LAYERS,
     OLLAMA_REQUEST_TIMEOUT_SECONDS,
     OLLAMA_RETRIES,
     OLLAMA_RETRY_BACKOFF_BASE_SECONDS,
@@ -57,7 +58,11 @@ class OllamaClient:
                 "stream": False,
                 "format": schema.model_json_schema(),
                 "messages": [{"role": "system", "content": system}, {"role": "user", "content": prompt}],
-                "options": {"temperature": temperature, "num_ctx": OLLAMA_CONTEXT_TOKENS},
+                "options": {
+                    "temperature": temperature,
+                    "num_ctx": OLLAMA_CONTEXT_TOKENS,
+                    "num_gpu": OLLAMA_GENERATION_GPU_LAYERS,
+                },
             }
             payload["think"] = False if thinking == "no" else thinking
             request_path = artifact_dir / f"{call_id}.attempt{attempt}.request.json"
