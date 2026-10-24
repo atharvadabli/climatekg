@@ -1281,7 +1281,7 @@ Input:
 
 ## Prompt: `map_consolidation.txt`
 
-The exact standalone Qwen3.6-27B prompt is versioned as `map_consolidation_v16` in `prompts/map_consolidation.txt`. It has the same complete-setting requirements as `paper_map_v16`, and additionally explains the distinction between preliminary scout notes and selected original evidence.
+The exact standalone Qwen3.6-27B prompt is versioned as `map_consolidation_v17` in `prompts/map_consolidation.txt`. It has the same complete-setting requirements as `paper_map_v16`, explains the distinction between preliminary scout notes and selected original evidence, and receives the required result SourceBlock IDs as a concise checklist.
 
 The map must assign every result block identified by the section scouts to at least one `result_scope`. A result scope is an extraction-planning record, not a graph node. It names one focused family of findings, identifies the existing Context or Transition that owns them, and lists the SourceBlocks that must reach Claim extraction. Missing scout-result coverage is a visible mapping failure.
 

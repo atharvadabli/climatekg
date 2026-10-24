@@ -19,6 +19,7 @@ INPUT
 You will receive:
 - paper metadata;
 - preliminary notes made from separate paper sections;
+- a checklist of every result SourceBlock ID that must be assigned to at least one result-extraction scope;
 - selected original passages with stable SourceBlock IDs.
 
 The preliminary notes identify possible settings and comparisons. Use the original passages to decide the final structure and evidence.
@@ -127,6 +128,9 @@ PAPER METADATA
 
 PRELIMINARY SECTION NOTES
 {scout_outputs}
+
+REQUIRED RESULT SOURCEBLOCK IDS
+{required_result_block_ids}
 
 SELECTED ORIGINAL PASSAGES
 {selected_blocks}

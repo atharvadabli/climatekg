@@ -10,7 +10,7 @@ from pydantic import BaseModel
 import pytest
 
 from climatekg.ollama import OllamaClient
-from climatekg.extraction_models import MapContext, PaperMap, SectionScout, SmallPaperExtraction
+from climatekg.extraction_models import ClaimCandidate, MapContext, PaperMap, SectionScout, SmallPaperExtraction
 from climatekg.location_extraction import enforce_copied_location_names
 from climatekg.query import _shared_answer_guidance
 
@@ -22,7 +22,7 @@ EXPECTED_PLACEHOLDERS = {
     "small_paper_extraction.txt": {"paper_id", "paper_text"},
     "paper_map.txt": {"paper_id", "paper_text"},
     "section_scout.txt": {"paper_id", "section_path", "section_blocks"},
-    "map_consolidation.txt": {"paper_metadata", "scout_outputs", "selected_blocks"},
+    "map_consolidation.txt": {"paper_metadata", "scout_outputs", "required_result_block_ids", "selected_blocks"},
     "facet_extraction.txt": {"paper_id", "target_context", "context_registry", "parent_facets", "existing_target_facets", "evidence_blocks"},
     "claim_extraction.txt": {"paper_id", "relevant_contexts", "available_scope_facets", "target_scope", "result_focus", "evidence_blocks"},
     "context_reconciliation.txt": {"context_registry", "hints", "hint_evidence_blocks"},
@@ -52,6 +52,29 @@ def test_prompt_templates_are_standalone_and_renderable() -> None:
         assert _fields(template) == expected
         rendered = template.format(**{field: f"<{field}>" for field in expected})
         assert all(f"<{field}>" in rendered for field in expected)
+
+
+def test_claim_candidate_rejects_comparison_labels_missing_from_cases() -> None:
+    with pytest.raises(ValueError, match="case_labels"):
+        ClaimCandidate.model_validate(
+            {
+                "from": {"concept": "configuration", "state": "CTRL"},
+                "to": {"concept": "evapotranspiration", "state": "overestimated"},
+                "relation": "associative",
+                "description": "CTRL overestimated evapotranspiration more than DRY.",
+                "evidence_role": "OWN_RESULT",
+                "conditioning_facet_ids": [],
+                "analysis_cases": [
+                    {"label": "DJF season", "description": "December through February", "evidence_block_ids": ["P1:S1:P1"]}
+                ],
+                "analysis_comparison": {
+                    "dimension": "configuration",
+                    "case_labels": ["CTRL", "DRY"],
+                    "description": "CTRL exceeded DRY.",
+                },
+                "evidence_block_ids": ["P1:S1:P1"],
+            }
+        )
 
 
 def test_prompts_avoid_pipeline_dependent_phrasing() -> None:

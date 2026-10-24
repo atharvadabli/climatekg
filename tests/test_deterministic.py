@@ -3,7 +3,7 @@ import shutil
 import uuid
 
 from climatekg.canonicalize import canonical_concept, canonical_direction, state_id
-from climatekg.extract import _apply_map_repair, _render_blocks, _validate_map, _validate_map_references, _validate_map_repair, _validate_reference_only_repair, compact_claim_facets, include_evidence_blocks, is_outcome_like_facet, partition_claim_blocks, relevant_claim_contexts, remove_internal_inventory_aliases, render_paper_map_tree, scout_setting_inventory, select_map_consolidation_blocks, validate_context_mention_resolution, validate_result_scope_coverage
+from climatekg.extract import _apply_map_repair, _apply_missing_context_evidence_repair, _render_blocks, _validate_map, _validate_map_references, _validate_map_repair, _validate_reference_only_repair, compact_claim_facets, include_evidence_blocks, is_outcome_like_facet, partition_claim_blocks, relevant_claim_contexts, remove_internal_inventory_aliases, render_paper_map_tree, scout_setting_inventory, select_map_consolidation_blocks, validate_context_mention_resolution, validate_result_scope_coverage
 from climatekg.extraction_models import ContextHintDecision, ContextReconciliationBatch, MapContext, MapResultScope, MapTransition, PaperMap, ScoutMention, SectionScout
 from climatekg.graph import _flatten, _inflate
 from climatekg.indexer import _clear_derived_artifacts, current_prompt_versions, index_pdf, indexing_derivation_fingerprint
@@ -235,6 +235,25 @@ def test_map_repair_applies_only_new_endpoint_children() -> None:
     assert applied.transitions[0].from_context_temp_id == "left"
 
 
+def test_missing_context_evidence_repair_changes_only_empty_evidence_lists() -> None:
+    empty = MapContext(temp_id="empty", label="original wind", evidence_block_ids=[])
+    complete = MapContext(temp_id="complete", label="control", evidence_block_ids=["B1"])
+    original = PaperMap(contexts=[empty, complete], transitions=[])
+    proposed = PaperMap(
+        contexts=[empty.model_copy(update={"evidence_block_ids": ["B2"]}), complete],
+        transitions=[],
+    )
+    repaired = _apply_missing_context_evidence_repair(original, proposed, {"B1", "B2"})
+    assert repaired.contexts[0].evidence_block_ids == ["B2"]
+    assert repaired.contexts[1] == complete
+
+    changed = proposed.model_copy(
+        update={"contexts": [proposed.contexts[0].model_copy(update={"label": "rewritten"}), complete]}
+    )
+    with pytest.raises(ValueError, match="Context semantics"):
+        _apply_missing_context_evidence_repair(original, changed, {"B1", "B2"})
+
+
 def test_map_reference_repair_can_only_change_evidence_ids() -> None:
     original = PaperMap(contexts=[MapContext(temp_id="C", label="context", evidence_block_ids=["P0007"])], transitions=[])
     repaired = PaperMap(contexts=[MapContext(temp_id="C", label="context", evidence_block_ids=["P:S00:P0007"])], transitions=[])
@@ -386,7 +405,7 @@ def test_explicit_derived_rebuild_retains_parse_and_blocks() -> None:
         assert (paper_dir / "blocks" / "artifact.txt").exists()
         assert not (paper_dir / "extraction").exists()
         assert not (paper_dir / "final").exists()
-        assert current_prompt_versions()["map_consolidation"] == "v16"
+        assert current_prompt_versions()["map_consolidation"] == "v17"
         assert current_prompt_versions()["section_scout"] == "v5"
     finally:
         shutil.rmtree(data_root, ignore_errors=True)

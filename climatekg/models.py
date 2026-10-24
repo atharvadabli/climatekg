@@ -108,6 +108,15 @@ class Claim(StrictModel):
     evidence_block_ids: list[str] = Field(default_factory=list)
     claim_embedding: list[float] | None = None
 
+    @model_validator(mode="after")
+    def validate_analysis_comparison(self) -> "Claim":
+        if self.analysis_comparison is None:
+            return self
+        labels = {case.label for case in self.analysis_cases}
+        if not set(self.analysis_comparison.case_labels) <= labels:
+            raise ValueError("analysis_comparison.case_labels must exactly copy labels from analysis_cases")
+        return self
+
 
 class State(StrictModel):
     id: str

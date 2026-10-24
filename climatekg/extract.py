@@ -412,6 +412,28 @@ def _apply_map_repair(original: PaperMap, proposed: PaperMap, block_ids: set[str
     return repaired
 
 
+def _apply_missing_context_evidence_repair(original: PaperMap, proposed: PaperMap, block_ids: set[str]) -> PaperMap:
+    """Apply evidence IDs only to Contexts whose original evidence list was empty."""
+    proposed_contexts = {item.temp_id: item for item in proposed.contexts}
+    repaired_contexts: list[MapContext] = []
+    for context in original.contexts:
+        candidate = proposed_contexts.get(context.temp_id)
+        if candidate is None:
+            raise ValueError(f"evidence repair omitted Context: {context.temp_id}")
+        if context.evidence_block_ids:
+            if candidate != context:
+                raise ValueError(f"evidence repair changed immutable Context: {context.temp_id}")
+            repaired_contexts.append(context)
+            continue
+        expected = context.model_copy(update={"evidence_block_ids": candidate.evidence_block_ids})
+        if candidate != expected:
+            raise ValueError(f"evidence repair changed Context semantics: {context.temp_id}")
+        repaired_contexts.append(expected)
+    repaired = original.model_copy(update={"contexts": repaired_contexts})
+    _validate_map(repaired, block_ids)
+    return repaired
+
+
 def map_paper(paper: Paper, blocks: list[SourceBlock], paper_dir: Path, client: OllamaClient) -> PaperMap:
     cfg = PIPELINE
     cached_path = paper_dir / "extraction" / "map" / "paper_map.json"
@@ -453,6 +475,7 @@ def map_paper(paper: Paper, blocks: list[SourceBlock], paper_dir: Path, client: 
         repair_base_user = consolidation_user.format(
             paper_metadata=paper.model_dump_json(),
             scout_outputs=render_scout_notes(scouts),
+            required_result_block_ids=json.dumps(sorted({block_id for scout in scouts for block_id in scout.claim_seed_block_ids})),
             selected_blocks=_render_blocks(selected),
         )
         consolidation_cfg = cfg["ollama"]["stages"]["map_consolidation"]
@@ -499,6 +522,56 @@ def map_paper(paper: Paper, blocks: list[SourceBlock], paper_dir: Path, client: 
         except ValueError as repair_exc:
             raise ValueError(f"FAILED_REFERENCE_VALIDATION: {repair_exc}") from repair_exc
         result = reference_repaired
+    missing_contexts = [context for context in result.contexts if not context.evidence_block_ids]
+    if missing_contexts:
+        missing_ids = {context.temp_id for context in missing_contexts}
+        related_ids = {
+            block_id
+            for context in result.contexts
+            if context.temp_id in missing_ids
+            or any(parent_id in missing_ids for parent_id in context.parent_temp_ids)
+            or any(child.parent_temp_ids and context.temp_id in child.parent_temp_ids for child in missing_contexts)
+            for block_id in context.evidence_block_ids
+        }
+        queries = [
+            *(context.label for context in missing_contexts),
+            "passages that establish the named study setting, baseline condition, forcing, period, treatment, or simulation case",
+        ]
+        repair_blocks = evidence_bundle(blocks, queries, [], sorted(related_ids), client)
+        evidence_repair_user = (
+            "TASK\n\nAdd directly supporting evidence passage IDs to study-setting records whose evidence list is empty. "
+            "Return the complete JSON object in the supplied schema.\n\n"
+            "INPUT\n\nYou will receive a previously generated study-setting map, the IDs of records with no evidence, "
+            "a list of allowed passage IDs, and selected original passages.\n\n"
+            f"PREVIOUS JSON OBJECT\n{result.model_dump_json(by_alias=True)}\n\n"
+            f"RECORDS WITH MISSING EVIDENCE\n{json.dumps(sorted(missing_ids))}\n\n"
+            f"ALLOWED SOURCEBLOCK IDS\n{json.dumps(sorted(block_ids))}\n\n"
+            f"SELECTED ORIGINAL PASSAGES\n{_render_blocks(repair_blocks)}\n\n"
+            "OUTPUT\n\nCopy every record and every field exactly. For each listed record only, fill `evidence_block_ids` "
+            "with the smallest set of allowed SourceBlock IDs that directly establishes that named setting. "
+            "Do not change labels, hierarchy, comparisons, result scopes, or any other evidence lists. "
+            "Return valid JSON only, with no Markdown or commentary."
+        )
+        evidence_repair_path = paper_dir / "extraction" / "map" / "paper_map.evidence_repair_candidate.json"
+        if evidence_repair_path.exists():
+            evidence_repaired = PaperMap.model_validate_json(evidence_repair_path.read_text(encoding="utf-8"))
+        else:
+            repair_cfg = cfg["ollama"]["stages"]["paper_map_reference_repair"]
+            evidence_repaired = client.structured(
+                stage="paper_map_context_evidence_repair",
+                system=repair_system,
+                user=evidence_repair_user,
+                schema=PaperMap,
+                model=cfg["ollama"]["model"],
+                temperature=repair_cfg["temperature"],
+                thinking=repair_cfg["thinking"],
+                artifact_dir=paper_dir / "extraction" / "map" / "context_evidence_repair",
+                paper_id=paper.id,
+                input_block_ids=[block.id for block in repair_blocks],
+                retries=repair_cfg["retries"],
+            )
+            write_json(evidence_repair_path, evidence_repaired.model_dump(by_alias=True))
+        result = _apply_missing_context_evidence_repair(result, evidence_repaired, block_ids)
     try:
         _validate_map(result, block_ids)
     except ValueError as exc:
