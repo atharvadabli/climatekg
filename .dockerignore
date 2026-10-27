@@ -1,0 +1,14 @@
+.git
+.venv*
+.pytest_cache
+**/__pycache__
+**/*.pyc
+climatekg/runtime
+evaluation/output
+evaluation/shared
+Paper_writing
+documents
+*.zip
+.env*
+deployment/secrets
+deployment/volumes

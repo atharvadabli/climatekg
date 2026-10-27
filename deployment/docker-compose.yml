@@ -1,0 +1,171 @@
+x-app-environment: &app-environment
+  CLIMATEKG_WEBAPP_GRAPH_ROOT: /data/parquet_graph
+  CLIMATEKG_BASELINE_ROOT: /data/baselines
+  CLIMATEKG_WATERSHED_PATH: /app/assets/watershed_pan_india_simplified.geojson
+  CLIMATEKG_KOPPEN_PATH: /app/assets/Global_1986-2010_KG_5m.kmz.zip
+  CLIMATEKG_JOB_ROOT: /artifacts/jobs
+  CLIMATEKG_QUERY_OUTPUT_ROOT: /artifacts/queries
+  CLIMATEKG_INTERNAL_TOKEN: ${CLIMATEKG_INTERNAL_TOKEN:?set CLIMATEKG_INTERNAL_TOKEN}
+  OLLAMA_URL: http://ollama:11434
+  EARTH_ENGINE_PROJECT: ${EARTH_ENGINE_PROJECT:-}
+  GOOGLE_APPLICATION_CREDENTIALS: /credentials/application_default_credentials.json
+  TIKTOKEN_CACHE_DIR: /artifacts/cache/tiktoken
+
+x-app-volumes: &app-volumes
+  - ${CLIMATEKG_DATA_DIR:-../climatekg/runtime/outputs/three_system_benchmark}:/data:ro
+  - ${CLIMATEKG_ASSETS_DIR:-../assets}:/app/assets:ro
+  - ${CLIMATEKG_ARTIFACTS_DIR:-../climatekg/runtime/deployment}:/artifacts
+  - ${CLIMATEKG_CREDENTIALS_DIR:-./secrets/earthengine}:/credentials:ro
+
+x-airflow-environment: &airflow-environment
+  AIRFLOW__CORE__EXECUTOR: LocalExecutor
+  AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+  AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+  AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
+  AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "false"
+  CLIMATEKG_JOB_ROOT: /artifacts/jobs
+  CLIMATEKG_COMPUTE_URL: http://compute:8790
+  CLIMATEKG_INTERNAL_TOKEN: ${CLIMATEKG_INTERNAL_TOKEN:?set CLIMATEKG_INTERNAL_TOKEN}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - airflow-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  airflow-init:
+    image: apache/airflow:2.10.5-python3.12
+    user: "0:0"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      <<: *airflow-environment
+      AIRFLOW_ADMIN_USERNAME: ${AIRFLOW_ADMIN_USERNAME:-climatekg}
+      AIRFLOW_ADMIN_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:-change-me}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags:ro
+      - ${CLIMATEKG_ARTIFACTS_DIR:-../climatekg/runtime/deployment}:/artifacts
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - >-
+        airflow db migrate &&
+        airflow users create
+        --username "$${AIRFLOW_ADMIN_USERNAME:-climatekg}"
+        --password "$${AIRFLOW_ADMIN_PASSWORD:-change-me}"
+        --firstname ClimateKG --lastname Admin
+        --role Admin --email admin@localhost || true
+
+  airflow-webserver:
+    image: apache/airflow:2.10.5-python3.12
+    restart: unless-stopped
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    environment:
+      <<: *airflow-environment
+      AIRFLOW_ADMIN_USERNAME: ${AIRFLOW_ADMIN_USERNAME:-climatekg}
+      AIRFLOW_ADMIN_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:-change-me}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags:ro
+      - ${CLIMATEKG_ARTIFACTS_DIR:-../climatekg/runtime/deployment}:/artifacts
+    command: webserver
+    ports:
+      - "127.0.0.1:${AIRFLOW_HOST_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+
+  airflow-scheduler:
+    image: apache/airflow:2.10.5-python3.12
+    restart: unless-stopped
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    environment: *airflow-environment
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags:ro
+      - ${CLIMATEKG_ARTIFACTS_DIR:-../climatekg/runtime/deployment}:/artifacts
+    command: scheduler
+
+  ollama:
+    image: ${OLLAMA_IMAGE:-ollama/ollama:0.34.4}
+    restart: unless-stopped
+    volumes:
+      - ${CLIMATEKG_MODELS_DIR:-./volumes/models}:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+
+  ollama-models:
+    image: ${OLLAMA_IMAGE:-ollama/ollama:0.34.4}
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: /bin/sh
+    command: ["-c", "ollama pull qwen3.6:27b && ollama pull qwen3-embedding:4b"]
+
+  compute:
+    build:
+      context: ..
+      dockerfile: deployment/docker/Dockerfile.app
+    restart: unless-stopped
+    depends_on:
+      ollama-models:
+        condition: service_completed_successfully
+    environment: *app-environment
+    volumes: *app-volumes
+    command: ["python", "-m", "webapp.compute_service", "--host", "0.0.0.0", "--port", "8790"]
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8790/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+
+  backend:
+    build:
+      context: ..
+      dockerfile: deployment/docker/Dockerfile.app
+    restart: unless-stopped
+    depends_on:
+      airflow-webserver:
+        condition: service_healthy
+      compute:
+        condition: service_healthy
+    environment:
+      <<: *app-environment
+      CLIMATEKG_JOB_BACKEND: airflow
+      AIRFLOW_API_URL: http://airflow-webserver:8080
+      AIRFLOW_API_USERNAME: ${AIRFLOW_ADMIN_USERNAME:-climatekg}
+      AIRFLOW_API_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:-change-me}
+      AIRFLOW_DAG_ID: climatekg_query
+    volumes: *app-volumes
+    ports:
+      - "127.0.0.1:${CLIMATEKG_HOST_PORT:-8780}:8780"
+
+volumes:
+  airflow-postgres:

@@ -16,7 +16,8 @@ from urllib.parse import unquote, urlparse
 from climatekg.config import OUTPUT_ROOT, PIPELINE, QUERY_PIPELINE
 from climatekg.earth_engine import EarthEngineBackend
 from climatekg.enrichment import derive_facets
-from climatekg.models import SpatialSupport
+from climatekg.models import FinalPaper, SpatialSupport
+from climatekg.ollama import OllamaClient
 from climatekg.parquet_graph import ParquetGraph
 from climatekg.query import run_query
 from climatekg.utils import write_json
@@ -27,14 +28,17 @@ from webapp.answer_systems import (
     readiness,
     run_baseline,
 )
+from webapp.orchestration import build_question
 
 
 WEBAPP_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = WEBAPP_DIR.parent
 WATERSHED_PATH = PROJECT_ROOT / "assets" / "watershed_pan_india_simplified.geojson"
-KOPPEN_PATH = PROJECT_ROOT / "assets" / "Global_1986-2010_KG_5m.kmz.zip"
+KOPPEN_PATH = Path(os.environ.get("CLIMATEKG_KOPPEN_PATH", PROJECT_ROOT / "assets" / "Global_1986-2010_KG_5m.kmz.zip"))
 DEFAULT_GRAPH_ROOT = OUTPUT_ROOT / "three_system_benchmark" / "parquet_graph"
-WEBAPP_OUTPUT_ROOT = PROJECT_ROOT / "climatekg" / "runtime" / "webapp" / "queries"
+WEBAPP_OUTPUT_ROOT = Path(os.environ.get("CLIMATEKG_QUERY_OUTPUT_ROOT", PROJECT_ROOT / "climatekg" / "runtime" / "webapp" / "queries"))
+TIKTOKEN_CACHE_ROOT = PROJECT_ROOT / "climatekg" / "runtime" / "cache" / "tiktoken"
+os.environ.setdefault("TIKTOKEN_CACHE_DIR", str(TIKTOKEN_CACHE_ROOT))
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -90,13 +94,14 @@ class ClimateKGEngine:
         graph_root: Path = DEFAULT_GRAPH_ROOT,
         output_root: Path = WEBAPP_OUTPUT_ROOT,
         watershed_path: Path = WATERSHED_PATH,
+        ollama_url: str | None = None,
     ) -> None:
         self.graph_root = graph_root.resolve()
         self.output_root = output_root.resolve()
         self.watershed_path = watershed_path.resolve()
         self.koppen_path = KOPPEN_PATH.resolve()
         self.model = QUERY_PIPELINE["ollama"]["model"]
-        self.ollama_url = QUERY_PIPELINE["ollama"]["base_url"]
+        self.ollama_url = ollama_url or QUERY_PIPELINE["ollama"]["base_url"]
         self.embedding_model = QUERY_PIPELINE["embeddings"]["model"]
         self._papers = None
         self._indexes = None
@@ -153,9 +158,19 @@ class ClimateKGEngine:
         if system != "climatekg":
             return run_baseline(
                 system, augmented_question, question, query_id, artifact_dir, derived_facets,
+                "planning" if planning_feature is not None else "process",
                 self.ollama_url, self.embedding_model, self.model, stage_callback,
             )
         self._load_graph()
+        support = None
+        if planning_feature is not None:
+            properties = planning_feature["properties"]
+            support = SpatialSupport(
+                kind="watershed",
+                name=str(properties["wsconc"]),
+                geometry=planning_feature["geometry"],
+                resolution="exact",
+            )
         report = run_query(
             question,
             query_id,
@@ -164,9 +179,12 @@ class ClimateKGEngine:
             stage_callback=stage_callback,
             indexes=self._indexes,
             state_semantic_links=self._state_semantic_links,
+            spatial_support=support,
+            answer_task="planning" if planning_feature is not None else "process",
+            client=OllamaClient(getattr(self, "ollama_url", QUERY_PIPELINE["ollama"]["base_url"])),
         )
-        result = compact_report(report, artifact_dir)
-        result.update({"system": "climatekg", "system_label": "ClimateKG (context-aware)"})
+        result = compact_report(report, artifact_dir, self._papers)
+        result.update({"system": "climatekg", "system_label": "ClimateKG"})
         return result
 
     def _enrich_planning_feature(
@@ -196,7 +214,49 @@ class ClimateKGEngine:
         stage_callback("watershed_enriched", {"facet_count": len(serialized), "warnings": warnings})
         return serialized
 
-def compact_report(report: dict[str, Any], artifact_dir: Path) -> dict[str, Any]:
+def climatekg_citation_details(report: dict[str, Any], papers: list[FinalPaper]) -> dict[str, dict[str, Any]]:
+    cited_ids = set(report.get("synthesis", {}).get("provenance", {}))
+    paper_by_id = {paper.paper.id: paper for paper in papers}
+    claim_by_id = {claim.id: (paper, claim) for paper in papers for claim in paper.claims}
+    details: dict[str, dict[str, Any]] = {}
+    for claim_id in sorted(cited_ids):
+        owned = claim_by_id.get(claim_id)
+        if owned is None:
+            continue
+        paper, claim = owned
+        context_ids: list[str] = []
+        transition = None
+        if claim.scope_type == "context":
+            context_ids = [claim.scope_id]
+        elif claim.scope_type == "transition":
+            transition = next((item for item in paper.transitions if item.id == claim.scope_id), None)
+            if transition:
+                context_ids = [transition.from_context_id, transition.to_context_id]
+        contexts = [item for item in paper.contexts if item.id in context_ids]
+        context_facets = [item for item in paper.facets if item.context_id in context_ids]
+        conditioning = [item for item in paper.facets if item.id in claim.conditioning_facet_ids]
+        blocks = [item for item in paper.source_blocks if item.id in claim.evidence_block_ids]
+        details[claim_id] = {
+            "kind": "climatekg_claim",
+            "citation_id": claim_id,
+            "paper": paper.paper.model_dump(mode="json"),
+            "claim": claim.model_dump(mode="json", by_alias=True, exclude={"claim_embedding"}),
+            "transition": transition.model_dump(mode="json", exclude={"transition_embedding"}) if transition else None,
+            "contexts": [item.model_dump(mode="json", exclude={"retrieval_embedding"}) for item in contexts],
+            "conditioning_facets": [
+                item.model_dump(mode="json", exclude={"notion_embedding", "content_embedding"})
+                for item in conditioning
+            ],
+            "context_facets": [
+                item.model_dump(mode="json", exclude={"notion_embedding", "content_embedding"})
+                for item in context_facets
+            ],
+            "source_blocks": [item.model_dump(mode="json") for item in blocks],
+        }
+    return details
+
+
+def compact_report(report: dict[str, Any], artifact_dir: Path, papers: list[FinalPaper] | None = None) -> dict[str, Any]:
     spec = report.get("query_spec", {})
     facets = spec.get("context", {}).get("facets", [])
     claims = list(report.get("claim_candidates", [])[:8])
@@ -217,6 +277,7 @@ def compact_report(report: dict[str, Any], artifact_dir: Path) -> dict[str, Any]
         "claims": claims,
         "paths": report.get("paths", [])[:5],
         "provenance": report.get("synthesis", {}).get("provenance", {}),
+        "citation_details": climatekg_citation_details(report, papers or []),
         "warnings": report.get("warnings", []),
         "artifact_dir": str(artifact_dir),
     }
@@ -283,24 +344,7 @@ class JobManager:
             return self.jobs[job_id]
 
     def _question(self, kind: str, payload: dict[str, Any]) -> str:
-        if kind == "process":
-            question = str(payload.get("question", "")).strip()
-            if not question:
-                raise ValueError("question is required")
-            return question
-        if kind != "planning":
-            raise ValueError(f"unsupported job kind: {kind}")
-        watershed_id = str(payload.get("watershed_id", "")).strip().upper()
-        if not self.watersheds.contains(watershed_id):
-            raise ValueError(f"unknown watershed: {watershed_id}")
-        objective = str(payload.get("objective", "")).strip()
-        if not objective:
-            raise ValueError("planning objective is required")
-        question = f"For watershed {watershed_id} in India, what land-use changes could {objective.rstrip('.?')}?"
-        additional = str(payload.get("additional_information", "")).strip()
-        if additional:
-            question += f" Additional local information supplied by the user: {additional}"
-        return question
+        return build_question(kind, payload, self.watersheds)[0]
 
     def _execute(
         self,
@@ -404,6 +448,8 @@ class WebAppHandler(SimpleHTTPRequestHandler):
             self._json(job.public(), HTTPStatus.ACCEPTED)
         except (ValueError, json.JSONDecodeError) as exc:
             self._json({"error": str(exc)}, HTTPStatus.BAD_REQUEST)
+        except RuntimeError as exc:
+            self._json({"error": str(exc)}, HTTPStatus.SERVICE_UNAVAILABLE)
 
     def _serve_file(self, path: Path, content_type: str) -> None:
         size = path.stat().st_size
@@ -424,8 +470,14 @@ def create_server(
 ) -> ThreadingHTTPServer:
     if manager is None:
         graph_root = Path(os.environ.get("CLIMATEKG_WEBAPP_GRAPH_ROOT", DEFAULT_GRAPH_ROOT))
-        engine = ClimateKGEngine(graph_root=graph_root)
-        manager = JobManager(engine, WatershedCatalog())
+        engine = ClimateKGEngine(graph_root=graph_root, ollama_url=os.environ.get("OLLAMA_URL"))
+        watersheds = WatershedCatalog(Path(os.environ.get("CLIMATEKG_WATERSHED_PATH", WATERSHED_PATH)))
+        if os.environ.get("CLIMATEKG_JOB_BACKEND", "local").lower() == "airflow":
+            from webapp.orchestration import manager_from_environment
+
+            manager = manager_from_environment(engine, watersheds)
+        else:
+            manager = JobManager(engine, watersheds)
     handler = type("ConfiguredWebAppHandler", (WebAppHandler,), {"manager": manager})
     return ThreadingHTTPServer((host, port), handler)
 

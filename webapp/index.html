@@ -100,7 +100,20 @@
     <div class="facet-dialog-body" id="facet-dialog-body"></div>
   </dialog>
 
+  <dialog class="facet-dialog citation-dialog" id="citation-dialog" aria-labelledby="citation-dialog-title">
+    <header>
+      <div>
+        <p class="eyebrow" id="citation-dialog-domain">Scientific evidence</p>
+        <h2 id="citation-dialog-title">Citation details</h2>
+      </div>
+      <button class="dialog-close" id="citation-dialog-close" type="button" aria-label="Close citation details">&times;</button>
+    </header>
+    <div class="facet-dialog-body" id="citation-dialog-body"></div>
+  </dialog>
+
   <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="vendor/marked/marked.umd.js"></script>
+  <script src="vendor/dompurify/purify.min.js"></script>
   <script type="module" src="js/app.js"></script>
 </body>
 </html>

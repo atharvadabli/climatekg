@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from argparse import Namespace
 from pathlib import Path
 from typing import Any, Callable
@@ -8,14 +9,16 @@ from climatekg.config import OUTPUT_ROOT
 from climatekg.utils import write_json
 
 
-BASELINE_ROOT = OUTPUT_ROOT / "three_system_benchmark" / "baselines"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+BASELINE_ROOT = Path(os.environ["CLIMATEKG_BASELINE_ROOT"]) if os.environ.get("CLIMATEKG_BASELINE_ROOT") else OUTPUT_ROOT / "three_system_benchmark" / "baselines"
 PLAIN_RAG_INDEX = BASELINE_ROOT / "plain_rag" / "index"
 GRAPHRAG_INDEX = BASELINE_ROOT / "graphrag"
+PROMPT_ROOT = PROJECT_ROOT / "prompts"
 
 ANSWER_SYSTEMS = (
     {"id": "graphrag", "label": "Microsoft GraphRAG"},
     {"id": "plain_rag", "label": "Plain RAG"},
-    {"id": "climatekg", "label": "ClimateKG (context-aware)"},
+    {"id": "climatekg", "label": "ClimateKG"},
 )
 DEFAULT_ANSWER_SYSTEM = "graphrag"
 
@@ -37,6 +40,7 @@ def run_baseline(
     query_id: str,
     artifact_dir: Path,
     derived_facets: list[dict[str, Any]],
+    answer_task: str,
     ollama_url: str,
     embedding_model: str,
     generation_model: str,
@@ -45,12 +49,12 @@ def run_baseline(
     if system == "graphrag":
         return _run_graphrag(
             retrieval_question, display_question, query_id, artifact_dir, derived_facets,
-            ollama_url, embedding_model, generation_model, stage_callback,
+            answer_task, ollama_url, embedding_model, generation_model, stage_callback,
         )
     if system == "plain_rag":
         return _run_plain_rag(
             retrieval_question, display_question, query_id, artifact_dir, derived_facets,
-            ollama_url, embedding_model, generation_model, stage_callback,
+            answer_task, ollama_url, embedding_model, generation_model, stage_callback,
         )
     raise ValueError(f"unsupported baseline answer system: {system}")
 
@@ -61,6 +65,7 @@ def _run_graphrag(
     query_id: str,
     artifact_dir: Path,
     derived_facets: list[dict[str, Any]],
+    answer_task: str,
     ollama_url: str,
     embedding_model: str,
     generation_model: str,
@@ -73,7 +78,7 @@ def _run_graphrag(
     stage_callback("graphrag_retrieval_started", {"index": str(GRAPHRAG_INDEX)})
     report = _json_safe(query_index(
         GRAPHRAG_INDEX, retrieval_question, ollama_url, embedding_model,
-        generation_model, thinking="no",
+        generation_model, thinking="no", answer_instructions=rag_answer_instructions(answer_task),
     ))
     stage_callback("graphrag_answer_synthesized", {
         "communities": len(report["selected_communities"]),
@@ -85,6 +90,7 @@ def _run_graphrag(
         "question": display_question, "answer": report["answer"], "mode": "community graph retrieval",
         "derived_facets": derived_facets, "communities": report["selected_communities"],
         "evidence": report["evidence"], "contexts": [], "claims": [], "paths": [], "provenance": {},
+        "citation_details": _graphrag_citation_details(report["evidence"]),
         "warnings": ["GraphRAG uses graph communities and relationship evidence; it does not apply ClimateKG context gating."],
         "artifact_dir": str(artifact_dir),
     }
@@ -96,6 +102,7 @@ def _run_plain_rag(
     query_id: str,
     artifact_dir: Path,
     derived_facets: list[dict[str, Any]],
+    answer_task: str,
     ollama_url: str,
     embedding_model: str,
     generation_model: str,
@@ -115,7 +122,7 @@ def _run_plain_rag(
     )
     stage_callback("plain_rag_retrieval_started", {"index": str(PLAIN_RAG_INDEX)})
     sources = plain_rag.retrieve(args, retrieval_question)
-    prompt = _plain_rag_prompt(retrieval_question, sources)
+    prompt = _plain_rag_prompt(retrieval_question, sources, answer_task)
     answer, thinking = plain_rag.chat(ollama_url, generation_model, prompt, "no")
     report = {
         "question": retrieval_question, "sources": sources, "prompt": prompt,
@@ -128,6 +135,19 @@ def _run_plain_rag(
         "question": display_question, "answer": answer, "mode": "passage retrieval",
         "derived_facets": derived_facets, "sources": sources,
         "contexts": [], "claims": [], "paths": [], "provenance": {},
+        "citation_details": {
+            f"S{index}": {
+                "kind": "source_excerpt",
+                "citation_id": f"S{index}",
+                "paper": {"title": item["paper"]},
+                "source_blocks": [{
+                    "id": f"S{index}",
+                    "section_path": item.get("heading") or item.get("section"),
+                    "text": item["text"],
+                }],
+            }
+            for index, item in enumerate(sources, 1)
+        },
         "warnings": ["Plain RAG retrieves source passages; it does not use graph paths or ClimateKG context gating."],
         "artifact_dir": str(artifact_dir),
     }
@@ -140,18 +160,20 @@ def append_environmental_context(question: str, facets: list[dict[str, Any]]) ->
     return f"{question}\n\nEnvironmental context derived for the selected watershed:\n{facts}"
 
 
-def _plain_rag_prompt(question: str, sources: list[dict[str, Any]]) -> str:
+def rag_answer_instructions(answer_task: str) -> str:
+    filename = "webapp_land_use_rag_answer.txt" if answer_task == "planning" else "webapp_process_rag_answer.txt"
+    return (PROMPT_ROOT / filename).read_text(encoding="utf-8").strip()
+
+
+def _plain_rag_prompt(question: str, sources: list[dict[str, Any]], answer_task: str) -> str:
     records = "\n\n".join(
         f"[S{index}] Paper: {item['paper']}; section: {item.get('heading') or item['section']}\n{item['text']}"
         for index, item in enumerate(sources, 1)
     )
     return (
-        "TASK\n\nAnswer the scientific question using only the source excerpts below. "
-        "Each excerpt begins with an identifier such as [S1]. Cite every substantive statement "
-        "with the identifier of the excerpt that supports it. State when the excerpts do not provide "
-        "enough evidence.\n\nINPUT\n\n"
-        f"Question:\n{question}\n\nSource excerpts:\n\n{records}\n\n"
-        "OUTPUT\n\nWrite a direct answer in 2-5 short paragraphs using plain text citations such as [S1]."
+        f"{rag_answer_instructions(answer_task)}\n\n"
+        "QUESTION\n\n"
+        f"{question}\n\nSOURCE EXCERPTS\n\n{records}"
     )
 
 
@@ -165,3 +187,31 @@ def _json_safe(value: Any) -> Any:
     if hasattr(value, "item"):
         return value.item()
     return value
+
+
+def _graphrag_citation_details(evidence: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    details = {}
+    for item in evidence:
+        claim_id = item["claim_id"]
+        details[claim_id] = {
+            "kind": "graphrag_relationship",
+            "citation_id": claim_id,
+            "paper": {"id": item["paper"], "title": item["paper_title"]},
+            "claim": {
+                "id": claim_id,
+                "from_state_id": item["source_state"],
+                "to_state_id": item["target_state"],
+                "relation": item["relation"],
+                "description": item["description"],
+            },
+            "conditioning_facets": item.get("conditioning_facets", []),
+            "source_blocks": [
+                {
+                    "id": block["block_id"],
+                    "page": block.get("page"),
+                    "text": block.get("text", ""),
+                }
+                for block in item.get("blocks", [])
+            ],
+        }
+    return details

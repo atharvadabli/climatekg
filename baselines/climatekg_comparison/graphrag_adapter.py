@@ -160,16 +160,32 @@ def community_texts(
 
 
 def build_index(
-    papers: list[CorpusPaper], output_dir: Path, vendor_root: Path, ollama_url: str, embed_model: str
+    papers: list[CorpusPaper],
+    output_dir: Path,
+    vendor_root: Path,
+    ollama_url: str,
+    embed_model: str,
+    embedding_cache_dir: Path | None = None,
 ) -> dict[str, Any]:
     started = time.perf_counter()
     output_dir.mkdir(parents=True, exist_ok=True)
     entities, relationships, text_units = build_tables(papers)
     communities = create_communities(entities, relationships, vendor_root)
     descriptions = community_texts(communities, entities, relationships)
-    vectors = []
-    for start in range(0, len(descriptions), 8):
-        vectors.extend(embed(ollama_url, embed_model, descriptions[start : start + 8]))
+    cached_vectors: dict[str, Any] = {}
+    cache_path = embedding_cache_dir / "communities.parquet" if embedding_cache_dir else None
+    if cache_path and cache_path.exists():
+        cached = pd.read_parquet(cache_path, columns=["full_content", "embedding"])
+        cached_vectors = dict(zip(cached["full_content"], cached["embedding"], strict=True))
+    vectors: list[Any | None] = [cached_vectors.get(text) for text in descriptions]
+    missing = [index for index, value in enumerate(vectors) if value is None]
+    for start in range(0, len(missing), 8):
+        positions = missing[start : start + 8]
+        generated = embed(ollama_url, embed_model, [descriptions[index] for index in positions])
+        for index, vector in zip(positions, generated, strict=True):
+            vectors[index] = vector
+    if any(value is None for value in vectors):
+        raise RuntimeError("GraphRAG community embedding generation was incomplete")
     communities["full_content"] = descriptions
     communities["embedding"] = vectors
     entities.to_parquet(output_dir / "entities.parquet", index=False)
@@ -184,6 +200,8 @@ def build_index(
         "community_levels": sorted(communities["level"].unique().tolist()),
         "cluster_implementation": "Microsoft GraphRAG 3.1.1 hierarchical Leiden",
         "mechanism_projection": "Canonical State entities connected by Claim relationships",
+        "community_embeddings_reused": len(descriptions) - len(missing),
+        "community_embeddings_generated": len(missing),
         "seconds": round(time.perf_counter() - started, 3),
     }
     (output_dir / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
@@ -199,6 +217,7 @@ def query_index(
     top_communities: int = 5,
     max_relationships: int = 18,
     thinking: str = "no",
+    answer_instructions: str | None = None,
 ) -> dict[str, Any]:
     started = time.perf_counter()
     communities = pd.read_parquet(output_dir / "communities.parquet")
@@ -235,24 +254,24 @@ def query_index(
                 "score": row["score"],
             }
         )
-    prompt = (
+    instructions = answer_instructions or (
         "TASK\n\n"
-        "Answer the scientific question using only the evidence records supplied below. "
-        "Each record has a bracketed identifier, a finding, the reported relationship type, "
-        "relevant study conditions when available, and exact supporting text from a paper. "
-        "Consider whether study conditions support transfer to the location or scenario in the question.\n\n"
-        f"QUESTION\n\n{question}\n\nEVIDENCE RECORDS\n\n"
+        "Answer a scientific land-atmosphere question using only the supplied evidence.\n\n"
+        "INPUT\n\n"
+        "You will receive a user's scientific question and evidence records from scientific papers. "
+        "Each evidence record has an identifier such as [paper:claim]. Use those identifiers as citations.\n\n"
+        "OUTPUT\n\n"
+        "Write a direct answer in 2-5 short paragraphs. Cite every substantive scientific statement "
+        "with the supplied evidence identifiers."
+    )
+    prompt = (
+        f"{instructions}\n\nQUESTION\n\n{question}\n\nEVIDENCE RECORDS\n\n"
         + "\n\n".join(
             f"[{item['evidence_id']}] {item['description']}\n"
             f"Relation: {item['relation']}; conditions: {'; '.join(item['conditioning_facets']) or 'not specified'}\n"
             + "\n".join(f"SourceBlock {block['block_id']} page {block['page']}: {block['text']}" for block in item["blocks"])
             for item in evidence
         )
-        + "\n\nOUTPUT\n\n"
-        "Write a direct answer in 2-5 short paragraphs. Cite every substantive scientific statement "
-        "with one or more bracketed evidence identifiers exactly as supplied. Clearly separate findings "
-        "reported by the papers from application to a new location. State important missing conditions "
-        "or uncertainties."
     )
     raw = answer(ollama_url, chat_model, prompt, thinking)
     return {

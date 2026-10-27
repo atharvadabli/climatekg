@@ -92,6 +92,37 @@ function escapeHTML(value) {
   return span.innerHTML;
 }
 
+function normalizeAnswerMarkdown(value) {
+  return String(value ?? "")
+    .replace(/^\s*(?:#+\s*)?1\.\s*Land use recommendation\s*$/gim, "## Land use recommendation")
+    .replace(/^\s*(?:#+\s*)?2\.\s*Limitations(?: and other important notes)?\s*$/gim, "## Limitations and other important notes");
+}
+
+function citationKey(value) {
+  return value.includes(":") ? value.split(":").at(-1) : value;
+}
+
+function renderMarkdown(value, citationDetails = {}) {
+  const source = normalizeAnswerMarkdown(value).replace(
+    /\b(?:P\d{6}:)?P\d{6}_CL\d+\b|\bS\d+\b/g,
+    (citation) => {
+      const key = citationKey(citation);
+      return citationDetails[key]
+        ? `<a class="citation-link" data-citation-id="${key}" href="#citation-${key}">${citation}</a>`
+        : citation;
+    },
+  );
+  if (!window.marked?.parse || !window.DOMPurify?.sanitize) {
+    return escapeHTML(source).replaceAll("\n", "<br>");
+  }
+  const parsed = window.marked.parse(source, { gfm: true, breaks: true });
+  return window.DOMPurify.sanitize(parsed, {
+    USE_PROFILES: { html: true },
+    FORBID_TAGS: ["style"],
+    FORBID_ATTR: ["style"],
+  });
+}
+
 function score(value) {
   return typeof value === "number" ? value.toFixed(3) : "unknown";
 }
@@ -149,6 +180,39 @@ function showFacetDetails(item) {
   dialog.showModal();
 }
 
+function endpointText(endpoint) {
+  if (!endpoint) return "Not recorded";
+  if (typeof endpoint === "string") return endpoint;
+  return endpoint.state ? `${endpoint.concept} (${endpoint.state})` : endpoint.concept;
+}
+
+function facetText(item) {
+  if (typeof item === "string") return item;
+  return `${item.domain} / ${item.notion}: ${item.description}`;
+}
+
+function showCitationDetails(item) {
+  const dialog = $("#citation-dialog");
+  const paper = item.paper || {};
+  const claim = item.claim || {};
+  const from = claim.from || claim.from_state_id;
+  const to = claim.to || claim.to_state_id;
+  const contexts = item.contexts || [];
+  const conditioning = item.conditioning_facets || [];
+  const contextFacets = item.context_facets || [];
+  const blocks = item.source_blocks || [];
+  $("#citation-dialog-domain").textContent = item.kind === "source_excerpt" ? "Source excerpt" : "Scientific evidence";
+  $("#citation-dialog-title").textContent = item.citation_id || claim.id || "Citation details";
+  $("#citation-dialog-body").innerHTML = `
+    <section><h3>Paper</h3><p><strong>${escapeHTML(paper.title || "Title not recorded")}</strong>${paper.year ? ` (${escapeHTML(paper.year)})` : ""}</p><p class="citation-meta">${escapeHTML(paper.id || "")}${paper.doi ? ` · DOI ${escapeHTML(paper.doi)}` : ""}</p></section>
+    ${claim.description ? `<section><h3>Claim</h3><p>${escapeHTML(claim.description)}</p><dl class="evidence-dl"><dt>From</dt><dd>${escapeHTML(endpointText(from))}</dd><dt>Relation</dt><dd>${escapeHTML(claim.relation || "Not recorded")}</dd><dt>To</dt><dd>${escapeHTML(endpointText(to))}</dd><dt>Evidence role</dt><dd>${escapeHTML(claim.evidence_role || "Not recorded")}</dd></dl></section>` : ""}
+    ${contexts.length ? `<section><h3>Supporting study context</h3>${contexts.map((context) => `<article class="evidence-detail"><strong>${escapeHTML(context.label)}</strong><p>${escapeHTML(context.description || "")}</p><span>${escapeHTML(context.id)}</span></article>`).join("")}</section>` : ""}
+    ${conditioning.length ? `<section><h3>Conditioning facets</h3>${conditioning.map((facet) => `<p>${escapeHTML(facetText(facet))}</p>`).join("")}</section>` : ""}
+    ${contextFacets.length ? `<details class="all-context-facets"><summary>All facets in the supporting context</summary>${contextFacets.map((facet) => `<p>${escapeHTML(facetText(facet))}</p>`).join("")}</details>` : ""}
+    <section><h3>Supporting source passages</h3>${blocks.length ? blocks.map((block) => `<article class="source-block-detail"><strong>${escapeHTML(block.id)}${block.page ? ` · page ${escapeHTML(block.page)}` : ""}</strong><p>${escapeHTML(block.text || "Passage text not available")}</p><span>${escapeHTML((block.section_path || []).join?.(" › ") || block.section_path || "")}</span></article>`).join("") : `<p>No source passage was returned with this citation.</p>`}</section>`;
+  dialog.showModal();
+}
+
 function renderRetrievalTrace(result) {
   if (result.system === "graphrag") {
     const communities = result.communities || [];
@@ -176,22 +240,70 @@ function renderRetrievalTrace(result) {
   </div></section>`;
 }
 
-function renderResult(container, result) {
+function renderStageTrace(stages = []) {
+  if (!stages.length) return `<p class="empty-copy">No step trace was recorded for this run.</p>`;
+  return `<ol class="trace-steps">${stages.map((stage) => `
+    <li>
+      <strong>${escapeHTML(stageLabel(stage.name))}</strong>
+      ${stage.details && Object.keys(stage.details).length ? `<pre>${escapeHTML(JSON.stringify(stage.details, null, 2))}</pre>` : ""}
+    </li>`).join("")}</ol>`;
+}
+
+function renderClimateKGProcessingTrace(result) {
+  if (result.system !== "climatekg") return "";
+  const userFacets = result.user_facets || [];
+  const derivedFacets = result.derived_facets || [];
+  return `<section class="result-section"><h3>Parsed query and context</h3><div class="trace-grid">
+    <article><strong>${escapeHTML(result.mode || "unknown")}</strong><span>query mode</span><p>${escapeHTML(result.question || "")}</p></article>
+    <article><strong>${userFacets.length}</strong><span>user-stated context facets</span>${userFacets.slice(0, 4).map((item) => `<p>${escapeHTML(item.domain)} / ${escapeHTML(item.notion)}</p>`).join("")}</article>
+    <article><strong>${derivedFacets.length}</strong><span>derived watershed facets</span>${derivedFacets.slice(0, 4).map((item) => `<p>${escapeHTML(item.domain)} / ${escapeHTML(item.notion)}</p>`).join("")}</article>
+  </div>${result.spatial_support ? `<pre class="trace-json">${escapeHTML(JSON.stringify(result.spatial_support, null, 2))}</pre>` : ""}</section>`;
+}
+
+function renderProvenanceTrace(result) {
   const citations = Object.entries(result.provenance || {});
+  if (result.system !== "climatekg") return "";
+  return `<section class="result-section"><h3>Cited sources</h3>${citations.length ? `<div class="citation-list">${citations.map(([claim, item]) => `<article><strong>${escapeHTML(claim)}</strong><p>${escapeHTML(item.title)} (${escapeHTML(item.year || "n.d.")})${item.pages?.length ? `, pages ${escapeHTML(item.pages.join(", "))}` : ""}</p><span>${escapeHTML(item.source_block_ids?.join(", ") || "")}</span></article>`).join("")}</div>` : `<p class="empty-copy">No cited Claim survived grounding validation.</p>`}</section>`;
+}
+
+function renderTracePanel(result, stages) {
+  return `<section class="trace-panel" hidden>
+    <header><div><p class="eyebrow">Run trace</p><h2>How this answer was produced</h2></div></header>
+    <section class="result-section"><h3>Pipeline steps</h3>${renderStageTrace(stages)}</section>
+    ${renderClimateKGProcessingTrace(result)}
+    ${renderRetrievalTrace(result)}
+    ${renderProvenanceTrace(result)}
+    <section class="result-section"><h3>Trace files</h3><p class="artifact-path">${escapeHTML(result.artifact_dir || "No artifact directory recorded")}</p></section>
+  </section>`;
+}
+
+function renderResult(container, result, stages = []) {
   const derived = result.derived_facets || [];
-  const climateKGCitations = result.system === "climatekg" ? `<section class="result-section"><h3>Cited sources</h3>${citations.length ? `<div class="citation-list">${citations.map(([claim, item]) => `<article><strong>${escapeHTML(claim)}</strong><p>${escapeHTML(item.title)} (${escapeHTML(item.year || "n.d.")})${item.pages?.length ? `, pages ${escapeHTML(item.pages.join(", "))}` : ""}</p><span>${escapeHTML(item.source_block_ids?.join(", ") || "")}</span></article>`).join("")}</div>` : `<p class="empty-copy">No cited Claim survived grounding validation.</p>`}</section>` : "";
   container.innerHTML = `
     <article class="answer-panel">
       <header><div><p class="eyebrow">${escapeHTML(result.system_label || "ClimateKG")} answer</p><h2>${escapeHTML(result.question || "Result")}</h2></div><span class="mode-badge">${escapeHTML(result.mode || "query")}</span></header>
-      <div class="answer-text">${escapeHTML(result.answer).replaceAll("\n", "<br>")}</div>
+      <div class="answer-text">${renderMarkdown(result.answer, result.citation_details || {})}</div>
     </article>
     ${derived.length ? `<section class="result-section"><h3>Watershed context used</h3><p class="section-note">Select a context value to see what it means, why it affects evidence matching, and where it came from.</p><div class="facet-grid">${derived.map((item, index) => `<button class="facet-card" type="button" data-facet-index="${index}"><span>${escapeHTML(item.domain)}</span><strong>${escapeHTML(item.notion)}</strong><p>${escapeHTML(item.description)}</p><small>View explanation</small></button>`).join("")}</div></section>` : ""}
-    ${renderRetrievalTrace(result)}
-    ${climateKGCitations}
     ${result.warnings?.length ? `<details class="warning-list"><summary>${result.warnings.length} method notices</summary>${result.warnings.map((item) => `<p>${escapeHTML(item)}</p>`).join("")}</details>` : ""}
-    <p class="artifact-path">Full trace: ${escapeHTML(result.artifact_dir)}</p>`;
+    <div class="trace-toggle-row"><button class="secondary-button trace-toggle" type="button">Show trace</button></div>
+    ${renderTracePanel(result, stages)}`;
   container.querySelectorAll("[data-facet-index]").forEach((card) => {
     card.addEventListener("click", () => showFacetDetails(derived[Number(card.dataset.facetIndex)]));
+  });
+  container.querySelectorAll("[data-citation-id]").forEach((citation) => {
+    citation.addEventListener("click", (event) => {
+      event.preventDefault();
+      const item = result.citation_details?.[citation.dataset.citationId];
+      if (item) showCitationDetails(item);
+    });
+  });
+  const toggle = container.querySelector(".trace-toggle");
+  const panel = container.querySelector(".trace-panel");
+  toggle?.addEventListener("click", () => {
+    const willShow = panel.hasAttribute("hidden");
+    panel.toggleAttribute("hidden", !willShow);
+    toggle.textContent = willShow ? "Hide trace" : "Show trace";
   });
 }
 
@@ -205,7 +317,7 @@ async function watchJob(jobId, container) {
     const job = await request(`/api/jobs/${encodeURIComponent(jobId)}`);
     renderStages(container, job);
     if (job.status === "complete") {
-      renderResult(container, job.result);
+      renderResult(container, job.result, job.stages);
       return;
     }
     if (job.status === "failed") throw new Error(job.error || "Query failed");
@@ -308,6 +420,10 @@ async function initialize() {
   $("#watershed-find").addEventListener("click", findWatershed);
   $("#facet-dialog-close").addEventListener("click", () => $("#facet-dialog").close());
   $("#facet-dialog").addEventListener("click", (event) => {
+    if (event.target === event.currentTarget) event.currentTarget.close();
+  });
+  $("#citation-dialog-close").addEventListener("click", () => $("#citation-dialog").close());
+  $("#citation-dialog").addEventListener("click", (event) => {
     if (event.target === event.currentTarget) event.currentTarget.close();
   });
   $("#watershed-search").addEventListener("keydown", (event) => {
