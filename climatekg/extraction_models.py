@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, create_model, model_validator
 from typing_extensions import TypedDict
 
 from .models import ClaimEndpoint, Domain, StrictModel
@@ -171,6 +171,31 @@ class ClaimBatch(StrictModel):
     claims: list[ClaimCandidate]
     unmapped_context_hints: list[str] = Field(default_factory=list)
     ambiguities: list[str] = Field(default_factory=list)
+
+
+class WindowClaimCandidate(ClaimCandidate):
+    scope_type: Literal["context", "transition"]
+    scope_id: str
+
+
+class WindowClaimBatch(StrictModel):
+    claims: list[WindowClaimCandidate]
+    unmapped_context_hints: list[str] = Field(default_factory=list)
+    ambiguities: list[str] = Field(default_factory=list)
+
+
+def window_claim_schema(block_ids: list[str]) -> type[WindowClaimBatch]:
+    """Constrain copied references during generation; scientific wording stays open."""
+    if not block_ids:
+        raise ValueError("A Claim window must contain evidence passages")
+    evidence_id = Literal[tuple(block_ids)]
+    case = create_model("WindowAnalysisCase", __base__=AnalysisCaseCandidate,
+                        evidence_block_ids=(list[evidence_id], Field(min_length=1)))
+    claim = create_model("ReferencedWindowClaim", __base__=WindowClaimCandidate,
+                         evidence_block_ids=(list[evidence_id], Field(min_length=1)),
+                         analysis_cases=(list[case], Field(default_factory=list)))
+    return create_model("ReferencedWindowClaimBatch", __base__=WindowClaimBatch,
+                        claims=(list[claim], ...))
 
 
 class SmallPaperFacet(CompleteOutputModel):

@@ -5037,6 +5037,40 @@ Do not require exact or fuzzy matching between LLM-generated labels and scout wo
 A completed paper may be returned from cache only when its recorded prompt versions match the active prompt versions. On mismatch, fail with `STALE_DERIVED_ARTIFACTS`. An explicit `--rebuild-derived` run removes only `extraction/` and `final/`, retains the Nemotron parse, cleaned text, SourceBlocks, and SourceBlock embeddings, and rebuilds from paper mapping onward.
 
 
+# 97.10 Experimental text-first Claim extraction (2026-10-27)
+
+The user-approved `text_windows` experiment replaces only staged Claim evidence
+selection in Section 96.8. Mapping, Context hierarchy, Facets, and Transitions
+remain unchanged. The default `scope_retrieval` route is retained for comparison.
+
+Process all cleaned non-reference SourceBlocks in source order, excluding standalone
+title/heading blocks (section paths remain attached). Include tables and captions.
+Partition at section/block boundaries within the configured Claim input budget;
+never select windows using existing Claims, query answers, or map Claim seeds.
+Every window receives the full setting/comparison registry and reported Facets.
+Qwen extracts and assigns each relationship to an existing Context or Transition
+in the same call, using `prompts/window_claim_extraction.txt` v2 and the
+`WindowClaimBatch` schema. Missing settings are reported as unresolved hints.
+Existing analysis-case rules and own-result/background distinctions still apply.
+
+Replace the Claim pass, not append a recovery pass. Validate scope/evidence/condition
+IDs against the supplied input, preserve rejected outputs, and fail visibly on
+invalid scope or evidence references. Invalid conditioning links are removed and
+logged according to Section 96.9, without dropping the Claim. Cache by actual
+prompt, registry, schema and generation settings.
+Constrain copied passage IDs to the actual window IDs in the generated JSON schema.
+Keep registry provenance IDs out of the semantic input: they identify setting
+definitions, not the permitted evidence for new findings. Use the configured
+`window_claim_target_tokens` (initial pilot revision: 3,000) for text windows.
+Save a passage coverage manifest. Coverage means the model saw the passage, not
+that every finding was recovered. Preserve existing downstream reconciliation,
+consolidation, canonicalization and embedding. The isolated fixed-registry pilot
+uses exact-only Claim deduplication and must be labelled separately from a full run.
+
+Reserve response space within the configured model context window. Fail explicitly
+if a complete registry or indivisible SourceBlock cannot fit; do not truncate it.
+The combined small-paper route and query algorithms are unchanged by this experiment.
+
 # 98. Final architectural summary
 
 ```text

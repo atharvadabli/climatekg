@@ -50,6 +50,8 @@ PROMPT_STAGES = (
 
 def current_prompt_versions(combined_route: bool = False) -> dict[str, str]:
     stages = (*PROMPT_STAGES, "small_paper_extraction") if combined_route else PROMPT_STAGES
+    if not combined_route and PIPELINE["evidence_retrieval"]["claim_extraction_mode"] == "text_windows":
+        stages = (*stages, "window_claim_extraction")
     return {stage: stage_prompt_version(stage) for stage in stages}
 
 
@@ -210,7 +212,15 @@ def index_pdf(pdf_path: Path, data_root: Path, paper_id: str, client: OllamaClie
             manifest["status"] = "extracting_claims"
             write_json(paper_dir / "manifest.json", manifest)
             with _timed_phase(timing_path, timing_report, "claim_extraction"):
-                claims, claim_hints = extract_claims(paper, mapped, contexts, transitions, facets, blocks, paper_dir, client)
+                claim_mode = PIPELINE["evidence_retrieval"]["claim_extraction_mode"]
+                if claim_mode == "text_windows":
+                    from .window_claims import extract_window_claims
+
+                    claims, claim_hints = extract_window_claims(paper, contexts, transitions, facets, blocks, paper_dir, client)
+                elif claim_mode == "scope_retrieval":
+                    claims, claim_hints = extract_claims(paper, mapped, contexts, transitions, facets, blocks, paper_dir, client)
+                else:
+                    raise ValueError(f"Unknown Claim extraction mode: {claim_mode}")
         manifest["status"] = "reconciling_contexts"
         write_json(paper_dir / "manifest.json", manifest)
         with _timed_phase(timing_path, timing_report, "context_reconciliation"):

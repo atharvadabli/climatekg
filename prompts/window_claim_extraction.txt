@@ -1,0 +1,102 @@
+SYSTEM
+
+TASK
+
+Read a portion of a scientific paper. Extract each directly supported relationship
+between two scientific variables, processes, or land states, and assign it to the
+study setting or comparison under which it was reported.
+
+INPUT
+
+The input contains a paper identifier, a registry of study settings and comparisons,
+environmental condition records, and numbered evidence passages from the paper.
+A setting (called a Context in the output) describes a study area or experiment.
+Its parent_ids identify broader settings whose conditions it inherits. A comparison
+(called a Transition) links two settings. A condition record (called a Facet)
+describes one environmental or experimental condition and belongs to a setting.
+The registry helps interpret the passages; the passages supply the findings.
+Assign scope by the scientific meaning of the setting and finding. The registry
+is a list of available settings, not a list of the findings that can be extracted.
+
+HOW TO DECIDE
+
+Read every passage for reported outcomes and explanations of those outcomes.
+Return separate records for separate supported relationships. If a passage states
+A changes B, which changes C, extract A to B and B to C. Extract A to C only when
+the passage directly supports it. Keep source and target as scientific noun phrases,
+not complete sentences. Preserve null results, reversals, uncertainty, scales,
+seasons, magnitudes, and comparisons between the actual tested values.
+Retain supported explanations and limitations of an effect as well as its headline
+outcome. For explicit comparisons, preserve both the reference case and the
+contrasted case, even when the sentence emphasizes only one of them.
+
+Choose the most specific supplied setting that matches the finding. Use a supplied
+comparison when the finding describes the effect of that comparison. Use a common
+parent only for findings that apply at that broader scope. When the true setting
+is absent or cannot be identified, describe the finding and supporting passage IDs
+in unmapped_context_hints instead of assigning it to an unrelated setting.
+
+Distinguish analysis subsets within a setting from separate experiments. Reported
+seasons, year groups, subregions, or percentiles can be analysis_cases. If their
+comparison is explicit, record it in analysis_comparison. Separate findings with
+different responses remain separate records, including when their cases differ.
+
+Use causal when the authors explicitly attribute a response to a cause or a
+controlled perturbation supports it. Use associative for correlations or
+co-occurrence without established causal attribution.
+
+Classify evidence_role as exactly one of:
+- OWN_RESULT: a finding from this paper's observations, analysis, or experiments.
+- AUTHORS_INTERPRETATION_OF_OWN_RESULT: an explanation of this paper's own finding.
+- CITED_BACKGROUND: a finding attributed only to another publication.
+- HYPOTHESIS_OR_PROPOSAL: an unestablished explanation or proposed relationship.
+A citation accompanying an interpretation of the current paper's result does not
+by itself make that interpretation cited background. Keep the distinction explicit.
+
+Use conditioning_facet_ids only for supplied conditions that materially determine
+the finding's applicability, not all conditions in its setting. Eligible conditions
+belong to the selected setting and its ancestors, or to either endpoint of a
+selected comparison and their ancestors. Preserve other reported qualifiers in
+the description and analysis cases without inventing condition IDs.
+
+OUTPUT
+
+Return valid JSON only, following the supplied JSON Schema:
+- claims: a list of relationship records; use [] if the passages support none.
+  Each record contains:
+  - scope_type: exactly context or transition, identifying a setting or comparison.
+  - scope_id: copy its exact ID from the registry.
+  - from: {concept, state}. Generate a scientific noun phrase of usually 1-8 words
+    for concept and a direction or category of usually 1-5 words for state.
+  - to: the same structure for the response variable or process.
+  - relation: exactly causal or associative, as defined above.
+  - description: one evidence-faithful sentence, usually 15-50 words, retaining
+    material conditions, spatial extent, magnitudes, tested contrasts and uncertainty.
+  - evidence_role: exactly one of the four categories defined above.
+  - conditioning_facet_ids: copied eligible condition IDs, or [].
+  - analysis_cases: a list, or []. Each item has a generated label (usually 1-6
+    words), a description defining the reported subset in one short sentence,
+    and evidence_block_ids copied from the smallest directly supporting passage set.
+  - analysis_comparison: null unless cases are explicitly compared. Otherwise use
+    {dimension, case_labels, description}: a short generated name for the comparison
+    dimension, exact labels from analysis_cases, and one sentence stating the result.
+  - evidence_block_ids: copy the smallest sufficient directly supporting passage IDs.
+- unmapped_context_hints: short descriptions with passage IDs for findings whose
+  setting is missing or unresolved; use [] when none. A passage with no relevant
+  finding needs no hint.
+- ambiguities: short descriptions of remaining scientific uncertainty, or [].
+
+Use only supplied evidence. Keep physically distinct variables such as surface
+temperature and near-surface air temperature separate. A finding attributed only
+to other literature remains CITED_BACKGROUND.
+
+USER
+
+PAPER IDENTIFIER
+{paper_id}
+
+STUDY SETTINGS, COMPARISONS, AND CONDITIONS
+{registry}
+
+EVIDENCE PASSAGES WITH SOURCEBLOCK IDS
+{evidence_blocks}
