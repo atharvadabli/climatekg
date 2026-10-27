@@ -62,6 +62,8 @@ Return valid JSON only, with no Markdown or surrounding commentary. The JSON Sch
   - `kind_hint`: Use a short type such as `region`, `watershed`, `coordinates`, or `administrative_area` when identifiable; otherwise `null`.
   A geographic adjective inside the name of a climate system, weather phenomenon, model, or dataset is not by itself a place reference.
 
+A measured outcome, estimated quantity, analysis operation, or requested explanation is part of the scientific result, not an environmental condition. A physical setting describes where or when the relationship applies; wording such as estimating river flow, explaining a response, or calculating a contribution does not describe such a setting.
+
 - `global_requested`: `true` only when the user explicitly requests a global, corpus-wide, or across-literature synthesis.
 
 - `ambiguities`: Short descriptions of genuine uncertainty in interpreting this atomic search. Use an empty list when none exists.

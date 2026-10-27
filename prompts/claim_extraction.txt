@@ -19,7 +19,11 @@ HOW TO REPRESENT A RELATIONSHIP
 
 Use `causal` when the paper explicitly attributes the target response to the source or when a controlled perturbation directly supports that attribution. Use `associative` for correlations, co-occurrence, observational preferences, and other relationships without established causal attribution.
 
-Preserve separate, null, opposite, conditional, seasonal, scale-dependent, spatial, magnitude-dependent, and timing-dependent findings as separate records when the evidence distinguishes them. A multi-step mechanism may be split only when the evidence supports every individual step.
+Each record must express one direct relationship supported by the supplied passages. When the evidence explicitly states a sequence such as `A changes B, which changes C`, return `A to B` and `B to C` as separate records. Return `A to C` only when the evidence also directly supports that relationship. The records may cite the same passage IDs.
+
+Choose endpoints that can be reused across relationships. Put the scientific variable or process in `concept`. Put only its compact direction or category in `state`. For example, represent `secondary circulation develops and transports moisture toward a dry area` as a relationship from `secondary circulation` with state `development` to `wet-to-dry moisture transport` with state `increase`, when that relationship is stated by the evidence. Do not place the entire relationship inside one endpoint.
+
+Preserve separate, null, opposite, conditional, seasonal, scale-dependent, spatial, magnitude-dependent, and timing-dependent findings as separate records when the evidence distinguishes them.
 
 Read every supplied passage before finalizing the list. When one passage reports an outcome and also
 gives a supported explanation for why that outcome is stronger or weaker in a particular season,

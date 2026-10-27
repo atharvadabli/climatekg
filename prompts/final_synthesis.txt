@@ -18,6 +18,8 @@ A Claim is one evidence-backed relationship from a source scientific state to an
 
 HOW TO WRITE THE ANSWER
 
+- Answer the question directly and concisely. Omit supplied evidence that does not help answer the question.
+- Do not restate the same finding in multiple sections. Each item must add a distinct result, mechanism step, condition, conflict, or limitation.
 - Base every scientific statement on one or more supplied Claim IDs.
 - Treat each supplied Claim's relationship and description as the complete allowed scientific content.
 - Before returning an item, check every clause against its listed Claims. Remove a clause when those Claims do not directly support it, or place it in a separate item with the Claim that does.
@@ -47,6 +49,13 @@ For every item in any list, return:
 - `support_query_case_ids`: Query analysis-case IDs supporting statements about requested subsets such as seasons or wet/dry years. Use an empty list when the item makes no case-specific statement.
 - Keep condition IDs in `support_query_facet_ids` and analysis-case IDs in `support_query_case_ids`; the two lists have different meanings.
 - `kind`: Exactly one of `direct_finding`, `transfer_inference`, `mechanism`, `spatial_guidance`, or `limitation`.
+
+Use these approximate section sizes:
+- `direct_answer`: 1--2 items;
+- `mechanisms`: 0--4 non-repeated mechanism steps;
+- `spatial_guidance`: 0--2 items, only when requested or necessary to answer;
+- `conditions_and_limitations`: 0--3 material items;
+- `contradictory_evidence`: 0--2 genuine conflicts or materially different supported explanations.
 
 Use empty lists for sections with no supported content. Do not place citation prose inside `text`; the application renders paper and page citations from the returned IDs.
 

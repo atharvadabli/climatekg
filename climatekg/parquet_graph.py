@@ -9,7 +9,7 @@ import pyarrow.parquet as pq
 
 from .canonicalize import state_id
 from .config import PIPELINE
-from .models import FinalPaper
+from .models import FinalPaper, StateSemanticLink
 from .utils import write_json
 from .vector_index import FaissIndexes
 
@@ -152,6 +152,17 @@ class ParquetGraph:
             path.stem: pq.read_metadata(path).num_rows
             for path in sorted(self.root.glob("*.parquet"))
         }
+
+    def write_state_semantic_links(self, links: Iterable[StateSemanticLink]) -> int:
+        rows = [link.model_dump() for link in links]
+        _write_table(self.root / "state_semantic_links.parquet", rows)
+        return len(rows)
+
+    def read_state_semantic_links(self) -> list[StateSemanticLink]:
+        path = self.root / "state_semantic_links.parquet"
+        if not path.exists():
+            return []
+        return [StateSemanticLink.model_validate(row) for row in _read_table(path)]
 
 
 def _write_table(path: Path, rows: list[dict[str, Any]]) -> None:

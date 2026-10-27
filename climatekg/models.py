@@ -117,6 +117,17 @@ class State(StrictModel):
     concept_embedding: list[float] | None = None
 
 
+class StateSemanticLink(StrictModel):
+    source_state_id: str
+    target_state_id: str
+    relation: Literal["equivalent_to", "narrower_than", "broader_than"]
+    candidate_similarity: float
+    decision_method: Literal["verified_alias", "llm_adjudicated"]
+    rationale: str
+    source_claim_ids: list[str] = Field(default_factory=list)
+    target_claim_ids: list[str] = Field(default_factory=list)
+
+
 class SourceBlock(StrictModel):
     id: str
     paper_id: str

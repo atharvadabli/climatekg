@@ -1,0 +1,61 @@
+{
+  "version": "1.0",
+  "existing_case_ids": [
+    "XPG007",
+    "XPG008",
+    "XPG009",
+    "XPG012",
+    "XPG013",
+    "XPG023",
+    "XPG025",
+    "XPG026"
+  ],
+  "additional_cases": [
+    {
+      "id": "AES009",
+      "version": 1,
+      "category": "mechanism_chain",
+      "capability": "forest_to_crop_india_chain",
+      "question": "How can forest-to-crop conversion in India affect rainfall and near-surface temperature through roughness, wind, evapotranspiration, instability, radiation, and sensible heat? Preserve the distinct supported pathways.",
+      "answerable": true,
+      "source_papers": [{"paper_id": "P000068"}],
+      "expected_claim_ids": [
+        "P000068_CL001",
+        "P000068_CL002",
+        "P000068_CL003",
+        "P000068_CL004",
+        "P000068_CL005",
+        "P000068_CL006",
+        "P000068_CL007",
+        "P000068_CL008",
+        "P000068_CL009",
+        "P000068_CL010"
+      ],
+      "reference_answer": "Forest-to-crop conversion reduces roughness, which strengthens near-surface wind and weakens moisture convergence. It also reduces evapotranspiration and moist static energy or convective instability, reducing moderate rainfall. Separately, cloud loss increases net radiation and sensible heat, warming near-surface air.",
+      "required_qualifiers": ["roughness", "moisture convergence", "evapotranspiration", "sensible heat"],
+      "unsupported_conclusions": ["All reported temperature and rainfall changes follow one undifferentiated pathway."]
+    },
+    {
+      "id": "AES010",
+      "version": 1,
+      "category": "cross_paper_synthesis",
+      "capability": "irrigation_dry_and_moist_heat_tradeoff",
+      "question": "Why can irrigation cool land and near-surface air while still increasing one measure of extreme moist heat in India? Separate the surface-energy and humidity pathways.",
+      "answerable": true,
+      "source_papers": [{"paper_id": "P000037"}, {"paper_id": "P000039"}],
+      "expected_claim_ids": [
+        "P000037_CL001",
+        "P000037_CL002",
+        "P000039_CL001",
+        "P000039_CL002",
+        "P000039_CL003",
+        "P000039_CL004",
+        "P000039_CL006",
+        "P000039_CL011"
+      ],
+      "reference_answer": "Irrigation shifts available energy from sensible to latent heat, lowering land and near-surface air temperature. The added evaporation also raises atmospheric humidity; in the Indian simulations this increased extreme wet-bulb temperature even though dry-bulb temperature fell.",
+      "required_qualifiers": ["latent heat", "sensible heat", "air temperature", "wet-bulb temperature"],
+      "unsupported_conclusions": ["Cooling dry-bulb temperature guarantees lower moist-heat risk."]
+    }
+  ]
+}

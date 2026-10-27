@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "selection_policy": "Mechanism-diverse papers already present in the traced 115-paper corpus; selected before implementation.",
+  "papers": [
+    {
+      "paper_id": "P000002",
+      "title": "Decreased cloud cover partially offsets the cooling effects of surface albedo change due to deforestation",
+      "diagnostic_role": "deforestation-cloud-radiative mechanism chain"
+    },
+    {
+      "paper_id": "P000014",
+      "title": "Observational evidence for cloud cover enhancement over western European forests",
+      "diagnostic_role": "associative forest-cloud evidence and edge/wind spatial effects"
+    },
+    {
+      "paper_id": "P000018",
+      "title": "The Effect of Land Surface Heterogeneity and Background Wind on Shallow Cumulus Clouds and the Transition to Deeper Convection",
+      "diagnostic_role": "atomic wet-dry circulation, moisture-pooling, and convection chain"
+    },
+    {
+      "paper_id": "P000037",
+      "title": "Irrigation induced surface cooling in the context of modern and increased greenhouse gas forcing",
+      "diagnostic_role": "irrigation cooling and evaporative-fraction conditioning"
+    },
+    {
+      "paper_id": "P000039",
+      "title": "Moist heat stress extremes in India enhanced by irrigation",
+      "diagnostic_role": "dry-temperature and moist-heat trade-off"
+    },
+    {
+      "paper_id": "P000040",
+      "title": "River interlinking alters land-atmosphere feedback and changes the Indian summer monsoon",
+      "diagnostic_role": "remote circulation and precipitation sign differences"
+    },
+    {
+      "paper_id": "P000068",
+      "title": "Investigating the impact of land-use land-cover change on Indian summer monsoon daily rainfall and temperature during 1951-2005 using a regional climate model",
+      "diagnostic_role": "forest-to-crop energy, moisture, wind, and rainfall chain"
+    },
+    {
+      "paper_id": "P000071",
+      "title": "The Influence of Land Surface Heterogeneities on Cloud Size Development",
+      "diagnostic_role": "non-monotonic patch-size and convection timing"
+    },
+    {
+      "paper_id": "P000082",
+      "title": "Remote land use impacts on river flows through atmospheric teleconnections",
+      "diagnostic_role": "cross-basin moisture-recycling and hydrological response"
+    },
+    {
+      "paper_id": "P000100",
+      "title": "Irrigated agriculture supports rainfed crops in India through atmospheric moisture recycling",
+      "diagnostic_role": "upwind irrigation, seasonal recycling, and dry-year analysis"
+    }
+  ]
+}

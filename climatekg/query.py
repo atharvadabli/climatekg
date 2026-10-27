@@ -11,6 +11,13 @@ from typing import Any, Callable
 from .canonicalize import canonical_concept, canonical_direction, state_id
 from .config import PIPELINE, QUERY_PIPELINE, ROOT, STATE_ALIASES
 from .earth_engine import EarthEngineBackend
+from .evidence_subgraph import (
+    assemble_subgraph_evidence_paths,
+    evidence_path_sort_key,
+    query_requirements,
+    select_balanced_compound_paths,
+    select_evidence_subgraph,
+)
 from .embeddings import DOMAIN_ORDER, analysis_case_text, effective_facets, facet_content_text, facet_notion_text
 from .enrichment import derive_facets, query_facets
 from .extraction_models import (
@@ -22,7 +29,7 @@ from .extraction_models import (
     SynthesisOutput,
 )
 from .geocoding import NominatimGeocoder
-from .models import Claim, ClaimEndpoint, Context, Facet, FinalPaper, QueryAnalysisCase, QueryContext, QueryFacet, QuerySpec, SourceBlock, SpatialSupport, State, Transition
+from .models import Claim, ClaimEndpoint, Context, Facet, FinalPaper, QueryAnalysisCase, QueryContext, QueryFacet, QuerySpec, SourceBlock, SpatialSupport, State, StateSemanticLink, Transition
 from .ollama import OllamaClient, stage_prompt_version
 from .spatial import resolve_spatial_support
 from .utils import cosine, normalize_text_key, token_count, write_json
@@ -935,7 +942,9 @@ def rank_claims(spec: QuerySpec, vectors: dict[str, list[float] | None], corpus:
                 ),
             }
             context_scoring_source = "claim_context_on_demand"
-        context_score = context_report["context_similarity"]["overall_score"] if context_report else None
+        context_score = None
+        if context_report and context_report["context_similarity"]["coverage"] > 0:
+            context_score = context_report["context_similarity"]["overall_score"]
         conditioning = _conditioning(claim, spec, corpus)
         case_match = _analysis_case_match(claim, spec)
         beta = QUERY_PIPELINE["conditioning"]["weight_beta"]
@@ -1501,6 +1510,7 @@ def _run_atomic_query(
     preferred_paper_ids: set[str] | None = None,
     synthesize_answer: bool = True,
     prepared_query: tuple[QuerySpec, list[str]] | None = None,
+    state_semantic_links: list[StateSemanticLink] | None = None,
 ) -> dict[str, Any]:
     client = client or OllamaClient()
     artifact_dir = output_root / query_id
@@ -1540,9 +1550,36 @@ def _run_atomic_query(
         QUERY_PIPELINE["evidence_assembly"]["require_known_context_for_graph"],
     )
     graph_paths = search_paths(spec, corpus, ranked, source_seeds, target_seeds, [row["claim_id"] for row in anchor_rows])
-    paths = assemble_evidence_paths(direct_paths, graph_paths)
+    requirements = query_requirements(spec)
+    requirement_vectors = client.embed(
+        [item["text"] for item in requirements],
+        QUERY_PIPELINE["embeddings"]["model"],
+        QUERY_PIPELINE["embeddings"]["dimension"],
+    ) if requirements else []
+    if QUERY_PIPELINE["evidence_subgraph"]["enabled"]:
+        subgraph_paths, evidence_subgraph = select_evidence_subgraph(
+            spec,
+            corpus.claims,
+            ranked,
+            requirements,
+            requirement_vectors,
+            graph_paths,
+            QUERY_PIPELINE["evidence_subgraph"],
+            state_semantic_links,
+        )
+        paths = assemble_subgraph_evidence_paths(
+            graph_paths,
+            subgraph_paths,
+            graph_limit=QUERY_PIPELINE["evidence_assembly"]["graph_paths"],
+            claim_limit=QUERY_PIPELINE["evidence_subgraph"]["max_claims"],
+        )
+    else:
+        evidence_subgraph = None
+        paths = assemble_evidence_paths(direct_paths, graph_paths)
     stage("paths_searched", {"path_count": len(graph_paths), "top_paths": [{key: row[key] for key in ("claim_ids", "R_path", "A_path", "C_path", "context_unknown", "coherence_unknown")} for row in graph_paths[:QUERY_PIPELINE["reporting"]["top_paths"]]]})
     stage("evidence_assembled", {"direct_path_count": len(direct_paths), "graph_path_count": len(graph_paths), "assembled_path_count": len(paths), "assembled_paths": [{"claim_ids": row["claim_ids"], "evidence_lane": row["evidence_lane"]} for row in paths]})
+    if evidence_subgraph is not None:
+        stage("evidence_subgraph_selected", evidence_subgraph)
     alternatives = retrieve_alternatives(paths, ranked, corpus, spec)
     stage("alternatives_retrieved", {"count": len(alternatives), "claim_ids": [row["claim_id"] for row in alternatives]})
     selected_blocks = select_source_blocks(paths[:QUERY_PIPELINE["synthesis"]["top_paths"]], corpus, vectors["claim"], [item["claim_id"] for item in alternatives])
@@ -1558,7 +1595,7 @@ def _run_atomic_query(
         synthesis = {"items": [], "provenance": {}}
         stage("evidence_ready", {"path_count": len(synthesis_paths), "alternative_count": len(synthesis_alternatives), "source_block_count": sum(len(items) for items in selected_blocks.values())})
     synthesis_template = "final_synthesis_planning.txt" if answer_task == "planning" else "final_synthesis.txt"
-    report = {"query_id": query_id, "query_pipeline_version": "0.8-atomic-plan", "answer_task": answer_task, "query_spec": _query_spec_payload(spec), "context_evidence_comparisons": context_comparisons, "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "claim_candidates": ranked, "direct_evidence_paths": direct_paths, "graph_paths": graph_paths, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis"), "final_synthesis_template": synthesis_template}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
+    report = {"query_id": query_id, "query_pipeline_version": "0.9-evidence-subgraph", "answer_task": answer_task, "query_spec": _query_spec_payload(spec), "context_evidence_comparisons": context_comparisons, "context_gate_disabled_reason": "empty_query_context" if not spec.context.facets else None, "context_candidates": list(context_reports.values()), "state_mapping": {"source_seeds": source_seeds, "target_seeds": target_seeds}, "state_semantic_link_count": len(state_semantic_links or []), "claim_candidates": ranked, "direct_evidence_paths": direct_paths, "graph_paths": graph_paths, "evidence_subgraph": evidence_subgraph, "paths": paths, "contradictions_and_alternatives": alternatives, "synthesis_package": {"paths": synthesis_paths, "contradictions_and_alternatives": synthesis_alternatives}, "source_blocks": selected_blocks, "synthesis": synthesis, "answer": answer, "prompt_versions": {"query_parse": stage_prompt_version("query_parse"), "final_synthesis": stage_prompt_version("final_synthesis"), "final_synthesis_template": synthesis_template}, "models": {"generation": QUERY_PIPELINE["ollama"]["model"], "embedding": QUERY_PIPELINE["embeddings"]}, "state_alias_registry_version": STATE_ALIASES["version"], "effective_parameters": QUERY_PIPELINE, "warnings": list(dict.fromkeys(warnings))}
     report["dependency_paper_ids"] = sorted(preferred_paper_ids or set())
     report["primary_evidence_paper_ids"] = _primary_semantic_paper_ids(direct_paths, ranked, corpus)
     report["synthesis_mode"] = "full" if synthesize_answer else "retrieval_only"
@@ -1584,10 +1621,22 @@ def _synthesize_combined_evidence(
     allowed_claims: set[str] = set()
     claims: dict[str, Any] = {}
     block_references: dict[str, list[dict[str, Any]]] = {}
+    synthesis_config = QUERY_PIPELINE["synthesis"]
+    all_paths = [
+        sorted(report.get("synthesis_package", {}).get("paths", []), key=evidence_path_sort_key)
+        for report in reports
+    ]
+    packed_paths = select_balanced_compound_paths(
+        all_paths,
+        max_claims=synthesis_config["combined_max_claims"],
+        max_paths_per_subquery=synthesis_config["combined_paths_per_subquery"],
+    )
     for number, (subquery, report) in enumerate(zip(plan.queries, reports), 1):
         ranked = {row["claim_id"]: row for row in report.get("claim_candidates", [])}
-        paths = report.get("synthesis_package", {}).get("paths", [])
-        alternatives = report.get("synthesis_package", {}).get("contradictions_and_alternatives", [])
+        paths = packed_paths[number - 1]
+        alternatives = report.get("synthesis_package", {}).get(
+            "contradictions_and_alternatives", []
+        )[: synthesis_config["combined_alternatives_per_subquery"]]
         claim_ids = {
             claim_id
             for path in paths
@@ -1607,6 +1656,8 @@ def _synthesize_combined_evidence(
             if claim_id in ranked:
                 claims[claim_id]["scores_by_subquery"][str(number)] = ranked[claim_id]
         for claim_id, items in report.get("source_blocks", {}).items():
+            if claim_id not in claim_ids:
+                continue
             block_references.setdefault(claim_id, [])
             existing = {item.get("id") for item in block_references[claim_id]}
             for item in items:
@@ -1739,6 +1790,7 @@ def run_query(
     indexes: FaissIndexes | None = None,
     spatial_support: SpatialSupport | None = None,
     answer_task: str = "process",
+    state_semantic_links: list[StateSemanticLink] | None = None,
 ) -> dict[str, Any]:
     client = client or OllamaClient()
     artifact_dir = output_root / query_id
@@ -1775,6 +1827,7 @@ def run_query(
             spatial_support,
             answer_task,
             prepared_query=prepared,
+            state_semantic_links=state_semantic_links,
         )
         report["query_plan"] = plan.model_dump()
         report["original_question"] = question
@@ -1799,7 +1852,7 @@ def run_query(
             if (
                 loaded.get("query_spec", {}).get("user_question") == subquery.question
                 and loaded.get("synthesis_mode") == "retrieval_only"
-                and loaded.get("query_pipeline_version") == "0.8-atomic-plan"
+                and loaded.get("query_pipeline_version") == "0.9-evidence-subgraph"
             ):
                 candidate = loaded
                 reusable_candidates[number] = loaded
@@ -1882,6 +1935,7 @@ def run_query(
                     preferred_paper_ids,
                     False,
                     prepared_query,
+                    state_semantic_links,
                 )
             )
 
@@ -1911,7 +1965,7 @@ def run_query(
         warnings.extend(report.get("warnings", []))
     report = {
         "query_id": query_id,
-        "query_pipeline_version": "0.8-atomic-plan",
+        "query_pipeline_version": "0.9-evidence-subgraph",
         "answer_task": answer_task,
         "original_question": question,
         "query_plan": plan.model_dump(),

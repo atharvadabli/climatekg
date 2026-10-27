@@ -100,6 +100,7 @@ class ClimateKGEngine:
         self.embedding_model = QUERY_PIPELINE["embeddings"]["model"]
         self._papers = None
         self._indexes = None
+        self._state_semantic_links = None
         self._load_lock = threading.Lock()
 
         # Browser selection supplies a registry identifier, so the query pipeline
@@ -131,6 +132,7 @@ class ClimateKGEngine:
                 graph = ParquetGraph(self.graph_root)
                 self._papers = graph.read_corpus()
                 self._indexes = graph.read_indexes()
+                self._state_semantic_links = graph.read_state_semantic_links()
 
     def run(
         self,
@@ -161,6 +163,7 @@ class ClimateKGEngine:
             self.output_root,
             stage_callback=stage_callback,
             indexes=self._indexes,
+            state_semantic_links=self._state_semantic_links,
         )
         result = compact_report(report, artifact_dir)
         result.update({"system": "climatekg", "system_label": "ClimateKG (context-aware)"})

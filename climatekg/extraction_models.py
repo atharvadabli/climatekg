@@ -407,7 +407,7 @@ class CombinedSynthesisItem(StrictModel):
 
 
 class CombinedSynthesis(StrictModel):
-    items: list[CombinedSynthesisItem]
+    items: list[CombinedSynthesisItem] = Field(max_length=8)
 
 
 class SynthesisItem(StrictModel):

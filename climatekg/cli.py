@@ -86,9 +86,10 @@ def main() -> None:
         if args.storage == "parquet":
             graph = ParquetGraph(args.graph_root)
             papers, indexes = graph.read_corpus(), graph.read_indexes()
+            state_semantic_links = graph.read_state_semantic_links()
         else:
-            papers, indexes = Neo4jHttp().read_corpus(), None
-        report = run_query(args.question, args.query_id, papers, args.output_root, indexes=indexes)
+            papers, indexes, state_semantic_links = Neo4jHttp().read_corpus(), None, []
+        report = run_query(args.question, args.query_id, papers, args.output_root, indexes=indexes, state_semantic_links=state_semantic_links)
         print(report["answer"])
     elif args.command == "validate-queries":
         summary = run_validation_suite(args.suite, args.output_root, args.query_ids, args.storage, args.graph_root)

@@ -39,6 +39,8 @@ The JSON Schema supplied with this request is authoritative.
 
 HOW TO WRITE THE ANSWER
 
+- Answer the original question directly and concisely. Omit supplied evidence that does not help answer it.
+- Do not repeat a finding in different items. Each item must add a distinct result, comparison, mechanism, recommendation, or limitation.
 - Cover every requested part that has supporting evidence.
 - For `compare`, state the supported difference or similarity between cases.
 - For `join`, connect findings only when the supplied Claims support the connection. Otherwise report the findings separately and identify the missing link as a limitation.
@@ -47,6 +49,7 @@ HOW TO WRITE THE ANSWER
 - State important missing evidence, contextual mismatch, uncertainty, and contradictory findings.
 - Give geographic or directional guidance only when the evidence explicitly supports that translation.
 - Every scientific finding, comparison, mechanism, or recommendation must cite at least one supplied Claim ID. A limitation may have no Claim ID when it only identifies missing evidence.
+- Usually return 2--6 items. Use more only when the original question has additional independently requested parts.
 
 USER
 

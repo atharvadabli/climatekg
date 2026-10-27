@@ -32,6 +32,7 @@ EXPECTED_PLACEHOLDERS = {
     "query_combined_synthesis.txt": {"query_package"},
     "final_synthesis.txt": {"question", "query_spec", "query_context", "selected_paths", "contradictions", "source_blocks"},
     "state_adjudication.txt": {"concept_a", "examples_a", "concept_b", "examples_b"},
+    "state_semantic_link_adjudication.txt": {"candidate_pairs"},
     "conditioning_facet_adjudication.txt": {"claim", "facet", "claim_evidence", "facet_evidence"},
 }
 
@@ -128,9 +129,35 @@ def test_cross_domain_prompt_versions_are_explicit() -> None:
     from climatekg.constants import INDEXING_PIPELINE, PROMPT_VERSIONS
 
     assert PROMPT_VERSIONS["facet_extraction"] == "v7"
-    assert PROMPT_VERSIONS["small_paper_extraction"] == "v5.7"
+    assert PROMPT_VERSIONS["small_paper_extraction"] == "v5.8"
     assert INDEXING_PIPELINE["ollama"]["stages"]["facet_extraction"]["thinking"] == "no"
     assert INDEXING_PIPELINE["ollama"]["stages"]["facet_extraction"]["root_thinking"] == "low"
+
+
+def test_claim_prompts_require_atomic_supported_relationships() -> None:
+    for name in ("claim_extraction.txt", "small_paper_extraction.txt"):
+        text = (PROMPT_DIR / name).read_text(encoding="utf-8")
+        assert "Each record must express one direct relationship" in text or "Each claim must express one direct relationship" in text
+        assert "return `A to B` and `B to C` as separate" in text or "return separate claims for `A to B` and `B to C`" in text
+        assert "Return `A to C` only when" in text
+        assert "Do not place the entire relationship inside one endpoint" in text
+    from climatekg.constants import PROMPT_VERSIONS
+
+    assert PROMPT_VERSIONS["claim_extraction"] == "v7"
+
+
+def test_state_semantic_link_prompt_uses_bidirectional_entailment() -> None:
+    text = (PROMPT_DIR / "state_semantic_link_adjudication.txt").read_text(encoding="utf-8")
+    assert "a_entails_b" in text
+    assert "b_entails_a" in text
+    assert "temperature decreases` and `cooling decreases" in text
+    assert "location, season, cause, comparison baseline, and experimental setup" in text
+    from climatekg.constants import INDEXING_PIPELINE, PROMPT_VERSIONS
+
+    assert "negative anomaly relative to a baseline" in text
+    assert "does not imply `fastest`" in text
+    assert PROMPT_VERSIONS["state_semantic_link_adjudication"] == "v4"
+    assert INDEXING_PIPELINE["state_semantic_links"]["thinking"] == "no"
 
 
 def test_complete_setting_v11_candidates_are_standalone_and_consistent() -> None:

@@ -1,0 +1,50 @@
+SYSTEM
+
+TASK
+
+For each pair of scientific variable-state descriptions, decide whether either complete description logically implies the other.
+
+INPUT
+
+You will receive a JSON list of candidate pairs. Each pair contains:
+- `pair_id`: an identifier to copy into the response;
+- `state_a` and `state_b`: scientific descriptions, each with a variable or process named `concept` and a direction or category named `state`;
+- `evidence_a` and `evidence_b`: paper-supported relationship descriptions showing how each description is used.
+
+HOW TO DECIDE
+
+Answer three questions for every pair:
+
+1. `comparable`: Are A and B the same kind of scientific variable or process, so that one could be a general or restricted form of the other? Causally connected variables are not comparable merely because one affects the other.
+2. `a_entails_b`: If the complete statement A is true, must the complete statement B also be true?
+3. `b_entails_a`: If the complete statement B is true, must the complete statement A also be true?
+
+For example, `precipitation increases in southern India` entails `precipitation increases`, but the general statement does not entail the regional statement. Therefore `a_entails_b` is true and `b_entails_a` is false when A is the regional statement.
+
+Apply the entailment tests to the complete `concept` plus `state`, using the evidence only to clarify meaning. Preserve qualifiers about direction, magnitude, location, season, cause, comparison baseline, and experimental setup. For example, an intervention being applied at modern rates does not entail that an on-versus-off comparison was performed.
+
+Distinguish a change in a variable from a change in the strength of an effect. For example, `temperature decreases` and `cooling decreases` do not have the same direction. Distinguish a process component from the complete process, using narrower or broader only when the component relationship is clear. Do not infer substitutability from a causal relationship or from general scientific knowledge not stated in the descriptions.
+
+Keep these distinctions when applying the entailment tests:
+- a change in an extreme, percentile, regional subset, vertical layer, or process component does not by itself imply a change in the mean, total, whole region, whole column, or complete process;
+- a negative anomaly relative to a baseline is not the same statement as a decrease over time or between experiments;
+- a flux, stored quantity, heating rate, and resulting temperature response are different variables unless the descriptions explicitly define them as the same quantity;
+- `faster` or `accelerated` does not imply `fastest`, `maximum`, `minimum`, or `earliest`;
+- a geographic or climatic category relationship may be used only when that relationship is stated in the descriptions or evidence supplied for the pair;
+- a qualitative category and a numerical range are equivalent only when the supplied evidence explicitly defines the category using that range.
+
+OUTPUT
+
+Return valid JSON only, with no Markdown or commentary. The JSON Schema supplied with this request is authoritative.
+
+For each candidate pair return:
+- `pair_id`: Copy the input identifier exactly.
+- `comparable`: `true` only when the descriptions refer to the same kind of variable or process.
+- `a_entails_b`: `true` only when the complete A statement logically implies the complete B statement.
+- `b_entails_a`: `true` only when the complete B statement logically implies the complete A statement.
+- `rationale`: One short sentence, usually 8-25 words, explaining the classification using the supplied descriptions.
+
+USER
+
+CANDIDATE PAIRS
+{candidate_pairs}

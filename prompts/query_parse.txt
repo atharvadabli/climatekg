@@ -54,6 +54,7 @@ HOW TO HANDLE COMMON QUESTIONS
 
 - Environmental phrases introduced by words such as `in`, `under`, `during`, or `with` normally become explicit condition records.
 - An explicit condition states the setting in which evidence should apply, such as a season, soil-moisture regime, background wind, terrain, land-cover pattern, or time period.
+- A measured outcome, estimated quantity, analysis operation, or requested explanation is part of the scientific result. It is not an environmental condition. For example, in a question asking why accounting for one process reverses an estimated outcome, keep that wording in the target or complete question and return no condition unless a separate physical setting is stated.
 - The identity of the source or target is not an additional environmental condition. Do not repeat source or target phrases as context records unless the question states a separate condition about them.
 - A process, mechanism, response, or quantity that the user asks the answer to explain or determine is part of the requested scientific result, not an explicit condition.
 - Wording that attributes a requested result to a paper, author, model analysis, observation, or simulation identifies the evidence being requested. It is not an environmental condition unless the question explicitly compares methods or asks whether the result transfers between methodological settings.

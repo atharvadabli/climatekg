@@ -29,6 +29,10 @@ A `transition` is a comparison or imposed change between two contexts. Its endpo
 
 A `claim` is one evidence-supported relationship between a source state or process and an outcome state or process.
 
+Each claim must express one direct relationship supported by the supplied passages. When the paper explicitly states a sequence such as `A changes B, which changes C`, return separate claims for `A to B` and `B to C`. Return `A to C` only when the paper also directly supports that relationship. The claims may cite the same evidence handles.
+
+Choose endpoints that can be reused across relationships. Put the scientific variable or process in `concept`. Put only its compact direction or category in `state`. For example, represent `secondary circulation develops and transports moisture toward a dry area` as a relationship from `secondary circulation` with state `development` to `wet-to-dry moisture transport` with state `increase`, when that relationship is stated by the evidence. Do not place the entire relationship inside one endpoint.
+
 HOW TO IDENTIFY COMPLETE SETTINGS
 
 Inventory every condition dimension that changes the study setup, sampled setting, treatment, or prescribed forcing. Include brief sensitivity, robustness, resolution, parameter, and null-result experiments.
