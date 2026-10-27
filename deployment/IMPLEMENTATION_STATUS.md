@@ -42,6 +42,13 @@ state.
   `climatekg/runtime/deployment/queries/WEB_20261027_211157_7a4511`.
   This checks integration, not scientific correctness: the answer incorrectly
   expanded `MSE` as "moisture-equivalent" rather than moist static energy.
+- A local ClimateKG process query completed all 16 reported stages and saved
+  its trace under `climatekg/runtime/deployment/queries/WEB_20261027_211542_0cab56`.
+  The answer is not scientifically acceptable: it generalized an Amazon
+  observational null result to weak-wind heterogeneous patches despite also
+  citing a positive idealized patch experiment, and overstated the 0-to-1 m/s
+  wind comparison. This is an unresolved query/retrieval/synthesis quality
+  issue, not an infrastructure failure.
 
 ## Remaining deployment check
 

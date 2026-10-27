@@ -68,3 +68,7 @@ substitute for the pending Airflow/Docker end-to-end check.
 A local GraphRAG job completed and saved a cited trace. Its answer still needs
 scientific review; see the concrete terminology error in
 `deployment/IMPLEMENTATION_STATUS.md`.
+A local ClimateKG job also completed the entire query route, but its answer
+mixed an observational null context with a positive idealized patch context
+and led with an overgeneralization. The branch is runnable for review; it is
+not validated as a trustworthy land-use recommender.

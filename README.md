@@ -40,12 +40,18 @@ scripts/          Validation, replay, export, and benchmark commands
 tests/            Deterministic and pipeline-boundary tests
 visualizer/       Local artifact and graph browser
 webapp/           Process-understanding and watershed-planning prototype
+deployment/       Docker Compose, Airflow, Apache, and server setup
 docs/             Implementation and validation reports
 documents/        Technical and research-paper documents
 ```
 
 Runtime data, PDFs, model weights, embeddings, LLM caches, and generated query
 runs belong under `climatekg/runtime/` and are deliberately excluded from Git.
+
+For Docker and Airflow deployment, start with
+[`deployment/README.md`](deployment/README.md). The branch's tested scope and
+the paused text-first extraction experiment are described in
+[`docs/INTEGRATION_BRANCH.md`](docs/INTEGRATION_BRANCH.md).
 
 ## Installation
 
