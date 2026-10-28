@@ -38,22 +38,22 @@ the archive.
 
 ## Private Hugging Face dataset
 
-A private Hugging Face dataset is suitable for the 526 MB bundle. The account
-that owns it must first authenticate with `hf auth login`. Replace `<OWNER>`
-with that account's user or organization name:
+The current bundle is hosted in the **private** dataset
+[`atharvdabli/climatekg-serving-v1`](https://huggingface.co/datasets/atharvdabli/climatekg-serving-v1).
+Its archive is 551,722,774 bytes and has SHA-256
+`7a7159b062d989d98744f7391f27957bebf56572c4bd5465f83b8372bec95dcd`.
+Access requires permission to that dataset. Do not make it public until
+source-text redistribution rights have been reviewed.
+
+On a new Linux server, install the Hugging Face CLI in a temporary virtual
+environment. Authenticate with a read-only token authorized for the private
+dataset, then download and verify both files before extracting:
 
 ```bash
-hf repos create <OWNER>/climatekg-serving-v1 --repo-type dataset --private
-hf upload <OWNER>/climatekg-serving-v1 /path/to/climatekg-serving-v1.zip --repo-type dataset
-hf upload <OWNER>/climatekg-serving-v1 /path/to/climatekg-serving-v1.zip.sha256 --repo-type dataset
-```
-
-On a new Linux server, authenticate with a read-only token authorized for
-that private dataset. Download both files and verify before extracting:
-
-```bash
-hf auth login
-hf download <OWNER>/climatekg-serving-v1 \
+python3 -m venv /tmp/climatekg-hf
+/tmp/climatekg-hf/bin/pip install 'huggingface_hub[cli]'
+/tmp/climatekg-hf/bin/hf auth login
+/tmp/climatekg-hf/bin/hf download atharvdabli/climatekg-serving-v1 \
   climatekg-serving-v1.zip climatekg-serving-v1.zip.sha256 \
   --repo-type dataset --local-dir /tmp/climatekg-bundle
 cd /tmp/climatekg-bundle
@@ -61,6 +61,6 @@ sha256sum -c climatekg-serving-v1.zip.sha256
 sudo unzip climatekg-serving-v1.zip -d /srv/climatekg
 ```
 
-The current bundle has **not** been uploaded. Do not put a Hugging Face token
-in `.env`, Git, or a container image. The server only needs the extracted
-files; it does not need Hugging Face credentials after installation.
+Do not put a Hugging Face token in `.env`, Git, or a container image. The
+server only needs the extracted files; it does not need Hugging Face
+credentials after installation.

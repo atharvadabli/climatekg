@@ -8,8 +8,9 @@ ClimateKG, Microsoft GraphRAG, or Plain RAG.
 
 This README covers serving an **already-built index** on Ubuntu 24.04
 `x86_64`. PDF indexing is separate. The repository does not include PDFs,
-graph data, watershed assets, model weights, or credentials. Supply those
-artifacts before starting the stack.
+graph data, watershed assets, model weights, or credentials. The graph data
+and map assets are available as a private serving bundle; supply those and
+credentials before starting the stack.
 
 ## Services and Libraries
 
@@ -29,8 +30,8 @@ Python dependency ranges.
 
 ## Linux Prerequisites
 
-- Ubuntu 24.04 `x86_64`, Git, and disk space for the index, images, and roughly
-  20 GB of model downloads.
+- Ubuntu 24.04 `x86_64`, Git, Python 3, `python3-venv`, `unzip`, and disk
+  space for the index, images, and roughly 20 GB of model downloads.
 - An NVIDIA GPU with enough free VRAM for Qwen3.6-27B at the configured
   context size. A 24 GB GPU is a starting point, not a guarantee; test the
   actual server without other GPU workloads.
@@ -60,7 +61,11 @@ sudo chgrp -R 0 /srv/climatekg/artifacts
 sudo chmod -R 2770 /srv/climatekg/artifacts
 ```
 
-Copy a completed, compatible index and the two map assets to these paths:
+Download the current 115-paper serving bundle from the private Hugging Face
+dataset, verify its checksum, and extract it under `/srv/climatekg`. The
+account used on the server needs read access. Exact commands are in
+[`deployment/DATA_BUNDLE.md`](deployment/DATA_BUNDLE.md). The extracted files
+must include:
 
 ```text
 /srv/climatekg/data/parquet_graph/manifest.json
@@ -72,11 +77,9 @@ Copy a completed, compatible index and the two map assets to these paths:
 /srv/climatekg/assets/Global_1986-2010_KG_5m.kmz.zip
 ```
 
-The graph and baseline indexes must come from the same corpus. The current
-demo index is generated data kept outside Git; an empty mount cannot answer
-questions. Data and assets mount read-only. See
-[`deployment/DATA_BUNDLE.md`](deployment/DATA_BUNDLE.md) to package, privately
-host, verify, and extract the complete serving bundle. See
+The graph and baseline indexes must come from the same corpus. They are kept
+outside Git; an empty mount cannot answer questions. Data and assets mount
+read-only. See
 [`deployment/DOCKER_DEPLOYMENT.md`](deployment/DOCKER_DEPLOYMENT.md) for index
 replacement and backups.
 
