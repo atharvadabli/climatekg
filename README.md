@@ -75,6 +75,8 @@ Copy a completed, compatible index and the two map assets to these paths:
 The graph and baseline indexes must come from the same corpus. The current
 demo index is generated data kept outside Git; an empty mount cannot answer
 questions. Data and assets mount read-only. See
+[`deployment/DATA_BUNDLE.md`](deployment/DATA_BUNDLE.md) to package, privately
+host, verify, and extract the complete serving bundle. See
 [`deployment/DOCKER_DEPLOYMENT.md`](deployment/DOCKER_DEPLOYMENT.md) for index
 replacement and backups.
 

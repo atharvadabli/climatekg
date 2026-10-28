@@ -17,6 +17,7 @@ stored under the mounted artifacts directory.
 - `ARCHITECTURE.md` - services, request flow, and failure behavior.
 - `INSTALLATION.md` - clean-server prerequisites and first installation.
 - `DOCKER_DEPLOYMENT.md` - volumes, Compose commands, upgrades, and backups.
+- `DATA_BUNDLE.md` - package and privately distribute the graph and map assets.
 - `AIRFLOW_WORKFLOW.md` - DAG behavior and job-record contract.
 - `APACHE_DEPLOYMENT.md` - HTTPS reverse proxy configuration.
 - `OPERATIONS.md` - health checks, logs, retries, and troubleshooting.
