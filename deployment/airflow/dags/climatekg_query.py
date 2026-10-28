@@ -72,6 +72,7 @@ with DAG(
     start_date=datetime(2025, 1, 1, tzinfo=timezone.utc),
     schedule=None,
     catchup=False,
+    is_paused_upon_creation=False,
     max_active_runs=1,
     default_args={"owner": "climatekg", "retries": 1, "retry_delay": timedelta(seconds=30)},
     tags=["climatekg", "query"],
