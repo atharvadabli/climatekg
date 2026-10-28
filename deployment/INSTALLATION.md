@@ -16,8 +16,9 @@ The application image uses Python 3.13 and installs the repository with the
 - Earth Engine API, Rasterio, and Pillow for spatial enrichment;
 - Python standard-library HTTP servers for the public and internal APIs.
 
-The application container additionally installs `curl` for health checks and
-`libgomp1` for FAISS/OpenMP runtime support. Airflow runs in its separate pinned
+The application container additionally installs `curl` for health checks,
+`libexpat1` for Rasterio, and `libgomp1` for FAISS/OpenMP runtime support.
+Airflow runs in its separate pinned
 Python 3.12 image and PostgreSQL 16 stores Airflow metadata. Ollama and its CUDA
 runtime are isolated in the Ollama container.
 
@@ -58,7 +59,7 @@ cd /opt/climatekg/app/deployment
 ## 3. Prepare mounted directories
 
 ```bash
-sudo mkdir -p /srv/climatekg/{data,models,artifacts,credentials}
+sudo mkdir -p /srv/climatekg/{data,assets,models,artifacts,credentials}
 sudo chgrp -R 0 /srv/climatekg/artifacts
 sudo chmod -R 2770 /srv/climatekg/artifacts
 ```

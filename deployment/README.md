@@ -20,8 +20,6 @@ stored under the mounted artifacts directory.
 - `AIRFLOW_WORKFLOW.md` - DAG behavior and job-record contract.
 - `APACHE_DEPLOYMENT.md` - HTTPS reverse proxy configuration.
 - `OPERATIONS.md` - health checks, logs, retries, and troubleshooting.
-- `IMPLEMENTATION_STATUS.md` - completed work, validation status, and the exact
-  point from which deployment testing should resume.
 
 The primary deployment path is Docker Compose. It keeps Airflow and Python
 dependencies reproducible while mounting large indexes, Ollama models, and
