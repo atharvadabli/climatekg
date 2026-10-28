@@ -6,7 +6,7 @@ x-app-environment: &app-environment
   CLIMATEKG_JOB_ROOT: /artifacts/jobs
   CLIMATEKG_QUERY_OUTPUT_ROOT: /artifacts/queries
   CLIMATEKG_INTERNAL_TOKEN: ${CLIMATEKG_INTERNAL_TOKEN:?set CLIMATEKG_INTERNAL_TOKEN}
-  OLLAMA_URL: http://ollama:11434
+  OLLAMA_URL: ${CLIMATEKG_OLLAMA_URL:-http://ollama:11434}
   EARTH_ENGINE_PROJECT: ${EARTH_ENGINE_PROJECT:-}
   GOOGLE_APPLICATION_CREDENTIALS: /credentials/application_default_credentials.json
   TIKTOKEN_CACHE_DIR: /artifacts/cache/tiktoken

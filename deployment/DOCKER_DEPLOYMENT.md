@@ -48,6 +48,14 @@ startup. To inspect the model store:
 docker compose exec ollama ollama list
 ```
 
+On Windows with Docker Desktop/WSL, the containerized Ollama process may fail
+to allocate a large CUDA buffer even when `nvidia-smi` reports free VRAM. If
+the same model loads in native Windows Ollama, set
+`CLIMATEKG_OLLAMA_URL=http://host.docker.internal:11434` in the ignored
+`deployment/.env` and recreate `compute` and `backend`. The app still runs in
+Docker; only inference uses native Windows Ollama. Keep the native Ollama server
+running. On Linux, leave this variable unset to use the containerized server.
+
 Pin `OLLAMA_IMAGE` to a tested version before production deployment. When
 upgrading Ollama, test both structured JSON generation and 2,048-dimensional
 embedding requests before changing the pin.
