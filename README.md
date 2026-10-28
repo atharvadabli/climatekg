@@ -34,24 +34,22 @@ shortcuts.
 
 ```text
 climatekg/        Python implementation and centralized constants.py settings
-config/           State aliases, validation queries, and legacy config snapshots
-prompts/          Versioned standalone Qwen prompts
-scripts/          Validation, replay, export, and benchmark commands
+config/           State aliases, validation queries, and pipeline config
+prompts/          Standalone prompts used by the application
+scripts/          Indexing, validation, and export tools
 tests/            Deterministic and pipeline-boundary tests
+baselines/        Microsoft GraphRAG and Plain RAG implementations
 visualizer/       Local artifact and graph browser
-webapp/           Process-understanding and watershed-planning prototype
+webapp/           Process-understanding and watershed-planning app
 deployment/       Docker Compose, Airflow, Apache, and server setup
-docs/             Implementation and validation reports
-documents/        Technical and research-paper documents
+docs/             Core implementation references
 ```
 
 Runtime data, PDFs, model weights, embeddings, LLM caches, and generated query
 runs belong under `climatekg/runtime/` and are deliberately excluded from Git.
 
 For Docker and Airflow deployment, start with
-[`deployment/README.md`](deployment/README.md). The branch's tested scope and
-the paused text-first extraction experiment are described in
-[`docs/INTEGRATION_BRANCH.md`](docs/INTEGRATION_BRANCH.md).
+[`deployment/README.md`](deployment/README.md).
 
 ## Installation
 
@@ -124,9 +122,8 @@ paths, selected evidence, LLM request envelopes, and cited answer under
 python -m pytest tests -q -p no:cacheprovider
 ```
 
-The ANN and exact-MaxSim benchmark is documented in
-`docs/ANN_MAXSIM_BENCHMARK.md`. The Parquet storage design is documented in
-`docs/PARQUET_GRAPH_BACKEND.md`.
+The ANN benchmark and Parquet storage design are documented in
+`docs/ANN_MAXSIM_BENCHMARK.md` and `docs/PARQUET_GRAPH_BACKEND.md`.
 
 ## Visualizer
 

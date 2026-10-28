@@ -27,5 +27,5 @@ The primary deployment path is Docker Compose. It keeps Airflow and Python
 dependencies reproducible while mounting large indexes, Ollama models, and
 generated artifacts from the host.
 
-The clean integration branch and paused extraction experiment are documented
-in `docs/INTEGRATION_BRANCH.md` and `docs/TEXT_FIRST_EXPERIMENT_STATUS.md`.
+The scientific indexing and query behavior is specified in the two
+`land_atmosphere_kg_*_pipeline.md` files at the repository root.
