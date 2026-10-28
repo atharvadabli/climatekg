@@ -19,7 +19,9 @@ RUN python -m pip install --upgrade pip setuptools wheel \
     && python -m pip install ".[baselines]"
 
 RUN useradd --create-home --uid 10001 --gid 0 climatekg \
-    && chown -R climatekg:0 /app
+    && mkdir -p /home/climatekg/.config/earthengine \
+    && ln -s /credentials/credentials /home/climatekg/.config/earthengine/credentials \
+    && chown -R climatekg:0 /app /home/climatekg/.config
 USER climatekg
 
 EXPOSE 8780

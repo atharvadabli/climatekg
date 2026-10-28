@@ -17,6 +17,17 @@ The code is built from the checked-out Git revision. Rebuild `backend` and
 `compute` after pulling code changes. Data and model updates do not require an
 image rebuild.
 
+## Earth Engine credentials
+
+For a Linux server, put application-default credentials at
+`CLIMATEKG_CREDENTIALS_DIR/application_default_credentials.json` and use a
+dedicated service identity. For a Windows Docker Desktop test with an existing
+`earthengine authenticate` login, copy
+`%USERPROFILE%\.config\earthengine\credentials` to
+`CLIMATEKG_CREDENTIALS_DIR/credentials`. The app image links that mounted file
+to the path expected by the Earth Engine Python API. Neither credential file
+belongs in Git or in the image. Restart `compute` after changing credentials.
+
 ## Commands
 
 ```bash
